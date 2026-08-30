@@ -1,0 +1,19 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",       "title": "Portada",                 "x": 0,    "y": 0,    "w": 1440, "h": 1800 },
+    { "file": "Listado.dc.html",    "title": "Listado con filtros",     "x": 1560, "y": 0,    "w": 1440, "h": 1520 },
+    { "file": "Ficha.dc.html",      "title": "Ficha — arranque en frio","x": 3120, "y": 0,    "w": 1440, "h": 1980 },
+    { "file": "Resena.dc.html",     "title": "Escribir resena",         "x": 0,    "y": 2140, "w": 1000, "h": 1160 },
+    { "file": "FichaEN.dc.html",    "title": "Resenas en ingles",       "x": 1120, "y": 2140, "w": 1000, "h": 1210 },
+    { "file": "DireccionB.dc.html", "title": "Direccion B (boceto)",    "x": 2240, "y": 2140, "w": 900,  "h": 660 }
+  ],
+  "annotations": [
+    { "id": "nota-direccion", "x": 0, "y": -150, "w": 700,
+      "text": "DIRECCION A — la que esta construida.\nPapel calido, verde selva y naranja de lava. Serif editorial (Instrument Serif) para titulares, grotesca (Archivo) para el resto. Sin fotos de archivo: cada ficha usa un marcador con su inicial sobre el color de su categoria, que es exactamente lo que hara el sitio real hasta que cada negocio suba su logo." },
+    { "id": "nota-ficha", "x": 3120, "y": -150, "w": 700,
+      "text": "EL PROBLEMA DEL DIA UNO, RESUELTO A LA VISTA.\nLa ficha muestra la nota de Google y Tripadvisor con su fuente y su enlace, y declara en la misma linea que las resenas propias todavia no existen. Nada finge ser nuestro. El bloque de resenas vacio no es un error: es la invitacion." },
+    { "id": "nota-b", "x": 2240, "y": 2870, "w": 600,
+      "text": "DIRECCION B — boceto, sin construir.\nMapa a pantalla completa, modo noche, datos en monoespaciada. Sirve al turista que YA esta en La Fortuna y decide en la calle. Se pierde el peso editorial que posiciona en Google, que es de donde vendra el trafico. Si te gusta esta, la construyo completa." }
+  ],
+  "launch": { "view": "canvas" }
+}

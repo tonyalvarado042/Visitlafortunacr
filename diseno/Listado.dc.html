@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: Archivo, 'Helvetica Neue', sans-serif; background: #FAF7F2; color: #23201C; }
+    a { color: #1F5D45; text-decoration: none; }
+    a:hover { color: #C1440E; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; background: #FAF7F2;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 64px; border-bottom: 1px solid #E2DBCF;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <svg width="30" height="21" viewBox="0 0 96 60" fill="none" aria-hidden="true">
+        <path d="M2 58 L42 12 Q48 6 54 12 L94 58 Z" fill="#1F5D45"></path>
+        <path d="M36 20 L44 26 L52 20" stroke="#FAF7F2" stroke-width="3" stroke-linecap="round" fill="none"></path>
+      </svg>
+      <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 22px;">visitlafortuna<span style="color: #C1440E;">cr</span></span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1; max-width: 520px; margin: 0 40px; padding: 10px 16px; background: #FFFFFF; border: 1px solid #D6CDBE; border-radius: 4px;">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6B6259" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <span style="font-size: 15px; color: #9A9084;">Buscar en La Fortuna</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 18px;">
+      <div style="display: flex; align-items: center; border: 1px solid #D6CDBE; border-radius: 999px; overflow: hidden; font-size: 13px; font-weight: 600;">
+        <span style="padding: 6px 14px; background: #23201C; color: #FAF7F2;">ES</span>
+        <span style="padding: 6px 14px; color: #6B6259;">EN</span>
+      </div>
+      <a href="#" style="font-size: 15px; font-weight: 600; color: #23201C;">Ingresar</a>
+    </div>
+  </div>
+
+  <div style="padding: 34px 64px 0;">
+    <div style="font-size: 14px; color: #6B6259;"><a href="#">Inicio</a> <span style="margin: 0 7px;">/</span> <span style="color: #23201C;">Restaurantes</span></div>
+    <h1 style="font-family: 'Instrument Serif', Georgia, serif; font-size: 52px; font-weight: 400; margin: 12px 0 0; letter-spacing: -0.02em;">Restaurantes en La Fortuna</h1>
+    <p style="font-size: 17px; line-height: 1.55; color: #6B6259; margin: 12px 0 0; max-width: 700px;">Desde la soda de casados hasta la cocina de autor. Seis fichas publicadas, tres con datos verificados en fuente oficial.</p>
+  </div>
+
+  <div style="display: flex; gap: 36px; padding: 32px 64px 0; align-items: flex-start;">
+
+    <!-- Filtros -->
+    <div style="width: 264px; flex-shrink: 0; display: flex; flex-direction: column; gap: 26px; padding: 24px; background: #FFFFFF; border: 1px solid #E2DBCF; border-radius: 6px;">
+
+      <div>
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: #23201C; margin-bottom: 12px;">TIPO DE COCINA</div>
+        <div style="display: flex; flex-direction: column; gap: 9px; font-size: 15px;">
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #23201C; border-radius: 3px; background: #23201C; display: flex; align-items: center; justify-content: center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FAF7F2" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5 5 11-11"></path></svg></span> Comida típica <span style="color: #9A9084;">(3)</span></label>
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Cocina internacional <span style="color: #9A9084;">(3)</span></label>
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Cafeterías <span style="color: #9A9084;">(0)</span></label>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: #23201C; margin-bottom: 12px;">PRECIO</div>
+        <div style="display: flex; gap: 6px;">
+          <span style="flex-grow: 1; padding: 9px 0; text-align: center; border: 1px solid #C6BCAA; border-radius: 4px; font-size: 15px; font-weight: 600;">$</span>
+          <span style="flex-grow: 1; padding: 9px 0; text-align: center; background: #23201C; color: #FAF7F2; border: 1px solid #23201C; border-radius: 4px; font-size: 15px; font-weight: 600;">$$</span>
+          <span style="flex-grow: 1; padding: 9px 0; text-align: center; border: 1px solid #C6BCAA; border-radius: 4px; font-size: 15px; font-weight: 600;">$$$</span>
+          <span style="flex-grow: 1; padding: 9px 0; text-align: center; border: 1px solid #C6BCAA; border-radius: 4px; font-size: 15px; font-weight: 600;">$$$$</span>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: #23201C; margin-bottom: 12px;">SERVICIOS</div>
+        <div style="display: flex; flex-direction: column; gap: 9px; font-size: 15px;">
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Opciones vegetarianas</label>
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Acepta tarjeta</label>
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Vista al volcán</label>
+          <label style="display: flex; align-items: center; gap: 10px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> En el centro del pueblo</label>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: 0.04em; color: #23201C; margin-bottom: 12px;">DATOS</div>
+        <label style="display: flex; align-items: center; gap: 10px; font-size: 15px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Solo fichas verificadas</label>
+        <label style="display: flex; align-items: center; gap: 10px; font-size: 15px; margin-top: 9px;"><span style="width: 16px; height: 16px; border: 1.5px solid #C6BCAA; border-radius: 3px; display: block;"></span> Abierto ahora</label>
+      </div>
+
+      <button style="padding: 11px; background: #FFFFFF; border: 1px solid #D6CDBE; border-radius: 4px; font-family: Archivo, sans-serif; font-size: 14px; font-weight: 600; color: #6B6259; cursor: pointer;">Limpiar filtros</button>
+    </div>
+
+    <!-- Resultados -->
+    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px;">
+
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 4px;">
+        <span style="font-size: 15px; color: #6B6259;"><span style="font-weight: 700; color: #23201C;">6 lugares</span> · filtrando por comida típica</span>
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 15px;">
+          <span style="color: #6B6259;">Ordenar por</span>
+          <span style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #FFFFFF; border: 1px solid #D6CDBE; border-radius: 4px; font-weight: 600;">
+            Mejor valorados
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6259" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Destacado, rotulado como pagado -->
+      <div style="display: flex; gap: 20px; padding: 20px; background: #FFFFFF; border: 1.5px solid #C1440E; border-radius: 6px;">
+        <div style="display: flex; align-items: center; justify-content: center; width: 148px; height: 148px; background: #F7E8DF; border-radius: 4px; flex-shrink: 0;">
+          <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 62px; color: #C1440E;">L</span>
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <span style="padding: 3px 9px; background: #C1440E; color: #FAF7F2; border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em;">DESTACADO PAGADO</span>
+            <span style="font-size: 12px; font-weight: 600; color: #C1440E; letter-spacing: 0.04em;">COMIDA TÍPICA</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #1F5D45;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F5D45" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5 5 11-11"></path></svg>Verificado
+            </span>
+          </div>
+          <div style="font-size: 22px; font-weight: 600;">La Choza de Laurel</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #6B6259;">Comida típica bajo rancho, con gallinas asadas al fogón a la entrada. A 300 metros oeste del Parque Central.</div>
+          <div style="display: flex; align-items: center; gap: 14px; margin-top: auto; font-size: 14px; color: #6B6259;">
+            <span><span style="font-weight: 700; color: #23201C;">4,4</span> en Google · 6.100 reseñas</span>
+            <span style="color: #D6CDBE;">·</span>
+            <span>$$</span>
+            <span style="color: #D6CDBE;">·</span>
+            <span style="color: #1F5D45; font-weight: 600;">Abierto ahora</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 20px; padding: 20px; background: #FFFFFF; border: 1px solid #E2DBCF; border-radius: 6px;">
+        <div style="display: flex; align-items: center; justify-content: center; width: 148px; height: 148px; background: #F7E8DF; border-radius: 4px; flex-shrink: 0;">
+          <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 62px; color: #C1440E;">P</span>
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <span style="font-size: 12px; font-weight: 600; color: #C1440E; letter-spacing: 0.04em;">COMIDA TÍPICA</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #1F5D45;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1F5D45" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M4 12.5l5 5 11-11"></path></svg>Verificado
+            </span>
+          </div>
+          <div style="font-size: 22px; font-weight: 600;">Pollo Fortuneño</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #6B6259;">Pollo y costillas a la leña en parrilla a la vista. Precio de pueblo, no de zona turística.</div>
+          <div style="display: flex; align-items: center; gap: 14px; margin-top: auto; font-size: 14px; color: #6B6259;">
+            <span><span style="font-weight: 700; color: #23201C;">4,5</span> en Google · 1.840 reseñas</span>
+            <span style="color: #D6CDBE;">·</span>
+            <span>$</span>
+            <span style="color: #D6CDBE;">·</span>
+            <span style="color: #1F5D45; font-weight: 600;">Abierto ahora</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 20px; padding: 20px; background: #FFFFFF; border: 1px solid #E2DBCF; border-radius: 6px;">
+        <div style="display: flex; align-items: center; justify-content: center; width: 148px; height: 148px; background: #F2EDE4; border-radius: 4px; flex-shrink: 0;">
+          <span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 62px; color: #9A9084;">T</span>
+        </div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <span style="font-size: 12px; font-weight: 600; color: #C1440E; letter-spacing: 0.04em;">COMIDA TÍPICA</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #F2EDE4; border-radius: 999px; font-size: 12px; font-weight: 600; color: #6B6259;">Datos por confirmar</span>
+          </div>
+          <div style="font-size: 22px; font-weight: 600;">Tierra Mía Restaurante</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #6B6259;">Fuera del circuito más transitado. El lomito y la pechuga son lo que recomienda todo el mundo.</div>
+          <div style="display: flex; align-items: center; gap: 14px; margin-top: auto; font-size: 14px; color: #9A9084;">
+            <span>Sin nota todavía</span>
+            <span style="color: #D6CDBE;">·</span>
+            <span>$$</span>
+            <span style="color: #D6CDBE;">·</span>
+            <a href="#" style="font-weight: 600; color: #C1440E;">¿Conocés este lugar? Escribí la primera reseña</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 22px; border: 1px dashed #D6CDBE; border-radius: 6px; font-size: 15px; color: #6B6259;">
+        <span>Faltan negocios de La Fortuna en esta lista.</span>
+        <a href="#" style="font-weight: 600;">Sugerí uno →</a>
+      </div>
+
+    </div>
+  </div>
+  <div style="height: 56px;"></div>
+</div>
+</x-dc>
+</body>
+</html>

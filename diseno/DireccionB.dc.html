@@ -1,0 +1,99 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+  <style>
+    body { margin: 0; font-family: Archivo, 'Helvetica Neue', sans-serif; background: #14181A; color: #E8E4DC; }
+    a { color: #7FD4A8; } a:hover { color: #FFB27A; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div style="width: 900px; height: 660px; background: #14181A; display: flex; flex-direction: column;">
+
+  <div style="padding: 16px 22px; border-bottom: 1px dashed #3A423F; display: flex; align-items: center; justify-content: space-between;">
+    <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: #7A857F;">DIRECCIÓN B — BOCETO</div>
+    <div style="font-size: 13px; font-weight: 600; color: #E8E4DC;">"El mapa manda"</div>
+  </div>
+
+  <div style="display: flex; flex-grow: 1;">
+
+    <!-- Lista lateral -->
+    <div style="width: 320px; flex-shrink: 0; border-right: 1px dashed #3A423F; display: flex; flex-direction: column;">
+      <div style="padding: 16px 20px; border-bottom: 1px dashed #3A423F;">
+        <div style="height: 34px; border: 1px dashed #5A635E; border-radius: 3px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; color: #7A857F;">buscar…</div>
+        <div style="display: flex; gap: 6px; margin-top: 10px;">
+          <span style="padding: 4px 10px; border: 1px solid #7FD4A8; border-radius: 999px; font-size: 11px; color: #7FD4A8;">abierto</span>
+          <span style="padding: 4px 10px; border: 1px dashed #5A635E; border-radius: 999px; font-size: 11px; color: #7A857F;">$$</span>
+          <span style="padding: 4px 10px; border: 1px dashed #5A635E; border-radius: 999px; font-size: 11px; color: #7A857F;">&lt;2 km</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px dashed #3A423F;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; background: #FFB27A; color: #14181A; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; flex-shrink: 0;">1</div>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14px; font-weight: 600;">Don Rufino</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7A857F; margin-top: 3px;">4.6 ★ · $$$ · 350 m · abierto</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px dashed #3A423F;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; border: 1px solid #5A635E; color: #7A857F; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; flex-shrink: 0;">2</div>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14px; font-weight: 600;">La Choza de Laurel</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7A857F; margin-top: 3px;">4.4 ★ · $$ · 420 m · abierto</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px dashed #3A423F;">
+        <div style="width: 26px; height: 26px; border-radius: 50%; border: 1px solid #5A635E; color: #7A857F; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; flex-shrink: 0;">3</div>
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14px; font-weight: 600;">Pollo Fortuneño</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7A857F; margin-top: 3px;">4.5 ★ · $ · 600 m · cierra 22:00</div>
+        </div>
+      </div>
+
+      <div style="padding: 14px 20px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #5A635E;">+ 26 más</div>
+    </div>
+
+    <!-- Mapa -->
+    <div style="flex-grow: 1; position: relative; background: #1A1F21;">
+      <svg width="580" height="560" viewBox="0 0 580 560" fill="none" style="position: absolute; inset: 0;" aria-hidden="true">
+        <path d="M0 300 L180 300 L260 220 L420 220 L580 260" stroke="#2E3634" stroke-width="14" fill="none"></path>
+        <path d="M240 560 L240 300" stroke="#2E3634" stroke-width="10" fill="none"></path>
+        <path d="M400 560 L400 220" stroke="#2E3634" stroke-width="8" fill="none"></path>
+        <path d="M0 430 L580 430" stroke="#2E3634" stroke-width="8" fill="none"></path>
+        <path d="M60 130 L190 30 Q205 16 220 30 L350 130 Z" fill="#232B28"></path>
+        <path d="M430 470 q40 -30 80 0 q-40 30 -80 0" fill="#1E3A34"></path>
+        <circle cx="252" cy="316" r="13" fill="#FFB27A"></circle>
+        <circle cx="252" cy="316" r="24" stroke="#FFB27A" stroke-width="1" fill="none" opacity="0.4"></circle>
+        <circle cx="196" cy="288" r="9" fill="#7FD4A8"></circle>
+        <circle cx="330" cy="360" r="9" fill="#7FD4A8"></circle>
+        <circle cx="412" cy="252" r="9" fill="#7FD4A8"></circle>
+        <circle cx="150" cy="418" r="9" fill="#7FD4A8"></circle>
+      </svg>
+
+      <div style="position: absolute; left: 24px; bottom: 24px; padding: 14px 16px; background: rgba(20, 24, 26, 0.94); border: 1px dashed #5A635E; border-radius: 4px; width: 260px;">
+        <div style="font-size: 14px; font-weight: 600;">Don Rufino</div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #7A857F; margin: 5px 0 10px;">cocina internacional · $$$</div>
+        <div style="display: flex; gap: 6px;">
+          <span style="flex-grow: 1; padding: 7px 0; text-align: center; background: #FFB27A; color: #14181A; border-radius: 3px; font-size: 12px; font-weight: 600;">Cómo llegar</span>
+          <span style="flex-grow: 1; padding: 7px 0; text-align: center; border: 1px dashed #5A635E; border-radius: 3px; font-size: 12px;">Ver ficha</span>
+        </div>
+      </div>
+
+      <div style="position: absolute; right: 20px; top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #5A635E; text-align: right; line-height: 1.6;">
+        MODO NOCHE<br>DENSO · UTILITARIO<br>PARA QUIEN YA ESTÁ AQUÍ
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
