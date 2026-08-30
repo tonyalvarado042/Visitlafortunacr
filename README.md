@@ -60,3 +60,9 @@ Antes de escribir la primera linea del sitio:
    (Settings > API > Exposed schemas).
 2. Conectar Google Places API para coordenadas, horarios y agregados.
 3. Elegir entre las dos direcciones visuales del canvas de diseno.
+
+## Paginas para leer sin abrir el repo
+
+- `docs/arquitectura.html` — la arquitectura completa en una pagina.
+- `docs/pantallas.html` — las seis pantallas del diseno, generada con
+  `node diseno/componer-pantallas.mjs` desde los `.dc.html`.

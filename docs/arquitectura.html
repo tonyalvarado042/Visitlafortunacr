@@ -1,0 +1,487 @@
+<title>Arquitectura de visitlafortunacr</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground:   #F5F8F7;
+    --surface:  #FFFFFF;
+    --sunk:     #ECF1EF;
+    --ink:      #101715;
+    --ink-2:    #52605B;
+    --ink-3:    #7C8985;
+    --line:     #DBE4E0;
+    --line-2:   #C4D1CB;
+    --acento:   #0F5C56;
+    --acento-b: #E3F0EC;
+    --alerta:   #A34A17;
+    --alerta-b: #F7EBE2;
+    --ok:       #1F6B45;
+    --sans: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:   #0D1211;
+      --surface:  #141B19;
+      --sunk:     #1A2321;
+      --ink:      #E8EFEC;
+      --ink-2:    #A0AFAA;
+      --ink-3:    #75837E;
+      --line:     #263230;
+      --line-2:   #35443F;
+      --acento:   #5FC9B4;
+      --acento-b: #14302B;
+      --alerta:   #E29765;
+      --alerta-b: #2E2018;
+      --ok:       #5CBE8B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:   #0D1211;
+    --surface:  #141B19;
+    --sunk:     #1A2321;
+    --ink:      #E8EFEC;
+    --ink-2:    #A0AFAA;
+    --ink-3:    #75837E;
+    --line:     #263230;
+    --line-2:   #35443F;
+    --acento:   #5FC9B4;
+    --acento-b: #14302B;
+    --alerta:   #E29765;
+    --alerta-b: #2E2018;
+    --ok:       #5CBE8B;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .envoltura { max-width: 1080px; margin: 0 auto; padding: 0 32px 96px; }
+
+  /* Cabecera */
+  header { padding: 64px 0 40px; border-bottom: 2px solid var(--ink); }
+  .marca {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--acento);
+  }
+  h1 {
+    font-family: var(--sans); font-size: clamp(38px, 6vw, 62px); font-weight: 700;
+    line-height: 1.02; letter-spacing: -0.025em; margin: 14px 0 0; text-wrap: balance;
+  }
+  .bajada {
+    font-size: 20px; line-height: 1.55; color: var(--ink-2);
+    margin: 18px 0 0; max-width: 62ch; text-wrap: pretty;
+  }
+
+  .cifras {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px; margin-top: 40px; background: var(--line); border: 1px solid var(--line);
+  }
+  .cifra { background: var(--surface); padding: 18px 20px; }
+  .cifra dt {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3);
+  }
+  .cifra dd {
+    font-family: var(--sans); font-size: 32px; font-weight: 600;
+    letter-spacing: -0.02em; margin: 6px 0 0; font-variant-numeric: tabular-nums;
+  }
+  .cifra dd span { font-size: 15px; font-weight: 400; color: var(--ink-2); }
+
+  /* Secciones */
+  section { padding-top: 60px; }
+  .rotulo {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.13em; text-transform: uppercase; color: var(--acento);
+    padding-bottom: 10px; border-bottom: 1px solid var(--line-2); margin-bottom: 26px;
+  }
+  h2 {
+    font-family: var(--sans); font-size: 34px; font-weight: 600;
+    letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 16px; text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--sans); font-size: 20px; font-weight: 600;
+    letter-spacing: -0.01em; margin: 34px 0 10px;
+  }
+  p { margin: 0 0 16px; max-width: 68ch; text-wrap: pretty; }
+  .guia { color: var(--ink-2); }
+  strong { font-weight: 600; }
+  code {
+    font-family: var(--mono); font-size: 0.86em; background: var(--sunk);
+    padding: 1px 5px; border-radius: 3px; color: var(--ink);
+  }
+  a { color: var(--acento); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: var(--alerta); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+
+  /* Fases */
+  .fases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 26px 0 8px; }
+  .fase { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--acento); padding: 22px; }
+  .fase:nth-child(2) { border-top-color: var(--line-2); }
+  .fase:nth-child(3) { border-top-color: var(--line-2); }
+  .fase .n {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; color: var(--ink-3);
+  }
+  .fase h4 { font-family: var(--sans); font-size: 18px; font-weight: 600; margin: 8px 0 8px; }
+  .fase p { font-size: 15px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+
+  /* Bloque de ejemplo tipo ficha */
+  .muestra {
+    background: var(--surface); border: 1px solid var(--line); padding: 22px 24px;
+    margin: 24px 0; font-family: var(--mono); font-size: 13.5px; line-height: 1.9;
+  }
+  .muestra .fila { display: flex; align-items: baseline; gap: 14px; }
+  .muestra .fuente { width: 132px; color: var(--ink-2); }
+  .muestra .nota { font-weight: 600; font-variant-numeric: tabular-nums; width: 42px; }
+  .muestra .conteo { color: var(--ink-3); flex-grow: 1; }
+  .muestra .propia { color: var(--acento); }
+  .muestra .divisor { height: 1px; background: var(--line); margin: 10px 0; }
+
+  /* Tablas */
+  .tabla-marco { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; font-family: var(--sans); }
+  th {
+    text-align: left; font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-3);
+    padding: 12px 16px; border-bottom: 1px solid var(--line-2); white-space: nowrap;
+  }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  td.cod { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+
+  .marca-estado {
+    display: inline-block; font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.06em; padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+  }
+  .e-ok { background: var(--acento-b); color: var(--ok); }
+  .e-medio { background: var(--sunk); color: var(--ink-2); }
+
+  /* Diagrama del modelo */
+  .modelo { background: var(--surface); border: 1px solid var(--line); padding: 26px; margin: 24px 0; }
+  .modelo-fila { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+  .caja {
+    flex: 1 1 150px; border: 1px solid var(--line-2); padding: 12px 14px; background: var(--ground);
+  }
+  .caja.eje { border-color: var(--acento); border-width: 2px; background: var(--acento-b); }
+  .caja .t { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+  .caja .d { font-size: 13px; line-height: 1.45; color: var(--ink-2); margin-top: 4px; font-family: var(--sans); }
+  .conector {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+    text-align: center; padding: 2px 0 6px; letter-spacing: 0.08em;
+  }
+
+  /* Decisiones */
+  .decision { border-left: 3px solid var(--acento); padding: 4px 0 4px 22px; margin: 28px 0; }
+  .decision h3 { margin-top: 0; }
+
+  .aviso {
+    display: flex; gap: 14px; background: var(--alerta-b); border: 1px solid var(--alerta);
+    padding: 18px 20px; margin: 24px 0;
+  }
+  .aviso .icono { color: var(--alerta); flex-shrink: 0; font-family: var(--mono); font-weight: 600; font-size: 13px; }
+  .aviso p { margin: 0; font-size: 15.5px; line-height: 1.55; }
+
+  ol.pasos { counter-reset: paso; list-style: none; padding: 0; margin: 22px 0; }
+  ol.pasos li {
+    counter-increment: paso; position: relative; padding: 0 0 18px 46px; max-width: 68ch;
+  }
+  ol.pasos li::before {
+    content: counter(paso); position: absolute; left: 0; top: 1px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--acento);
+    width: 28px; height: 28px; border: 1px solid var(--line-2); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  footer {
+    margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--line);
+    font-family: var(--mono); font-size: 12px; color: var(--ink-3); line-height: 1.8;
+  }
+
+  @media (max-width: 780px) {
+    .cifras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fases { grid-template-columns: 1fr; }
+    .envoltura { padding: 0 20px 64px; }
+    body { font-size: 16px; }
+  }
+</style>
+
+<div class="envoltura">
+
+<header>
+  <div class="marca">Fase de diseño · 30 de agosto de 2026</div>
+  <h1>Arquitectura de visitlafortunacr</h1>
+  <p class="bajada">Un directorio de La Fortuna de San Carlos con reseñas de visitantes: hoteles, restaurantes, tours, parques, atracciones, transporte y comercio. El modelo de referencia es Tripadvisor, acotado a un solo destino.</p>
+
+  <dl class="cifras">
+    <div class="cifra"><dt>Tablas en Supabase</dt><dd>14</dd></div>
+    <div class="cifra"><dt>Negocios sembrados</dt><dd>29</dd></div>
+    <div class="cifra"><dt>Con datos verificados</dt><dd>9 <span>de 29</span></dd></div>
+    <div class="cifra"><dt>Categorías</dt><dd>7 <span>+ 18 sub</span></dd></div>
+  </dl>
+</header>
+
+<section>
+  <div class="rotulo">Por qué un solo destino</div>
+  <h2>La acotación es la ventaja, no el límite</h2>
+  <p>Tripadvisor sabe un poco de 200.000 destinos. Este sitio puede saberlo todo de uno: qué termales tienen sombra a las tres de la tarde, cuál soda abre los domingos, cuánto cobra de verdad el taxi‑bote‑taxi a Monteverde este mes.</p>
+  <p class="guia">Ese detalle es lo que Google premia y lo que un agregador global no puede sostener. Es también lo único que un competidor con más presupuesto no puede copiar rápido.</p>
+
+  <div class="tabla-marco">
+    <table>
+      <thead><tr><th>Quién llega</th><th>A qué viene</th><th>Qué se lleva</th></tr></thead>
+      <tbody>
+        <tr><td>Turista antes del viaje</td><td>Comparar y decidir</td><td>Fichas comparables, reseñas, precios reales</td></tr>
+        <tr><td>Turista ya en La Fortuna</td><td>Resolver ahora</td><td>Qué está abierto, qué queda cerca, teléfono y WhatsApp</td></tr>
+        <tr><td>Negocio local</td><td>Ser encontrado</td><td>Ficha reclamable, gratis, que posiciona en Google</td></tr>
+        <tr><td>Vos</td><td>Monetizar</td><td>Destacados, comisión de reservas, perfiles premium</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="rotulo">El problema central</div>
+  <h2>Un directorio sin reseñas no le sirve a nadie, y nadie deja reseñas en un directorio que no sirve</h2>
+  <p>Ese círculo se rompe en tres fases, y el modelo de datos tiene que soportar las tres desde el primer día. Es la decisión que ordena todo lo demás.</p>
+
+  <div class="fases">
+    <div class="fase">
+      <div class="n">MESES 0–3</div>
+      <h4>Credibilidad prestada</h4>
+      <p>La ficha muestra lo que otras plataformas ya dicen del negocio, con atribución y enlace. No inventamos reseñas ni copiamos las ajenas.</p>
+    </div>
+    <div class="fase">
+      <div class="n">MESES 3–12</div>
+      <h4>Reseñas propias</h4>
+      <p>QR en el mostrador del negocio, correo posterior a la reserva, e insignias de colaborador. En ese orden de rendimiento.</p>
+    </div>
+    <div class="fase">
+      <div class="n">AÑO 2 EN ADELANTE</div>
+      <h4>Datos propios</h4>
+      <p>Series de precios, estacionalidad real y reseñas en español de gente de la zona. Lo que ninguna otra plataforma tiene de La Fortuna.</p>
+    </div>
+  </div>
+
+  <h3>Cómo se ve la fase 1 en la ficha</h3>
+  <div class="muestra">
+    <div class="fila"><span class="fuente">Google</span><span class="nota">4,6</span><span class="conteo">3.214 reseñas</span><span>ver en Google →</span></div>
+    <div class="fila"><span class="fuente">Tripadvisor</span><span class="nota">4,5</span><span class="conteo">2.087 reseñas</span><span>ver en Tripadvisor →</span></div>
+    <div class="divisor"></div>
+    <div class="fila"><span class="fuente propia">visitlafortunacr</span><span class="conteo">Todavía sin reseñas nuestras</span><span class="propia">escribí la primera →</span></div>
+  </div>
+  <p>Mostrar la <strong>nota y el conteo</strong> es un dato factual agregado con enlace a la fuente: es lo que hacen los metabuscadores y es defendible. De Google Places sí se muestran hasta cinco reseñas con texto, porque su propia API las entrega para eso, siempre con el nombre del autor, la atribución y enlace al original.</p>
+
+  <div class="aviso">
+    <span class="icono">NO</span>
+    <p><strong>No se raspa el texto de las reseñas de Tripadvisor ni de Booking.</strong> Viola sus términos, expone a reclamos de derechos de autor sobre el texto de cada persona que la escribió, y hunde el posicionamiento por contenido duplicado — que es exactamente lo contrario de lo que el sitio necesita.</p>
+  </div>
+</section>
+
+<section>
+  <div class="rotulo">Modelo de datos</div>
+  <h2>Catorce tablas en el esquema <code>directorio</code></h2>
+
+  <div class="modelo">
+    <div class="modelo-fila">
+      <div class="caja"><div class="t">categoria</div><div class="d">7 principales + 18 subcategorías, jerárquicas</div></div>
+    </div>
+    <div class="conector">│ 1 : N</div>
+    <div class="modelo-fila">
+      <div class="caja eje"><div class="t">negocio</div><div class="d">La ficha. Una sola tabla para las siete categorías</div></div>
+    </div>
+    <div class="conector">├──────────────┬──────────────┬──────────────┤</div>
+    <div class="modelo-fila">
+      <div class="caja"><div class="t">resena</div><div class="d">Propias. Cuentan para el promedio</div></div>
+      <div class="caja"><div class="t">resena_externa</div><div class="d">Caché de Google y Tripadvisor, con vencimiento</div></div>
+      <div class="caja"><div class="t">negocio_horario</div><div class="d">Un día por fila, para el "abierto ahora"</div></div>
+      <div class="caja"><div class="t">negocio_foto</div><div class="d">Galería oficial del negocio</div></div>
+    </div>
+    <div class="modelo-fila">
+      <div class="caja"><div class="t">resena_foto</div><div class="d">Fotos de quien escribió</div></div>
+      <div class="caja"><div class="t">resena_util</div><div class="d">Votos de "me sirvió"</div></div>
+      <div class="caja"><div class="t">resena_externa_extracto</div><div class="d">Las 5 reseñas con texto de Google</div></div>
+      <div class="caja"><div class="t">etiqueta + negocio_etiqueta</div><div class="d">Wifi, vista al volcán, solo adultos</div></div>
+    </div>
+    <div class="modelo-fila">
+      <div class="caja"><div class="t">perfil</div><div class="d">Extiende auth.users con lo público</div></div>
+      <div class="caja"><div class="t">reclamo_negocio</div><div class="d">El dueño pide su ficha</div></div>
+      <div class="caja"><div class="t">redireccion</div><div class="d">URLs viejas → 301</div></div>
+    </div>
+  </div>
+
+  <div class="decision">
+    <h3>1. Una sola tabla <code>negocio</code> para las siete categorías</h3>
+    <p>Un hotel, una catarata y un rent‑a‑car comparten el 90% de lo que el sitio necesita: nombre, contacto, ubicación, fotos, reseñas. Lo que no comparten cabe en <code>atributos</code>, de tipo <code>jsonb</code>: el hotel guarda <code>{"estrellas": 4}</code> y la catarata <code>{"altura_metros": 70, "escalones": 500}</code>.</p>
+    <p class="guia">Con siete tablas paralelas, la búsqueda global necesitaría siete consultas y un <code>union</code>, y el sistema de reseñas habría que escribirlo siete veces. Regla de mantenimiento: cuando un campo de <code>atributos</code> empieza a usarse para filtrar, se asciende a columna real con su índice.</p>
+  </div>
+
+  <div class="decision">
+    <h3>2. Reseñas propias y externas en tablas distintas</h3>
+    <p>No es purismo. Tienen dueño distinto, viven distinto tiempo, y solo unas entran en el promedio. Una sola tabla con una columna <code>origen</code> haría que un <code>DELETE</code> mal escrito borrara reseñas de gente real, y que fuera fácil colar notas ajenas en el marcado que lee Google — que es el tipo de cosa por la que cae una penalización manual.</p>
+    <p>El campo <code>expira_en</code> no es decorativo: Google prohíbe almacenar sus datos indefinidamente, así que el cumplimiento vive en la política de lectura de la base y no en la buena memoria de alguien. Vencido el plazo, el dato deja de mostrarse solo.</p>
+  </div>
+
+  <div class="decision">
+    <h3>3. Los contadores los calculan disparadores, no la aplicación</h3>
+    <p>Un listado de 40 fichas no puede hacer 40 subconsultas de promedio. Si el cálculo viviera en el código del sitio, bastaría una inserción desde el panel de Supabase o desde un script de importación para que los números dejaran de cuadrar en silencio.</p>
+  </div>
+
+  <div class="decision">
+    <h3>4. Todo campo público es bilingüe, con una excepción deliberada</h3>
+    <p><code>descripcion_es</code> y <code>descripcion_en</code> como columnas hermanas — se descartó una tabla de traducciones aparte porque solo hay dos idiomas y obligaría a un <code>join</code> en la consulta más frecuente del sitio. La excepción: <strong><code>nombre</code> no se traduce.</strong> Don Rufino se llama Don Rufino en las dos versiones; traducir nombres propios rompe la búsqueda y confunde a quien llega con el nombre que vio en un rótulo.</p>
+  </div>
+
+  <h3>Lo que la base no deja hacer</h3>
+  <p class="guia">Las reglas de negocio están en la base, no solo en el formulario. Un formulario se salta; una restricción no.</p>
+  <div class="tabla-marco">
+    <table>
+      <thead><tr><th>Restricción</th><th>Qué impide</th></tr></thead>
+      <tbody>
+        <tr><td class="cod">ck_negocio_telefono_e164</td><td>Guardar <code>2479-9997</code> en vez de <code>+50624799997</code>. Un solo formato, o el enlace de llamada no funciona en la mitad de los teléfonos</td></tr>
+        <tr><td class="cod">ck_resena_cuerpo_minimo</td><td>Reseñas de 40 caracteres o menos: el "muy bueno" suelto no le sirve a nadie que esté decidiendo</td></tr>
+        <tr><td class="cod">uq_resena_autor_por_negocio</td><td>Que una persona infle la nota con diez reseñas del mismo sitio</td></tr>
+        <tr><td class="cod">ck_resena_visita_no_futura</td><td>Reseñar una visita que todavía no ocurrió</td></tr>
+        <tr><td class="cod">ck_negocio_publicado_...</td><td>Publicar una ficha sin descripción</td></tr>
+        <tr><td class="cod">uq_reclamo_negocio_pendiente</td><td>Dos personas reclamando la misma ficha a la vez</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="rotulo">La base ya está poblada</div>
+  <h2>29 negocios reales de La Fortuna</h2>
+  <p>Levantados por investigación web y sembrados en Supabase. El estado de verificación de cada ficha refleja la calidad real de la fuente: <strong>nada se marca como verificado si no se confirmó teléfono o correo en fuente oficial.</strong></p>
+
+  <div class="tabla-marco">
+    <table>
+      <thead><tr><th>Negocio</th><th>Categoría</th><th>Contacto confirmado</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td>Parque Nacional Volcán Arenal</td><td>Parques</td><td class="cod">+506 2200 4192 · correo SINAC</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Catarata Río Fortuna</td><td>Cataratas</td><td class="cod">+506 2479 9515</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Místico Arenal Hanging Bridges</td><td>Puentes colgantes</td><td class="cod">+506 2479 8282 · correo</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Don Rufino</td><td>Cocina internacional</td><td class="cod">+506 2479 9997 · WhatsApp</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>La Choza de Laurel</td><td>Comida típica</td><td class="cod">+506 2479 7063 · correo</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Pollo Fortuneño</td><td>Comida típica</td><td class="cod">+506 8991 0217</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Desafío Adventure Company</td><td>Tours</td><td class="cod">+506 2479 0020</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Arenal Mundo Aventura</td><td>Canopy</td><td class="cod">+506 2479 9762 · correo</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Adobe Rent a Car La Fortuna</td><td>Alquiler de autos</td><td class="cod">+506 2542 4848</td><td><span class="marca-estado e-ok">VERIFICADO</span></td></tr>
+        <tr><td>Tabacón, Baldí, Ecotermales, The&nbsp;Springs, Paradise</td><td>Aguas termales</td><td class="cod">web oficial, falta correo</td><td><span class="marca-estado e-medio">PARCIAL / PENDIENTE</span></td></tr>
+        <tr><td>Arenal Observatory Lodge, Nayara, Kioro, Arenal Springs, La&nbsp;Pradera</td><td>Hoteles</td><td class="cod">web oficial, falta correo</td><td><span class="marca-estado e-medio">PARCIAL / PENDIENTE</span></td></tr>
+        <tr><td>Sky Adventures, Pure Trek, Wave Expeditions</td><td>Tours</td><td class="cod">web oficial</td><td><span class="marca-estado e-medio">PARCIAL</span></td></tr>
+        <tr><td>Ecocentro Danaus, Arenal Backpackers, Selina, Interbus, 3 restaurantes</td><td>Varias</td><td class="cod">nombre y web</td><td><span class="marca-estado e-medio">PARCIAL / PENDIENTE</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>De dónde vienen los datos</h3>
+  <div class="tabla-marco">
+    <table>
+      <thead><tr><th>Fuente</th><th>Qué trae</th><th>Cada cuánto</th><th class="num">Confianza</th></tr></thead>
+      <tbody>
+        <tr><td>Siembra investigada</td><td>Nombre, teléfono, web, correo, descripción</td><td>Una vez</td><td class="num">Alta</td></tr>
+        <tr><td>Google Places API</td><td>Coordenadas, horarios, nota, conteo, 5 reseñas</td><td>Semanal</td><td class="num">Alta</td></tr>
+        <tr><td>Sitio del propio negocio</td><td>Correo, precios, logo</td><td>Mensual</td><td class="num">Media</td></tr>
+        <tr><td>El dueño, tras reclamar</td><td>Todo, y manda sobre lo anterior</td><td>Cuando quiera</td><td class="num">Máxima</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="guia">Sobre el raspado: <strong>solo se raspa el sitio del propio negocio</strong> — información que ese negocio publica para que sus clientes la lean — respetando su <code>robots.txt</code>, con identificador propio y un límite de una petición cada dos segundos. Los logos no se toman sin permiso: son marca registrada. Hasta que el negocio suba el suyo, la ficha muestra un marcador con la inicial sobre el color de su categoría.</p>
+</section>
+
+<section>
+  <div class="rotulo">Nomenclatura</div>
+  <h2>Una regla manda sobre todas</h2>
+  <p><strong>Un nombre se lee y se entiende sin abrir la definición.</strong> Si hace falta un comentario para saber qué guarda una columna, el nombre está mal puesto. El código y la base van en español, igual que tus otros proyectos.</p>
+
+  <div class="tabla-marco">
+    <table>
+      <thead><tr><th>Elemento</th><th>Regla</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td>Tabla</td><td>snake_case, singular</td><td class="cod">negocio, resena</td></tr>
+        <tr><td>Clave foránea</td><td>tabla referida + _id</td><td class="cod">resena.negocio_id</td></tr>
+        <tr><td>Booleano</td><td>se lee como afirmación, nunca en negativo</td><td class="cod">es_destacado, tiene_spa</td></tr>
+        <tr><td>Instante</td><td>sufijo _en, tipo timestamptz</td><td class="cod">creado_en, publicado_en</td></tr>
+        <tr><td>Acumulado</td><td>prefijo total_ o promedio_</td><td class="cod">total_resenas</td></tr>
+        <tr><td>Dinero</td><td>sufijo con moneda, nunca float</td><td class="cod">precio_desde_usd</td></tr>
+        <tr><td>URL legible</td><td>se llama babosa en este proyecto</td><td class="cod">babosa_es, babosa_en</td></tr>
+        <tr><td>Índice</td><td>idx_ tabla _ columnas</td><td class="cod">idx_negocio_categoria_id</td></tr>
+        <tr><td>Disparador</td><td>tg_ tabla _ cuándo _ qué hace</td><td class="cod">tg_resena_antes_actualizar</td></tr>
+        <tr><td>Política de acceso</td><td>frase en español que se lee sola</td><td class="cod">"cualquiera lee negocios publicados"</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="guia">Prohibido: abreviar sin necesidad (<code>desc</code> además es palabra reservada), mezclar idiomas en un nombre, y <code>data</code>, <code>info</code>, <code>valor</code> o <code>campo_extra</code>, que no dicen nada. Una babosa publicada nunca cambia: si el negocio se renombra, la vieja queda como redirección 301.</p>
+</section>
+
+<section>
+  <div class="rotulo">Cómo se construye</div>
+  <h2>Stack y rutas</h2>
+  <div class="tabla-marco">
+    <table>
+      <thead><tr><th>Capa</th><th>Elección</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Framework</td><td>Next.js, TypeScript</td><td>Renderizado en servidor, innegociable para un sitio que vive del buscador</td></tr>
+        <tr><td>Base de datos</td><td>Supabase, esquema <code>directorio</code></td><td>La que ya usás. Postgres da búsqueda de texto sin pagar otro servicio</td></tr>
+        <tr><td>Cuentas</td><td>Supabase Auth</td><td>Google y correo. Necesarias para reseñas y para reclamar fichas</td></tr>
+        <tr><td>Mapas</td><td>Leaflet + OpenStreetMap</td><td>Sin costo por carga de mapa</td></tr>
+        <tr><td>Datos externos</td><td>Google Places API</td><td>Coordenadas, horarios, nota, conteo y 5 reseñas con atribución</td></tr>
+        <tr><td>Búsqueda</td><td><code>tsvector</code> de Postgres</td><td>Aguanta decenas de miles de fichas. La Fortuna tiene cientos</td></tr>
+        <tr><td>Hosting</td><td>Vercel</td><td>Despliegue desde el repo</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="muestra">
+    <div>/es/hoteles</div>
+    <div>/es/hoteles/tabacon-thermal-resort-spa</div>
+    <div>/es/restaurantes/don-rufino</div>
+    <div>/es/atracciones/catarata-rio-fortuna</div>
+    <div class="divisor"></div>
+    <div>/en/restaurants/don-rufino  <span style="color: var(--ink-3)">← el espejo completo, con babosa_en</span></div>
+  </div>
+  <p class="guia">Cada ficha lleva <code>hreflang</code> cruzado entre las dos versiones y marcado <code>LocalBusiness</code> con la nota calculada <strong>solo con reseñas propias</strong>. Marcar como propias las notas de Google sería engañar al buscador.</p>
+</section>
+
+<section>
+  <div class="rotulo">Dinero</div>
+  <h2>Monetización, en orden de cuándo activarla</h2>
+  <ol class="pasos">
+    <li><strong>Perfil destacado.</strong> Posición superior en su categoría, rotulado como contenido pagado. Se puede vender desde el mes uno.</li>
+    <li><strong>Comisión por reserva.</strong> Enlaces de afiliado a Booking y a los operadores de tours, que es donde está el margen real en La Fortuna.</li>
+    <li><strong>Perfil premium del negocio.</strong> Galería ampliada, respuesta a reseñas, estadísticas de visitas de su ficha.</li>
+    <li><strong>Publicidad local.</strong> Solo de negocios de la zona, y nunca dentro del bloque de reseñas.</li>
+  </ol>
+  <div class="aviso">
+    <span class="icono">REGLA</span>
+    <p><strong>El dinero no mueve el orden de las reseñas ni la nota.</strong> Un destacado se ve arriba y dice que es pagado; su nota es la que sea. El día que eso se rompa, el sitio pierde lo único que lo hace útil.</p>
+  </div>
+</section>
+
+<section>
+  <div class="rotulo">Lo siguiente</div>
+  <h2>Qué falta antes de escribir la primera línea del sitio</h2>
+  <ol class="pasos">
+    <li><strong>Exponer el esquema en la API.</strong> En Supabase, Settings → API → Exposed schemas, agregar <code>directorio</code>. Sin eso el sitio no ve ninguna tabla, aunque los permisos estén bien puestos.</li>
+    <li><strong>Conectar Google Places.</strong> Trae de una sola vez las coordenadas que faltan, los horarios por día y los agregados externos.</li>
+    <li><strong>Completar los correos.</strong> Solo 4 de 29 fichas tienen correo confirmado. Se resuelve con una pasada por la página de contacto de cada sitio oficial.</li>
+    <li><strong>Elegir la dirección visual</strong> entre las dos del lienzo de diseño.</li>
+    <li><strong>Disparador de alta de perfil</strong> sobre <code>auth.users</code>, y políticas de acceso para moderadores y dueños. Van con la fase de cuentas.</li>
+  </ol>
+</section>
+
+<footer>
+  visitlafortunacr · La Fortuna de San Carlos, Alajuela, Costa Rica<br>
+  Documentos completos en el repositorio, rama <code>claude/la-fortuna-directory-design-l8qnxg</code>:<br>
+  docs/diseno/01-nomenclatura.md · 02-arquitectura.md · 03-modelo-datos.md · datos/investigacion/negocios-verificados.md
+</footer>
+
+</div>
