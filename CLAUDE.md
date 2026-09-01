@@ -46,8 +46,11 @@ se hace con una vista, nunca mezclando tablas.
 2. **Nomenclatura**: esquema propio + prefijo de tres letras, como el CRM usa
    `cta_`. Aquí es `dst_`. Español, snake_case, tablas en singular, y
    `COMMENT ON TABLE` que diga para qué sirve **y qué no es**.
-3. **Bilingüe desde el día uno**: columnas hermanas `_es` / `_en`. Excepción:
-   `dst_negocio.nombre` no se traduce (Don Rufino se llama igual en inglés).
+3. **Cinco idiomas: es, en, pt, fr, de.** El texto del idioma principal del
+   destino vive en la fila; los demás en `dst_traduccion`, y las URLs de cada
+   idioma en `dst_ruta`. Agregar japonés es insertar filas, no alterar tablas.
+   Si falta una traducción, cae al idioma principal: una ficha a medio traducir
+   se ve completa. Excepción: `dst_negocio.nombre` no se traduce.
 4. **Las reseñas ajenas no se copian.** Se muestra la nota y el conteo con
    enlace a la fuente. Solo Google Places entrega texto, y con vencimiento
    (`expira_en`), que además está metido en la política de lectura.
@@ -86,22 +89,44 @@ Monteverde puede tener otra paleta sin tocar una línea.
 
 | | |
 |---|---|
-| Tablas | 32 |
+| Tablas | 35 |
 | Políticas de acceso | 54 |
 | Avisos de seguridad | 0 |
 | Destinos | 1 (La Fortuna, apagado hasta cargar contenido) |
 | Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna |
 | Etiquetas | 26 |
+| Idiomas | 5 · es, en, pt, fr, de |
+| Traducciones cargadas | 133 |
 | Negocios | 29 publicados, 9 con datos verificados en fuente oficial |
 | Tours cargados | 0 |
 | Guías escritas | 0 |
+| Sitio | Next.js 15, compila y lee de la base |
 
 ---
 
+## El sitio
+
+Next.js 15 (App Router) en la raíz del repo. Rutas:
+
+```
+/                       redirige al idioma del navegador
+/[idioma]               portada
+/[idioma]/[categoria]   listado
+/[idioma]/[categoria]/[babosa]   ficha
+/api/solicitud          captura de leads (POST)
+```
+
+El destino se resuelve por el `Host` de cada petición contra
+`dst_destino.dominio`. Un solo despliegue sirve todos los destinos.
+
+**Ojo con el entorno de Claude Code**: el proxy de egress deniega
+`*.supabase.co`, así que desde el contenedor no se puede llamar a la API REST.
+La base se trabaja por el conector de Supabase, y el sitio se prueba desplegado.
+
 ## Lo que sigue, en orden
 
-1. Exponer el esquema `destinos` en la API (Settings → API → Exposed schemas).
-2. Cargar los primeros 30 tours reservables con precio y comisión.
-3. Escribir las 10 guías SEO de arranque.
-4. Google Places para coordenadas, horarios y agregados externos.
-5. Construir el sitio y el panel en `/admin`.
+1. Cargar los primeros 30 tours reservables con precio y comisión.
+2. Escribir las 10 guías SEO de arranque.
+3. Google Places para coordenadas, horarios y agregados externos.
+4. Traducir a pt, fr y de lo que ya está en es/en.
+5. Construir el panel en `/admin`.
