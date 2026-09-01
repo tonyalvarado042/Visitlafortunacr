@@ -39,7 +39,13 @@ export type Destino = {
 export async function destinoActual(): Promise<Destino> {
   const cabeceras = await headers();
   const host = (cabeceras.get('host') ?? '').split(':')[0].replace(/^www\./, '');
-  const porDefecto = process.env.NEXT_PUBLIC_DOMINIO_POR_DEFECTO ?? 'visitlafortunacr.com';
+
+  // Solo se acepta si parece un dominio de verdad: al importar el repo, Vercel
+  // puede haber tomado un marcador del archivo de ejemplo.
+  const desdeEntorno = process.env.NEXT_PUBLIC_DOMINIO_POR_DEFECTO?.trim();
+  const porDefecto = desdeEntorno && desdeEntorno.includes('.') && !desdeEntorno.includes('...')
+    ? desdeEntorno
+    : 'visitlafortunacr.com';
 
   // En desarrollo y en las URLs de vista previa el Host no es un dominio real.
   const esLocal = !host || host === 'localhost' || host.endsWith('.vercel.app');
