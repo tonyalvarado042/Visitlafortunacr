@@ -1,68 +1,55 @@
-# visitlafortunacr
+# Visit La Fortuna CR
 
-Directorio de La Fortuna de San Carlos, Costa Rica: hoteles, restaurantes,
-tours, parques, atracciones, transporte y comercio, con resenas de visitantes.
+Plataforma privada de destinos: **contenido + directorio + planificador +
+marketplace de tours + captación de leads + agencia**. El primer destino es
+La Fortuna; está construida para replicarse a cientos de destinos en el mundo.
 
-**Estado: fase de diseno.** Todavia no hay sitio web. Lo que existe es el
-diseno, el modelo de datos y la base poblada con negocios reales.
+> **Leé `CLAUDE.md` antes de tocar nada.** Ahí están las decisiones tomadas y
+> dónde vive cada base de datos.
 
-## Que hay aca
+## Qué hay aquí
 
 ```
-docs/diseno/
-  01-nomenclatura.md      Como se nombra todo en este proyecto
-  02-arquitectura.md      Stack, rutas, resenas, ingesta, SEO y monetizacion
-  03-modelo-datos.md      Las 14 tablas y el porque de cada decision
-
-datos/investigacion/
-  negocios-verificados.md 29 negocios de La Fortuna, con su fuente y su
-                          estado de verificacion
-
-supabase/
-  migraciones/            El esquema directorio, en orden de aplicacion
-  semillas/               Categorias, etiquetas y los 29 negocios
-
-diseno/
-  *.dc.html               Los seis artboards del canvas de diseno
-  canvas.json             Como se colocan en el lienzo
+CLAUDE.md                          El cerebro: decisiones y mapa de esquemas
+sitio/portada.html                 La portada, con la marca VLF
+supabase/plataforma/*.sql          El esquema de la plataforma
+docs/plataforma/
+  replicar-un-destino.md           Cómo lanzar VisitMonteverdeCR
+docs/diseno/01-nomenclatura.md     Cómo se nombra todo
+datos/investigacion/               Los 29 negocios y su fuente
 ```
 
-## La base de datos
+## La base
 
-Aplicada y poblada en el esquema `directorio` del proyecto Supabase
-`mlhhhwbgymobcxiklnoz`, aislada del esquema `public` donde vive el CRM.
-Ver `supabase/migraciones/README.md` para el porque y para recrearla.
+Proyecto Supabase **`visitdestinos`** (`eulkufetcymallfbpone`), esquema
+`destinos`, prefijo `dst_`. Independiente del CRM de inversionistas.
 
 | | |
 |---|---|
-| Tablas | 14 |
-| Categorias | 7 principales + 18 subcategorias |
-| Etiquetas | 22 |
-| Negocios | 29 publicados, 9 con datos verificados en fuente oficial |
+| Tablas | 32 |
+| Políticas de acceso | 54 |
+| Avisos de seguridad | 0 |
+| Destinos | 1 · La Fortuna (apagado hasta cargar contenido) |
+| Categorías | 48 en catálogo global, 47 encendidas |
+| Negocios | 29 publicados, 9 verificados en fuente oficial |
 
-## Las tres decisiones que hay que entender antes de tocar nada
+## Lanzar otro destino
 
-1. **Las resenas propias y las ajenas viven en tablas distintas.** Las de
-   Google y Tripadvisor son cache con vencimiento y atribucion obligatoria;
-   no entran nunca en el promedio propio ni en el marcado JSON-LD.
-2. **Una sola tabla `negocio` para las siete categorias.** Lo especifico de
-   cada una vive en `atributos` (jsonb) hasta que se use para filtrar, y
-   entonces se asciende a columna.
-3. **El estado de verificacion es honesto por ficha.** Nada se publica como
-   verificado si no se confirmo en fuente oficial. La siembra inicial tiene
-   9 de 29.
+```sql
+select destinos.lanzar_destino(
+  'monteverde', 'Monteverde', 'visitmonteverdecr.com', 'CR', 'Costa Rica',
+  'America/Costa_Rica', 'Visit Monteverde CR', 'VMV', 'CRC',
+  p_categorias_excluidas => array['aguas-termales','volcan']
+);
+```
+
+Eso es todo lo que hace falta del lado de la base. Ver
+`docs/plataforma/replicar-un-destino.md`.
 
 ## Lo siguiente
 
-Antes de escribir la primera linea del sitio:
-
-1. Exponer el esquema `directorio` en la API de Supabase
-   (Settings > API > Exposed schemas).
-2. Conectar Google Places API para coordenadas, horarios y agregados.
-3. Elegir entre las dos direcciones visuales del canvas de diseno.
-
-## Paginas para leer sin abrir el repo
-
-- `docs/arquitectura.html` — la arquitectura completa en una pagina.
-- `docs/pantallas.html` — las seis pantallas del diseno, generada con
-  `node diseno/componer-pantallas.mjs` desde los `.dc.html`.
+1. Exponer el esquema `destinos` en la API de Supabase.
+2. Cargar 30 tours reservables con precio y comisión.
+3. Escribir las 10 guías SEO de arranque.
+4. Google Places para coordenadas, horarios y agregados.
+5. Construir el sitio en Next.js y el panel en `/admin`.
