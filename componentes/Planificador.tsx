@@ -10,12 +10,21 @@ const CON_QUIEN = [
   { valor: 'solo',    clave: 'solo'    },
 ] as const;
 
-export function Planificador({
-  idioma, intereses,
-}: {
-  idioma: Idioma;
-  intereses: { babosa: string; nombre: string }[];
-}) {
+/* Intereses cortos y fijos, no las categorías del directorio: "Termales" cabe
+   en un chip, "Aguas termales de La Fortuna" no. Lo que se guarda es la clave,
+   que es con lo que después se segmenta en el CRM. */
+const INTERESES = [
+  { clave: 'aguas-termales', texto: 'int_termales'   },
+  { clave: 'rafting',        texto: 'int_rafting'    },
+  { clave: 'naturaleza',     texto: 'int_naturaleza' },
+  { clave: 'bienestar',      texto: 'int_bienestar'  },
+  { clave: 'ciclismo',       texto: 'int_ciclismo'   },
+  { clave: 'comida',         texto: 'int_comida'     },
+  { clave: 'aventura',       texto: 'int_aventura'   },
+  { clave: 'vida-silvestre', texto: 'int_fauna'      },
+] as const;
+
+export function Planificador({ idioma }: { idioma: Idioma }) {
   const [llegaEl, setLlegaEl] = useState('');
   const [conQuien, setConQuien] = useState<string>('');
   const [elegidos, setElegidos] = useState<string[]>([]);
@@ -80,7 +89,7 @@ export function Planificador({
 
   return (
     <form className="bloque" onSubmit={enviar}>
-      <div className="titulo">{t('armar_viaje', idioma)}</div>
+      <div className="titulo">{t('empecemos', idioma)}</div>
 
       <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--humo)', marginBottom: 7 }}>
         {t('cuando_llegas', idioma)}
@@ -103,21 +112,17 @@ export function Planificador({
         ))}
       </div>
 
-      {intereses.length > 0 && (
-        <>
-          <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--humo)', margin: '16px 0 7px' }}>
-            {t('que_te_mueve', idioma)}
-          </label>
-          <div style={fila}>
-            {intereses.map((i) => (
-              <button key={i.babosa} type="button" onClick={() => alternar(i.babosa)}
-                      style={chip(elegidos.includes(i.babosa))}>
-                {i.nombre}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--humo)', margin: '16px 0 7px' }}>
+        {t('que_te_mueve', idioma)}
+      </label>
+      <div style={fila}>
+        {INTERESES.map((i) => (
+          <button key={i.clave} type="button" onClick={() => alternar(i.clave)}
+                  style={chip(elegidos.includes(i.clave))}>
+            {t(i.texto, idioma)}
+          </button>
+        ))}
+      </div>
 
       <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: 'var(--humo)', margin: '16px 0 7px' }}>
         {t('tu_correo', idioma)}

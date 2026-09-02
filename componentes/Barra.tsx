@@ -36,26 +36,24 @@ export function Barra({
       <nav className="menu">
         {SECCIONES.filter((s) => conContenido.has(s)).map((seccion) => (
           <Link key={seccion} href={`/${idioma}/${primeraDe(seccion)}`}>
-            {t(seccion, idioma)}
+            {t(seccion === 'comer_beber' ? 'comer' : seccion, idioma)}
           </Link>
         ))}
+        <Link href={`/${idioma}#plan`}>{t('planifica', idioma)}</Link>
       </nav>
 
       <div className="acciones">
-        <details className="selector-idioma">
-          <summary>
-            {idioma.toUpperCase()}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 strokeWidth="3" strokeLinecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-          </summary>
-          <div className="lista">
-            {destino.idiomas.map((codigo) => (
-              <Link key={codigo} href={`/${codigo}${rutaActual}`} aria-current={codigo === idioma}>
-                {NOMBRE_PROPIO[codigo]}
-              </Link>
-            ))}
-          </div>
-        </details>
+        {/* Pastillas, no desplegable: el idioma se ve y se cambia de un clic. */}
+        <nav className="idiomas" aria-label="Idioma">
+          {destino.idiomas.map((codigo) => (
+            <Link key={codigo} href={`/${codigo}${rutaActual}`}
+                  className={codigo === idioma ? 'on' : 'off'}
+                  aria-current={codigo === idioma}
+                  title={NOMBRE_PROPIO[codigo]}>
+              {codigo.toUpperCase()}
+            </Link>
+          ))}
+        </nav>
         <Link className="boton" href={`/${idioma}#plan`}>{t('armar_viaje', idioma)}</Link>
       </div>
     </header>

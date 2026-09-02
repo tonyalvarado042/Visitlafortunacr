@@ -47,6 +47,15 @@ img { max-width: 100%; display: block; }
 .menu a:hover { opacity: 1; color: var(--naranja); }
 .acciones { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 
+.idiomas { display: flex; border: 1px solid #2E2E2E; border-radius: 100px; overflow: hidden; }
+.idiomas a {
+  padding: 6px 12px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+  transition: background .2s, color .2s;
+}
+.idiomas a.on  { background: var(--blanco); color: var(--negro); }
+.idiomas a.off { color: var(--humo); }
+.idiomas a.off:hover { color: var(--blanco); background: #1C1C1C; }
+
 .selector-idioma { position: relative; }
 .selector-idioma summary {
   list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px;

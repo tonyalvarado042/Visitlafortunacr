@@ -59,11 +59,6 @@ export default async function Portada({ params }: { params: Promise<{ idioma: Id
     .sort((a, b) => Number(b.es_destacado) - Number(a.es_destacado) || (b.promedio_calificacion ?? 0) - (a.promedio_calificacion ?? 0))
     .slice(0, 3);
 
-  const intereses = conContenido
-    .filter((c) => ['que_hacer', 'tours'].includes(c.seccion))
-    .slice(0, 8)
-    .map((c) => ({ babosa: c.babosa, nombre: c.nombre }));
-
   return (
     <>
       <Barra destino={destino} idioma={idioma} categorias={categorias} rutaActual="" sobreHero />
@@ -115,7 +110,11 @@ export default async function Portada({ params }: { params: Promise<{ idioma: Id
             <div className="plan-cuerpo">
               <div>
                 <span className="rotulo">{t('armar_viaje', idioma)}</span>
-                <h2>{t('en_60_segundos', idioma)}</h2>
+                <h2>
+                  {t('tu_viaje_a', idioma)}<br />
+                  {destino.nombre},<br />
+                  {t('en_60', idioma)}
+                </h2>
                 <p style={{ fontSize: 16.5, color: '#C2C0BC', maxWidth: '44ch', marginTop: 18 }}>
                   {t('plan_explica', idioma)}
                 </p>
@@ -124,8 +123,11 @@ export default async function Portada({ params }: { params: Promise<{ idioma: Id
                   <div className="paso"><i>2</i>{t('paso_2', idioma)}</div>
                   <div className="paso"><i>3</i>{t('paso_3', idioma)}</div>
                 </div>
+                <a className="boton" href="#empecemos" style={{ marginTop: 32, padding: '15px 32px', fontSize: 14 }}>
+                  {t('armar_itinerario', idioma)}
+                </a>
               </div>
-              <Planificador idioma={idioma} intereses={intereses} />
+              <div id="empecemos"><Planificador idioma={idioma} /></div>
             </div>
           </div>
         </div>
