@@ -19,7 +19,7 @@ export default async function PaginaAutomatizaciones() {
 
   return (
     <>
-      <Cabecera titulo="Automatizaciones" migas={[{ ruta: '/admin/ia', nombre: 'Inteligencia' }]} sub="Cuando pasa X, se hace Y. El cron las revisa cada hora; nunca escribe entre 21:00 y 8:00 del destino." />
+      <Cabecera titulo="Automatizaciones" migas={[{ ruta: '/admin/ia', nombre: 'Inteligencia' }]} sub="Cuando pasa X, se hace Y. El cron las revisa solo (diario en Hobby, cada hora en Pro) y también con “Correr ahora”; nunca escribe entre 21:00 y 8:00 del destino." />
       <div className="tarjeta desliza">
         {!reglas?.length ? <Vacio texto="Sin reglas." /> : (
           <table className="tabla">

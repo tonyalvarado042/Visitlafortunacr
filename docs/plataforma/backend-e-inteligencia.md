@@ -63,7 +63,9 @@ y se marca para revisión.
 `dst_automatizacion` define reglas (disparador + condiciones → acción +
 parámetros). `programar_automatizaciones(destino)` deja filas en
 `dst_automatizacion_envio` (una por lead e intento: nunca se manda dos veces).
-El cron (`vercel.json`, cada hora, con `CRON_SECRET`) las ejecuta con
+El cron (`vercel.json`, a las 7:00 de Costa Rica con `CRON_SECRET`; en el plan
+Hobby de Vercel solo se permite un cron diario, en Pro se cambia a `0 * * * *`
+para que corra cada hora) las ejecuta con
 `correrAutomatizaciones()`: plantillas, mensajes de la IA (con aprobación si la
 regla lo pide), tareas, cambios de etapa, puntuación. Entre 21:00 y 8:00 del
 destino no se escribe a nadie. `no_molestar` en el viajero apaga todo.

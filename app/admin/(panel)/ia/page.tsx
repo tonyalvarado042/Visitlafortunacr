@@ -74,7 +74,7 @@ export default async function PaginaIA() {
         </div>
         <div className="tarjeta">
           <h2>Motor de seguimiento</h2>
-          <p style={{ margin: '0 0 10px' }}>El cron corre cada hora: programa lo que toca, manda plantillas, pide mensajes a la IA, puntúa leads y analiza conversaciones. Podés correrlo ahora.</p>
+          <p style={{ margin: '0 0 10px' }}>El cron corre solo (una vez al día en el plan Hobby de Vercel; cada hora en Pro): programa lo que toca, manda plantillas, pide mensajes a la IA, puntúa leads y analiza conversaciones. Podés correrlo ahora.</p>
           <CorrerAhora />
           <div className="acciones-fila" style={{ marginTop: 14 }}>
             <Link href="/admin/ia/automatizaciones" className="boton secundario chico">Reglas</Link>

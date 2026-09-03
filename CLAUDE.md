@@ -120,7 +120,7 @@ Next.js 15 (App Router) en la raíz del repo. Rutas:
 /api/ia/conversar       chat del sitio (POST habla, GET consulta respuestas humanas)
 /api/ia/planificar      generar un plan (sesión del equipo o CRON_SECRET)
 /api/webhooks/whatsapp  WhatsApp Cloud API (GET verifica, POST recibe)
-/api/cron/automatizaciones  el motor de seguimiento, cada hora (vercel.json)
+/api/cron/automatizaciones  el motor de seguimiento (vercel.json: diario en Hobby, cada hora en Pro)
 /admin                  el panel (CRM + IA + contenido + equipo)
 ```
 
