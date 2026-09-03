@@ -11,10 +11,13 @@ La Fortuna; está construida para replicarse a cientos de destinos en el mundo.
 
 ```
 CLAUDE.md                          El cerebro: decisiones y mapa de esquemas
-sitio/portada.html                 La portada, con la marca VLF
-supabase/plataforma/*.sql          El esquema de la plataforma
+app/                               El sitio (Next.js 15) y el panel /admin
+lib/ia/                            Los cinco agentes de IA (Claude)
+lib/automatizaciones.ts            El motor de seguimiento
+supabase/plataforma/*.sql          Las 16 migraciones del esquema
 docs/plataforma/
   replicar-un-destino.md           Cómo lanzar VisitMonteverdeCR
+  backend-e-inteligencia.md        Cómo está armado el CRM, la IA y el panel
 docs/diseno/01-nomenclatura.md     Cómo se nombra todo
 datos/investigacion/               Los 29 negocios y su fuente
 ```
@@ -26,10 +29,9 @@ Proyecto Supabase **`visitdestinos`** (`eulkufetcymallfbpone`), esquema
 
 | | |
 |---|---|
-| Tablas | 32 |
-| Políticas de acceso | 54 |
-| Avisos de seguridad | 0 |
-| Destinos | 1 · La Fortuna (apagado hasta cargar contenido) |
+| Tablas | 46 |
+| Migraciones | 16 |
+| Destinos | 1 · La Fortuna |
 | Categorías | 48 en catálogo global, 47 encendidas |
 | Negocios | 29 publicados, 9 verificados en fuente oficial |
 
@@ -46,10 +48,18 @@ select destinos.lanzar_destino(
 Eso es todo lo que hace falta del lado de la base. Ver
 `docs/plataforma/replicar-un-destino.md`.
 
+## Correr
+
+```bash
+npm install
+npm run dev        # sitio en http://localhost:3000, panel en /admin
+npm run build
+```
+
+Las variables de entorno están explicadas en `.env.example`. Sin
+`ANTHROPIC_API_KEY` y `SUPABASE_SECRET_KEY` el sitio y el panel funcionan,
+pero la IA no.
+
 ## Lo siguiente
 
-1. Exponer el esquema `destinos` en la API de Supabase.
-2. Cargar 30 tours reservables con precio y comisión.
-3. Escribir las 10 guías SEO de arranque.
-4. Google Places para coordenadas, horarios y agregados.
-5. Construir el sitio en Next.js y el panel en `/admin`.
+Está en `CLAUDE.md`, sección "Lo que sigue".

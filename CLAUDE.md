@@ -85,22 +85,24 @@ Monteverde puede tener otra paleta sin tocar una línea.
 
 ---
 
-## Estado actual (1 de septiembre de 2026)
+## Estado actual (3 de septiembre de 2026)
 
 | | |
 |---|---|
-| Tablas | 35 |
-| Políticas de acceso | 54 |
-| Avisos de seguridad | 0 |
-| Destinos | 1 (La Fortuna, apagado hasta cargar contenido) |
+| Tablas | 46 (35 del directorio y CRM + 11 de inteligencia) |
+| Migraciones | 16, todas guardadas en `supabase/plataforma/` |
+| Avisos de seguridad | 0 nuevos (queda el aviso previo por `regconfig` en `dst_idioma`) |
+| Destinos | 1 (La Fortuna, encendido) |
 | Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna |
-| Etiquetas | 26 |
 | Idiomas | 5 · es, en, pt, fr, de |
-| Traducciones cargadas | 133 |
 | Negocios | 29 publicados, 9 con datos verificados en fuente oficial |
 | Tours cargados | 0 |
 | Guías escritas | 0 |
-| Sitio | Next.js 15, compila y lee de la base |
+| Conocimiento de la IA | 22 fichas de La Fortuna, sin verificar por el equipo |
+| Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor) |
+| Automatizaciones | 10 de arranque, encendidas |
+| Panel `/admin` | Completo; el primer administrador entra con la invitación de `aalvarado@gmail.com` |
+| Sitio | Next.js 15, compila, lee de la base, chat concierge en todas las páginas |
 
 ---
 
@@ -110,10 +112,16 @@ Next.js 15 (App Router) en la raíz del repo. Rutas:
 
 ```
 /                       redirige al idioma del navegador
-/[idioma]               portada
+/[idioma]               portada (con el chat concierge)
 /[idioma]/[categoria]   listado
 /[idioma]/[categoria]/[babosa]   ficha
-/api/solicitud          captura de leads (POST)
+/[idioma]/plan/[babosa] el itinerario que armó la IA para un viajero
+/api/solicitud          captura de leads (POST); si es itinerario, dispara el planificador
+/api/ia/conversar       chat del sitio (POST habla, GET consulta respuestas humanas)
+/api/ia/planificar      generar un plan (sesión del equipo o CRON_SECRET)
+/api/webhooks/whatsapp  WhatsApp Cloud API (GET verifica, POST recibe)
+/api/cron/automatizaciones  el motor de seguimiento, cada hora (vercel.json)
+/admin                  el panel (CRM + IA + contenido + equipo)
 ```
 
 El destino se resuelve por el `Host` de cada petición contra
@@ -121,12 +129,46 @@ El destino se resuelve por el `Host` de cada petición contra
 
 **Ojo con el entorno de Claude Code**: el proxy de egress deniega
 `*.supabase.co`, así que desde el contenedor no se puede llamar a la API REST.
-La base se trabaja por el conector de Supabase, y el sitio se prueba desplegado.
+La base se trabaja por el conector de Supabase, y el sitio y el panel se
+prueban desplegados. `npx tsc --noEmit` y `npm run build` sí corren aquí.
+
+## El backend (CRM + IA)
+
+Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
+
+- **Dos clientes de Supabase, dos trabajos.** El panel usa la sesión del
+  usuario (`lib/supabase-sesion.ts`): las políticas de acceso y la auditoría
+  saben quién fue. La IA, los webhooks y el cron usan la clave de servicio
+  (`lib/supabase-servidor.ts`, `server-only`). Nunca al revés.
+- **Toda llamada a Claude pasa por `ejecutar()`** (`lib/ia/cliente.ts`) y
+  queda en `dst_agente_ejecucion` con tokens y costo. Modelo por defecto
+  `claude-opus-5`, pensamiento adaptativo, salida estructurada con zod.
+  Precios en `lib/ia/modelos.ts`.
+- **La IA se alimenta desde el panel**, no desde el código: `dst_conocimiento`
+  (prioridad 7+ va siempre; el resto se busca) y las instrucciones de cada
+  agente en `dst_agente`. Cambiar el modelo o el tono no requiere desplegar.
+- **La IA no confirma reservas ni inventa precios.** Crea solicitudes, pide
+  datos, recomienda del catálogo y escala a una persona cuando toca. Cuando
+  una persona responde, la IA se calla hasta que la devuelvan.
+- **Los mensajes entran y salen por una puerta**: `registrar_mensaje_entrante`
+  y `registrar_mensaje_saliente`. Si un canal no está configurado, el mensaje
+  queda pendiente en `/admin/ia/aprobaciones`; nunca se pierde.
+- **Al panel se entra por invitación** (`dst_invitacion` → trigger en
+  `auth.users` → `dst_usuario`). Roles: admin, vendedor, editor, moderador,
+  socio. Un destino nuevo nace con agentes, plantillas y automatizaciones
+  (trigger `dst_destino_inteligencia`).
+- **Secretos solo en variables de entorno** (`.env.example`). `dst_canal`
+  guarda el NOMBRE de la variable, nunca el valor.
 
 ## Lo que sigue, en orden
 
-1. Cargar los primeros 30 tours reservables con precio y comisión.
-2. Escribir las 10 guías SEO de arranque.
-3. Google Places para coordenadas, horarios y agregados externos.
-4. Traducir a pt, fr y de lo que ya está en es/en.
-5. Construir el panel en `/admin`.
+1. Poner en Vercel `ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY` y `CRON_SECRET`;
+   entrar a `/admin` con el correo invitado y verificar las 22 fichas de
+   conocimiento.
+2. Conectar WhatsApp Cloud API (canal en Ajustes + `WHATSAPP_*`) y correo
+   (`RESEND_API_KEY`).
+3. Cargar los primeros 30 tours reservables con precio y comisión (desde
+   `/admin/tours`).
+4. Escribir las 10 guías SEO de arranque (borradores con `/admin/guias`).
+5. Google Places para coordenadas, horarios y agregados externos.
+6. Traducir a pt, fr y de lo que ya está en es/en.

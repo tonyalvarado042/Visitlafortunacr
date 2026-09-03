@@ -301,3 +301,70 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   .planificador { padding: 38px 24px; }
   .pista { height: 190vh; }
 }
+
+/* ---- Concierge (chat) ---- */
+.concierge-boton {
+  position: fixed; right: 22px; bottom: 22px; z-index: 80;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 12px 18px; border-radius: 100px; border: 0; cursor: pointer;
+  background: var(--naranja); color: var(--negro); font-family: inherit;
+  font-weight: 700; font-size: 13px; letter-spacing: .02em;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45); transition: transform .2s, opacity .2s;
+}
+.concierge-boton:hover { transform: translateY(-2px); }
+.concierge-boton.oculto { opacity: 0; pointer-events: none; }
+.concierge {
+  position: fixed; right: 22px; bottom: 22px; z-index: 90;
+  width: min(380px, calc(100vw - 32px)); height: min(560px, calc(100vh - 44px));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--carbon); border: 1px solid var(--borde); border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.6);
+}
+.concierge header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid var(--borde); background: var(--negro);
+}
+.concierge header strong { display: block; font-size: 14px; }
+.concierge header small { color: var(--humo); font-size: 11.5px; }
+.concierge header button { background: none; border: 0; color: var(--humo); font-size: 22px; cursor: pointer; line-height: 1; }
+.concierge .hilo { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.concierge .burbuja {
+  max-width: 86%; padding: 10px 13px; border-radius: 14px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap;
+}
+.concierge .burbuja.ellos { align-self: flex-start; background: #1E1E1E; border-bottom-left-radius: 4px; }
+.concierge .burbuja.yo { align-self: flex-end; background: var(--verde); color: var(--negro); border-bottom-right-radius: 4px; font-weight: 600; }
+.concierge .burbuja.pensando { color: var(--humo); letter-spacing: .2em; }
+.concierge .aviso { font-size: 11.5px; color: var(--humo); text-align: center; padding: 4px 0; }
+.concierge form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--borde); background: var(--negro); }
+.concierge form input {
+  flex: 1; background: #151515; border: 1px solid #262626; border-radius: 8px; padding: 11px 12px;
+  color: #fff; font-family: inherit; font-size: 13.5px;
+}
+.concierge form button {
+  padding: 0 16px; border-radius: 8px; border: 0; background: var(--naranja); color: var(--negro);
+  font-weight: 700; font-family: inherit; cursor: pointer;
+}
+.concierge form button:disabled { opacity: .5; cursor: default; }
+
+/* ---- Plan (itinerario publico) ---- */
+.plan-cabecera { padding: 70px 0 30px; }
+.plan-cabecera h1 { font-size: clamp(30px, 5vw, 52px); letter-spacing: -.03em; line-height: 1.05; margin: 0 0 14px; }
+.plan-cabecera p { color: #C9C7C2; max-width: 720px; font-size: 17px; }
+.plan-datos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.plan-datos span { border: 1px solid var(--borde); border-radius: 100px; padding: 6px 13px; font-size: 12.5px; color: var(--humo); }
+.plan-dia { border-top: 1px solid var(--borde); padding: 34px 0; }
+.plan-dia h2 { margin: 0 0 18px; font-size: 22px; }
+.plan-dia h2 i { font-style: normal; color: var(--naranja); margin-right: 10px; }
+.plan-parada { display: grid; grid-template-columns: 110px 1fr; gap: 18px; padding: 16px 0; border-bottom: 1px dashed #202020; }
+.plan-parada .momento { color: var(--verde); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding-top: 3px; }
+.plan-parada h3 { margin: 0 0 6px; font-size: 17px; }
+.plan-parada p { margin: 0 0 6px; color: #C9C7C2; font-size: 14.5px; }
+.plan-parada .porque { color: var(--humo); font-size: 13px; font-style: italic; }
+.plan-parada .meta { display: flex; gap: 14px; font-size: 12.5px; color: var(--humo); margin-top: 6px; }
+.plan-parada .meta a { color: var(--naranja); font-weight: 600; }
+.plan-consejos { background: var(--carbon); border: 1px solid var(--borde); border-radius: 12px; padding: 26px 28px; margin: 34px 0; }
+.plan-consejos h2 { margin: 0 0 12px; font-size: 18px; }
+.plan-consejos li { color: #C9C7C2; margin-bottom: 8px; }
+.plan-cierre { text-align: center; padding: 30px 0 80px; }
+.plan-cierre p { color: var(--humo); margin: 0 0 16px; }
+@media (max-width: 640px) { .plan-parada { grid-template-columns: 1fr; gap: 6px; } }

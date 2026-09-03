@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { destinoActual } from '@/lib/destino';
 import { esIdioma } from '@/lib/idiomas';
 import type { Metadata } from 'next';
+import { Concierge } from '@/componentes/Concierge';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,5 +51,10 @@ export default async function LayoutIdioma({
     '--fuente': `'${destino.tipografia}', -apple-system, 'Helvetica Neue', Arial, sans-serif`,
   } as React.CSSProperties;
 
-  return <div style={paleta}>{children}</div>;
+  return (
+    <div style={paleta}>
+      {children}
+      <Concierge idioma={idioma} marca={destino.marca_nombre} />
+    </div>
+  );
 }

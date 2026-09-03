@@ -1,11 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { dominioDeHost } from '@/lib/dominio';
+import { hayClaveDeServicio } from '@/lib/supabase-servidor';
+import { hayClaveDeIA } from '@/lib/ia/cliente';
+import { generarItinerarioParaSolicitud } from '@/lib/ia/planificador';
 
 /**
  * La única puerta por la que el sitio escribe. No hace INSERT: llama a
  * registrar_solicitud, que valida el destino, exige una forma de contacto y
  * crea el viajero y la solicitud en una transacción.
+ *
+ * Después de responder, si la solicitud es de itinerario y la IA está
+ * configurada, el planificador arma el plan y se lo manda al viajero.
  */
+export const runtime = 'nodejs';
+export const maxDuration = 300;
+
 export async function POST(peticion: NextRequest) {
   let cuerpo: Record<string, unknown>;
   try {
@@ -24,17 +34,13 @@ export async function POST(peticion: NextRequest) {
     );
   }
 
-  const host = (peticion.headers.get('host') ?? '').split(':')[0].replace(/^www\./, '');
-  const esLocal = !host || host === 'localhost' || host.endsWith('.vercel.app');
-  const dominio = esLocal
-    ? (process.env.NEXT_PUBLIC_DOMINIO_POR_DEFECTO ?? 'visitlafortunacr.com')
-    : host;
-
+  const dominio = dominioDeHost(peticion.headers.get('host'));
   const url = new URL(peticion.url);
+  const tipo = typeof cuerpo.tipo === 'string' ? cuerpo.tipo : 'consulta_general';
 
   const { data, error } = await supabase.rpc('registrar_solicitud', {
     p_dominio:      dominio,
-    p_tipo:         typeof cuerpo.tipo === 'string' ? cuerpo.tipo : 'consulta_general',
+    p_tipo:         tipo,
     p_nombre:       typeof cuerpo.nombre === 'string' ? cuerpo.nombre : null,
     p_email:        email,
     p_whatsapp:     whatsapp,
@@ -61,5 +67,17 @@ export async function POST(peticion: NextRequest) {
     );
   }
 
-  return NextResponse.json({ solicitud_id: data }, { status: 201 });
+  const solicitudId = data as string;
+  const generaPlan = tipo === 'itinerario' && hayClaveDeServicio() && hayClaveDeIA();
+  if (generaPlan) {
+    after(async () => {
+      try {
+        await generarItinerarioParaSolicitud(solicitudId, 'web');
+      } catch (fallo) {
+        console.error('No se pudo generar el itinerario:', fallo);
+      }
+    });
+  }
+
+  return NextResponse.json({ solicitud_id: solicitudId, plan_en_camino: generaPlan }, { status: 201 });
 }
