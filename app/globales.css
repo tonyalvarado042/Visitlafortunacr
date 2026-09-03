@@ -56,12 +56,16 @@ img { max-width: 100%; display: block; }
 .idiomas a.off { color: var(--humo); }
 .idiomas a.off:hover { color: var(--blanco); background: #1C1C1C; }
 
-.selector-idioma { position: relative; }
+.selector-idioma { position: relative; display: none; }
 .selector-idioma summary {
-  list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px;
-  border: 1px solid #2E2E2E; border-radius: 100px; padding: 6px 12px;
-  font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+  list-style: none; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  border: 1px solid #2E2E2E; border-radius: 100px; padding: 7px 11px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: .04em; color: var(--blanco);
+  white-space: nowrap;
 }
+.selector-idioma summary::marker { content: ''; }
+.selector-idioma[open] summary svg { transform: rotate(180deg); }
+.selector-idioma summary svg { transition: transform .2s; }
 .selector-idioma summary::-webkit-details-marker { display: none; }
 .selector-idioma .lista {
   position: absolute; right: 0; top: calc(100% + 8px); min-width: 150px; z-index: 70;
@@ -214,8 +218,16 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   border-radius: 4px; backdrop-filter: blur(18px); overflow: hidden;
   animation: aparece 1s ease .7s both;
 }
-.buscador .campo { flex-grow: 1; display: flex; align-items: center; gap: 12px; padding: 17px 20px; font-size: 15px; color: #B9B7B3; font-weight: 500; }
-.buscador .boton { border-radius: 0; padding: 0 30px; font-size: 14px; }
+.buscador .campo {
+  flex-grow: 1; min-width: 0; display: flex; align-items: center; gap: 12px;
+  padding: 17px 20px; font-size: 15px; color: #B9B7B3; font-weight: 500;
+}
+.buscador .campo svg { flex-shrink: 0; }
+.buscador .campo .texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.buscador .boton {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 0; padding: 0 30px; font-size: 14px; white-space: nowrap; flex-shrink: 0;
+}
 
 .bajar {
   position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 6;
@@ -368,3 +380,46 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
 .plan-cierre { text-align: center; padding: 30px 0 80px; }
 .plan-cierre p { color: var(--humo); margin: 0 0 16px; }
 @media (max-width: 640px) { .plan-parada { grid-template-columns: 1fr; gap: 6px; } }
+
+/* =========================================================================
+   TELÉFONO — la barra y el buscador tienen que caber sin empujarse
+   ========================================================================= */
+
+@media (max-width: 1000px) {
+  /* Cinco pastillas de idioma no caben y empujan el botón fuera de pantalla:
+     en el teléfono el idioma se pliega en un desplegable. */
+  .idiomas { display: none; }
+  .selector-idioma { display: block; }
+
+  .barra { gap: 10px; }
+  .logo { min-width: 0; }
+  .logo .texto { font-size: 15px; }
+  .acciones { gap: 8px; }
+  .acciones .boton.armar { padding: 9px 13px; font-size: 12px; white-space: nowrap; }
+
+  .buscador { margin-top: 30px; }
+  .buscador .campo { padding: 14px 16px; font-size: 14px; gap: 10px; }
+  .buscador .boton { padding: 0 20px; font-size: 13px; }
+}
+
+@media (max-width: 560px) {
+  .barra { padding: 10px 14px; }
+  .logo .texto { font-size: 14px; }
+  .logo svg { width: 28px; height: 28px; }
+  .acciones .boton.armar { padding: 9px 11px; font-size: 11.5px; }
+  .selector-idioma summary { padding: 7px 9px; font-size: 11px; }
+  .selector-idioma .lista { min-width: 132px; }
+
+  .buscador .campo { padding: 13px 14px; font-size: 13.5px; }
+  .buscador .campo svg { width: 17px; height: 17px; }
+  .buscador .boton { padding: 0 16px; font-size: 12.5px; }
+
+  /* El chat no debe taparle el buscador a nadie. */
+  .concierge-boton { right: 14px; bottom: 14px; padding: 11px 15px; font-size: 12px; }
+}
+
+/* En pantallas muy angostas el nombre de la marca cede el paso al botón. */
+@media (max-width: 400px) {
+  .logo .texto { display: none; }
+  .buscador .campo .texto { font-size: 13px; }
+}

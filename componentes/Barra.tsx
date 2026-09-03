@@ -43,7 +43,9 @@ export function Barra({
       </nav>
 
       <div className="acciones">
-        {/* Pastillas, no desplegable: el idioma se ve y se cambia de un clic. */}
+        {/* En pantalla ancha, pastillas: el idioma se ve y se cambia de un clic.
+            En el teléfono no caben cinco, así que se pliegan en un desplegable
+            y el botón de armar el viaje no se sale de la pantalla. */}
         <nav className="idiomas" aria-label="Idioma">
           {destino.idiomas.map((codigo) => (
             <Link key={codigo} href={`/${codigo}${rutaActual}`}
@@ -54,7 +56,24 @@ export function Barra({
             </Link>
           ))}
         </nav>
-        <Link className="boton" href={`/${idioma}#plan`}>{t('armar_viaje', idioma)}</Link>
+
+        <details className="selector-idioma">
+          <summary aria-label="Idioma">
+            {idioma.toUpperCase()}
+            <svg width="9" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+          </summary>
+          <div className="lista">
+            {destino.idiomas.map((codigo) => (
+              <Link key={codigo} href={`/${codigo}${rutaActual}`} aria-current={codigo === idioma}>
+                {NOMBRE_PROPIO[codigo]}
+              </Link>
+            ))}
+          </div>
+        </details>
+
+        <Link className="boton armar" href={`/${idioma}#plan`}>{t('armar_viaje', idioma)}</Link>
       </div>
     </header>
   );
