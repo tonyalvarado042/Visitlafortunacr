@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, enTeaser, categoriasDe, negocioPorBabosa, notasExternasDe, SIMBOLO_PRECIO } from '@/lib/destino';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
 export default async function Ficha({ params }: { params: Parametros }) {
   const { idioma, babosa } = await params;
   const destino = await destinoActual();
+  // En prelanzamiento las fichas no se muestran todavía.
+  if (enTeaser(destino)) redirect(`/${idioma}`);
   const negocio = await negocioPorBabosa(destino, babosa, idioma);
   if (!negocio) notFound();
 

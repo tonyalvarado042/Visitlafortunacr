@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
-import { destinoActual, categoriasDe } from '@/lib/destino';
+import { destinoActual, enTeaser, categoriasDe } from '@/lib/destino';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -53,6 +53,8 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
 export default async function PaginaPlan({ params }: { params: Parametros }) {
   const { idioma, babosa } = await params;
   const [destino, plan] = await Promise.all([destinoActual(), planPorBabosa(babosa)]);
+  // En prelanzamiento no se publican itinerarios.
+  if (enTeaser(destino)) redirect(`/${idioma}`);
   if (!plan || plan.destino_id !== destino.id) notFound();
   const categorias = await categoriasDe(destino, idioma);
 

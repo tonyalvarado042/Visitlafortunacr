@@ -90,9 +90,9 @@ Monteverde puede tener otra paleta sin tocar una línea.
 | | |
 |---|---|
 | Tablas | 46 (35 del directorio y CRM + 11 de inteligencia) |
-| Migraciones | 16, todas guardadas en `supabase/plataforma/` |
+| Migraciones | 17, todas guardadas en `supabase/plataforma/` |
 | Avisos de seguridad | 0 nuevos (queda el aviso previo por `regconfig` en `dst_idioma`) |
-| Destinos | 1 (La Fortuna, encendido) |
+| Destinos | 1 (La Fortuna, encendido y en **modo teaser** hasta el 1 de octubre de 2026) |
 | Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna |
 | Idiomas | 5 · es, en, pt, fr, de |
 | Negocios | 29 publicados, 9 con datos verificados en fuente oficial |
@@ -127,10 +127,44 @@ Next.js 15 (App Router) en la raíz del repo. Rutas:
 El destino se resuelve por el `Host` de cada petición contra
 `dst_destino.dominio`. Un solo despliegue sirve todos los destinos.
 
-**Ojo con el entorno de Claude Code**: el proxy de egress deniega
-`*.supabase.co`, así que desde el contenedor no se puede llamar a la API REST.
-La base se trabaja por el conector de Supabase, y el sitio y el panel se
-prueban desplegados. `npx tsc --noEmit` y `npm run build` sí corren aquí.
+### Prelanzamiento: `dst_destino.modo_sitio`
+
+Un destino puede estar encendido y todavía no tener contenido que mostrar.
+Para eso está `modo_sitio`, que **no es lo mismo** que `esta_activo`:
+
+| | Qué hace |
+|---|---|
+| `esta_activo = false` | La política RLS ni deja **leer** la fila del destino. El sitio no puede pintar nada, ni los colores: sale la pantalla de error. Es el apagado de verdad. |
+| `modo_sitio = 'teaser'` | El destino se lee normal, con su marca y su paleta, pero el público ve **una sola pantalla** de prelanzamiento: logo, promesa, cuenta regresiva y captura de correos. El directorio, las fichas y el planificador se esconden. |
+| `modo_sitio = 'completo'` | La plataforma entera. Es el valor por defecto. |
+
+Se cambia desde **Ajustes**, sin desplegar. El guardián vive en las páginas
+(`app/[idioma]/**/page.tsx`, un `redirect` al inicio) y no en el middleware,
+que correría contra la base en cada petición.
+
+La cuenta regresiva apunta a **`dst_destino.lanzado_el` a las 00:00 de
+`zona_horaria`** (`lib/fechas.ts`). En `null` dice "muy pronto" y no pinta
+números: nunca se inventa una fecha.
+
+El teaser sale solo en **es/en** (`IDIOMAS_TEASER` en `lib/idiomas.ts`); quien
+llega en pt, fr o de va a parar a `/en`.
+
+**El fondo del teaser** es el volcán dibujado (canvas + SVG, cero archivos)
+mientras `video_portada_url` esté vacío. Apenas ese campo tenga una URL, el
+video la reemplaza y `imagen_portada_url` le sirve de cartel. El bucket público
+**`marca`** de Supabase Storage es donde van esos archivos.
+
+**Ojo con dónde se está trabajando**, que no da lo mismo:
+
+- **En la nube (contenedor de Claude Code)**: el proxy de egress deniega
+  `*.supabase.co`, así que desde ahí no se puede llamar a la API REST. La base
+  se trabaja por el conector de Supabase, y el sitio y el panel se prueban
+  desplegados. `npx tsc --noEmit` y `npm run build` sí corren.
+- **En la máquina de Tony (local)**: **no hay tal proxy.** `npm run dev` levanta
+  el sitio y habla con Supabase sin problema — verificado el 3 de septiembre de
+  2026 con datos reales en pantalla. Ahí sí se prueba antes de desplegar, que es
+  lo que corresponde. El repo vive en
+  `C:\Users\Usuario\.claude\visitlafortunacr` y el servidor corre en el **3200**.
 
 ## El backend (CRM + IA)
 
@@ -162,6 +196,9 @@ Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
 
 ## Lo que sigue, en orden
 
+0. **Apuntar `visitlafortunacr.com` al proyecto `visitlafortunacr` de Vercel.**
+   Hoy el dominio sirve una pagina de GoDaddy Website Builder, no la
+   plataforma. Mientras tanto el teaser vive en la URL de Vercel.
 1. Poner en Vercel `ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY` y `CRON_SECRET`;
    entrar a `/admin` con el correo invitado y verificar las 22 fichas de
    conocimiento.

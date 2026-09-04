@@ -1,9 +1,12 @@
 import Link from 'next/link';
-import { destinoActual, categoriasDe, negociosDe, type Negocio, type Categoria } from '@/lib/destino';
-import { t, type Idioma } from '@/lib/idiomas';
+import { redirect } from 'next/navigation';
+import { destinoActual, enTeaser, categoriasDe, negociosDe, type Negocio, type Categoria } from '@/lib/destino';
+import { t, esIdiomaDeTeaser, type Idioma } from '@/lib/idiomas';
+import { medianocheEnZona } from '@/lib/fechas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { Hero } from '@/componentes/Hero';
+import { Teaser } from '@/componentes/Teaser';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
 import { Planificador } from '@/componentes/Planificador';
 
@@ -30,6 +33,32 @@ const FORMA = ['g-6 alta', 'g-6 alta', 'g-4', 'g-4', 'g-4'];
 export default async function Portada({ params }: { params: Promise<{ idioma: Idioma }> }) {
   const { idioma } = await params;
   const destino = await destinoActual();
+
+  /* En prelanzamiento la portada es la única pantalla que existe: ni
+     directorio, ni fichas, ni planificador. Se decide aquí y no en el
+     middleware a propósito — el middleware corre en cada petición y tendría
+     que preguntarle a la base cada vez. */
+  if (enTeaser(destino)) {
+    if (!esIdiomaDeTeaser(idioma)) redirect('/en');
+    return (
+      <Teaser
+        idioma={idioma}
+        nombre={destino.nombre}
+        marca={destino.marca_nombre}
+        sigla={destino.marca_sigla}
+        dominio={destino.dominio}
+        region={destino.region}
+        pais={destino.pais_nombre}
+        objetivo={medianocheEnZona(destino.lanzado_el, destino.zona_horaria)}
+        colorAcento={destino.color_acento}
+        colorVerde={destino.color_naturaleza}
+        logoUrl={destino.logo_url}
+        videoUrl={destino.video_portada_url}
+        imagenUrl={destino.imagen_portada_url}
+      />
+    );
+  }
+
   const [categorias, negocios] = await Promise.all([
     categoriasDe(destino, idioma),
     negociosDe(destino, idioma),

@@ -49,6 +49,18 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label>Correo de contacto</label><input type="email" name="email_contacto" defaultValue={d.email_contacto ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>Comisión por defecto %</label><input type="number" step="0.5" name="comision_por_defecto" defaultValue={d.comision_por_defecto ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label><input type="checkbox" name="esta_activo" value="1" defaultChecked={d.esta_activo} disabled={!esAdmin} /> Sitio encendido (se sirve al público)</label></div>
+                <div className="campo">
+                  <label>Qué se muestra</label>
+                  <select name="modo_sitio" defaultValue={d.modo_sitio ?? 'completo'} disabled={!esAdmin}>
+                    <option value="completo">Plataforma completa</option>
+                    <option value="teaser">Prelanzamiento (una sola pantalla)</option>
+                  </select>
+                </div>
+                <div className="campo">
+                  <label>Fecha de apertura</label>
+                  <input type="date" name="lanzado_el" defaultValue={d.lanzado_el ?? ''} disabled={!esAdmin} />
+                  <span className="gris" style={{ fontSize: 11.5 }}>A dónde apunta la cuenta regresiva del prelanzamiento. Vacía: dice «muy pronto», sin números.</span>
+                </div>
               </div>
             </div>
             <div className="tarjeta">

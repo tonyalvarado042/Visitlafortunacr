@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negociosDe } from '@/lib/destino';
+import { destinoActual, enTeaser, categoriasDe, negociosDe } from '@/lib/destino';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -29,6 +29,8 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
 export default async function Listado({ params }: { params: Parametros }) {
   const { idioma, categoria } = await params;
   const destino = await destinoActual();
+  // En prelanzamiento el directorio no existe todavía para el público.
+  if (enTeaser(destino)) redirect(`/${idioma}`);
   const categorias = await categoriasDe(destino, idioma);
 
   const actual = categorias.find((c) => c.babosa === categoria);

@@ -10,6 +10,7 @@ export type Destino = {
   dominio: string;
   pais_nombre: string;
   region: string | null;
+  zona_horaria: string;
   marca_nombre: string;
   marca_sigla: string | null;
   lema: string | null;
@@ -29,7 +30,18 @@ export type Destino = {
   video_portada_url: string | null;
   imagen_portada_url: string | null;
   whatsapp: string | null;
+  /* Qué se le muestra al público: el directorio entero o la pantalla de
+     prelanzamiento. No confundir con esta_activo, que corta hasta la lectura. */
+  modo_sitio: 'completo' | 'teaser';
+  /* Fecha de apertura. En modo teaser es a donde apunta la cuenta regresiva;
+     en null el teaser no pinta números, que es mejor que inventar una fecha. */
+  lanzado_el: string | null;
 };
+
+/** Si el sitio público de este destino está en pantalla de prelanzamiento. */
+export function enTeaser(destino: Destino): boolean {
+  return destino.modo_sitio === 'teaser';
+}
 
 /**
  * Qué destino sirve esta petición. Se resuelve por el Host, que es lo que

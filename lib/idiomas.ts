@@ -13,6 +13,15 @@ export function esIdioma(valor: string): valor is Idioma {
   return (IDIOMAS as readonly string[]).includes(valor);
 }
 
+/* La pantalla de prelanzamiento sale solo en estos dos. La plataforma completa
+   sirve los cinco, pero el teaser son quince frases y traducirlas a medias se
+   ve peor que no traducirlas: quien llega en pt, fr o de lo ve en inglés. */
+export const IDIOMAS_TEASER = ['es', 'en'] as const;
+
+export function esIdiomaDeTeaser(valor: string): boolean {
+  return (IDIOMAS_TEASER as readonly string[]).includes(valor);
+}
+
 /** Elige el mejor idioma soportado a partir de la cabecera Accept-Language. */
 export function idiomaPreferido(cabecera: string | null, respaldo: Idioma = 'es'): Idioma {
   if (!cabecera) return respaldo;
@@ -129,6 +138,33 @@ export const T: Record<string, Diccionario> = {
   familia:           { es: 'Familia', en: 'Family', pt: 'Família', fr: 'Famille', de: 'Familie' },
   amigos:            { es: 'Amigos', en: 'Friends', pt: 'Amigos', fr: 'Amis', de: 'Freunde' },
   solo:              { es: 'Solo', en: 'Solo', pt: 'Sozinho', fr: 'Seul', de: 'Allein' },
+
+  /* ---- Pantalla de prelanzamiento (modo_sitio = 'teaser') ----
+     Solo sale en español e inglés: quien llegue en pt, fr o de va a parar a
+     /en. Esas tres columnas repiten el inglés a propósito, para que nadie vea
+     español por accidente si algún día se llega aquí sin pasar por el desvío.
+     {destino} se reemplaza con el nombre del destino al pintar. */
+  teaser_ritmo:      { es: 'Descubrí · Planeá · Viví', en: 'Discover · Plan · Experience', pt: 'Discover · Plan · Experience', fr: 'Discover · Plan · Experience', de: 'Discover · Plan · Experience' },
+  teaser_titular:    { es: 'Algo extraordinario viene a {destino}', en: 'Something extraordinary is coming to {destino}', pt: 'Something extraordinary is coming to {destino}', fr: 'Something extraordinary is coming to {destino}', de: 'Something extraordinary is coming to {destino}' },
+  teaser_bajada:     { es: 'Descubrí, planeá y viví el destino como nunca antes.', en: 'Discover, plan and experience the destination like never before.', pt: 'Discover, plan and experience the destination like never before.', fr: 'Discover, plan and experience the destination like never before.', de: 'Discover, plan and experience the destination like never before.' },
+  teaser_acceso:     { es: 'Quiero acceso anticipado', en: 'Get early access', pt: 'Get early access', fr: 'Get early access', de: 'Get early access' },
+  teaser_negocio:    { es: 'Sumar mi negocio', en: 'List your business', pt: 'List your business', fr: 'List your business', de: 'List your business' },
+  teaser_categorias: { es: 'Tours · Hoteles · Restaurantes · Bienestar · Secretos locales', en: 'Tours · Hotels · Restaurants · Wellness · Local Secrets', pt: 'Tours · Hotels · Restaurants · Wellness · Local Secrets', fr: 'Tours · Hotels · Restaurants · Wellness · Local Secrets', de: 'Tours · Hotels · Restaurants · Wellness · Local Secrets' },
+  teaser_pronto:     { es: 'Muy pronto', en: 'Launching soon', pt: 'Launching soon', fr: 'Launching soon', de: 'Launching soon' },
+  teaser_dia:        { es: 'día', en: 'day', pt: 'day', fr: 'day', de: 'day' },
+  teaser_dias:       { es: 'días', en: 'days', pt: 'days', fr: 'days', de: 'days' },
+  teaser_hora:       { es: 'hora', en: 'hour', pt: 'hour', fr: 'hour', de: 'hour' },
+  teaser_horas:      { es: 'horas', en: 'hours', pt: 'hours', fr: 'hours', de: 'hours' },
+  teaser_minuto:     { es: 'minuto', en: 'minute', pt: 'minute', fr: 'minute', de: 'minute' },
+  teaser_minutos:    { es: 'minutos', en: 'minutes', pt: 'minutes', fr: 'minutes', de: 'minutes' },
+  teaser_segundo:    { es: 'segundo', en: 'second', pt: 'second', fr: 'second', de: 'second' },
+  teaser_segundos:   { es: 'segundos', en: 'seconds', pt: 'seconds', fr: 'seconds', de: 'seconds' },
+  teaser_promesa:    { es: 'Todo lo que necesitás para vivir {destino}, en un solo lugar.', en: 'Everything you need to experience {destino} — in one place.', pt: 'Everything you need to experience {destino} — in one place.', fr: 'Everything you need to experience {destino} — in one place.', de: 'Everything you need to experience {destino} — in one place.' },
+  teaser_pide_viajero:{ es: 'Entrá de primero', en: 'Be the first in', pt: 'Be the first in', fr: 'Be the first in', de: 'Be the first in' },
+  teaser_pide_negocio:{ es: 'Sumá tu negocio', en: 'Add your business', pt: 'Add your business', fr: 'Add your business', de: 'Add your business' },
+  teaser_enviar:     { es: 'Anotarme', en: 'Sign me up', pt: 'Sign me up', fr: 'Sign me up', de: 'Sign me up' },
+  teaser_sin_spam:   { es: 'Sin spam. Te avisamos apenas abramos.', en: 'No spam. We will let you know the moment we open.', pt: 'No spam. We will let you know the moment we open.', fr: 'No spam. We will let you know the moment we open.', de: 'No spam. We will let you know the moment we open.' },
+  teaser_cerrar:     { es: 'Cerrar', en: 'Close', pt: 'Close', fr: 'Close', de: 'Close' },
 };
 
 export function t(clave: string, idioma: Idioma): string {

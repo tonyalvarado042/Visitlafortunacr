@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
+import { usarCeniza } from '@/lib/ceniza';
+import { CapasVolcan } from './CapasVolcan';
 
 export function Hero({
   idioma, nombre, region, pais, lema, colorAcento, colorVerde,
@@ -22,69 +24,9 @@ export function Hero({
   const c2 = useRef<SVGSVGElement>(null);
   const c3 = useRef<SVGSVGElement>(null);
 
+  usarCeniza(lienzo, colorAcento, colorVerde);
+
   useEffect(() => {
-    const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const cv = lienzo.current;
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    if (!ctx) return;
-
-    let an = 0, al = 0, cuadro = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    type Brasa = { x: number; y: number; r: number; vx: number; vy: number; vida: number; baja: number; verde: boolean };
-    const brasas: Brasa[] = [];
-
-    function medir() {
-      an = cv!.clientWidth; al = cv!.clientHeight;
-      cv!.width = an * dpr; cv!.height = al * dpr;
-      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    /* Ceniza que sube del cráter. Es lo que le da vida al hero sin necesitar
-       un video: se dibuja sola y pesa cero. */
-    function nacer(): Brasa {
-      return {
-        x: an * 0.5 + (Math.random() - 0.5) * an * 0.12,
-        y: al * 0.62 + Math.random() * 40,
-        r: Math.random() * 1.7 + 0.4,
-        vx: (Math.random() - 0.5) * 0.32,
-        vy: -(Math.random() * 0.7 + 0.22),
-        vida: 1,
-        baja: Math.random() * 0.0035 + 0.0014,
-        verde: Math.random() > 0.78,
-      };
-    }
-
-    function pintar() {
-      ctx!.clearRect(0, 0, an, al);
-      const g = ctx!.createLinearGradient(0, 0, 0, al);
-      g.addColorStop(0, '#050505'); g.addColorStop(0.42, '#0C0A08');
-      g.addColorStop(0.72, '#171008'); g.addColorStop(1, '#0B0B0B');
-      ctx!.fillStyle = g; ctx!.fillRect(0, 0, an, al);
-
-      const r = ctx!.createRadialGradient(an * 0.5, al * 0.6, 0, an * 0.5, al * 0.6, an * 0.42);
-      r.addColorStop(0, 'rgba(255,106,0,.16)'); r.addColorStop(1, 'rgba(255,106,0,0)');
-      ctx!.fillStyle = r; ctx!.fillRect(0, 0, an, al);
-
-      if (suave) {
-        if (brasas.length < 90) brasas.push(nacer());
-        for (let i = brasas.length - 1; i >= 0; i--) {
-          const p = brasas[i];
-          p.x += p.vx; p.y += p.vy; p.vida -= p.baja;
-          if (p.vida <= 0 || p.y < -20) { brasas.splice(i, 1); continue; }
-          ctx!.globalAlpha = p.vida * 0.65;
-          ctx!.fillStyle = p.verde ? colorVerde : colorAcento;
-          ctx!.beginPath(); ctx!.arc(p.x, p.y, p.r, 0, 6.2832); ctx!.fill();
-        }
-        ctx!.globalAlpha = 1;
-      }
-      cuadro = requestAnimationFrame(pintar);
-    }
-
-    medir();
-    pintar();
-    window.addEventListener('resize', medir);
-
     /* El titular sube y se desvanece mientras el volcán se acerca. Cada capa
        se mueve distinto: el frente más que el fondo, que es lo que da la
        sensación de profundidad. */
@@ -122,50 +64,19 @@ export function Hero({
     document.querySelectorAll('.revela').forEach((el) => mirador.observe(el));
 
     return () => {
-      cancelAnimationFrame(cuadro);
-      window.removeEventListener('resize', medir);
       window.removeEventListener('scroll', alScroll);
       mirador.disconnect();
       barra?.classList.remove('sobre-hero', 'pegada');
     };
-  }, [colorAcento, colorVerde]);
+  }, []);
 
   return (
     <div className="pista" ref={pista}>
       <div className="escena">
         <canvas id="cielo" ref={lienzo} />
 
-        <svg className="capa" ref={c3} width="2400" height="760" viewBox="0 0 2400 760"
-             fill="none" aria-hidden="true" style={{ opacity: .35 }}>
-          <path d="M0 760 L560 250 Q600 205 640 250 L1180 760 Z" fill="#0E1A12" />
-          <path d="M1120 760 L1620 330 Q1656 292 1692 330 L2400 760 Z" fill="#0C1610" />
-        </svg>
-
-        <svg className="capa" ref={c2} width="2000" height="700" viewBox="0 0 2000 700" fill="none" aria-hidden="true">
-          <defs>
-            <linearGradient id="cono" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#1C1C1A" /><stop offset="100%" stopColor="#0B0B0B" />
-            </linearGradient>
-            <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={colorAcento} /><stop offset="100%" stopColor={colorAcento} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d="M240 700 L900 128 Q1000 44 1100 128 L1760 700 Z" fill="url(#cono)" />
-          <path d="M960 96 L1000 62 L1040 96 L1022 140 L978 140 Z" fill="url(#lava)" opacity=".85" />
-          <path d="M1000 62 L1016 132 L1048 260 L1030 700 L985 700 L972 250 Z" fill={colorAcento} opacity=".13" />
-          <path d="M1000 66 L1010 120 L1028 210" stroke={colorAcento} strokeWidth="3" opacity=".5" fill="none" />
-        </svg>
-
-        <svg className="capa" ref={c1} width="2600" height="330" viewBox="0 0 2600 330" fill="none" aria-hidden="true">
-          <path d="M0 330 L0 190 Q300 130 620 178 Q940 226 1300 160 Q1660 94 2000 168 Q2320 236 2600 176 L2600 330 Z" fill="#080808" />
-          <g fill={colorVerde} opacity=".18">
-            <path d="M180 190 q30 -66 60 0 q-30 26 -60 0" /><path d="M760 172 q34 -74 68 0 q-34 30 -68 0" />
-            <path d="M1500 150 q30 -66 60 0 q-30 26 -60 0" /><path d="M2160 176 q34 -74 68 0 q-34 30 -68 0" />
-          </g>
-        </svg>
-
-        <div className="velo" />
-        <div className="grano" />
+        <CapasVolcan colorAcento={colorAcento} colorVerde={colorVerde}
+                     capas={{ lejos: c3, cono: c2, frente: c1 }} />
 
         <div className="titular" ref={titular}>
           <span className="antetitulo">{[region, pais].filter(Boolean).join(' · ')}</span>

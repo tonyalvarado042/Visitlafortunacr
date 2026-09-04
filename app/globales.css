@@ -423,3 +423,173 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   .logo .texto { display: none; }
   .buscador .campo .texto { font-size: 13px; }
 }
+
+/* =========================================================================
+   PRELANZAMIENTO — una sola pantalla (dst_destino.modo_sitio = 'teaser')
+   Comparte el fondo del volcán con la portada; lo que cambia es lo de encima.
+   ========================================================================= */
+
+.teaser { position: relative; min-height: 100dvh; overflow: hidden; display: flex; }
+.teaser #cielo { position: fixed; }
+/* El fondo entero se queda quieto: el lienzo, las capas y el velo van fijos a
+   la ventana. Si las capas quedaran pegadas al contenedor, al crecer la pagina
+   (cuando se abre el formulario) las montanas se irian para abajo y el fondo
+   se partiria en dos. */
+.teaser .capa { position: fixed; pointer-events: none; }
+
+/* El velo del hero deja pasar el chorro de lava por el centro, que ahi no
+   estorba porque el titular se va con el scroll. Aqui el texto se queda
+   quieto encima, asi que el fondo tiene que hundirse mas. */
+.teaser .velo {
+  position: fixed;
+  background:
+    radial-gradient(ellipse 62% 48% at 50% 42%, rgba(11,11,11,.82) 0%, rgba(11,11,11,.34) 62%, rgba(11,11,11,0) 100%),
+    linear-gradient(180deg, rgba(11,11,11,.72) 0%, rgba(11,11,11,.30) 30%, rgba(11,11,11,.52) 70%, var(--negro) 100%);
+}
+
+.teaser-marco {
+  position: relative; z-index: 5; flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 20px;
+  padding: 22px 24px 26px; max-width: 1240px; margin: 0 auto; width: 100%;
+}
+
+.teaser-barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.teaser-lugar {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--humo); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.teaser-idiomas { display: flex; gap: 4px; flex-shrink: 0; }
+.teaser-idiomas a {
+  padding: 6px 11px; border-radius: 3px; font-size: 11.5px; font-weight: 800;
+  letter-spacing: .06em; color: var(--humo); transition: color .18s, background .18s;
+}
+.teaser-idiomas a:hover { color: var(--blanco); }
+.teaser-idiomas a.activo { background: rgba(255,255,255,.1); color: var(--blanco); }
+.teaser-idiomas abbr { text-decoration: none; }
+
+.teaser-centro {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 22px; padding: 26px 0;
+}
+.teaser-centro > * { margin: 0; }
+
+/* El sello con el nombre debajo */
+.marca-sello { display: flex; flex-direction: column; align-items: center; gap: 14px; color: var(--blanco); }
+.marca-sello svg, .marca-sello img { animation: aparece 1s ease .1s both; }
+.marca-sello img { width: clamp(112px, 15vw, 168px); height: auto; }
+.marca-nombre {
+  font-size: clamp(19px, 3.4vw, 30px); font-weight: 800; letter-spacing: -.02em;
+  line-height: 1; animation: aparece 1s ease .25s both;
+}
+.marca-nombre i { font-style: normal; color: var(--naranja); }
+.marca-nombre span { font-size: .62em; font-weight: 700; color: var(--humo); }
+
+.teaser-titular {
+  font-size: clamp(30px, 5.2vw, 58px); font-weight: 900; line-height: 1.02;
+  letter-spacing: -.035em; text-wrap: balance; max-width: 17ch;
+  animation: aparece 1s ease .4s both;
+}
+.teaser-bajada {
+  font-size: clamp(14.5px, 1.6vw, 18px); font-weight: 500; color: #D6D4D0;
+  max-width: 54ch; text-wrap: pretty; animation: aparece 1s ease .55s both;
+}
+
+.teaser-botones {
+  display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+  animation: aparece 1s ease .7s both;
+}
+.teaser-botones .boton, .teaser-botones .boton-linea {
+  font-size: 13px; letter-spacing: .08em; text-transform: uppercase; padding: 15px 26px;
+}
+
+.teaser-categorias {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--humo); text-wrap: balance; max-width: 46ch;
+}
+
+.teaser-lanzamiento {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 22px 30px; border: 1px solid rgba(255,255,255,.11); border-radius: 4px;
+  background: rgba(11,11,11,.66); backdrop-filter: blur(14px);
+}
+.teaser-lanzamiento .rotulo { margin-bottom: 6px; }
+
+.cuenta { display: flex; align-items: flex-start; gap: 4px; }
+.cuenta-bloque { display: flex; align-items: baseline; gap: 4px; }
+.cuenta-numero {
+  font-size: clamp(28px, 4.6vw, 46px); font-weight: 900; letter-spacing: -.04em;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.cuenta-unidad {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--humo);
+}
+.cuenta-punto { color: var(--naranja); opacity: .55; margin: 0 6px; font-size: 22px; line-height: 1; }
+
+.teaser-promesa {
+  font-size: clamp(15px, 1.8vw, 20px); font-weight: 600; color: var(--blanco);
+  max-width: 40ch; text-wrap: balance;
+}
+
+/* El formulario */
+.teaser-forma {
+  width: min(520px, 100%); text-align: left;
+  padding: 20px; border: 1px solid rgba(255,255,255,.13); border-radius: 4px;
+  background: rgba(11,11,11,.94); backdrop-filter: blur(16px);
+  animation: aparece .45s ease both;
+}
+.teaser-forma-cabeza { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+.teaser-forma-cabeza strong { font-size: 14.5px; font-weight: 800; letter-spacing: -.01em; }
+.teaser-cerrar {
+  background: none; border: none; padding: 4px; cursor: pointer; font-family: var(--fuente);
+  font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--humo);
+}
+.teaser-cerrar:hover { color: var(--blanco); }
+.teaser-forma-fila { display: flex; gap: 8px; }
+.teaser-forma-fila input {
+  flex: 1; min-width: 0; background: #151515; border: 1px solid #262626; border-radius: 3px;
+  padding: 13px 14px; font-size: 14.5px; font-weight: 600; color: var(--blanco);
+  font-family: inherit; color-scheme: dark;
+}
+.teaser-forma-fila input:focus-visible { outline: 2px solid var(--naranja); outline-offset: 1px; }
+.teaser-forma-fila .boton { flex-shrink: 0; padding: 13px 20px; }
+.teaser-nota { font-size: 11.5px; color: #6E6C68; margin: 11px 0 0; }
+.teaser-error { font-size: 13px; color: #E2795A; margin: 10px 0 0; }
+.teaser-gracias { display: flex; align-items: center; gap: 12px; color: var(--verde); }
+.teaser-gracias p { margin: 0; font-size: 14.5px; font-weight: 700; color: var(--blanco); }
+
+/* La trampa para robots. Fuera de la pantalla y no display:none, que algunos
+   robots detectan; nadie que use el teclado o un lector la alcanza. */
+.trampa { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* El video del destino, cuando dst_destino.video_portada_url tiene algo. Va
+   fijo y detras de todo; encima queda el mismo velo que hunde el fondo para
+   que el texto se siga leyendo sobre cualquier metraje. */
+.teaser-video {
+  position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  z-index: 0; pointer-events: none;
+}
+.teaser.con-video .velo { position: fixed; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* A quien pidio menos movimiento se le deja el cartel del video, quieto. */
+  .teaser-video { display: none; }
+  .teaser.con-video { background: var(--negro) center/cover no-repeat; }
+}
+
+.teaser-pie { font-size: 11.5px; color: #5E5C58; text-align: center; }
+
+@media (max-width: 560px) {
+  .teaser-marco { padding: 16px 16px 20px; }
+  .teaser-centro { gap: 18px; padding: 14px 0; }
+  .teaser-lanzamiento { padding: 16px 14px; width: 100%; }
+  .cuenta { gap: 0; }
+  .cuenta-punto { margin: 0 3px; font-size: 17px; }
+  .cuenta-unidad { font-size: 9px; letter-spacing: .08em; }
+  .teaser-botones { width: 100%; flex-direction: column; }
+  .teaser-botones .boton, .teaser-botones .boton-linea { width: 100%; }
+  .teaser-forma-fila { flex-direction: column; }
+  .teaser-forma-fila .boton { width: 100%; }
+  /* Que "La Fortuna - Alajuela - Costa Rica" quepa entero al lado de ES/EN. */
+  .teaser-lugar { font-size: 9px; letter-spacing: .08em; }
+}

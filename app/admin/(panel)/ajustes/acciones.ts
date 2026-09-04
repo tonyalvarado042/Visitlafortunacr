@@ -32,6 +32,12 @@ export async function editarDestino(datos: FormData) {
     video_portada_url: texto(datos, 'video_portada_url') || null,
     imagen_portada_url: texto(datos, 'imagen_portada_url') || null,
     esta_activo: texto(datos, 'esta_activo') === '1',
+    // El día del lanzamiento esto pasa a 'completo' y aparece la plataforma.
+    // No hay que desplegar nada: el sitio lee este campo en cada petición.
+    modo_sitio: ['completo', 'teaser'].includes(texto(datos, 'modo_sitio'))
+      ? texto(datos, 'modo_sitio')
+      : undefined,
+    lanzado_el: texto(datos, 'lanzado_el') || null,
   }).eq('id', destino.id);
   if (error) console.error('editarDestino:', error.message);
   revalidatePath('/admin', 'layout');
