@@ -172,3 +172,54 @@ Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
 4. Escribir las 10 guías SEO de arranque (borradores con `/admin/guias`).
 5. Google Places para coordenadas, horarios y agregados externos.
 6. Traducir a pt, fr y de lo que ya está en es/en.
+
+---
+
+## Hacia dónde vamos (fases del producto)
+
+La lista de arriba es lo inmediato. Esto es el resto de la visión, en fases
+que respetan dependencias — no saltar el orden sin razón. Nada de esto está
+construido salvo que se diga lo contrario.
+
+**Fase 0 — cerrar lo ya arrancado.** Es "Lo que sigue, en orden" de arriba.
+Sin esto no hay coordenadas para el mapa (Fase 1) ni tours reales para
+reservar (Fase 3).
+
+**Fase 1 — descubrimiento B2C**
+
+| Funcionalidad | Nota |
+|---|---|
+| Buscador / filtros robustos | Por categoría, precio, etc. Aparte, buscador con IA: prompt libre → un agente busca en la base → resultados. |
+| Mapa interactivo | Clic en un hotel, restaurante o tour → su ubicación en el mapa. Depende de las coordenadas de Google Places (Fase 0). |
+| Ficha de negocio: ¿modal o página? | Hoy es página (`/[idioma]/[categoria]/[babosa]`). Decidir si pasa a modal con botón "ver más" sobre las cards, y si ese modal enlaza a reserva dentro o fuera de la app. |
+
+**Fase 2 — retención y planificador**
+
+| Funcionalidad | Nota |
+|---|---|
+| Planificador de viajes IA | Ya existe el agente y `/[idioma]/plan/[babosa]`; falta el markdown de conocimiento de un experto en turismo nativo de La Fortuna (más allá de las 22 fichas actuales) y ponerle nombre al bot conversacional. |
+| Favoritos | Sección dedicada, filtrable por tipo de negocio como las fichas. Necesita identidad del viajero (`dst_viajero`) y una tabla nueva por diseñar. |
+| Promociones | Sección para que los hoteles publiquen sus promociones. Tabla nueva por diseñar. |
+
+**Fase 3 — el corazón del negocio: reservas y pagos**
+
+| Funcionalidad | Nota |
+|---|---|
+| Planes y fechas | Backend de disponibilidad (libre/ocupado) para tours y hoteles. Una sola fuente de verdad, consultada tanto por el buscador como por las reservaciones. |
+| Reservaciones | Formulario con fechas de entrada/salida (hoteles) o fecha de tour, contra la disponibilidad real. |
+| Pagos | Para reservaciones y comisiones a embajadores. |
+
+**Fase 4 — B2B**
+
+| Funcionalidad | Nota |
+|---|---|
+| Embajadores | Un negocio pide un embajador → aplica → un admin del sistema aprueba o rechaza. Perfiles visibles a los negocios, más un buscador IA: el admin del negocio describe qué necesita y el agente busca entre los embajadores disponibles. |
+| Directorio administrador | Cada negocio gestiona lo suyo: planes, fotos, videos, fichas. Encaja con los roles ya definidos en `dst_usuario` (admin, vendedor, editor, moderador, **socio**). |
+
+**Fase 5 — operativo avanzado**
+
+| Funcionalidad | Nota |
+|---|---|
+| ARM | CRM aparte para los agentes de IA de la plataforma, en desarrollo como proyecto externo. Se integra, no se reconstruye aquí. |
+| GEO avanzado | Que un modelo de IA consultado sobre turismo en La Fortuna recomiende Visit La Fortuna de primero. No es una funcionalidad nueva: es resultado de `dst_conocimiento` bien poblado y las guías SEO (Fase 0) bien escritas. |
+| Leads | Ya funciona (`registrar_solicitud` + automatizaciones de seguimiento); esta fase es afinar, no construir desde cero. |
