@@ -4,7 +4,6 @@ import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { Hero } from '@/componentes/Hero';
-import { VideoPortada } from '@/componentes/VideoPortada';
 import { Resultados } from '@/componentes/Resultados';
 import { CampoBusqueda } from '@/componentes/CampoBusqueda';
 import { buscarNegocios } from '@/lib/buscar';
@@ -106,12 +105,8 @@ export default async function Portada({ params, searchParams }: {
         lema={destino.lema}
         colorAcento={destino.color_acento}
         colorVerde={destino.color_naturaleza}
+        videoUrl={destino.video_portada_url}
       />
-
-      {/* ---- Video ---- */}
-      {destino.video_portada_url && (
-        <VideoPortada url={destino.video_portada_url} poster={destino.imagen_portada_url} />
-      )}
 
       {/* ---- Qué hacer ---- */}
       <section className="zona">

@@ -5,7 +5,7 @@ import { t, type Idioma } from '@/lib/idiomas';
 import { CampoBusqueda } from './CampoBusqueda';
 
 export function Hero({
-  idioma, nombre, region, pais, lema, colorAcento, colorVerde, consulta = '',
+  idioma, nombre, region, pais, lema, colorAcento, colorVerde, consulta = '', videoUrl,
 }: {
   idioma: Idioma;
   nombre: string;
@@ -16,6 +16,9 @@ export function Hero({
   colorVerde: string;
   /** Lo que se buscó, para que el campo no se vacíe al volver los resultados. */
   consulta?: string;
+  /** El video del destino, de dst_destino.video_portada_url. Sin él, el hero
+   *  se queda con el volcán dibujado y no pasa nada. */
+  videoUrl?: string | null;
 }) {
   const lienzo = useRef<HTMLCanvasElement>(null);
   const pista = useRef<HTMLDivElement>(null);
@@ -24,13 +27,16 @@ export function Hero({
   const c1 = useRef<SVGSVGElement>(null);
   const c2 = useRef<SVGSVGElement>(null);
   const c3 = useRef<SVGSVGElement>(null);
+  const video = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* El lienzo de ceniza solo existe cuando el destino NO tiene video: era
+       el relleno mientras no había imágenes reales. Puede no estar, así que
+       de aquí en adelante nada puede darlo por hecho — el scroll y el
+       observador de secciones tienen que seguir funcionando igual. */
     const cv = lienzo.current;
-    if (!cv) return;
-    const ctx = cv.getContext('2d');
-    if (!ctx) return;
+    const ctx = cv?.getContext('2d') ?? null;
 
     let an = 0, al = 0, cuadro = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -38,6 +44,7 @@ export function Hero({
     const brasas: Brasa[] = [];
 
     function medir() {
+      if (!cv || !ctx) return;
       an = cv!.clientWidth; al = cv!.clientHeight;
       cv!.width = an * dpr; cv!.height = al * dpr;
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -59,6 +66,7 @@ export function Hero({
     }
 
     function pintar() {
+      if (!cv || !ctx) return;
       ctx!.clearRect(0, 0, an, al);
       const g = ctx!.createLinearGradient(0, 0, 0, al);
       g.addColorStop(0, '#050505'); g.addColorStop(0.42, '#0C0A08');
@@ -84,9 +92,14 @@ export function Hero({
       cuadro = requestAnimationFrame(pintar);
     }
 
-    medir();
-    pintar();
-    window.addEventListener('resize', medir);
+    if (cv && ctx) {
+      medir();
+      pintar();
+      window.addEventListener('resize', medir);
+    }
+
+    // Con video, se reproduce desde el primer momento: es el fondo del hero.
+    if (video.current && suave) video.current.play().catch(() => {});
 
     /* El titular sube y se desvanece mientras el volcán se acerca. Cada capa
        se mueve distinto: el frente más que el fondo, que es lo que da la
@@ -105,6 +118,13 @@ export function Hero({
       if (c1.current) c1.current.style.transform = `translateX(-50%) translateY(${p * 90}px) scale(${1 + p * 0.16})`;
       if (c2.current) c2.current.style.transform = `translateX(-50%) translateY(${p * 34}px) scale(${1 + p * 0.09})`;
       if (c3.current) c3.current.style.transform = `translateX(-50%) translateY(${p * 12}px) scale(${1 + p * 0.04})`;
+
+      /* El video está desde el primer fotograma y se mueve con el scroll: se
+         acerca y sube un poco, igual que hacían las capas dibujadas. Es lo
+         que evita que se sienta una foto pegada detrás del texto. */
+      if (video.current) {
+        video.current.style.transform = `translateY(${-p * 60}px) scale(${1 + p * 0.14})`;
+      }
 
       barra?.classList.toggle('pegada', y > 80);
       barra?.classList.toggle('sobre-hero', y <= 80);
@@ -125,7 +145,7 @@ export function Hero({
     document.querySelectorAll('.revela').forEach((el) => mirador.observe(el));
 
     return () => {
-      cancelAnimationFrame(cuadro);
+      if (cuadro) cancelAnimationFrame(cuadro);
       window.removeEventListener('resize', medir);
       window.removeEventListener('scroll', alScroll);
       mirador.disconnect();
@@ -136,6 +156,10 @@ export function Hero({
   return (
     <div className="pista" ref={pista}>
       <div className="escena">
+        {/* El volcán dibujado y la ceniza eran el relleno mientras el destino
+            no tenía video. Con video no se dibujan: ni se pintan encima ni
+            gastan un requestAnimationFrame permanente detrás de él. */}
+        {!videoUrl && <>
         <canvas id="cielo" ref={lienzo} />
 
         <svg className="capa" ref={c3} width="2400" height="760" viewBox="0 0 2400 760"
@@ -167,7 +191,17 @@ export function Hero({
           </g>
         </svg>
 
-        <div className="velo" />
+        </>}
+
+        {/* El fondo del hero. Va antes del velo y del grano a propósito, para
+            que esos dos lo cubran: son los que disuelven sus bordes en negro
+            y los que mantienen legible el titular encima. */}
+        {videoUrl && (
+          <video ref={video} className="video-escena" src={videoUrl}
+                 autoPlay muted loop playsInline preload="auto" aria-hidden="true" />
+        )}
+
+        <div className={videoUrl ? 'velo con-video' : 'velo'} />
         <div className="grano" />
 
         <div className="titular" ref={titular}>

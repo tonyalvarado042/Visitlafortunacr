@@ -315,14 +315,25 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   border-radius: 0; padding: 0 30px; font-size: 14px; white-space: nowrap; flex-shrink: 0;
 }
 
-/* La banda de video, pegada al hero. Lleva .zona a propósito: el hero es
-   sticky dentro de una pista de 230vh, y es el z-index y el fondo de .zona lo
-   que hace que el contenido pase por encima en vez de quedar detrás. */
-.banda-video { padding: 0; line-height: 0; }
-.banda-video video {
-  display: block; width: 100%; height: auto;
-  aspect-ratio: 16 / 9; max-height: 78vh; object-fit: cover;
-  background: var(--negro);
+/* El video del destino, dentro de la escena del hero. No es un bloque: entra
+   con el scroll y el volcán dibujado se apaga al mismo ritmo. Arranca en 0 y
+   el manejador de scroll le escribe la opacidad. La máscara disuelve el borde
+   de abajo para que no haya costura con lo que sigue; la de arriba la pone el
+   .velo, que va encima. */
+.video-escena {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; will-change: transform;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 80%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 80%, transparent 100%);
+}
+
+/* Sobre imagen real el titular necesita más fondo que sobre el volcán
+   dibujado, que ya era oscuro: el cielo del video es claro y el texto blanco
+   se perdería contra las nubes. */
+.velo.con-video {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, rgba(11,11,11,.62) 0%, rgba(11,11,11,0) 100%),
+    linear-gradient(180deg, rgba(11,11,11,.72) 0%, rgba(11,11,11,.28) 34%, rgba(11,11,11,.46) 70%, var(--negro) 100%);
 }
 
 .bajar {
