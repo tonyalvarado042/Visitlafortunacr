@@ -5,6 +5,7 @@ import type { Rol } from '@/lib/supabase-sesion';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { cancelarInvitacion, editarUsuario, invitar } from './acciones';
+import { MiCuenta } from './MiCuenta';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,11 @@ export default async function PaginaEquipo() {
   return (
     <>
       <Cabecera titulo="Equipo" sub={`${equipo?.length ?? 0} personas · ${invitaciones?.length ?? 0} invitaciones pendientes`} />
+
+      <div className="tarjeta" style={{ maxWidth: 520 }}>
+        <h2>Tu cuenta</h2>
+        <MiCuenta email={usuario.email} />
+      </div>
 
       <div className="tarjeta desliza">
         <h2>Personas</h2>

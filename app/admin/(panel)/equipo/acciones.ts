@@ -2,6 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { contextoPanel } from '@/lib/admin/contexto';
+import { sesion } from '@/lib/supabase-sesion';
+
+export type EstadoClave = { ok?: string | null; error?: string | null };
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -54,4 +57,24 @@ export async function editarUsuario(datos: FormData) {
   const { error } = await db.from('dst_usuario').update(cambios).eq('id', id);
   if (error) console.error('editarUsuario:', error.message);
   revalidatePath('/admin/equipo');
+}
+
+/**
+ * Cada quien cambia su propia contraseña. Pasa por Supabase Auth con la sesión
+ * del usuario, así que nadie puede cambiar la de otro ni desde aquí ni desde
+ * la base. No hace falta el correo: es lo que salva el día cuando el SMTP se
+ * queda sin cupo.
+ */
+export async function cambiarMiClave(_previo: EstadoClave, datos: FormData): Promise<EstadoClave> {
+  await contextoPanel();
+  const clave = String(datos.get('clave') ?? '');
+  const repetida = String(datos.get('repetida') ?? '');
+
+  if (clave.length < 8) return { error: 'La contraseña necesita al menos 8 caracteres.' };
+  if (clave !== repetida) return { error: 'Las dos contraseñas no coinciden.' };
+
+  const db = await sesion();
+  const { error } = await db.auth.updateUser({ password: clave });
+  if (error) return { error: error.message };
+  return { ok: 'Contraseña cambiada. La próxima vez entrás con la nueva.' };
 }
