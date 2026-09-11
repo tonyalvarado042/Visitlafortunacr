@@ -68,7 +68,17 @@ se hace con una vista, nunca mezclando tablas.
    publicar: `git fetch` y **rebase** sobre el remoto, nunca `push --force` ni
    descartar lo ajeno. Si el rebase choca, se avisa y se resuelve a mano; el
    trabajo del otro no se pisa.
-9. **Lo que se hace a mano se anota aquí, no se pregunta.** Claude no tiene
+9. **No todas las sesiones pueden lo mismo, y hay que decirlo de entrada.**
+   Una sesión en **la nube** (Claude Code on the web) corre en un contenedor de
+   Anthropic detrás de un proxy de egress: **no** alcanza GoDaddy, Vercel,
+   `*.supabase.co` ni el sitio desplegado, y **no** ve el navegador de nadie;
+   sí trabaja la base por el conector de Supabase, lee DNS, compila y publica
+   en git. Una sesión **local** (Claude Code en la máquina de Tony) no tiene
+   ese proxy: alcanza todo y puede manejar un navegador de verdad, con Tony
+   haciendo el login cuando haga falta. Al arrancar una tarea que dependa de un
+   panel externo, **se aclara en la primera respuesta desde dónde se está
+   corriendo**, en vez de dejar que se descubra a la tercera vez.
+10. **Lo que se hace a mano se anota aquí, no se pregunta.** Claude no tiene
    acceso a GoDaddy, Vercel, el panel de Supabase, Meta ni SiteGround. Cuando
    Tony diga "entrá a GoDaddy" (o a cualquiera de esas), la respuesta NO es
    pedir permiso ni explicar que no se puede: es dejar escrito en
@@ -182,8 +192,11 @@ Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
 
 ## Trabajo a mano
 
-Pasos fuera del código y de la base. Claude no puede ejecutarlos: los deja
-escritos aquí con los valores exactos, y Tony los pega.
+Pasos que dependen de un panel externo. **Una sesión local sí puede hacerlos**
+(alcanza la red y maneja el navegador, con Tony autenticándose); la sesión en la
+nube no, y por eso los deja escritos aquí con los valores exactos.
+
+Antes de empezar en la máquina: `git pull` de la rama, que aquí está lo último.
 
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
