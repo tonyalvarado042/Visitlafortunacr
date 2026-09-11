@@ -63,6 +63,13 @@ se hace con una vista, nunca mezclando tablas.
 7. **El sitio público escribe por una sola puerta**: la función
    `destinos.registrar_solicitud(...)`. No hay INSERT directo desde la llave
    pública a ninguna tabla.
+8. **Lo que se hace a mano se anota aquí, no se pregunta.** Claude no tiene
+   acceso a GoDaddy, Vercel, el panel de Supabase, Meta ni SiteGround. Cuando
+   Tony diga "entrá a GoDaddy" (o a cualquiera de esas), la respuesta NO es
+   pedir permiso ni explicar que no se puede: es dejar escrito en
+   **Trabajo a mano** de este archivo el paso exacto, con los valores exactos
+   que hay que pegar, y avisar que quedó anotado. Si un valor lo decide el
+   proveedor en pantalla, se dice cuál manda.
 
 ---
 
@@ -90,7 +97,7 @@ Monteverde puede tener otra paleta sin tocar una línea.
 | | |
 |---|---|
 | Tablas | 46 (35 del directorio y CRM + 11 de inteligencia) |
-| Migraciones | 16, todas guardadas en `supabase/plataforma/` |
+| Migraciones | 18, todas guardadas en `supabase/plataforma/` |
 | Avisos de seguridad | 0 nuevos (queda el aviso previo por `regconfig` en `dst_idioma`) |
 | Destinos | 1 (La Fortuna, encendido) |
 | Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna |
@@ -163,15 +170,84 @@ Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
 - **Secretos solo en variables de entorno** (`.env.example`). `dst_canal`
   guarda el NOMBRE de la variable, nunca el valor.
 
+## Trabajo a mano
+
+Pasos fuera del código y de la base. Claude no puede ejecutarlos: los deja
+escritos aquí con los valores exactos, y Tony los pega.
+
+### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
+
+**La trampa:** SiteGround da el correo del mismo dominio. Si se cambian los
+nameservers a los de Vercel, Vercel se queda con todo el DNS y **los MX
+desaparecen: el correo se cae**. Así que **los nameservers se quedan en
+GoDaddy** y solo se agregan dos registros.
+
+En GoDaddy → *My Products* → el dominio → *DNS* → *Manage Zones*:
+
+| Tipo | Nombre | Valor | TTL |
+|---|---|---|---|
+| A | `@` | `76.76.21.21` | 600 |
+| CNAME | `www` | `cname.vercel-dns.com` | 600 |
+
+**No se toca nada más de esa zona.** Los MX de SiteGround y su registro SPF
+se quedan como están.
+
+Si un registro `A` o `CNAME` con ese nombre ya existe (GoDaddy suele traer un
+`A @` hacia su propio parking), se **edita** el que está; no se agrega un
+segundo con el mismo nombre.
+
+Luego en Vercel → el proyecto → *Settings* → *Domains* → agregar
+`visitlafortunacr.com` y `www.visitlafortunacr.com`. **Vercel muestra en
+pantalla el registro exacto que espera: si difiere de la tabla de arriba, manda
+Vercel**, porque esos valores los cambia de vez en cuando. Vercel emite el
+certificado solo cuando el DNS ya resuelve; puede tardar hasta una hora.
+
+### SiteGround · el correo de la plataforma
+
+1. Site Tools → *Email* → *Accounts*: crear el buzón `hola@visitlafortunacr.com`.
+2. Site Tools muestra los datos SMTP de ese buzón (servidor, puerto, usuario).
+3. Esos datos van a Vercel → *Settings* → *Environment Variables*:
+
+```
+SMTP_HOST=<el servidor que muestre SiteGround, normalmente mail.visitlafortunacr.com>
+SMTP_PUERTO=465
+SMTP_USUARIO=hola@visitlafortunacr.com
+SMTP_CLAVE=<la contraseña del buzón>
+EMAIL_REMITENTE=hola@visitlafortunacr.com
+```
+
+4. Que el **SPF** de SiteGround esté en la zona de GoDaddy. Sin él, Gmail
+   manda los correos a spam. SiteGround indica el valor en Site Tools → *Email*.
+5. El canal ya está creado en la base (`dst_canal`: email/smtp, remitente
+   `hola@visitlafortunacr.com`, secreto en `SMTP_CLAVE`). No hay que crearlo:
+   se revisa en `/admin/ajustes`.
+
+### Supabase · dejar de depender de su SMTP
+
+Panel de Supabase → *Authentication*:
+
+- *Sign In / Providers* → *Email* → **apagar "Confirm email"**. El acceso al
+  panel lo protege la invitación, no el correo, y el SMTP por defecto de
+  Supabase se queda sin cupo con tres o cuatro envíos.
+- Si se quiere que Supabase también mande por SiteGround: *Emails* →
+  *SMTP Settings* → *Custom SMTP*, con los mismos cuatro valores de arriba.
+
+### Vercel · variables que faltan
+
+`ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY`, `CRON_SECRET` y las `SMTP_*`.
+Después de agregarlas hay que **volver a desplegar**: Vercel no las inyecta en
+un despliegue ya hecho. `/admin/ajustes` muestra cuáles están puestas.
+
 ## Lo que sigue, en orden
 
 1. Poner en Vercel `ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY` y `CRON_SECRET`;
    entrar a `/admin` con el correo invitado y verificar las 22 fichas de
    conocimiento.
-2. Conectar WhatsApp Cloud API (canal en Ajustes + `WHATSAPP_*`) y correo
-   (`RESEND_API_KEY`).
-3. Cargar los primeros 30 tours reservables con precio y comisión (desde
+2. Hacer los pasos de **Trabajo a mano**: DNS en GoDaddy, buzón en SiteGround,
+   variables en Vercel, confirmación de correo apagada en Supabase.
+3. Conectar WhatsApp Cloud API (canal en Ajustes + `WHATSAPP_*`).
+4. Cargar los primeros 30 tours reservables con precio y comisión (desde
    `/admin/tours`).
-4. Escribir las 10 guías SEO de arranque (borradores con `/admin/guias`).
-5. Google Places para coordenadas, horarios y agregados externos.
-6. Traducir a pt, fr y de lo que ya está en es/en.
+5. Escribir las 10 guías SEO de arranque (borradores con `/admin/guias`).
+6. Google Places para coordenadas, horarios y agregados externos.
+7. Traducir a pt, fr y de lo que ya está en es/en.
