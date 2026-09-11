@@ -76,6 +76,37 @@ img { max-width: 100%; display: block; }
 .selector-idioma .lista a:hover { background: #202020; color: var(--naranja); }
 .selector-idioma .lista a[aria-current='true'] { color: var(--naranja); }
 
+/* El menú plegado: mismo patrón que el selector de idioma, para no mandar
+   JavaScript al cliente ni convertir la barra en componente de cliente.
+   Se enciende desde 1000px, donde .menu se apaga. */
+.menu-plegado { position: relative; display: none; }
+.menu-plegado summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center;
+  border: 1px solid #2E2E2E; border-radius: 100px; padding: 9px 10px;
+  color: var(--blanco);
+}
+.menu-plegado summary::marker { content: ''; }
+.menu-plegado summary::-webkit-details-marker { display: none; }
+.menu-plegado .lista {
+  position: absolute; right: 0; top: calc(100% + 8px); min-width: 196px; z-index: 70;
+  background: #151515; border: 1px solid var(--borde); border-radius: 5px;
+  padding: 6px; box-shadow: 0 14px 34px rgba(0,0,0,.5);
+}
+.menu-plegado .lista a {
+  display: block; padding: 10px 12px; border-radius: 3px;
+  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+}
+.menu-plegado .lista a:hover { background: #202020; color: var(--naranja); }
+
+/* Tocar fuera cierra el desplegable. El pseudo-elemento pertenece al summary,
+   así que el clic alterna el details. Ni sticky ni fixed crean bloque
+   contenedor, de modo que la capa cubre toda la pantalla aunque la barra
+   flote sobre el hero. */
+.menu-plegado[open] summary::before,
+.selector-idioma[open] summary::before {
+  content: ''; position: fixed; inset: 0; z-index: 65;
+}
+
 .boton {
   display: inline-block; background: var(--naranja); color: var(--negro);
   font-family: var(--fuente); font-weight: 800; font-size: 13px; letter-spacing: .02em;
@@ -125,7 +156,9 @@ section { padding: 84px 0; }
 .sello-pagado { background: var(--naranja); color: var(--negro); border-radius: 3px; padding: 3px 9px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 
 /* ---- Ficha ---- */
-.ficha-cuerpo { display: grid; grid-template-columns: 1fr 372px; gap: 40px; align-items: start; padding-bottom: 84px; }
+/* El aside nunca pasa de 372px, pero puede ceder hasta 300 antes de que el
+   texto quede estrangulado en un escritorio angosto. */
+.ficha-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 372px); gap: 40px; align-items: start; padding-bottom: 84px; }
 .bloque { background: var(--carbon); border: 1px solid var(--borde); border-radius: 5px; padding: 24px; }
 .bloque + .bloque { margin-top: 16px; }
 .bloque .titulo { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--humo); margin-bottom: 16px; }
@@ -155,13 +188,46 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
 .pie-caja { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
 .pie-caja .legal { font-size: 12.5px; color: #5E5C58; }
 
-@media (max-width: 1000px) {
+/* La barra no puede encoger: .menu a lleva white-space: nowrap, y el logo y
+   las acciones flex-shrink: 0. Así que sus dos cortes no son de estética,
+   son el ancho a partir del cual cada pieza deja de caber. Medido con los
+   siete enlaces y el texto más largo de los cinco idiomas (portugués). */
+
+/* Las cinco pastillas junto al menú completo piden ~1375px. Debajo de eso,
+   el idioma se pliega en el desplegable. */
+@media (max-width: 1400px) {
+  .idiomas { display: none; }
+  .selector-idioma { display: block; }
+}
+
+/* El menú completo pide ~1120px. Debajo, se pliega en la hamburguesa. */
+@media (max-width: 1120px) {
   .menu { display: none; }
-  .rejilla { grid-template-columns: 1fr; }
+  .menu-plegado { display: block; }
+}
+
+/* Escritorio angosto y tablet apaisada: se recortan los márgenes. */
+@media (max-width: 1240px) {
+  .caja { padding: 0 32px; }
+  .barra { padding: 14px 32px; gap: 18px; }
+  .menu { gap: 18px; font-size: 12px; }
+  .ficha-cuerpo { gap: 32px; }
+}
+
+/* Tablet vertical. */
+@media (max-width: 1000px) {
+  .rejilla { grid-template-columns: repeat(2, 1fr); }
   .ficha-cuerpo { grid-template-columns: 1fr; }
-  .caja { padding: 0 20px; }
-  .barra { padding: 12px 20px; }
-  section { padding: 56px 0; }
+  /* El aside deja de ser una columna estrecha y se reparte a lo ancho.
+     auto-fit cubre el negocio sin precio: un solo bloque ocupa todo. */
+  .ficha-cuerpo > aside {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px; align-items: start;
+  }
+  .ficha-cuerpo > aside .bloque + .bloque { margin-top: 0; }
+  .caja { padding: 0 28px; }
+  .barra { padding: 12px 28px; }
+  section { padding: 64px 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -223,10 +289,40 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   padding: 17px 20px; font-size: 15px; color: #B9B7B3; font-weight: 500;
 }
 .buscador .campo svg { flex-shrink: 0; }
-.buscador .campo .texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* .texto era un span decorativo; ahora es el input de verdad. Se deja sin
+   borde ni fondo: el marco y el foco los pone .buscador, no el campo. */
+.buscador .campo .texto {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex-grow: 1; min-width: 0; width: 100%;
+  background: none; border: 0; outline: none; padding: 0;
+  font-family: inherit; font-size: inherit; font-weight: inherit; color: var(--blanco);
+}
+.buscador .campo .texto::placeholder { color: #B9B7B3; opacity: 1; }
+.buscador:focus-within { border-color: rgba(255,255,255,.34); }
+
+/* Cuando hay búsqueda, el hero de 230vh se cambia por esta banda: el campo
+   arriba y los resultados justo debajo, sin scroll de por medio. */
+.banda-busqueda { padding: 26px 0 0; }
+.banda-busqueda .buscador {
+  margin-top: 0; margin-inline: auto;
+  /* El hero lo hace aparecer con 0,7s de retardo; en una página de resultados
+     el campo tiene que estar ahí desde el primer fotograma. */
+  animation: none;
+  background: #141414; border-color: #2E2E2E; backdrop-filter: none;
+}
 .buscador .boton {
   display: flex; align-items: center; justify-content: center;
   border-radius: 0; padding: 0 30px; font-size: 14px; white-space: nowrap; flex-shrink: 0;
+}
+
+/* La banda de video, pegada al hero. Lleva .zona a propósito: el hero es
+   sticky dentro de una pista de 230vh, y es el z-index y el fondo de .zona lo
+   que hace que el contenido pase por encima en vez de quedar detrás. */
+.banda-video { padding: 0; line-height: 0; }
+.banda-video video {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 16 / 9; max-height: 78vh; object-fit: cover;
+  background: var(--negro);
 }
 
 .bajar {
@@ -305,12 +401,17 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
 .barra.sobre-hero { position: fixed; background: transparent; backdrop-filter: none; border-bottom-color: transparent; }
 .barra.pegada { background: rgba(11,11,11,.92); backdrop-filter: blur(14px); border-bottom-color: var(--borde); }
 
+/* Tablet vertical: el mosaico pasa a dos mitades en vez de caer a una sola
+   columna. Si la última ficha queda impar, se lleva el ancho completo para
+   no dejar un hueco al lado; funciona con 3, 4 o 5 categorías. */
 @media (max-width: 1000px) {
   .plan-cuerpo { grid-template-columns: 1fr; gap: 36px; }
-  .pilares { grid-template-columns: 1fr; }
+  .pilares { grid-template-columns: repeat(2, 1fr); gap: 22px; }
   .cifras { grid-template-columns: repeat(2, 1fr); }
-  .g-6, .g-4, .g-3 { grid-column: span 12; }
-  .planificador { padding: 38px 24px; }
+  .g-6, .g-4, .g-3 { grid-column: span 6; }
+  .rejilla-hacer > *:last-child:nth-child(odd) { grid-column: span 12; }
+  .planificador { padding: 44px 32px; }
+  .cierre { padding: 80px 32px; }
   .pista { height: 190vh; }
 }
 
@@ -381,16 +482,19 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
 .plan-cierre p { color: var(--humo); margin: 0 0 16px; }
 @media (max-width: 640px) { .plan-parada { grid-template-columns: 1fr; gap: 6px; } }
 
+/* Única consulta de rango del archivo, y a conciencia: las capas del hero
+   tienen ancho fijo (2400, 2000 y 2600px), así que en una tablet se ve solo
+   el tercio central del cono. Se bajan a 190vw sin tocar el teléfono, que ya
+   estaba aprobado así. El parallax solo escribe transform, no interfiere. */
+@media (min-width: 701px) and (max-width: 1000px) {
+  .capa { width: 190vw; height: auto; }
+}
+
 /* =========================================================================
    TELÉFONO — la barra y el buscador tienen que caber sin empujarse
    ========================================================================= */
 
 @media (max-width: 1000px) {
-  /* Cinco pastillas de idioma no caben y empujan el botón fuera de pantalla:
-     en el teléfono el idioma se pliega en un desplegable. */
-  .idiomas { display: none; }
-  .selector-idioma { display: block; }
-
   .barra { gap: 10px; }
   .logo { min-width: 0; }
   .logo .texto { font-size: 15px; }
@@ -400,6 +504,22 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   .buscador { margin-top: 30px; }
   .buscador .campo { padding: 14px 16px; font-size: 14px; gap: 10px; }
   .buscador .boton { padding: 0 20px; font-size: 13px; }
+}
+
+/* Teléfono: vuelve la columna única y los márgenes cortos. Todo lo de aquí
+   es el valor que antes vivía en el bloque de 1000px, que ahora es tablet. */
+@media (max-width: 700px) {
+  .rejilla { grid-template-columns: 1fr; }
+  .g-6, .g-4, .g-3,
+  .rejilla-hacer > *:last-child:nth-child(odd) { grid-column: span 12; }
+  .pilares { grid-template-columns: 1fr; gap: 26px; }
+  .ficha-cuerpo > aside { grid-template-columns: 1fr; }
+  .ficha-cuerpo > aside .bloque + .bloque { margin-top: 16px; }
+  .planificador { padding: 38px 24px; }
+  .caja { padding: 0 20px; }
+  .barra { padding: 12px 20px; }
+  section { padding: 56px 0; }
+  .cierre { padding: 72px 20px; }
 }
 
 @media (max-width: 560px) {
@@ -418,8 +538,10 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   .concierge-boton { right: 14px; bottom: 14px; padding: 11px 15px; font-size: 12px; }
 }
 
-/* En pantallas muy angostas el nombre de la marca cede el paso al botón. */
-@media (max-width: 400px) {
+/* En pantallas angostas el nombre de la marca cede el paso al botón y a la
+   hamburguesa. Era 400px; con la hamburguesa (+36px) la barra se apretaba
+   entre 401 y 440, y en portugués no quedaba margen. */
+@media (max-width: 440px) {
   .logo .texto { display: none; }
   .buscador .campo .texto { font-size: 13px; }
 }

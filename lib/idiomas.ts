@@ -40,6 +40,14 @@ export const T: Record<string, Diccionario> = {
   buscar:            { es: 'Buscar', en: 'Search', pt: 'Buscar', fr: 'Rechercher', de: 'Suchen' },
   que_buscas:        { es: '¿Qué te gustaría vivir?', en: 'What would you like to experience?', pt: 'O que gostaria de viver?', fr: 'Que souhaitez-vous vivre ?', de: 'Was möchten Sie erleben?' },
   armar_viaje:       { es: 'Armar mi viaje', en: 'Plan my trip', pt: 'Planear a viagem', fr: 'Créer mon voyage', de: 'Reise planen' },
+  menu:              { es: 'Menú', en: 'Menu', pt: 'Menu', fr: 'Menu', de: 'Menü' },
+  lugar:             { es: 'lugar', en: 'place', pt: 'lugar', fr: 'lieu', de: 'Ort' },
+  resultados:        { es: 'Resultados', en: 'Results', pt: 'Resultados', fr: 'Résultats', de: 'Ergebnisse' },
+  todo_el_directorio:{ es: 'Todo el directorio', en: 'The whole directory', pt: 'Todo o diretório', fr: 'Tout le répertoire', de: 'Das ganze Verzeichnis' },
+  todas:             { es: 'Todas', en: 'All', pt: 'Todas', fr: 'Toutes', de: 'Alle' },
+  limpiar:           { es: 'Limpiar', en: 'Clear', pt: 'Limpar', fr: 'Effacer', de: 'Zurücksetzen' },
+  sin_resultados:    { es: 'Nada con esas palabras', en: 'Nothing matches those words', pt: 'Nada com essas palavras', fr: 'Rien avec ces mots', de: 'Nichts mit diesen Wörtern' },
+  sin_resultados_pista: { es: 'Probá con menos palabras, o mirá todo el directorio.', en: 'Try fewer words, or browse the whole directory.', pt: 'Tente menos palavras, ou veja todo o diretório.', fr: 'Essayez avec moins de mots, ou parcourez tout le répertoire.', de: 'Versuchen Sie weniger Wörter, oder sehen Sie das ganze Verzeichnis.' },
   que_hacer:         { es: 'Qué hacer', en: 'Things to do', pt: 'O que fazer', fr: 'À faire', de: 'Aktivitäten' },
   tours:             { es: 'Tours', en: 'Tours', pt: 'Passeios', fr: 'Excursions', de: 'Touren' },
   donde_dormir:      { es: 'Dónde dormir', en: 'Where to stay', pt: 'Onde ficar', fr: 'Où dormir', de: 'Unterkünfte' },
@@ -133,4 +141,9 @@ export const T: Record<string, Diccionario> = {
 
 export function t(clave: string, idioma: Idioma): string {
   return T[clave]?.[idioma] ?? T[clave]?.es ?? clave;
+}
+
+/** "1 lugar" y no "1 lugares". Devuelve solo la palabra, no el número. */
+export function lugares(cuantos: number, idioma: Idioma): string {
+  return t(cuantos === 1 ? 'lugar' : 'lugares', idioma);
 }

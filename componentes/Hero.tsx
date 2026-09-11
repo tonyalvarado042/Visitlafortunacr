@@ -2,9 +2,10 @@
 
 import { useEffect, useRef } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
+import { CampoBusqueda } from './CampoBusqueda';
 
 export function Hero({
-  idioma, nombre, region, pais, lema, colorAcento, colorVerde,
+  idioma, nombre, region, pais, lema, colorAcento, colorVerde, consulta = '',
 }: {
   idioma: Idioma;
   nombre: string;
@@ -13,6 +14,8 @@ export function Hero({
   lema: string | null;
   colorAcento: string;
   colorVerde: string;
+  /** Lo que se buscó, para que el campo no se vacíe al volver los resultados. */
+  consulta?: string;
 }) {
   const lienzo = useRef<HTMLCanvasElement>(null);
   const pista = useRef<HTMLDivElement>(null);
@@ -175,16 +178,7 @@ export function Hero({
           </h1>
           {lema && <p className="lema-hero">{lema}</p>}
 
-          <div className="buscador">
-            <div className="campo">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8B8B87"
-                   strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
-              </svg>
-              <span className="texto">{t('que_buscas', idioma)}</span>
-            </div>
-            <a className="boton" href="#plan">{t('buscar', idioma)}</a>
-          </div>
+          <CampoBusqueda idioma={idioma} consulta={consulta} />
         </div>
 
         <div className="bajar" ref={bajar}><span className="riel" />{t('desliza', idioma)}</div>

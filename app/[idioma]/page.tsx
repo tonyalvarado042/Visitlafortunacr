@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import { destinoActual, categoriasDe, negociosDe, type Negocio, type Categoria } from '@/lib/destino';
-import { t, type Idioma } from '@/lib/idiomas';
+import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { Hero } from '@/componentes/Hero';
+import { VideoPortada } from '@/componentes/VideoPortada';
+import { Resultados } from '@/componentes/Resultados';
+import { CampoBusqueda } from '@/componentes/CampoBusqueda';
+import { buscarNegocios } from '@/lib/buscar';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
 import { Planificador } from '@/componentes/Planificador';
 
@@ -27,13 +31,44 @@ const AMBIENTE_NEUTRO = 'linear-gradient(160deg,#141414 0%,#0B0B0B 68%)';
 /* El mosaico: dos piezas grandes arriba y tres abajo, como en el diseño. */
 const FORMA = ['g-6 alta', 'g-6 alta', 'g-4', 'g-4', 'g-4'];
 
-export default async function Portada({ params }: { params: Promise<{ idioma: Idioma }> }) {
+export default async function Portada({ params, searchParams }: {
+  params: Promise<{ idioma: Idioma }>;
+  searchParams: Promise<{ q?: string; cat?: string; ver?: string }>;
+}) {
   const { idioma } = await params;
+  const { q, cat, ver } = await searchParams;
   const destino = await destinoActual();
   const [categorias, negocios] = await Promise.all([
     categoriasDe(destino, idioma),
     negociosDe(destino, idioma),
   ]);
+
+  /* El buscador vive en el hero y los resultados salen aquí mismo: cuando hay
+     búsqueda, en vez de la portada se muestran las coincidencias. Sin ?q= ni
+     ?ver=todo, esto es exactamente la portada de siempre. */
+  const consulta = (q ?? '').trim();
+  if (consulta || ver === 'todo') {
+    return (
+      <>
+        <Barra destino={destino} idioma={idioma} categorias={categorias} rutaActual="" />
+        {/* Nada de hero aquí: son 230vh de volcán y dejarían los resultados dos
+            pantallas más abajo. Quien busca quiere ver lo que buscó. */}
+        <section className="zona banda-busqueda">
+          <div className="caja">
+            <CampoBusqueda idioma={idioma} consulta={consulta} />
+          </div>
+        </section>
+        <Resultados
+          negocios={buscarNegocios(negocios, consulta)}
+          categorias={categorias}
+          idioma={idioma}
+          consulta={consulta}
+          categoriaActiva={cat ?? ''}
+        />
+        <Pie destino={destino} />
+      </>
+    );
+  }
 
   const conContenido = categorias.filter((c) => c.total > 0);
 
@@ -73,6 +108,11 @@ export default async function Portada({ params }: { params: Promise<{ idioma: Id
         colorVerde={destino.color_naturaleza}
       />
 
+      {/* ---- Video ---- */}
+      {destino.video_portada_url && (
+        <VideoPortada url={destino.video_portada_url} poster={destino.imagen_portada_url} />
+      )}
+
       {/* ---- Qué hacer ---- */}
       <section className="zona">
         <div className="caja">
@@ -81,7 +121,9 @@ export default async function Portada({ params }: { params: Promise<{ idioma: Id
               <span className="rotulo">{t('que_hacer', idioma)}</span>
               <h2>{t('nadie_se_salta', idioma)}</h2>
             </div>
-            <span className="enlace-mas">{negocios.length} {t('lugares', idioma)}</span>
+            <Link className="enlace-mas" href={`/${idioma}?ver=todo`}>
+              {negocios.length} {lugares(negocios.length, idioma)} →
+            </Link>
           </div>
 
           <div className="rejilla-hacer">
@@ -91,7 +133,7 @@ export default async function Portada({ params }: { params: Promise<{ idioma: Id
                 <Link key={c.categoria_id} href={`/${idioma}/${c.babosa}`}
                       className={`ficha-grande revela ${FORMA[i] ?? 'g-4'}`}>
                   <div className="fondo" style={{ background: AMBIENTE[c.babosa] ?? AMBIENTE_NEUTRO }} />
-                  <span className="marca">{c.total} {t('lugares', idioma)}</span>
+                  <span className="marca">{c.total} {lugares(c.total, idioma)}</span>
                   <div className="contenido">
                     <h3>{c.nombre}</h3>
                     {mejor?.resumen && <p>{mejor.resumen}</p>}

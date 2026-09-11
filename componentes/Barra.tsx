@@ -26,6 +26,17 @@ export function Barra({
   const base = corte > 0 ? nombre.slice(0, corte) : nombre;
   const cola = corte > 0 ? nombre.slice(corte) : '';
 
+  /* Los mismos enlaces se pintan dos veces: en el menú de pantalla ancha y en
+     el desplegable. Se arman una sola vez para que no se puedan desincronizar. */
+  const enlaces = [
+    ...SECCIONES.filter((s) => conContenido.has(s)).map((seccion) => ({
+      clave: seccion as string,
+      href: `/${idioma}/${primeraDe(seccion)}`,
+      texto: t(seccion === 'comer_beber' ? 'comer' : seccion, idioma),
+    })),
+    { clave: 'plan', href: `/${idioma}#plan`, texto: t('planifica', idioma) },
+  ];
+
   return (
     <header className={sobreHero ? 'barra sobre-hero' : 'barra'} id="barra">
       <Link className="logo" href={`/${idioma}`}>
@@ -34,18 +45,15 @@ export function Barra({
       </Link>
 
       <nav className="menu">
-        {SECCIONES.filter((s) => conContenido.has(s)).map((seccion) => (
-          <Link key={seccion} href={`/${idioma}/${primeraDe(seccion)}`}>
-            {t(seccion === 'comer_beber' ? 'comer' : seccion, idioma)}
-          </Link>
+        {enlaces.map((e) => (
+          <Link key={e.clave} href={e.href}>{e.texto}</Link>
         ))}
-        <Link href={`/${idioma}#plan`}>{t('planifica', idioma)}</Link>
       </nav>
 
       <div className="acciones">
         {/* En pantalla ancha, pastillas: el idioma se ve y se cambia de un clic.
-            En el teléfono no caben cinco, así que se pliegan en un desplegable
-            y el botón de armar el viaje no se sale de la pantalla. */}
+            Por debajo de 1400px las cinco ya no caben junto al menú, así que se
+            pliegan en un desplegable y el botón no se sale de la pantalla. */}
         <nav className="idiomas" aria-label="Idioma">
           {destino.idiomas.map((codigo) => (
             <Link key={codigo} href={`/${codigo}${rutaActual}`}
@@ -74,6 +82,22 @@ export function Barra({
         </details>
 
         <Link className="boton armar" href={`/${idioma}#plan`}>{t('armar_viaje', idioma)}</Link>
+
+        {/* Por debajo de 1120px el menú de arriba no cabe y se apaga. Sin esto,
+            tablet y teléfono se quedaban sin navegación. Mismo <details> que
+            el idioma: nada de JavaScript, y la barra sigue siendo de servidor. */}
+        <details className="menu-plegado">
+          <summary aria-label={t('menu', idioma)}>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="none" aria-hidden="true">
+              <path d="M1 1h15M1 6h15M1 11h15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+            </svg>
+          </summary>
+          <div className="lista">
+            {enlaces.map((e) => (
+              <Link key={e.clave} href={e.href}>{e.texto}</Link>
+            ))}
+          </div>
+        </details>
       </div>
     </header>
   );

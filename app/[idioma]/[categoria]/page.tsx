@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, negociosDe } from '@/lib/destino';
-import { t, type Idioma } from '@/lib/idiomas';
+import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
     if (!cat) return {};
     return {
       title: `${cat.nombre} · ${destino.nombre}`,
-      description: `${cat.total} ${t('lugares', idioma)} · ${cat.nombre} · ${destino.nombre}, ${destino.pais_nombre}`,
+      description: `${cat.total} ${lugares(cat.total, idioma)} · ${cat.nombre} · ${destino.nombre}, ${destino.pais_nombre}`,
     };
   } catch {
     return {};
@@ -59,7 +59,7 @@ export default async function Listado({ params }: { params: Parametros }) {
         <div className="caja">
           <h1>{actual.nombre}</h1>
           <p style={{ color: 'var(--humo)', marginTop: 14 }}>
-            {negocios.length} {t('lugares', idioma)} · {destino.nombre}
+            {negocios.length} {lugares(negocios.length, idioma)} · {destino.nombre}
           </p>
 
           {hermanas.length > 1 && (
