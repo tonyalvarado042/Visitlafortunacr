@@ -153,6 +153,9 @@ Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
 - **Los mensajes entran y salen por una puerta**: `registrar_mensaje_entrante`
   y `registrar_mensaje_saliente`. Si un canal no está configurado, el mensaje
   queda pendiente en `/admin/ia/aprobaciones`; nunca se pierde.
+- **El correo no está casado con un proveedor.** `dst_canal.proveedor` elige
+  entre `resend` (API, exige dominio verificado) y `smtp` (cualquier servidor).
+  Cambiar de proveedor son variables de entorno, no código.
 - **Al panel se entra por invitación** (`dst_invitacion` → trigger en
   `auth.users` → `dst_usuario`). Roles: admin, vendedor, editor, moderador,
   socio. Un destino nuevo nace con agentes, plantillas y automatizaciones

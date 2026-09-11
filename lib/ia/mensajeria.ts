@@ -1,4 +1,5 @@
 import 'server-only';
+import nodemailer from 'nodemailer';
 import { servicio } from '@/lib/supabase-servidor';
 
 /*
@@ -15,7 +16,7 @@ export type ConfigCanal = {
   id: string;
   destino_id: string;
   tipo: Canal;
-  proveedor: 'meta' | 'resend' | 'web' | 'manual';
+  proveedor: 'meta' | 'resend' | 'smtp' | 'web' | 'manual';
   identificador: string | null;
   nombre_visible: string | null;
   variable_secreto: string | null;
@@ -28,11 +29,17 @@ const VARIABLE_POR_DEFECTO: Record<Canal, string | null> = {
   web: null,
 };
 
+/* Por SMTP el secreto es la contraseña del servidor, no una clave de API. */
+const VARIABLE_SMTP = 'SMTP_CLAVE';
+
 function secretoDe(config: ConfigCanal): string | null {
-  const nombre = config.variable_secreto ?? VARIABLE_POR_DEFECTO[config.tipo];
+  const nombre = config.variable_secreto
+    ?? (config.proveedor === 'smtp' ? VARIABLE_SMTP : VARIABLE_POR_DEFECTO[config.tipo]);
   if (!nombre) return null;
   const valor = process.env[nombre]?.trim();
-  return valor && valor.length > 10 ? valor : null;
+  // Una contraseña de SMTP puede ser corta; una clave de API, no.
+  const minimo = config.proveedor === 'smtp' ? 4 : 10;
+  return valor && valor.length >= minimo ? valor : null;
 }
 
 export async function canalesDe(destinoId: string): Promise<ConfigCanal[]> {
@@ -82,12 +89,33 @@ export async function enviarWhatsapp(config: ConfigCanal & { secreto: string }, 
   }
 }
 
+/*
+ * El correo sale por uno de dos caminos, y el canal decide cuál:
+ *
+ *   proveedor 'resend' → la API de Resend (una clave, nada más que configurar)
+ *   proveedor 'smtp'   → cualquier servidor SMTP: Brevo, Mailjet, SendGrid,
+ *                        Amazon SES, Gmail, el correo del hosting...
+ *
+ * SMTP existe porque todo proveedor decente exige verificar un dominio antes
+ * de dejarte escribir a desconocidos, y no siempre se tiene uno a mano. Por
+ * SMTP se puede arrancar con lo que haya y cambiar de proveedor sin tocar el
+ * código: solo el canal y las variables de entorno.
+ */
 export async function enviarEmail(
   config: ConfigCanal & { secreto: string }, para: string, asunto: string, texto: string
 ): Promise<Resultado> {
   const remitente = config.identificador ?? process.env.EMAIL_REMITENTE;
   if (!remitente) return { ok: false, error: 'Falta el remitente del correo (dst_canal.identificador o EMAIL_REMITENTE).' };
   const de = config.nombre_visible ? `${config.nombre_visible} <${remitente}>` : remitente;
+
+  return config.proveedor === 'smtp'
+    ? enviarPorSmtp(config, de, para, asunto, texto)
+    : enviarPorResend(config, de, para, asunto, texto);
+}
+
+async function enviarPorResend(
+  config: ConfigCanal & { secreto: string }, de: string, para: string, asunto: string, texto: string
+): Promise<Resultado> {
   try {
     const respuesta = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -97,6 +125,29 @@ export async function enviarEmail(
     const cuerpo = (await respuesta.json().catch(() => ({}))) as { id?: string; message?: string };
     if (!respuesta.ok) return { ok: false, error: cuerpo.message ?? `HTTP ${respuesta.status}` };
     return { ok: true, id_externo: cuerpo.id };
+  } catch (fallo) {
+    return { ok: false, error: fallo instanceof Error ? fallo.message : String(fallo) };
+  }
+}
+
+async function enviarPorSmtp(
+  config: ConfigCanal & { secreto: string }, de: string, para: string, asunto: string, texto: string
+): Promise<Resultado> {
+  const host = process.env.SMTP_HOST?.trim();
+  if (!host) return { ok: false, error: 'Falta SMTP_HOST en el entorno.' };
+  const usuario = process.env.SMTP_USUARIO?.trim();
+  if (!usuario) return { ok: false, error: 'Falta SMTP_USUARIO en el entorno.' };
+
+  const puerto = Number(process.env.SMTP_PUERTO ?? 587);
+  try {
+    const transporte = nodemailer.createTransport({
+      host,
+      port: puerto,
+      secure: puerto === 465, // 465 va cifrado desde el saludo; 587 sube a TLS después
+      auth: { user: usuario, pass: config.secreto },
+    });
+    const envio = await transporte.sendMail({ from: de, to: para, subject: asunto, text: texto });
+    return { ok: true, id_externo: envio.messageId };
   } catch (fallo) {
     return { ok: false, error: fallo instanceof Error ? fallo.message : String(fallo) };
   }

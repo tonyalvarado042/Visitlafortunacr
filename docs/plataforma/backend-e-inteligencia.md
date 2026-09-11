@@ -44,9 +44,14 @@ el equipo las marca.
   conversación y el viajero (por WhatsApp o correo), guarda el mensaje. Es
   idempotente por `id_externo`, así que los reintentos de Meta no duplican.
 - Salida: `lib/ia/mensajeria.ts` elige el canal (WhatsApp si tiene, si no
-  correo), manda por Meta Cloud API o Resend, y registra con
-  `registrar_mensaje_saliente`. Si el canal no está configurado, el mensaje
-  queda `pendiente` y aparece en `/admin/ia/aprobaciones` para mandarlo a mano.
+  correo), manda por Meta Cloud API, y el correo por uno de dos proveedores, lo
+  que diga `dst_canal.proveedor`: `resend` (API, exige dominio verificado) o
+  `smtp` (cualquier servidor: Brevo, Mailjet, SendGrid, SES, Gmail, el del
+  hosting). Registra con `registrar_mensaje_saliente`. Si el canal no está
+  configurado, el mensaje queda `pendiente` y aparece en
+  `/admin/ia/aprobaciones` para mandarlo a mano: nunca se pierde.
+- Cambiar de proveedor de correo es cambiar el canal y las variables de
+  entorno, nunca el código.
 - La configuración del canal está en `dst_canal` (Ajustes). El secreto nunca
   vive en la base: está en la variable de entorno cuyo nombre dice el canal.
 

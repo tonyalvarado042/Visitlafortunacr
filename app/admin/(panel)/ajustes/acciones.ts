@@ -43,7 +43,7 @@ export async function guardarCanal(datos: FormData) {
   const id = texto(datos, 'id');
   const tipo = texto(datos, 'tipo');
   const proveedor = texto(datos, 'proveedor');
-  if (!['whatsapp', 'email', 'web'].includes(tipo) || !['meta', 'resend', 'web', 'manual'].includes(proveedor)) return;
+  if (!['whatsapp', 'email', 'web'].includes(tipo) || !['meta', 'resend', 'smtp', 'web', 'manual'].includes(proveedor)) return;
   const fila = {
     destino_id: destino.id, tipo, proveedor,
     identificador: texto(datos, 'identificador') || null,

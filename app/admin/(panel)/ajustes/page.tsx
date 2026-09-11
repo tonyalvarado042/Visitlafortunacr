@@ -14,7 +14,11 @@ const VARIABLES: { nombre: string; para: string }[] = [
   { nombre: 'WHATSAPP_PHONE_NUMBER_ID', para: 'Número de WhatsApp si no está en el canal.' },
   { nombre: 'WHATSAPP_VERIFY_TOKEN', para: 'Verificación del webhook de Meta.' },
   { nombre: 'WHATSAPP_APP_SECRET', para: 'Firma de los webhooks de Meta (recomendado).' },
-  { nombre: 'RESEND_API_KEY', para: 'Enviar correos.' },
+  { nombre: 'RESEND_API_KEY', para: 'Correo por la API de Resend (exige un dominio verificado).' },
+  { nombre: 'SMTP_HOST', para: 'Correo por SMTP: Brevo, Mailjet, SendGrid, SES, Gmail, el del hosting.' },
+  { nombre: 'SMTP_PUERTO', para: 'Puerto SMTP: 587 con TLS, 465 cifrado desde el inicio.' },
+  { nombre: 'SMTP_USUARIO', para: 'Usuario SMTP.' },
+  { nombre: 'SMTP_CLAVE', para: 'Contraseña SMTP.' },
   { nombre: 'EMAIL_REMITENTE', para: 'Remitente de correo si no está en el canal.' },
 ];
 
@@ -106,7 +110,7 @@ export default async function PaginaAjustes() {
             <summary style={{ cursor: 'pointer', fontWeight: 700, fontSize: 13 }}>Agregar canal</summary>
             <form action={guardarCanal} className="campos" style={{ marginTop: 10 }}>
               <div className="campo"><label>Tipo</label><select name="tipo" defaultValue="whatsapp"><option value="whatsapp">WhatsApp</option><option value="email">Correo</option></select></div>
-              <div className="campo"><label>Proveedor</label><select name="proveedor" defaultValue="meta"><option value="meta">Meta (WhatsApp Cloud API)</option><option value="resend">Resend (correo)</option><option value="manual">Manual (el equipo manda a mano)</option></select></div>
+              <div className="campo"><label>Proveedor</label><select name="proveedor" defaultValue="meta"><option value="meta">Meta (WhatsApp Cloud API)</option><option value="resend">Resend (correo por API)</option><option value="smtp">SMTP (Brevo, Mailjet, SendGrid, SES, Gmail…)</option><option value="manual">Manual (el equipo manda a mano)</option></select></div>
               <div className="campo"><label>Identificador</label><input name="identificador" placeholder="phone_number_id o remitente" /></div>
               <div className="campo"><label>Nombre visible</label><input name="nombre_visible" defaultValue={d.marca_nombre} /></div>
               <div className="campo"><label>Variable del secreto</label><input name="variable_secreto" placeholder="WHATSAPP_TOKEN" /></div>
@@ -115,7 +119,15 @@ export default async function PaginaAjustes() {
             </form>
           </details>
         )}
-        <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5, marginTop: 10 }}>Webhook de WhatsApp para Meta: <code>https://{d.dominio}/api/webhooks/whatsapp</code> con el token de WHATSAPP_VERIFY_TOKEN.</p>
+        <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5, marginTop: 10 }}>
+          Webhook de WhatsApp para Meta: <code>https://{d.dominio}/api/webhooks/whatsapp</code> con el token de WHATSAPP_VERIFY_TOKEN.
+        </p>
+        <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>
+          Para el correo hay dos caminos. <strong>Resend</strong> es una sola clave, pero no deja escribirle a nadie
+          hasta verificar un dominio propio. <strong>SMTP</strong> sirve con cualquier proveedor y con el correo que ya
+          tengas: poné el servidor en SMTP_HOST, SMTP_PUERTO, SMTP_USUARIO y SMTP_CLAVE, y en el canal el remitente.
+          Cambiar de proveedor después es cambiar esas variables, no el código.
+        </p>
       </div>
 
       {esAdmin && (
