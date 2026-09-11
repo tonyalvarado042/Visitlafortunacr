@@ -63,7 +63,12 @@ se hace con una vista, nunca mezclando tablas.
 7. **El sitio público escribe por una sola puerta**: la función
    `destinos.registrar_solicitud(...)`. No hay INSERT directo desde la llave
    pública a ninguna tabla.
-8. **Lo que se hace a mano se anota aquí, no se pregunta.** Claude no tiene
+8. **Dos sesiones trabajan a la vez, dos personas.** La rama
+   `claude/la-fortuna-directory-design-l8qnxg` la empuja más de uno. Antes de
+   publicar: `git fetch` y **rebase** sobre el remoto, nunca `push --force` ni
+   descartar lo ajeno. Si el rebase choca, se avisa y se resuelve a mano; el
+   trabajo del otro no se pisa.
+9. **Lo que se hace a mano se anota aquí, no se pregunta.** Claude no tiene
    acceso a GoDaddy, Vercel, el panel de Supabase, Meta ni SiteGround. Cuando
    Tony diga "entrá a GoDaddy" (o a cualquiera de esas), la respuesta NO es
    pedir permiso ni explicar que no se puede: es dejar escrito en
@@ -135,9 +140,14 @@ El destino se resuelve por el `Host` de cada petición contra
 `dst_destino.dominio`. Un solo despliegue sirve todos los destinos.
 
 **Ojo con el entorno de Claude Code**: el proxy de egress deniega
-`*.supabase.co`, así que desde el contenedor no se puede llamar a la API REST.
-La base se trabaja por el conector de Supabase, y el sitio y el panel se
-prueban desplegados. `npx tsc --noEmit` y `npm run build` sí corren aquí.
+`*.supabase.co` y `*.vercel.app`, así que desde el contenedor no se puede
+llamar a la API REST ni abrir el sitio. La base se trabaja por el conector de
+Supabase, y el sitio y el panel se prueban desplegados. `npx tsc --noEmit` y
+`npm run build` sí corren aquí.
+
+**El DNS sí se puede leer** (`pip install dnspython`, la resolución no pasa por
+el proxy). Así que después de cada cambio en GoDaddy se verifica desde aquí:
+A del apex, CNAME de www, MX, NS y TXT. Cambiarlo no; leerlo sí.
 
 ## El backend (CRM + IA)
 
@@ -177,10 +187,21 @@ escritos aquí con los valores exactos, y Tony los pega.
 
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
-**La trampa:** SiteGround da el correo del mismo dominio. Si se cambian los
+**Estado verificado por DNS el 11 de septiembre de 2026:**
+
+| Registro | Hoy | Qué significa |
+|---|---|---|
+| NS | `ns57` / `ns58.domaincontrol.com` | El DNS lo manda GoDaddy. Es lo que queremos. |
+| A `@` | `13.248.243.5`, `76.223.105.230` | Aparcado en GoDaddy. **Todavía no apunta a Vercel.** |
+| CNAME `www` | → el apex | Hay que **cambiarlo**, no agregar otro. |
+| MX | ninguno | **El correo del dominio no existe todavía.** |
+| TXT | ninguno | No hay SPF. |
+
+**La trampa:** SiteGround dará el correo del mismo dominio. Si se cambian los
 nameservers a los de Vercel, Vercel se queda con todo el DNS y **los MX
-desaparecen: el correo se cae**. Así que **los nameservers se quedan en
-GoDaddy** y solo se agregan dos registros.
+desaparecen: el correo se cae**. Hoy no hay MX que romper, pero los va a haber,
+así que **los nameservers se quedan en GoDaddy** y solo se cambian dos
+registros.
 
 En GoDaddy → *My Products* → el dominio → *DNS* → *Manage Zones*:
 
@@ -192,9 +213,9 @@ En GoDaddy → *My Products* → el dominio → *DNS* → *Manage Zones*:
 **No se toca nada más de esa zona.** Los MX de SiteGround y su registro SPF
 se quedan como están.
 
-Si un registro `A` o `CNAME` con ese nombre ya existe (GoDaddy suele traer un
-`A @` hacia su propio parking), se **edita** el que está; no se agrega un
-segundo con el mismo nombre.
+Los dos registros **ya existen** y hay que **editarlos**, no agregar otros: el
+`A @` apunta hoy al parking de GoDaddy, y el `CNAME www` apunta al apex. Dos
+registros con el mismo nombre se pelean.
 
 Luego en Vercel → el proyecto → *Settings* → *Domains* → agregar
 `visitlafortunacr.com` y `www.visitlafortunacr.com`. **Vercel muestra en
