@@ -80,7 +80,10 @@ export default async function PaginaEquipo() {
               <div className="campo"><label>Destinos (sin marcar = todos)</label>{destinos.map((d) => <label key={d.id} style={{ display: 'block', fontSize: 13 }}><input type="checkbox" name="destinos_ids" value={d.id} /> {d.nombre}</label>)}</div>
               <BotonAccion>Invitar</BotonAccion>
             </form>
-            <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>La invitación no manda correo: pasale el enlace del panel y que cree su cuenta con ese correo. Vence en 14 días.</p>
+            <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>
+              La invitación no manda correo: pasale el enlace del panel y que cree su cuenta con ese mismo correo.
+              Si ya tiene cuenta, le basta con recargar <code>/admin</code>: la invitación se reclama sola. Vence en 14 días.
+            </p>
           </div>
         </div>
       )}
