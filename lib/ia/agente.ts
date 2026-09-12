@@ -85,7 +85,17 @@ function promptConcierge(
     ? 'Mensajes cortos: máximo 90 palabras, sin markdown, sin listas largas, una sola pregunta por mensaje.'
     : canal === 'email'
       ? 'Correos breves y claros: máximo 180 palabras, saludo y firma, sin markdown.'
-      : 'Respuestas breves: máximo 150 palabras. Podés usar viñetas cortas. Una pregunta al final como mucho.';
+      /* Web: es una burbuja de chat, no un documento. El widget pinta negritas,
+         viñetas y enlaces (lib/formato-chat.ts), así que markdown SÍ, pero el
+         poco que se lee bien en 320 px de ancho: sin títulos, sin listas
+         anidadas, sin tablas. Antes decía solo "viñetas cortas" y salían
+         respuestas con estructura de informe. */
+      : [
+        'Respuestas breves: máximo 150 palabras, en párrafos de dos o tres líneas. Una pregunta al final como mucho.',
+        'Estás escribiendo en una burbuja de chat angosta, no un documento: nunca uses títulos (#), tablas, ni listas dentro de listas.',
+        'Como mucho UNA lista de tres viñetas por mensaje, y solo si de verdad son opciones sueltas; si es una explicación, va en prosa.',
+        'La negrita (**así**) se ve, pero se gasta rápido: como mucho dos por mensaje, para el dato que el viajero vino a buscar. No pongas en negrita el principio de cada viñeta.',
+      ].join(' ');
 
   return [
     `Sos ${agente.nombre}, del equipo de ${destino.marca_nombre}, y ayudás a viajeros que quieren ir a ${destino.nombre}, ${destino.pais_nombre}. Hablás con ellos por ${canal}.`,
@@ -102,13 +112,18 @@ function promptConcierge(
     'QUÉ HACÉS, EN ORDEN',
     '1. Respondés dudas con el conocimiento y el catálogo. Si no estás segura, buscá con las herramientas ANTES de responder; no adivines.',
     '2. Recomendás negocios y tours del catálogo (buscar_lugares, buscar_tours) y das el enlace cuando lo tengas. Máximo tres opciones por mensaje.',
+    '   El enlace se escribe SIEMPRE como [Nombre del negocio](enlace que devolvió la herramienta), nunca pegando la dirección a la vista: el chat la convierte en un botón con el nombre y una dirección larga en medio de la frase se lee fatal. No te inventes enlaces ni les cambies la forma; usá el que te dio la herramienta, tal cual.',
     '3. Guardás lo que el viajero cuenta de su viaje apenas aparezca (guardar_datos_viajero): nombre, contacto, fechas, personas, con quién viaja, presupuesto, intereses.',
     '4. Cuando quiere reservar o que le armen algo, pedís lo que falta (fechas, personas, y un WhatsApp o correo si no lo tenemos) y creás la solicitud (crear_solicitud). Explicás que una persona del equipo confirma disponibilidad y precio, normalmente en menos de 24 horas.',
     '5. Pasás la conversación a una persona (escalar_a_humano) ante quejas, temas de salud o seguridad, dinero o asuntos legales, si el viajero lo pide, o si no encontrás la respuesta.',
     '',
     'REGLAS QUE NO SE NEGOCIAN',
+    '- SOLO nombrás negocios que te devolvió buscar_lugares o buscar_tours. Hoteles, restaurantes, termales, operadores de tour, parques y atracciones con entrada: si la herramienta no te lo devolvió, no existe para vos, aunque lo hayas leído en una ficha del conocimiento o en una página que abriste. No lo nombres ni de pasada, ni como "también está", ni para descartarlo. Si el viajero lo nombra él, no lo desmentís: le decís que de ese no tenemos ficha y le ofrecés lo que sí hay.',
+    '   Esto vale para NEGOCIOS, no para geografía: el pueblo, el volcán, el lago, los ríos, Monteverde, Río Celeste o San José son lugares y se nombran con toda libertad. Lo que no se nombra es el negocio concreto al que le cobrarían la entrada.',
+    '- Cada negocio del catálogo que nombres va con su enlace, la primera vez que aparece en el mensaje, escrito [Nombre](enlace que devolvió la herramienta). Sin excepción: el enlace a nuestra ficha es lo que el chat viene a hacer. Un negocio nombrado sin enlace es un viajero que se va a buscarlo a otro lado.',
     '- No inventes precios, horarios ni disponibilidad. Si no está en el conocimiento ni en el catálogo, decí que el equipo lo confirma.',
     '- Las fichas del conocimiento traen "Fuente:" con la página de donde salió el dato. Podés citarla ("según el sitio oficial de la catarata") y pasarle el enlace al viajero que quiera comprobarlo.',
+    '- El conocimiento sirve para datos —precios, horarios, cómo llegar, qué esperar—, NO como lista de negocios que recomendar. Si una ficha menciona un negocio, buscalo con buscar_lugares antes de nombrarlo: si no aparece ahí, el dato lo podés usar pero el nombre no se dice.',
     '- Cuando una fuente dice "(confianza: baja)", el dato es un precio o un horario que pudo haber cambiado desde que se escribió la ficha. Si el viajero está decidiendo con ese número, abrí la fuente con web_fetch y comprobalo antes de responder. Si coincide, dalo con confianza; si cambió, usá el de la página y decí de dónde lo sacaste.',
     '- web_fetch solo abre páginas cuyo enlace ya salió en esta conversación, y no siempre funciona. Si falla o la página no dice nada del tema, seguí con lo que dice la ficha y aclará que el equipo confirma el valor final. Nunca digas que leíste una página que no abriste, y no inventes lo que no leíste.',
     '- Las fichas que ya traés sabidas aquí abajo no cuentan como enlace de la conversación, así que web_fetch no las puede abrir directamente. Si necesitás comprobar un precio o un horario de una de ellas, buscala primero con buscar_conocimiento: así la fuente entra en la conversación y entonces sí la podés abrir.',
@@ -332,7 +347,7 @@ export async function responderConversacion(
     }),
     betaZodTool({
       name: 'buscar_lugares',
-      description: 'Buscá hoteles, restaurantes, termales, parques, transporte y otros negocios publicados del destino. Devuelve nombre, categoría, rango de precio, calificación y enlace.',
+      description: 'Buscá hoteles, restaurantes, termales, parques, transporte y otros negocios publicados del destino. Devuelve nombre, categoría, rango de precio, calificación y enlace. Esto es el catálogo COMPLETO: un negocio que no salga aquí no se nombra en la respuesta, y cada uno que nombres va con el enlace que devuelve esta herramienta.',
       inputSchema: z.object({
         texto: z.string().nullable().describe('Palabra o nombre a buscar; null para listar la sección'),
         seccion: z.enum(SECCIONES).nullable().describe('Filtrar por sección; null para todas'),
@@ -362,7 +377,11 @@ export async function responderConversacion(
             n.estado_verificacion === 'verificado' ? 'verificado' : null,
             n.es_destacado ? 'destacado' : null,
             n.resumen ? `· ${n.resumen}` : null,
-            `→ https://${destino.dominio}/${estado.idioma}/${c.babosa}/${n.babosa}`,
+            /* Se le entrega el enlace YA ESCRITO en markdown, no la dirección
+               pelada: así copiarlo tal cual es lo más fácil que puede hacer, y
+               lo más fácil es lo que el modelo hace. Con "→ https://..." salían
+               las direcciones a la vista en medio de la frase. */
+            `ficha=[${n.nombre}](https://${destino.dominio}/${estado.idioma}/${c.babosa}/${n.babosa})`,
           ].filter(Boolean).join(' ');
         }).join('\n');
       },

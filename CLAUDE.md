@@ -160,7 +160,7 @@ Monteverde puede tener otra paleta sin tocar una línea.
 | Tours cargados | 0 |
 | Guías escritas | 0 |
 | Conocimiento de la IA | **69 fichas, ninguna verificada por el equipo.** Las 61 investigadas (`datos/investigacion/conocimiento-la-fortuna.md`) se cargaron el 12 de septiembre de 2026 —47 nuevas y 14 que reemplazaron a las genéricas—, más 8 del equipo que no se tocan. 44 traen URL de fuente; 20 están marcadas `(confianza: baja)` y son las que hay que repasar primero en `/admin/ia/conocimiento` |
-| Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor). **NINGUNO HA RESPONDIDO NUNCA.** `dst_agente_ejecucion` tiene 2 filas y las dos son errores 400 del cron de seguimiento. Ver "El agente todavía no ha contestado nunca" |
+| Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor). **El concierge ya contestó**, el 12 de septiembre de 2026 en local, usando `buscar_conocimiento` y `web_fetch` y sin error. Falta la clave en Vercel para que conteste en producción. Ver "El agente ya contestó" |
 | Automatizaciones | 10 de arranque, encendidas |
 | Panel `/admin` | Completo, con moderación de reseñas en `/admin/resenas`; el primer administrador entra con la invitación de `aalvarado@gmail.com` |
 | Sitio | Next.js 15, compila, lee de la base, chat concierge en todas las páginas. El mosaico de la portada ya sale con fotos reales, prestadas del mejor negocio de cada categoría |
@@ -189,6 +189,14 @@ Next.js 15 (App Router) en la raíz del repo. Rutas:
 
 El destino se resuelve por el `Host` de cada petición contra
 `dst_destino.dominio`. Un solo despliegue sirve todos los destinos.
+
+**La URL de producción es `https://visit-la-fortuna.vercel.app`.** Queda escrita
+porque no estaba en ningún lado y eso costó una tarde: adivinando el nombre se
+llega a **`visitlafortunacr.vercel.app`, que también responde 200 y también
+despliega este repo y esta rama** — pero es OTRO proyecto de Vercel, y no tiene
+cargadas las variables de entorno. Medir ahí da "falta `SUPABASE_SECRET_KEY`"
+cuando en el proyecto bueno está puesta. Si algún día sobra un proyecto, este es
+el que hay que borrar; mientras exista, es una trampa.
 
 **Ojo con el entorno de Claude Code**: en el **contenedor**, el proxy de
 egress deniega `*.supabase.co` y `*.vercel.app`, así que ahí no se puede
@@ -346,36 +354,55 @@ en `Conocimiento`, así que hasta que se aplique llega `undefined` y
 `bloqueConocimiento` simplemente no pinta la línea. No hay que desplegar nada
 en un orden concreto.
 
-### El agente todavía no ha contestado nunca
+### El agente ya contestó: qué lo tenía mudo y cómo se comprobó
 
-**Hay que saberlo antes de enseñarlo.** Al 12 de septiembre de 2026
-`dst_agente_ejecucion` tiene **2 filas, y las dos son errores**: el cron de
-seguimiento del 11 de septiembre, con este 400 de la API:
+**Resuelto el 12 de septiembre de 2026, a las 22:11 UTC, desde la máquina de
+Sebastián.** Era **el alcance de la clave de Anthropic**, y nada más.
 
-> This API key is not scoped to a workspace, so this request must include the
-> `anthropic-workspace-id` header with the ID of the workspace to use.
+Toda petición a la API corre dentro de **exactamente un workspace** — es la
+unidad con la que Anthropic lleva límites de gasto, límites de tasa, el informe
+de costo y el aislamiento de recursos (Files, Batches, Skills y **la caché de
+prompts**). Una clave creada dentro de un workspace ya lleva esa respuesta
+puesta. Una clave **multi-workspace** no, y la API **no elige por vos**: por eso
+no falla con un 403 de permisos sino con un **400 de petición inválida**,
+*"This API key is not scoped to a workspace..."*. No le faltaba permiso, le
+faltaba el dato. Se arregla de dos maneras y basta una: **clave de workspace**
+(lo que se hizo) o `ANTHROPIC_WORKSPACE_ID`, que `lib/ia/cliente.ts` ya manda
+como encabezado si existe.
 
-O sea que el problema **no es el conocimiento ni el prompt**: la clave de
-Anthropic que se estaba usando es de la organización y no de un workspace.
-Hay dos salidas y basta una:
+**La prueba que cierra el punto**, la que pedía este archivo:
 
-1. **Usar una clave de workspace** (Console → Workspaces → API keys). Es lo
-   más simple y no toca código.
-2. **Mandar el encabezado**: `lib/ia/cliente.ts` ya lo hace si existe
-   `ANTHROPIC_WORKSPACE_ID` en el entorno. Si la variable no está, el cliente
-   queda exactamente como antes.
+| | |
+|---|---|
+| Pregunta | "¿Cuánto cuesta entrar a la Catarata de La Fortuna?" |
+| `error` | **ninguno** |
+| `herramientas_usadas` | `["buscar_conocimiento", "web_fetch"]` |
+| `motivo_parada` | `end_turn` · 2 iteraciones · 9,8 s |
+| Costo | $0,144414 |
 
-**Lo que sí está verificado contra la base**, y es todo lo que el agente come:
-69 fichas de conocimiento, 17 de prioridad 7+ que van siempre en el prompt, 44
-con URL de fuente, y `buscar_conocimiento("cuanto cuesta la catarata")`
-devuelve la ficha correcta con su fuente y su marca de confianza. Lo único sin
-probar es la llamada al modelo.
+**Salió la cadena exacta que este archivo predijo y que nunca se había
+ejecutado**: el agente buscó primero con `buscar_conocimiento` y recién entonces
+abrió la fuente con `web_fetch`. Es la razón de ser de esa instrucción —
+`web_fetch` solo abre URLs que ya pasaron por la conversación, y las del prompt
+del sistema no cuentan; la fuente entró como resultado de una herramienta
+nuestra, que sí es origen válido. Y **corrigió el dato**: respondió 20 USD
+citando `cataratalafortuna.com`, no los 18 que decía la ficha vieja.
 
-**La prueba que cierra esto**, en cuanto haya clave buena: descomentar
-`ANTHROPIC_API_KEY` en `.env.local`, `npm run dev`, preguntarle al chat de la
-portada cuánto cuesta la catarata, y mirar `dst_agente_ejecucion`. Tiene que
-aparecer una fila **sin `error`**, con `web_fetch` dentro de
-`herramientas_usadas` si fue a comprobar el precio.
+**Lo que el costo enseña, y hay que tenerlo claro antes de estimar el gasto**:
+de los $0,144, la mayor parte es **escritura de caché** — entrada 2 461, salida
+487, caché leída 23 406, **caché escrita 17 317** a $6,25/MTok. Esos 17 mil
+tokens son el prompt del sistema (las 17 fichas de prioridad 7+ más las
+instrucciones). Es un pago de arranque: mientras la caché siga caliente, las
+conversaciones siguientes leen ese mismo prefijo a $0,50/MTok en vez de $5. La
+primera pregunta cuesta ~14 centavos; las de después, bastante menos. **Ojo si
+algún día se cambia de workspace: la caché está aislada por workspace y arranca
+fría.**
+
+**Lo que queda**: poner esa misma clave de workspace en Vercel
+(`ANTHROPIC_API_KEY`) y volver a desplegar. Hasta entonces el agente contesta en
+local y no en producción. Se comprueba con la misma llamada contra
+`visit-la-fortuna.vercel.app`: tiene que devolver `respuesta` con texto en vez
+de `humano: true`.
 
 ### El concierge navega: `web_fetch` está activado
 

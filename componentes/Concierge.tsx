@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { t, type Idioma } from '@/lib/idiomas';
+import { formatearMensaje, type Trozo } from '@/lib/formato-chat';
 
 /*
  * El chat "Preguntale a alguien de aquí". Habla con /api/ia/conversar, que
@@ -25,7 +27,47 @@ function identificadorLocal(): string {
   }
 }
 
-export function Concierge({ idioma, marca }: { idioma: Idioma; marca: string }) {
+/* Los trozos ya vienen separados por `formatearMensaje`; aquí solo se eligen
+   las etiquetas. Nada de `dangerouslySetInnerHTML`: lo que escriba el modelo
+   entra como texto de React y no puede convertirse en marcado. */
+function pintar(t: Trozo, i: number) {
+  if (t.tipo === 'fuerte') return <strong key={i}>{t.texto}</strong>;
+  if (t.tipo === 'enlace') {
+    return (
+      <a key={i} href={t.href} target="_blank" rel="noopener noreferrer nofollow">{t.texto}</a>
+    );
+  }
+  return <span key={i}>{t.texto}</span>;
+}
+
+/* Lo que dice el concierge. Los enlaces a fichas nuestras no van dentro de la
+   frase: bajan a pastillas, que es lo que se toca con el dedo. */
+function Dicho({ texto, dominio }: { texto: string; dominio: string }) {
+  const { bloques, pastillas } = formatearMensaje(texto, dominio);
+  return (
+    <>
+      {bloques.map((b, i) =>
+        b.tipo === 'parrafo' ? (
+          <p key={i}>{b.trozos.map(pintar)}</p>
+        ) : (
+          <ul key={i}>
+            {b.puntos.map((punto, j) => <li key={j}>{punto.map(pintar)}</li>)}
+          </ul>
+        ))}
+      {pastillas.length > 0 && (
+        <div className="pastillas">
+          {pastillas.map((p) => (
+            <Link key={p.href} className="pastilla" href={p.href}>
+              {p.texto}<span aria-hidden="true">→</span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: string; dominio: string }) {
   const [abierto, setAbierto] = useState(false);
   const [burbujas, setBurbujas] = useState<Burbuja[]>([]);
   const [texto, setTexto] = useState('');
@@ -138,7 +180,11 @@ export function Concierge({ idioma, marca }: { idioma: Idioma; marca: string }) 
           <div className="hilo" ref={fondo}>
             <div className="burbuja ellos">{t('concierge_saludo', idioma)}</div>
             {burbujas.map((b, i) => (
-              <div key={i} className={`burbuja ${b.de}`}>{b.texto}</div>
+              <div key={i} className={`burbuja ${b.de}`}>
+                {b.de === 'ellos'
+                  ? <Dicho texto={b.texto} dominio={dominio} />
+                  : b.texto}
+              </div>
             ))}
             {enviando && <div className="burbuja ellos pensando">···</div>}
             {humano && <div className="aviso">{t('concierge_humano', idioma)}</div>}

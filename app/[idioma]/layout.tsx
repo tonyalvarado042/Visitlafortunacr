@@ -54,7 +54,7 @@ export default async function LayoutIdioma({
   return (
     <div style={paleta}>
       {children}
-      <Concierge idioma={idioma} marca={destino.marca_nombre} />
+      <Concierge idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio} />
     </div>
   );
 }
