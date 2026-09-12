@@ -75,7 +75,25 @@ export function anthropic(): Anthropic {
   if (!hayClaveDeIA()) {
     throw new Error('Falta ANTHROPIC_API_KEY en el entorno: la IA no puede ejecutarse.');
   }
-  cliente ??= new Anthropic({ maxRetries: 2, timeout: 10 * 60 * 1000 });
+
+  /*
+   * ANTHROPIC_WORKSPACE_ID es opcional y casi siempre sobra, pero cuando hace
+   * falta no hay forma de adivinarlo desde el error.
+   *
+   * Las dos únicas ejecuciones que existían en dst_agente_ejecucion —del cron
+   * de seguimiento, el 11 de septiembre de 2026— fallaron las dos con un 400:
+   * "This API key is not scoped to a workspace, so this request must include
+   * the anthropic-workspace-id header". Pasa cuando la clave es de la
+   * organización y no de un workspace concreto. Hay dos salidas: usar una clave
+   * de workspace, o mandar el encabezado. Esto habilita la segunda sin estorbar
+   * a la primera: si la variable no está, el cliente queda igual que antes.
+   */
+  const workspace = process.env.ANTHROPIC_WORKSPACE_ID?.trim();
+  cliente ??= new Anthropic({
+    maxRetries: 2,
+    timeout: 10 * 60 * 1000,
+    ...(workspace ? { defaultHeaders: { 'anthropic-workspace-id': workspace } } : {}),
+  });
   return cliente;
 }
 
@@ -109,6 +127,44 @@ type UsoApi = {
   cache_read_input_tokens?: number | null;
   cache_creation_input_tokens?: number | null;
 } | null | undefined;
+
+/*
+ * La herramienta de web, que la corre Anthropic y no nosotros.
+ *
+ * Para qué está: desde la migración 23 cada ficha del conocimiento llega con su
+ * `Fuente:`, y con esto el agente puede abrir esa página y leerla en vez de
+ * quedarse con lo que la ficha resume. Sirve sobre todo para los datos que el
+ * archivo de conocimiento marca `(confianza: baja)` — precios y horarios, que
+ * son los que envejecen.
+ *
+ * **Solo alcanza a las URLs que pasaron por la conversación, y las del prompt
+ * del sistema NO cuentan.** Es una defensa de Anthropic contra la exfiltración
+ * de datos, y aquí tiene una consecuencia concreta que conviene no olvidar: el
+ * conocimiento de prioridad 7+ se inyecta en el prompt del sistema, así que
+ * esas fuentes NO se pueden abrir. Sí las que devuelve `buscar_conocimiento`,
+ * que es una herramienta nuestra y sus resultados sí son origen válido. En la
+ * práctica el agente puede abrir la fuente de una ficha que buscó, no la de
+ * una que ya traía puesta.
+ *
+ * Por qué la versión básica `web_fetch_20250910` y no una con filtrado
+ * dinámico: el modelo de cada agente se elige desde el panel (`dst_agente`), y
+ * las versiones nuevas solo corren en algunos modelos. La básica corre en
+ * todos. El costo igual queda acotado por `max_content_tokens`.
+ *
+ * Costo: la herramienta **no cobra por llamada**; se pagan los tokens de lo
+ * que baje. Con el tope de abajo, unos 4 centavos por página en el peor caso.
+ *
+ * `blocked_domains` es la regla 4 del cerebro puesta en código: de Tripadvisor
+ * y Booking no se copia texto de reseñas, y la forma de que no pase no es
+ * pedírselo al modelo en el prompt, es que no pueda.
+ */
+export const HERRAMIENTA_WEB = {
+  type: 'web_fetch_20250910' as const,
+  name: 'web_fetch' as const,
+  max_uses: 3,
+  max_content_tokens: 8000,
+  blocked_domains: ['tripadvisor.com', 'tripadvisor.es', 'booking.com'],
+};
 
 /** Acumula tokens, iteraciones y herramientas de una ejecución. */
 export class Medidor {

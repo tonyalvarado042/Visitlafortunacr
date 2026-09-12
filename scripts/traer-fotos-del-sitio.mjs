@@ -1,148 +1,227 @@
 /*
- * Baja imágenes candidatas desde el SITIO WEB DE CADA NEGOCIO, para que la
- * tarjeta muestre algo que de verdad corresponde a ese lugar mientras no haya
- * GOOGLE_PLACES_API_KEY.
+ * Baja fotos candidatas del sitio web de cada negocio.
  *
- *   node --env-file=.env.local scripts/traer-fotos-del-sitio.mjs
- *   node --env-file=.env.local scripts/traer-fotos-del-sitio.mjs --negocio don-rufino
+ *   node scripts/traer-fotos-del-sitio.mjs                 (todos los que falten)
+ *   node scripts/traer-fotos-del-sitio.mjs --solo babosa   (uno solo, para probar)
  *
- * Deja los candidatos en fotos-entrada/_sitios/<babosa>/ y un informe en
- * datos/investigacion/fotos-de-sitios.json. NO sube nada: la elección final
- * pasa por una revisión a ojo (contactos con armar-contactos.mjs), porque hay
- * dos cosas que ningún filtro decide bien —si sale gente y si la foto de
- * verdad es del lugar—.
+ * Lee `.negocios.json` (lo genera el paso anterior desde la base) y deja las
+ * candidatas en `.fotos/<babosa>/`. NO sube nada y NO escribe en la base: eso
+ * es `cargar-fotos.mjs`, y en medio va una revisión a ojo.
  *
- * Por qué de su propio sitio y no de un buscador de imágenes: es la fuente más
- * defendible que hay sin la API de Google. La `og:image` existe justamente para
- * que otros sitios la muestren al enlazar, y un negocio de un directorio gana
- * con que se le muestre su propia foto. No sustituye a un permiso, y por eso
- * queda anotado de dónde salió cada una y esto es temporal (ver regla 11).
+ * Por qué en medio va una persona mirando: el problema de este trabajo no es
+ * bajar imágenes, es que la imagen sea DEL NEGOCIO. Una portada trae el logo,
+ * el mapa, la foto de stock del banner y a veces una foto de otro país que al
+ * dueño le pareció linda. Ningún filtro automático distingue eso; el filtro de
+ * aquí abajo solo saca la basura evidente para que la revisión sea corta.
+ *
+ * Es reanudable: un negocio que ya tiene carpeta con archivos se salta.
  */
-import { mkdirSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
-import { createClient } from '@supabase/supabase-js';
+import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 
-const SOLO = process.argv.includes('--negocio') ? process.argv[process.argv.indexOf('--negocio') + 1] : null;
-const SALIDA = 'fotos-entrada/_sitios';
-const INFORME = 'datos/investigacion/fotos-de-sitios.json';
+const SALIDA = '.fotos';
+const MAX_POR_NEGOCIO = 8;
+const ANCHO_MINIMO = 600;       // menos que esto es miniatura, icono o logo
+const RELACION_MAXIMA = 2.8;    // más ancho que esto es un banner o una tira
+const ESPERA_MS = 12000;
 
-const POR_NEGOCIO = 6;      // candidatos a bajar; la elección es después
-const MIN_LADO = 600;       // por debajo no sirve ni para una tarjeta
-const MIN_RELACION = 1.1;   // apaisada: la tarjeta recorta a lo ancho
+const soloIdx = process.argv.indexOf('--solo');
+const SOLO = soloIdx > -1 ? process.argv[soloIdx + 1] : null;
+const REINTENTAR = process.argv.includes('--reintentar');
 
-/* Nombres que casi siempre son lo que NO queremos. Es un filtro barato que
-   descarta la mayoría antes de gastar una descarga; lo que se cuele lo agarra
-   la revisión a ojo. */
-const RUIDO = /logo|icon|favicon|sprite|placeholder|avatar|banner-?ad|badge|boton|button|arrow|flecha|whatsapp|facebook|instagram|tripadvisor|footer|header-?bg|pattern|texture|loading|spinner|pixel|1x1|blank/i;
-const GENTE = /team|staff|equipo|personal|nosotros|about-?us|guest|cliente|persona|people|portrait|retrato|familia|group|grupo|wedding|boda|novi/i;
+const AGENTE = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
-const db = createClient('https://eulkufetcymallfbpone.supabase.co', process.env.SUPABASE_SECRET_KEY?.trim(), {
-  db: { schema: 'destinos' }, auth: { persistSession: false },
-});
+/*
+ * Nombres que delatan que la imagen no retrata al negocio.
+ *
+ * OJO CON CÓMO SE COMPARA, que aquí hubo un error caro: la primera versión era
+ * una sola expresión regular contra la URL entera, y `star` coincidía dentro de
+ * "co-STAR-ica". Eso bloqueó EN SILENCIO todas las imágenes de cualquier
+ * dominio *costarica*.com — The Springs perdió sus 122 fotos y parecía que el
+ * sitio no tenía ninguna. Por eso ahora se compara por PALABRAS del nombre de
+ * archivo y su carpeta, partiendo por - _ . y /, y no por subcadena.
+ *
+ * `banner` tampoco está: en media web el "banner" o el "slider" de la portada
+ * es justamente la foto grande y buena del lugar (Don Rufino tenía ahí las
+ * suyas). Lo que se descarta es el adorno, no lo grande.
+ */
+const PALABRAS_BASURA = new Set([
+  'logo', 'logos', 'icon', 'icons', 'favicon', 'sprite', 'placeholder', 'avatar',
+  'badge', 'boton', 'button', 'arrow', 'flecha', 'whatsapp', 'facebook', 'fb',
+  'instagram', 'ig', 'twitter', 'tiktok', 'youtube', 'tripadvisor', 'booking',
+  'pixel', 'spacer', 'pattern', 'texture', 'loader', 'spinner', 'cart',
+  'estrella', 'stars', 'rating', 'flag', 'bandera', 'qr', 'cert', 'sello',
+  'watermark', 'marca', 'plugin', 'plugins', 'theme', 'themes', 'ui', 'svg',
+]);
 
-const { data: destino } = await db.from('dst_destino').select('id').eq('babosa', 'la-fortuna').single();
-let { data: negocios } = await db.from('dst_negocio')
-  .select('babosa, nombre, sitio_web').eq('destino_id', destino.id).not('sitio_web', 'is', null).order('nombre');
-if (SOLO) negocios = negocios.filter((n) => n.babosa === SOLO);
+function esBasura(url) {
+  let ruta;
+  try { ruta = new URL(url).pathname; } catch { return true; }
+  // Solo el archivo y su carpeta: el resto del path es del sitio, no de la foto.
+  const trozo = ruta.split('/').filter(Boolean).slice(-2).join('/');
+  const palabras = trozo.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  if (palabras.some((p) => PALABRAS_BASURA.has(p))) return true;
+  // Miniaturas de WordPress y similares: nombre-150x150.jpg
+  if (/-\d{1,3}x\d{1,3}\./.test(trozo)) return true;
+  return false;
+}
 
-const cabeceras = { 'User-Agent': 'Mozilla/5.0 (compatible; VisitLaFortunaCR/1.0; +https://visitlafortunacr.com)' };
-const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+async function bajar(url, ms = ESPERA_MS) {
+  const corte = AbortSignal.timeout(ms);
+  return fetch(url, { signal: corte, redirect: 'follow', headers: { 'user-agent': AGENTE, accept: '*/*' } });
+}
 
-/** Junta candidatas de la portada: og:image, luego <img>, luego fondos CSS. */
-function candidatasDe(html, base) {
+/*
+ * De dónde salen las imágenes de una página, en orden de calidad esperada.
+ *
+ * Ojo: mirar solo <img> y og:image deja fuera media web moderna. Trece sitios
+ * dieron CERO candidatas en la primera pasada —The Springs, Desafío, Don
+ * Rufino— y ninguno tenía la web vacía: usaban fondos CSS, <picture> o galerías
+ * en otra página. Cada bloque de aquí abajo nació de uno de esos casos.
+ */
+function imagenesDe(html, base) {
   const urls = [];
   const meter = (u) => {
     if (!u) return;
     try {
-      const abs = new URL(u.replace(/&amp;/g, '&').trim(), base).href;
-      if (!/^https?:/i.test(abs)) return;
-      if (!/\.(jpe?g|png|webp|avif)(\?|$)/i.test(abs)) return;
-      if (RUIDO.test(abs)) return;
-      if (!urls.includes(abs)) urls.push(abs);
-    } catch { /* URL rota, se ignora */ }
+      const abs = new URL(u.trim().split(/\s+/)[0].replace(/&amp;/g, '&'), base).href;
+      if (/^https?:/.test(abs) && !urls.includes(abs)) urls.push(abs);
+    } catch { /* URL basura en el HTML, se ignora */ }
   };
 
-  // La og:image primero: es la que el negocio eligió para que se le muestre.
+  // La og:image va primera a propósito: es la que el negocio eligió para que
+  // otros sitios la muestren al enlazarlo, así que suele ser la buena.
   for (const re of [
     /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi,
     /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/gi,
     /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/gi,
   ]) for (const m of html.matchAll(re)) meter(m[1]);
 
-  // Después las del cuerpo. srcset primero, que suele traer la grande.
   for (const m of html.matchAll(/<img[^>]+>/gi)) {
     const tag = m[0];
-    const srcset = tag.match(/srcset=["']([^"']+)["']/i);
-    if (srcset) {
-      const mayor = srcset[1].split(',').map((p) => p.trim().split(/\s+/)[0]).filter(Boolean).pop();
-      meter(mayor);
-    }
-    for (const attr of ['data-src', 'data-lazy-src', 'data-original', 'src']) {
-      const v = tag.match(new RegExp(`${attr}=["']([^"']+)["']`, 'i'));
-      if (v) meter(v[1]);
-    }
+    const src = tag.match(/\ssrc=["']([^"']+)["']/i)?.[1];
+    const lazy = tag.match(/\sdata-(?:src|lazy-src|original|bg|image)=["']([^"']+)["']/i)?.[1];
+    const set = tag.match(/\s(?:data-)?srcset=["']([^"']+)["']/i)?.[1];
+    // Del srcset se toma la última, que es la de mayor resolución.
+    if (set) meter(set.split(',').pop());
+    meter(lazy || src);
   }
-  for (const m of html.matchAll(/background-image\s*:\s*url\((["']?)([^"')]+)\1\)/gi)) meter(m[2]);
-  return urls;
+
+  // <picture><source srcset>: lo usan los sitios que sirven webp con respaldo.
+  for (const m of html.matchAll(/<source[^>]+srcset=["']([^"']+)["']/gi)) meter(m[1].split(',').pop());
+
+  // Fondos CSS, en atributo style y en <style>. Aquí estaban las de los hoteles
+  // con portada a pantalla completa, que no usan <img> en absoluto.
+  for (const m of html.matchAll(/url\(\s*["']?([^"')]+\.(?:jpe?g|png|webp|avif)[^"')]*)["']?\s*\)/gi)) meter(m[1]);
+
+  // JSON-LD y estado embebido: "image":"..." o "image":["...","..."].
+  for (const m of html.matchAll(/"(?:image|contentUrl|thumbnailUrl|url)"\s*:\s*"([^"]+\.(?:jpe?g|png|webp)[^"]*)"/gi)) meter(m[1]);
+
+  // Último recurso: cualquier URL absoluta que termine en imagen, esté donde
+  // esté en el HTML. Hace falta para los sitios que pintan la galería desde su
+  // propia API en otro host (La Choza de Laurel sirve desde railway.app) y que
+  // por eso no aparecen en ninguno de los patrones de arriba.
+  for (const m of html.matchAll(/https?:\/\/[^"'\s)\\]+\.(?:jpe?g|png|webp|avif)(?:\?[^"'\s)\\]*)?/gi)) meter(m[0]);
+
+  return urls.filter((u) => !esBasura(u) && /\.(jpe?g|png|webp|avif)(\?|$)/i.test(u));
 }
 
-mkdirSync(SALIDA, { recursive: true });
-const informe = {};
-let conFoto = 0, sinNada = 0;
+/** Enlaces internos que suelen llevar a las fotos buenas. */
+function paginasDeFotos(html, base) {
+  const paginas = [];
+  const interesa = /galer|gallery|foto|photo|habitacion|room|suite|nosotros|about|instalacion|servicio|tour|menu/i;
+  for (const m of html.matchAll(/<a[^>]+href=["']([^"'#]+)["']/gi)) {
+    if (!interesa.test(m[1])) continue;
+    try {
+      const abs = new URL(m[1], base);
+      if (abs.hostname !== new URL(base).hostname) continue;
+      if (!paginas.includes(abs.href)) paginas.push(abs.href);
+    } catch { /* href raro */ }
+  }
+  return paginas.slice(0, 3);
+}
 
-for (const negocio of negocios) {
+const negocios = JSON.parse(readFileSync('.negocios.json', 'utf8'))
+  .filter((n) => n.sitio_web)
+  .filter((n) => !SOLO || n.babosa === SOLO);
+
+mkdirSync(SALIDA, { recursive: true });
+const informe = [];
+
+for (const [i, negocio] of negocios.entries()) {
   const carpeta = `${SALIDA}/${negocio.babosa}`;
-  if (existsSync(carpeta) && readdirSync(carpeta).length) {
-    console.log(`${negocio.babosa.padEnd(34)} (ya estaba)`);
-    conFoto++;
+  // Una carpeta con solo _origen.json es un intento que no dio nada: con
+  // --reintentar se vuelve a probar, que es lo que hay que hacer después de
+  // mejorar el extractor.
+  const yaTiene = existsSync(carpeta) && readdirSync(carpeta).some((f) => /\.jpg$/i.test(f));
+  if (yaTiene || (existsSync(carpeta) && !REINTENTAR)) {
+    console.log(`[${i + 1}/${negocios.length}] ${negocio.babosa}: ya ${yaTiene ? 'tiene' : 'se intentó'}, se salta`);
     continue;
   }
 
   let html;
   try {
-    const res = await fetch(negocio.sitio_web, { headers: cabeceras, redirect: 'follow', signal: AbortSignal.timeout(20000) });
-    if (!res.ok) { console.log(`${negocio.babosa.padEnd(34)} http ${res.status}`); informe[negocio.babosa] = { error: `http ${res.status}` }; sinNada++; continue; }
-    html = await res.text();
+    const r = await bajar(negocio.sitio_web);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    html = await r.text();
   } catch (e) {
-    console.log(`${negocio.babosa.padEnd(34)} ${e.name === 'TimeoutError' ? 'sin respuesta' : e.message.slice(0, 40)}`);
-    informe[negocio.babosa] = { error: e.message.slice(0, 80) };
-    sinNada++;
+    console.log(`[${i + 1}/${negocios.length}] ${negocio.babosa}: NO ABRE (${e.message})`);
+    informe.push({ babosa: negocio.babosa, sitio: negocio.sitio_web, error: e.message, bajadas: 0 });
     continue;
   }
 
-  const candidatas = candidatasDe(html, negocio.sitio_web);
-  const guardadas = [];
-  for (const url of candidatas) {
-    if (guardadas.length >= POR_NEGOCIO) break;
-    try {
-      const r = await fetch(url, { headers: cabeceras, signal: AbortSignal.timeout(20000) });
-      if (!r.ok) continue;
-      const buf = Buffer.from(await r.arrayBuffer());
-      const meta = await sharp(buf).metadata();
-      if (!meta.width || meta.width < MIN_LADO) continue;
-      if (meta.width / meta.height < MIN_RELACION) continue;   // vertical, no sirve
-      mkdirSync(carpeta, { recursive: true });
-      const nombre = `${String(guardadas.length + 1).padStart(2, '0')}${GENTE.test(url) ? '-ojo' : ''}.jpg`;
-      // Se guarda ya reducida: no hace falta HD para una tarjeta, y así el
-      // archivo local pesa poco y la revisión a ojo es rápida.
-      await writeFile(`${carpeta}/${nombre}`, await sharp(buf).resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer());
-      guardadas.push({ archivo: nombre, origen: url, ancho: meta.width, alto: meta.height });
-    } catch { /* imagen rota o bloqueada; se pasa a la siguiente */ }
+  let candidatas = imagenesDe(html, negocio.sitio_web);
+
+  // Si la portada no da para elegir, se entra a la galería. No se hace siempre
+  // porque son más peticiones por negocio y la portada suele bastar.
+  if (candidatas.length < 4) {
+    for (const pagina of paginasDeFotos(html, negocio.sitio_web)) {
+      try {
+        const r = await bajar(pagina);
+        if (!r.ok) continue;
+        const mas = imagenesDe(await r.text(), pagina);
+        candidatas = [...new Set([...candidatas, ...mas])];
+        if (candidatas.length >= MAX_POR_NEGOCIO * 2) break;
+      } catch { /* subpágina caída */ }
+    }
   }
 
-  informe[negocio.babosa] = { nombre: negocio.nombre, sitio_web: negocio.sitio_web, candidatas: guardadas };
-  console.log(`${negocio.babosa.padEnd(34)} ${guardadas.length} de ${candidatas.length} candidatas`);
-  if (guardadas.length) conFoto++; else sinNada++;
-  await dormir(600);   // no se atropella al servidor de nadie
+  mkdirSync(carpeta, { recursive: true });
+
+  let guardadas = 0;
+  const huellas = new Set();
+  const origenes = [];
+
+  for (const url of candidatas) {
+    if (guardadas >= MAX_POR_NEGOCIO) break;
+    try {
+      const r = await bajar(url, 15000);
+      if (!r.ok) continue;
+      const bytes = Buffer.from(await r.arrayBuffer());
+      if (bytes.length < 15000) continue; // menos de 15 kB no es una foto de verdad
+
+      const meta = await sharp(bytes).metadata();
+      if (!meta.width || meta.width < ANCHO_MINIMO) continue;
+      const relacion = meta.width / (meta.height || 1);
+      if (relacion > RELACION_MAXIMA || relacion < 1 / RELACION_MAXIMA) continue;
+
+      const huella = createHash('md5').update(bytes).digest('hex');
+      if (huellas.has(huella)) continue;
+      huellas.add(huella);
+
+      guardadas += 1;
+      writeFileSync(`${carpeta}/${String(guardadas).padStart(2, '0')}.jpg`, bytes);
+      origenes.push({ archivo: `${String(guardadas).padStart(2, '0')}.jpg`, url, ancho: meta.width, alto: meta.height });
+    } catch { /* imagen rota o formato que sharp no lee */ }
+  }
+
+  writeFileSync(`${carpeta}/_origen.json`, JSON.stringify({ negocio: negocio.nombre, sitio: negocio.sitio_web, origenes }, null, 2));
+  console.log(`[${i + 1}/${negocios.length}] ${negocio.babosa}: ${guardadas} candidatas de ${candidatas.length} vistas`);
+  informe.push({ babosa: negocio.babosa, sitio: negocio.sitio_web, bajadas: guardadas, vistas: candidatas.length });
 }
 
-mkdirSync('datos/investigacion', { recursive: true });
-writeFileSync(INFORME, JSON.stringify({
-  _lee_esto: 'Imagenes candidatas bajadas del sitio web de cada negocio, para que la ficha muestre algo que corresponde mientras no haya GOOGLE_PLACES_API_KEY. Cada una guarda de que URL salio. NO estan aprobadas: la eleccion final es a ojo, porque si sale gente y si la foto es del lugar no lo decide un filtro. Ver regla 11 del CLAUDE.md: esto es temporal.',
-  generado_en: new Date().toISOString().slice(0, 10),
-  negocios: informe,
-}, null, 2) + '\n', 'utf8');
-
-console.log(`\n${conFoto} negocios con candidatas · ${sinNada} sin nada`);
-console.log(`informe en ${INFORME} · archivos en ${SALIDA}/`);
+writeFileSync(`${SALIDA}/_informe.json`, JSON.stringify(informe, null, 2));
+const conAlgo = informe.filter((r) => r.bajadas > 0).length;
+console.log(`\n${conAlgo} de ${informe.length} sitios dieron al menos una candidata.`);
+console.log(`Sin nada: ${informe.filter((r) => !r.bajadas).map((r) => r.babosa).join(', ') || 'ninguno'}`);

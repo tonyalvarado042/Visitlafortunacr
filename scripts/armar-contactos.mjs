@@ -1,80 +1,65 @@
 /*
- * Arma hojas de contacto con las candidatas bajadas de los sitios, para
- * revisarlas a ojo de una sentada en vez de abrir 300 archivos.
+ * Arma una hoja de contacto por negocio con sus candidatas numeradas, para
+ * poder revisarlas de un vistazo en vez de abrir 250 archivos.
  *
  *   node scripts/armar-contactos.mjs
  *
- * Cada hoja lleva hasta 12 miniaturas con su número y la babosa del negocio
- * escritos encima. De ahí sale la lista de aprobadas para
- * fotos-entrada/_sitios/elegidas.json, que es lo que lee el cargador.
+ * Lee `.fotos/<babosa>/NN.jpg` y escribe `.fotos/_contactos/<babosa>.jpg`.
  *
- * Hay dos cosas que ningún filtro automático decide bien y por eso existe este
- * paso: si en la foto sale gente, y si la foto es de verdad de ese lugar y no
- * del logo, del mapa o de un plato de stock que el negocio puso en su web.
+ * La revisión es a ojo y no hay forma de evitarlo: lo que hay que decidir es
+ * si la foto retrata A ESE NEGOCIO, y eso no es una propiedad que se pueda
+ * consultar. Las portadas traen logos, mapas, fotos de stock del banner y, más
+ * de una vez, una foto de otro país que al dueño le gustó.
  */
-import { mkdirSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { mkdirSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
 import sharp from 'sharp';
 
-const ORIGEN = 'fotos-entrada/_sitios';
-const SALIDA = 'fotos-entrada/_contactos';
-const COLUMNAS = 4;
-const FILAS = 3;
+const RAIZ = '.fotos';
+const SALIDA = `${RAIZ}/_contactos`;
 const CELDA = 420;
-const PIE = 34;          // franja negra para el rótulo
-const POR_HOJA = COLUMNAS * FILAS;
+const COLUMNAS = 4;
 
-if (!existsSync(ORIGEN)) { console.error(`No existe ${ORIGEN}. Corré antes traer-fotos-del-sitio.mjs`); process.exit(1); }
-
-const fichas = [];
-for (const babosa of readdirSync(ORIGEN)) {
-  const carpeta = `${ORIGEN}/${babosa}`;
-  let archivos;
-  try { archivos = readdirSync(carpeta).filter((a) => /\.(jpe?g|png|webp)$/i.test(a)).sort(); } catch { continue; }
-  for (const archivo of archivos) fichas.push({ babosa, archivo, ruta: `${carpeta}/${archivo}` });
-}
-if (!fichas.length) { console.error('No hay candidatas que revisar.'); process.exit(1); }
-
-const rotulo = (texto) => Buffer.from(
-  `<svg width="${CELDA}" height="${PIE}">
-     <rect width="100%" height="100%" fill="#0B0B0B"/>
-     <text x="8" y="23" font-family="monospace" font-size="17" fill="#FFFFFF">${
-       texto.replace(/[<>&]/g, '')
-     }</text>
-   </svg>`
-);
-
+if (!existsSync(RAIZ)) { console.error(`No existe ${RAIZ}/. Corré antes traer-fotos-del-sitio.mjs`); process.exit(1); }
 mkdirSync(SALIDA, { recursive: true });
-const hojas = Math.ceil(fichas.length / POR_HOJA);
 
-for (let h = 0; h < hojas; h++) {
-  const lote = fichas.slice(h * POR_HOJA, (h + 1) * POR_HOJA);
-  const capas = [];
+const carpetas = readdirSync(RAIZ, { withFileTypes: true })
+  .filter((d) => d.isDirectory() && !d.name.startsWith('_'))
+  .map((d) => d.name)
+  .sort();
 
-  for (const [i, f] of lote.entries()) {
+let hechas = 0;
+for (const babosa of carpetas) {
+  const archivos = readdirSync(`${RAIZ}/${babosa}`).filter((f) => /\.jpg$/i.test(f)).sort();
+  if (!archivos.length) continue;
+
+  const filas = Math.ceil(archivos.length / COLUMNAS);
+  const ancho = CELDA * Math.min(COLUMNAS, archivos.length);
+  const alto = CELDA * filas;
+
+  const piezas = [];
+  for (const [i, archivo] of archivos.entries()) {
     const x = (i % COLUMNAS) * CELDA;
-    const y = Math.floor(i / COLUMNAS) * (CELDA + PIE);
+    const y = Math.floor(i / COLUMNAS) * CELDA;
     try {
-      const mini = await sharp(f.ruta).resize(CELDA, CELDA, { fit: 'cover' }).jpeg({ quality: 78 }).toBuffer();
-      capas.push({ input: mini, left: x, top: y });
-    } catch { /* archivo roto: queda el hueco negro, que también informa */ }
-    // El número de celda es lo que después se escribe en elegidas.json.
-    capas.push({ input: rotulo(`${i + 1}. ${f.babosa} / ${f.archivo}`), left: x, top: y + CELDA });
+      const miniatura = await sharp(`${RAIZ}/${babosa}/${archivo}`)
+        .resize(CELDA, CELDA, { fit: 'cover' }).jpeg({ quality: 80 }).toBuffer();
+      piezas.push({ input: miniatura, left: x, top: y });
+      // El número va encima, grande y con fondo, porque es lo que después se
+      // escribe en la lista de elegidas.
+      const etiqueta = Buffer.from(
+        `<svg width="${CELDA}" height="70">
+           <rect x="0" y="0" width="86" height="70" fill="#000" opacity="0.78"/>
+           <text x="16" y="50" font-family="sans-serif" font-size="46" font-weight="bold" fill="#fff">${archivo.replace('.jpg', '')}</text>
+         </svg>`
+      );
+      piezas.push({ input: etiqueta, left: x, top: y });
+    } catch { /* archivo roto, se omite de la hoja */ }
   }
 
-  const salida = `${SALIDA}/hoja-${String(h + 1).padStart(2, '0')}.jpg`;
-  await sharp({
-    create: {
-      width: COLUMNAS * CELDA,
-      height: FILAS * (CELDA + PIE),
-      channels: 3,
-      background: { r: 11, g: 11, b: 11 },
-    },
-  }).composite(capas).jpeg({ quality: 76 }).toFile(salida);
-  console.log(`${salida}  (${lote.length} imágenes)`);
+  await sharp({ create: { width: ancho, height: alto, channels: 3, background: '#1a1a1a' } })
+    .composite(piezas).jpeg({ quality: 78 }).toFile(`${SALIDA}/${babosa}.jpg`);
+  hechas += 1;
 }
 
-// El índice, para poder pasar de "hoja 3, celda 7" a un archivo concreto.
-writeFileSync(`${SALIDA}/indice.json`, JSON.stringify(
-  fichas.map((f, i) => ({ hoja: Math.floor(i / POR_HOJA) + 1, celda: (i % POR_HOJA) + 1, ...f })), null, 2) + '\n', 'utf8');
-
-console.log(`\n${fichas.length} candidatas en ${hojas} hojas · índice en ${SALIDA}/indice.json`);
+writeFileSync(`${SALIDA}/_lista.json`, JSON.stringify(carpetas, null, 2));
+console.log(`${hechas} hojas de contacto en ${SALIDA}/`);

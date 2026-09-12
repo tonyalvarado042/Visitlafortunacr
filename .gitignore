@@ -9,18 +9,12 @@ next-env.d.ts
 .DS_Store
 .vercel
 
-# Las fotos originales que entran a mano. Se suben a Supabase Storage con
-# scripts/cargar-fotos.mjs y no viven en git: pesan, y las fotos de un
-# destino no son codigo. Las de Commons se vuelven a bajar con
-# `node scripts/buscar-fotos-commons.mjs --bajar` desde el JSON de licencias,
-# que ese si esta versionado.
-# El LEEME se queda: es donde dice como nombrar las carpetas.
-fotos-entrada/*
-!fotos-entrada/LEEME.md
-!fotos-entrada/_categorias/
-!fotos-entrada/_categorias/LEEME.md
-fotos-entrada/_categorias/*/
-!fotos-entrada/_sitios/
-!fotos-entrada/_sitios/elegidas.json
-fotos-entrada/_sitios/*/
-fotos-entrada/_contactos/
+# Las fotos de los negocios: una subcarpeta por babosa. Pesan y no son codigo;
+# se suben a Supabase Storage con scripts/cargar-fotos.mjs.
+fotos/
+
+# fotos: .fotos/ es el directorio de trabajo (candidatas bajadas), fotos/ lo que se sube
+.fotos/
+.negocios.json
+.sitios-encontrados.json
+.candidatos-hallados.json

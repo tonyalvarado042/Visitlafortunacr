@@ -1,0 +1,125 @@
+{
+  "_comentario": "Negocios que se agregan al directorio de La Fortuna, elegidos porque tienen foto real propia (ver fotos-elegidas.json). Nombre, categoría, dirección y sitio web son hechos comprobados en su propia web. LOS TEXTOS SON PROPIOS, escritos para este sitio: copiar los de otro lado sería contenido duplicado, que es justo lo que hunde la apuesta de GEO de la Fase 5. Todo entra estado_verificacion = 'pendiente': nadie del equipo los ha visitado.",
+  "negocios": [
+    {
+      "babosa": "canoa-aventura",
+      "nombre": "Canoa Aventura",
+      "categoria": "tours-naturaleza",
+      "direccion": "Ruta 142, 1 km al oeste de La Fortuna",
+      "sitio_web": "https://canoa-aventura.com",
+      "rango_precio": "moderado",
+      "resumen": "Safaris en canoa y caminatas guiadas, con más de treinta años en la zona.",
+      "resumen_en": "Canoe safaris and guided walks, with more than thirty years in the area.",
+      "descripcion": "Operador de naturaleza especializado en recorridos por agua: safaris flotantes por el río Peñas Blancas, canoa en humedales y salidas de observación de aves. También hacen caminatas por las coladas del volcán y puentes colgantes. Es de los operadores más antiguos de La Fortuna y trabaja con guías naturalistas.",
+      "descripcion_en": "A nature operator built around water: float safaris on the Peñas Blancas river, canoeing through wetlands and birdwatching outings. They also run walks over the volcano's lava flows and hanging bridges. One of the oldest operators in La Fortuna, working with naturalist guides."
+    },
+    {
+      "babosa": "sloths-territory",
+      "nombre": "Sloths Territory",
+      "categoria": "vida-silvestre",
+      "direccion": "La Fortuna, camino al volcán",
+      "sitio_web": "https://slothsterritory.com",
+      "rango_precio": "moderado",
+      "resumen": "Caminatas guiadas para ver perezosos, de día y de noche.",
+      "resumen_en": "Guided walks to see sloths, by day and by night.",
+      "descripcion": "Sendero privado dedicado al avistamiento de perezosos de dos y tres dedos, con guías que trabajan con telescopio. Hay salida diurna y tour nocturno, cuando el bosque cambia de habitantes y aparecen ranas, serpientes e insectos. Un perezoso duerme quince horas al día en lo alto de los árboles: sin guía casi no se ve nada, y esa es toda la diferencia.",
+      "descripcion_en": "A private trail dedicated to spotting two- and three-toed sloths, with guides working with a spotting scope. There is a daytime outing and a night tour, when the forest changes tenants and frogs, snakes and insects come out. A sloth sleeps fifteen hours a day at the top of the trees: without a guide you see almost nothing, and that is the whole difference."
+    },
+    {
+      "babosa": "butterfly-conservatory",
+      "nombre": "The Butterfly Conservatory",
+      "categoria": "vida-silvestre",
+      "direccion": "El Castillo, al otro lado del lago Arenal",
+      "sitio_web": "https://butterflyconservatory.org",
+      "rango_precio": "economico",
+      "resumen": "Mariposario y jardín botánico en El Castillo, con seis hábitats bajo cúpula.",
+      "resumen_en": "Butterfly house and botanical garden in El Castillo, with six habitats under domes.",
+      "descripcion": "Proyecto de conservación en El Castillo, en la ladera del volcán: varias cúpulas reproducen hábitats distintos —tierras bajas, bosque de altura, borde de bosque— y dentro vuelan mariposas de la zona en cada etapa de su vida. Hay además jardín de plantas medicinales, sendero de río y ranario. Es tranquilo y funciona bien con niños.",
+      "descripcion_en": "A conservation project in El Castillo, on the volcano's slope: several domes recreate different habitats — lowlands, highland forest, forest edge — and inside them local butterflies fly at every stage of their life. There is also a medicinal plant garden, a river trail and a frog house. It is quiet and works well with children."
+    },
+    {
+      "babosa": "costa-rica-descents",
+      "nombre": "Costa Rica Descents",
+      "categoria": "rafting",
+      "direccion": "La Fortuna centro",
+      "sitio_web": "https://costaricadescents.com",
+      "rango_precio": "moderado",
+      "resumen": "Rafting, canyoning y canopy con grupos pequeños.",
+      "resumen_en": "Rafting, canyoning and zipline with small groups.",
+      "descripcion": "Operador de aventura con rafting en el Balsa y el Sarapiquí, canyoning en cataratas, tirolesa y caminatas por las coladas del volcán. Trabajan con grupos pequeños y recogen en el hotel. Como en todo rafting de la zona, el río se elige por la edad y las ganas: el Balsa es clase II y III para principiantes, el Sarapiquí sube a III y IV.",
+      "descripcion_en": "An adventure operator with rafting on the Balsa and Sarapiquí rivers, waterfall canyoning, ziplining and hikes over the volcano's lava flows. They work with small groups and pick up at your hotel. As with all rafting here, the river is chosen by age and appetite: the Balsa is class II-III for beginners, the Sarapiquí goes up to III and IV."
+    },
+    {
+      "babosa": "organico-fortuna",
+      "nombre": "Orgánico Fortuna",
+      "categoria": "saludable",
+      "direccion": "La Fortuna centro",
+      "sitio_web": "https://www.organicofortuna.com",
+      "rango_precio": "moderado",
+      "resumen": "Desayunos, bowls y batidos con fruta de la zona.",
+      "resumen_en": "Breakfasts, bowls and smoothies with local fruit.",
+      "descripcion": "Cocina saludable en el centro: bowls de fruta, desayunos largos, ensaladas y batidos de frutas que fuera de Costa Rica no existen —cas, guanábana, maracuyá—. Tienen opciones vegetarianas y veganas claras, que en La Fortuna no siempre es fácil de encontrar.",
+      "descripcion_en": "Healthy cooking in the town centre: fruit bowls, long breakfasts, salads and smoothies made from fruit that does not exist outside Costa Rica — cas, soursop, passion fruit. They have clearly marked vegetarian and vegan options, which is not always easy to find in La Fortuna."
+    },
+    {
+      "babosa": "arenal-volcano-inn",
+      "nombre": "Arenal Volcano Inn",
+      "categoria": "hoteles",
+      "direccion": "Ruta 142, 6 km al oeste de La Fortuna",
+      "sitio_web": "https://arenalvolcanoinn.com",
+      "rango_precio": "moderado",
+      "resumen": "Hotel de jardín sobre la carretera al volcán, con vista al cono.",
+      "resumen_en": "A garden hotel on the road to the volcano, with views of the cone.",
+      "descripcion": "Hotel de habitaciones amplias con techo de madera a dos aguas, repartidas en jardines sobre la carretera al volcán. Está a unos diez minutos del centro en carro, así que conviene tener vehículo o contar con la recogida de los tours. Piscina y vista al Arenal los días despejados, que aquí suele ser temprano en la mañana.",
+      "descripcion_en": "A hotel of generous rooms with pitched wooden ceilings, spread across gardens on the road to the volcano. It is about ten minutes from the town centre by car, so you want a vehicle or the tour pickups. Pool and views of Arenal on clear days, which around here usually means early morning."
+    },
+    {
+      "babosa": "essence-arenal",
+      "nombre": "Essence Arenal Boutique Hostel",
+      "categoria": "hostales",
+      "direccion": "El Castillo, camino al lago Arenal",
+      "sitio_web": "https://essencearenal.com",
+      "rango_precio": "economico",
+      "resumen": "Hostal ecológico en la montaña, con finca, sauna y vista al volcán.",
+      "resumen_en": "An eco hostel up the mountain, with a farm, sauna and volcano views.",
+      "descripcion": "Hostal boutique de montaña con huerta propia, sendero de bosque, sauna, piscina y hamacas mirando al Arenal. Hay cama en dormitorio compartido y también habitaciones privadas y cabinas. Está fuera del pueblo, camino a El Castillo: es lo que lo hace tranquilo y lo que obliga a moverse en carro o con su traslado.",
+      "descripcion_en": "A boutique mountain hostel with its own vegetable garden, a forest trail, sauna, pool and hammocks facing Arenal. There are dorm beds as well as private rooms and cabins. It sits outside town on the way to El Castillo: that is what makes it quiet, and what means you need a car or their shuttle."
+    },
+    {
+      "babosa": "tropical-tour-shuttles",
+      "nombre": "Tropical Tours Shuttles",
+      "categoria": "shuttles",
+      "direccion": "La Fortuna centro",
+      "sitio_web": "https://tropicaltourshuttles.com",
+      "rango_precio": "moderado",
+      "resumen": "Shuttles compartidos y privados entre La Fortuna y el resto del país.",
+      "resumen_en": "Shared and private shuttles between La Fortuna and the rest of the country.",
+      "descripcion": "Traslados en van entre La Fortuna y San José, Liberia, Monteverde, Manuel Antonio y las playas de Guanacaste, compartidos o privados, con recogida en el hotel. El compartido es lo que elige la mayoría para llegar desde el aeropuerto; conviene reservarlo con anticipación porque se llenan, y preguntar por el límite de equipaje.",
+      "descripcion_en": "Van transfers between La Fortuna and San José, Liberia, Monteverde, Manuel Antonio and the Guanacaste beaches, shared or private, with hotel pickup. The shared shuttle is what most people take from the airport; book ahead because they fill up, and ask about the luggage limit."
+    },
+    {
+      "babosa": "morpho-vans",
+      "nombre": "Morpho Vans",
+      "categoria": "traslados",
+      "direccion": "La Fortuna centro",
+      "sitio_web": "https://morphovans.com",
+      "rango_precio": "moderado",
+      "resumen": "Traslados privados puerta a puerta, y el jeep-boat-jeep a Monteverde.",
+      "resumen_en": "Private door-to-door transfers, and the jeep-boat-jeep to Monteverde.",
+      "descripcion": "Transporte privado con chofer entre La Fortuna y el resto del país, y el cruce jeep-boat-jeep hacia Monteverde: van hasta la represa, bote cruzando el lago Arenal con el volcán detrás, y van hasta el hotel al otro lado. Son unas tres horas y media, y por carretera no se ahorra ni tiempo ni dinero.",
+      "descripcion_en": "Private transport with a driver between La Fortuna and the rest of the country, plus the jeep-boat-jeep crossing to Monteverde: a van to the dam, a boat across Lake Arenal with the volcano behind you, and a van to your hotel on the other side. It takes about three and a half hours, and going by road saves neither time nor money."
+    },
+    {
+      "babosa": "vagabondo-pizzeria",
+      "nombre": "Vagabondo Ristorante & Pizzería",
+      "categoria": "cocina-internacional",
+      "direccion": "Ruta 142, a la salida de La Fortuna hacia el volcán",
+      "sitio_web": "https://vagabondocr.com",
+      "rango_precio": "moderado",
+      "resumen": "Pizza de horno de leña y pasta italiana, sobre la carretera al volcán.",
+      "resumen_en": "Wood-fired pizza and Italian pasta, on the road to the volcano.",
+      "descripcion": "Restaurante italiano con horno de leña sobre la ruta 142, a la salida del pueblo. Pizza, pasta y carnes, con terraza y parqueo propio. Es de los sitios a los que se llega en carro más que caminando, y funciona bien para cenar volviendo de las termales.",
+      "descripcion_en": "An Italian restaurant with a wood-fired oven on Route 142, at the edge of town. Pizza, pasta and grilled meats, with a terrace and its own parking. It is a place you reach by car rather than on foot, and it works well for dinner on the way back from the hot springs."
+    }
+  ]
+}

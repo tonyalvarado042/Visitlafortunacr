@@ -1,0 +1,329 @@
+{
+  "_comentario": "Revision a ojo de las candidatas de .fotos/. La clave es la babosa del negocio; el arreglo son los archivos elegidos EN ORDEN, y el primero es la portada. Lo que no esta aqui no se sube.",
+  "elegidas": {
+    "tabacon-thermal-resort-spa": [
+      "01.jpg",
+      "03.jpg"
+    ],
+    "nayara-springs": [
+      "01.jpg"
+    ],
+    "arenal-observatory-lodge": [
+      "01.jpg",
+      "03.jpg",
+      "08.jpg"
+    ],
+    "baldi-hot-springs": [
+      "01.jpg",
+      "03.jpg"
+    ],
+    "arenal-kioro-suites-spa": [
+      "07.jpg",
+      "03.jpg",
+      "01.jpg"
+    ],
+    "montana-de-fuego": [
+      "07.jpg",
+      "01.jpg",
+      "06.jpg"
+    ],
+    "catarata-rio-fortuna": [
+      "01.jpg"
+    ],
+    "arenal-1968": [
+      "08.jpg",
+      "01.jpg",
+      "06.jpg"
+    ],
+    "mirador-el-silencio": [
+      "01.jpg",
+      "03.jpg",
+      "05.jpg"
+    ],
+    "arenal-springs-resort-spa": [
+      "01.jpg",
+      "03.jpg"
+    ],
+    "casa-del-rio": [
+      "01.jpg"
+    ],
+    "arenal-manoa": [
+      "01.jpg",
+      "02.jpg"
+    ],
+    "nayara-tented-camp": [
+      "02.jpg",
+      "01.jpg"
+    ],
+    "noahs-forest": [
+      "02.jpg",
+      "01.jpg",
+      "03.jpg",
+      "05.jpg"
+    ],
+    "magic-mountain": [
+      "02.jpg",
+      "04.jpg"
+    ],
+    "arenal-backpackers-resort": [
+      "01.jpg",
+      "06.jpg",
+      "08.jpg",
+      "02.jpg"
+    ],
+    "casa-luna": [
+      "03.jpg",
+      "04.jpg"
+    ],
+    "don-olivo-chocolate-tour": [
+      "01.jpg",
+      "06.jpg",
+      "03.jpg",
+      "08.jpg"
+    ],
+    "north-fields-cafe": [
+      "06.jpg",
+      "05.jpg",
+      "02.jpg"
+    ],
+    "kappa-sushi-fortuna": [
+      "05.jpg",
+      "03.jpg"
+    ],
+    "maria-bonita-steak-house": [
+      "01.jpg",
+      "02.jpg",
+      "04.jpg",
+      "06.jpg"
+    ],
+    "restaurante-tiquicia": [
+      "03.jpg",
+      "04.jpg",
+      "08.jpg",
+      "06.jpg"
+    ],
+    "selva-negra-bar": [
+      "03.jpg",
+      "01.jpg",
+      "08.jpg"
+    ],
+    "ecoglide-arenal-park": [
+      "01.jpg"
+    ],
+    "sky-adventures-arenal-park": [
+      "02.jpg",
+      "01.jpg"
+    ],
+    "wave-expeditions": [
+      "03.jpg",
+      "04.jpg",
+      "01.jpg",
+      "08.jpg"
+    ],
+    "pure-trek-canyoning": [
+      "01.jpg"
+    ],
+    "la-roca-canyoning": [
+      "01.jpg",
+      "06.jpg",
+      "08.jpg"
+    ],
+    "arenal-jungle-tours": [
+      "06.jpg",
+      "07.jpg",
+      "05.jpg"
+    ],
+    "paradise-hot-springs": [
+      "01.jpg"
+    ],
+    "ecocentro-danaus": [
+      "05.jpg",
+      "01.jpg",
+      "07.jpg",
+      "06.jpg"
+    ],
+    "proyecto-asis": [
+      "06.jpg",
+      "03.jpg",
+      "08.jpg",
+      "04.jpg"
+    ],
+    "arenal-oasis": [
+      "08.jpg",
+      "01.jpg"
+    ],
+    "la-fortuna-lodge": [
+      "01.jpg"
+    ],
+    "kenko-bar-restaurante": [
+      "07.jpg",
+      "01.jpg",
+      "04.jpg",
+      "06.jpg"
+    ],
+    "the-springs-resort-spa": [
+      "01.jpg",
+      "03.jpg",
+      "02.jpg"
+    ],
+    "el-silencio-del-campo": [
+      "01.jpg",
+      "04.jpg",
+      "03.jpg"
+    ],
+    "la-choza-de-laurel": [
+      "01.jpg",
+      "03.jpg",
+      "02.jpg"
+    ],
+    "don-rufino": [
+      "01.jpg",
+      "02.jpg"
+    ],
+    "restaurante-fortuneno": [
+      "01.jpg"
+    ],
+    "royal-corin": [
+      "02.jpg",
+      "03.jpg",
+      "08.jpg",
+      "06.jpg"
+    ],
+    "nayara-gardens": [
+      "01.jpg",
+      "02.jpg"
+    ],
+    "cavernas-de-venado": [
+      "01.jpg",
+      "04.jpg",
+      "03.jpg",
+      "05.jpg"
+    ],
+    "que-rico-arenal": [
+      "01.jpg",
+      "06.jpg",
+      "02.jpg",
+      "05.jpg"
+    ],
+    "amor-arenal": [
+      "01.jpg",
+      "08.jpg",
+      "02.jpg",
+      "04.jpg"
+    ],
+    "los-lagos-hotel-spa-resort": [
+      "07.jpg",
+      "06.jpg",
+      "02.jpg",
+      "05.jpg"
+    ],
+    "los-lagos-hot-springs": [
+      "01.jpg",
+      "07.jpg"
+    ],
+    "lomas-del-volcan": [
+      "01.jpg",
+      "06.jpg",
+      "04.jpg",
+      "02.jpg"
+    ],
+    "monkey-park-la-fortuna": [
+      "05.jpg",
+      "04.jpg",
+      "07.jpg"
+    ],
+    "volcano-lodge": [
+      "02.jpg"
+    ],
+    "lago-arenal": [
+      "06.jpg",
+      "03.jpg",
+      "07.jpg",
+      "02.jpg"
+    ],
+    "parque-nacional-volcan-arenal": [
+      "01.jpg",
+      "02.jpg",
+      "03.jpg",
+      "07.jpg"
+    ],
+    "canoa-aventura": [
+      "06.jpg",
+      "05.jpg",
+      "03.jpg",
+      "01.jpg"
+    ],
+    "sloths-territory": [
+      "02.jpg",
+      "01.jpg",
+      "05.jpg",
+      "07.jpg"
+    ],
+    "butterfly-conservatory": [
+      "04.jpg",
+      "07.jpg",
+      "01.jpg",
+      "06.jpg"
+    ],
+    "costa-rica-descents": [
+      "01.jpg",
+      "07.jpg",
+      "03.jpg",
+      "05.jpg"
+    ],
+    "organico-fortuna": [
+      "03.jpg",
+      "01.jpg",
+      "05.jpg",
+      "07.jpg"
+    ],
+    "arenal-volcano-inn": [
+      "02.jpg",
+      "03.jpg",
+      "07.jpg",
+      "04.jpg"
+    ],
+    "essence-arenal": [
+      "04.jpg",
+      "01.jpg",
+      "05.jpg",
+      "08.jpg"
+    ],
+    "tropical-tour-shuttles": [
+      "04.jpg",
+      "01.jpg"
+    ],
+    "morpho-vans": [
+      "02.jpg",
+      "01.jpg"
+    ],
+    "vagabondo-pizzeria": [
+      "01.jpg"
+    ],
+    "parque-eco-natura": [
+      "08.jpg"
+    ]
+  },
+  "_sin_nada": {
+    "_comentario": "Revisados y descartados enteros: no habia una sola foto del negocio.",
+    "ecotermales-fortuna": "las 2 candidatas son el logo",
+    "mistico-arenal-hanging-bridges-park": "logo con texto encima, cabalgata, y recortes de stock sobre negro (cacao, colibri). Los puentes no aparecen",
+    "sangregado-lodge": "la unica candidata es un amanecer del volcan: precioso, pero no identifica el lodge. Es justo el tipo de imagen de categoria que hay que evitar",
+    "roca-negra-del-arenal": "unica candidata: un pasillo de hotel desenfocado",
+    "interbus-la-fortuna": "todas son logos y banners promocionales con foto de stock encima",
+    "adobe-rent-a-car-la-fortuna": "banners promocionales con texto y una playa generica",
+    "tifakara-lodge": "unica candidata: un perezoso en blanco y negro. Es fauna, no el lodge",
+    "bosque-restaurant": "bosque.cr no es el restaurante: es un sitio de ilustraciones. El dominio adivinado estaba mal",
+    "tierra-mia-restaurante": "unica candidata: un mapamundi de semitonos, un adorno del tema de la web",
+    "restaurante-travesia": "travesiarestaurante.com responde pero no tiene ni una imagen: dominio practicamente vacio",
+    "el-salto": "Commons devolvio otro sitio llamado El Salto (un edificio azul con iguanas), no el balneario del rio",
+    "el-chollin": "Commons no tiene ninguna foto del rio Tabacon",
+    "acacia-restaurant": "su web es la de Noahs Forest y sirve las mismas fotos del hotel; ninguna retrata al restaurante",
+    "cuenca-restaurante": "casadelrio.net devuelve la misma imagen que ya es portada de casa-del-rio: repetirla en dos fichas es el mismo error con otra cara",
+    "desafio-adventure-company": "el sitio vio 49 imagenes pero las rechazo todas por tamano, y despues dejo de conectar. Vale reintentar otro dia",
+    "chachagua-rainforest-hotel": "candidato descartado: sus fotos no son del hotel (una es Rio Celeste y otra un bote rotulado canoa-aventura.com)",
+    "monte-tours": "candidato descartado: opera todo el pais y sus fotos son de Manuel Antonio, Puerto Viejo y el Teatro Nacional",
+    "jacamar-naturalist-tours": "candidato descartado: el dominio resolvio a Arenal Tours, otro nombre. No se da por el mismo negocio",
+    "vamos-rent-a-car": "candidato descartado: la unica imagen es un degradado verde"
+  }
+}

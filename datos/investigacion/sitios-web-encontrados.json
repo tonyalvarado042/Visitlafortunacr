@@ -1,0 +1,44 @@
+{
+  "_comentario": "Sitios web que la siembra no traía y que se encontraron adivinando el dominio desde el nombre. Cada uno lleva el <title> que se leyó para verificarlo, porque eso es lo único que dice de qué es un sitio: sin esa comprobación entraron una asociación de agencias de carga como 'Acacia Restaurant' y el sitio de un expresidente de la República como 'Soda Rodríguez'. Los carga scripts/cargar-sitios-web.mjs, que vuelve a comprobar el título antes de escribir y no pisa lo que ya tenga valor.",
+  "sitios": {
+    "amor-arenal": {
+      "url": "https://www.amorarenal.com",
+      "titulo_verificado": "Amor Arenal — Luxury in the Rainforest"
+    },
+    "arenal-montechiari": {
+      "url": "https://hotelarenalmontechiari.com",
+      "titulo_verificado": "Hotel Arenal Montechiari | La Fortuna, Costa Rica · Bungalows con Vista al Volcán Arenal"
+    },
+    "cavernas-de-venado": {
+      "url": "https://cavernasdevenado.com",
+      "titulo_verificado": "Cavernas de Venado | Cave Tour in La Fortuna, Costa Rica"
+    },
+    "kalambu-hot-springs": {
+      "url": "https://www.kalambu.com",
+      "titulo_verificado": "Kalambú — Aguas termales en La Fortuna, Arenal | Aventura acuática inmersiva"
+    },
+    "nayara-gardens": {
+      "url": "https://nayaragardens.com",
+      "titulo_verificado": "Nayara Gardens | #1 Resort Central America | Costa Rica | LHW"
+    },
+    "que-rico-arenal": {
+      "url": "https://www.quericoarenal.com",
+      "titulo_verificado": "QUE RICO RESTAURANTE | Inicio"
+    },
+    "royal-corin": {
+      "url": "https://www.royalcorin.com",
+      "titulo_verificado": "The Royal Corin Resort & Spa | La Fortuna Hot Springs"
+    }
+  },
+  "_descartados": {
+    "_comentario": "Dominios que se probaron, respondieron y NO son el negocio. Se anotan para no volver a caer en ellos.",
+    "acacia-restaurant": "acacia.co.cr es la Asociación Costarricense de Agencias de Carga, Consolidadores y Logística Interna",
+    "bosque-restaurant": "bosque.cr es un sitio de ilustraciones; pasó todos los filtros automáticos y se cazó mirando las fotos",
+    "mirador-steak-house": "mirador.cr es una agencia de bienes raíces",
+    "restaurante-cafe-mediterraneo": "mediterraneo.cr es Constructora Mediterráneo",
+    "soda-rodriguez": "rodriguez.cr es el sitio de Miguel Ángel Rodríguez Echeverría, expresidente de Costa Rica",
+    "soda-viquez": "viquez.cr es Fer Víquez, estudio de arquitectura e ingeniería civil",
+    "el-salto": "salto.com y los-lagos → lagos.com: dominios genéricos sin relación",
+    "tica-grill": "global.tica.com es una naviera"
+  }
+}

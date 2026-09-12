@@ -15,6 +15,12 @@ export type Conocimiento = {
   contenido: string;
   prioridad: number;
   etiquetas?: string[];
+  /*
+   * De dónde salió la ficha. Opcional a propósito: las funciones de la base lo
+   * devuelven desde la migración 23, y antes de aplicarla llega undefined. El
+   * código de abajo lo omite en ese caso en vez de romperse.
+   */
+  fuente?: string | null;
   relevancia?: number;
 };
 
@@ -63,7 +69,7 @@ export type ContextoDestino = {
   categorias: { id: string; babosa: string; seccion: string; nombre: string }[];
   negocios: NegocioContexto[];
   tours: TourContexto[];
-  conocimiento: { tipo: string; titulo: string; contenido: string }[];
+  conocimiento: { tipo: string; titulo: string; contenido: string; fuente?: string | null }[];
 };
 
 export async function contextoDestino(destinoId: string, idioma = 'es'): Promise<ContextoDestino> {
@@ -75,10 +81,27 @@ export async function contextoDestino(destinoId: string, idioma = 'es'): Promise
   return data as ContextoDestino;
 }
 
-/** El conocimiento como texto para el prompt, con el tipo entre paréntesis. */
-export function bloqueConocimiento(items: Pick<Conocimiento, 'tipo' | 'titulo' | 'contenido'>[]): string {
+/*
+ * El conocimiento como texto para el prompt, con el tipo entre corchetes y la
+ * fuente debajo cuando la ficha la trae.
+ *
+ * La fuente se le muestra al agente por dos razones y ninguna es decorativa:
+ * puede citar de dónde sale un dato ("según el sitio oficial de la catarata")
+ * y puede pasarle el enlace al viajero que quiere comprobarlo. Varias fichas
+ * llevan además "(confianza: baja)", que es la marca de que el dato es un
+ * precio o un horario y puede haber cambiado.
+ *
+ * Lo que el agente NO puede hacer es abrirlas: no tiene herramienta de web. El
+ * prompt se lo dice con todas las letras, porque un modelo al que se le dan
+ * URLs sin aclararlo termina diciendo que las leyó.
+ */
+export function bloqueConocimiento(items: Pick<Conocimiento, 'tipo' | 'titulo' | 'contenido' | 'fuente'>[]): string {
   if (!items.length) return '(todavía no hay conocimiento cargado para este destino)';
-  return items.map((k) => `### ${k.titulo} [${k.tipo}]\n${k.contenido}`).join('\n\n');
+  return items.map((k) => {
+    const cabeza = `### ${k.titulo} [${k.tipo}]`;
+    const pie = k.fuente ? `\nFuente: ${k.fuente}` : '';
+    return `${cabeza}\n${k.contenido}${pie}`;
+  }).join('\n\n');
 }
 
 /** El catálogo como texto compacto: una línea por negocio y por tour, con su id. */

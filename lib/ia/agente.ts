@@ -3,7 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { betaZodTool } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
 import { servicio } from '@/lib/supabase-servidor';
-import { agenteDe, ahoraEn, ejecutar, parametrosBase, textoDe, type Agente, type Origen } from './cliente';
+import { agenteDe, ahoraEn, ejecutar, parametrosBase, textoDe, HERRAMIENTA_WEB, type Agente, type Origen } from './cliente';
 import { buscarConocimiento, bloqueConocimiento, conocimientoBase } from './conocimiento';
 import { NOMBRE_IDIOMA } from './modelos';
 import { enviarEnConversacion } from './mensajeria';
@@ -108,6 +108,11 @@ function promptConcierge(
     '',
     'REGLAS QUE NO SE NEGOCIAN',
     '- No inventes precios, horarios ni disponibilidad. Si no está en el conocimiento ni en el catálogo, decí que el equipo lo confirma.',
+    '- Las fichas del conocimiento traen "Fuente:" con la página de donde salió el dato. Podés citarla ("según el sitio oficial de la catarata") y pasarle el enlace al viajero que quiera comprobarlo.',
+    '- Cuando una fuente dice "(confianza: baja)", el dato es un precio o un horario que pudo haber cambiado desde que se escribió la ficha. Si el viajero está decidiendo con ese número, abrí la fuente con web_fetch y comprobalo antes de responder. Si coincide, dalo con confianza; si cambió, usá el de la página y decí de dónde lo sacaste.',
+    '- web_fetch solo abre páginas cuyo enlace ya salió en esta conversación, y no siempre funciona. Si falla o la página no dice nada del tema, seguí con lo que dice la ficha y aclará que el equipo confirma el valor final. Nunca digas que leíste una página que no abriste, y no inventes lo que no leíste.',
+    '- Las fichas que ya traés sabidas aquí abajo no cuentan como enlace de la conversación, así que web_fetch no las puede abrir directamente. Si necesitás comprobar un precio o un horario de una de ellas, buscala primero con buscar_conocimiento: así la fuente entra en la conversación y entonces sí la podés abrir.',
+    '- Usala con criterio, no por costumbre: para un precio o un horario que el viajero va a usar para decidir, sí; para conversar, no. Como mucho un par de veces por respuesta.',
     '- Nunca confirmás una reserva ni prometés cupo.',
     '- Nunca digas que un negocio es "nuestro" ni favorezcas a uno por razones comerciales: recomendá por lo que busca el viajero.',
     '- No muestres ids internos, notas internas ni datos de otros viajeros.',
@@ -216,9 +221,10 @@ export async function sugerirRespuesta(
       inputSchema: z.object({ consulta: z.string() }),
       run: async ({ consulta }) => {
         const encontrado = await buscarConocimiento(conv.destino_id, consulta, 5, 'concierge');
-        return encontrado.length ? encontrado.map((k) => `## ${k.titulo}\n${k.contenido}`).join('\n\n') : 'Nada sobre eso en el conocimiento.';
+        return encontrado.length ? bloqueConocimiento(encontrado) : 'Nada sobre eso en el conocimiento.';
       },
     }),
+    HERRAMIENTA_WEB,
   ];
 
   const turnosPrevios = turnos(ctx.mensajes);
@@ -241,7 +247,12 @@ export async function sugerirRespuesta(
       for await (const mensaje of runner) {
         final = mensaje;
         medidor.sumar(mensaje.usage, mensaje.stop_reason);
-        for (const bloque of mensaje.content) if (bloque.type === 'tool_use') medidor.herramienta(bloque.name);
+        // `server_tool_use` es web_fetch, que corre del lado de Anthropic: si
+        // no se cuenta aquí, no aparece en dst_agente_ejecucion y deja de ser
+        // cierto que toda llamada queda registrada.
+        for (const bloque of mensaje.content) {
+          if (bloque.type === 'tool_use' || bloque.type === 'server_tool_use') medidor.herramienta(bloque.name);
+        }
       }
       return final ? textoDe(final.content) : '';
     },
@@ -315,7 +326,7 @@ export async function responderConversacion(
       run: async ({ consulta }) => {
         const encontrado = await buscarConocimiento(conv.destino_id, consulta, 5, 'concierge');
         return encontrado.length
-          ? encontrado.map((k) => `## ${k.titulo}\n${k.contenido}`).join('\n\n')
+          ? bloqueConocimiento(encontrado)
           : 'No hay nada sobre eso en el conocimiento. Si es importante para el viajero, decile que el equipo lo confirma o escalá.';
       },
     }),
@@ -524,6 +535,7 @@ export async function responderConversacion(
         return 'Marcado: no recibirá más mensajes automáticos.';
       },
     }),
+    HERRAMIENTA_WEB,
   ];
 
   const { resultado, ejecucion_id } = await ejecutar(
@@ -550,7 +562,8 @@ export async function responderConversacion(
         final = mensaje;
         medidor.sumar(mensaje.usage, mensaje.stop_reason);
         for (const bloque of mensaje.content) {
-          if (bloque.type === 'tool_use') medidor.herramienta(bloque.name);
+          // Ver la nota de la otra ruta: server_tool_use es web_fetch.
+          if (bloque.type === 'tool_use' || bloque.type === 'server_tool_use') medidor.herramienta(bloque.name);
         }
       }
 

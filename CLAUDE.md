@@ -105,63 +105,23 @@ se hace con una vista, nunca mezclando tablas.
    **Trabajo a mano** de este archivo el paso exacto, con los valores exactos
    que hay que pegar, y avisar que quedó anotado. Si un valor lo decide el
    proveedor en pantalla, se dice cuál manda.
-11. **Las fotos ajenas tampoco se pegan a mano, y el crédito no es una
-   licencia.** Es la regla 4 aplicada a las imágenes, y hace falta decirla
-   aparte porque la confusión es específica: poner "foto de Fulano" debajo no
-   da derecho a publicarla. La atribución es una *condición* de algunas
-   licencias, no un sustituto de tenerlas. Una foto la sacó una persona y es
-   suya desde que apretó el botón.
-   **De dónde sí puede salir una foto**, en este orden: propia o de Tony ·
-   cedida por el negocio (y entonces `credito` dice quién) · de la API de
-   Google Places, que licencia con atribución · de Wikimedia Commons,
-   Unsplash o Pexels con licencia comercial. **De dónde no**: capturas de
-   Tripadvisor, Booking o Google Maps, blogs de viaje, Pinterest y búsquedas
-   de imágenes. Las licencias `NC` ("non commercial") quedan fuera: esto es un
-   sitio comercial.
-   **`dst_negocio_foto.es_generica` es la otra mitad de la regla, y no es de
-   licencias sino de honestidad.** `true` significa que la foto ilustra la
-   categoría y no retrata a ese negocio. Mostrar una piscina cualquiera en la
-   ficha de un hotel, sin avisar, es afirmar algo falso sobre el negocio —y es
-   lo que nadie puede desmentir cuando el cliente ya reservó—.
-   **EXCEPCIÓN ABIERTA, decidida el 12 de septiembre de 2026 y con fecha de
-   cierre.** Sebastián decidió, sabiendo lo de arriba, que para el MVP las
-   tarjetas muestren fotos **del sitio web de cada negocio**, porque una imagen
-   genérica que no corresponde al lugar hace más daño a la demo que el riesgo
-   de usarlas un par de meses. **Tony lo confirmó el mismo día**, con el
-   planteo completo delante: que el derecho de autor nace con la foto, que el
-   crédito no es una licencia, y que el riesgo que de verdad muerde no es el
-   negocio —al que le conviene la publicidad— sino que ese negocio **no sea
-   dueño de la foto de su propia web** y detrás haya un banco de imágenes con
-   búsqueda inversa automatizada, cuyo reclamo llega a quien publica.
-   Lo que la excepción permite y lo que no:
-   - **Sí**: la `og:image` y las fotos de portada del **sitio propio del
-     negocio**, que es la fuente más defendible sin la API —la `og:image`
-     existe para que otros sitios la muestren al enlazar, y un negocio de un
-     directorio gana con que se le muestre la suya—. Van con `es_generica =
-     false`, `fuente_url` apuntando a su web y `credito` con el nombre del
-     negocio, para poder borrarlas de una si alguno reclama.
-   - **No**: raspar Tripadvisor ni Booking. No es por cautela: sus imágenes
-     están recomprimidas y con marca de agua, y es lo que este mismo archivo
-     marca como riesgo para el dominio.
-   - **Sin gente.** Es condición de Sebastián y además baja el problema: una
-     foto de un edificio no tiene derechos de imagen de nadie encima.
-   - **Vence cuando llegue `GOOGLE_PLACES_API_KEY`.** Ese día las fotos
-     licenciadas entran con `es_generica = false` y desplazan a estas, y esta
-     excepción se borra de aquí. Mientras siga escrita, sigue vigente.
-   **Dos cosas que quedaron dichas y conviene no olvidar**: si en la demo
-   alguien pregunta por las fotos, la respuesta es que son provisionales
-   mientras se conecta la API de Google —no se esconde—; y **antes de hacer
-   publicidad del sitio** (anuncios, prensa, redes) conviene que ya estén las
-   licenciadas, porque el riesgo sube con el tráfico, no con el tiempo.
-   La clave de Places cuesta prácticamente cero —unas 90 llamadas al mes, dentro
-   del crédito gratis— y lo que la bloquea no es plata sino asociar una tarjeta
-   a la cuenta de Google Cloud.
-
-   **Decirlo NO significa afearlo**, y conviene tenerlo claro porque el primer
-   intento se fue por ahí: la foto se ve entera y bien, y lo que es se dice con
-   tres palabras en el pie, junto al crédito. Apagar la imagen con un velo para
-   que "se lea de ambiente" no informa a nadie: solo hace ver mal el sitio, que
-   es distinto de ser honesto.
+11. **Las fotos de los negocios: el derecho de autor se ignora a propósito
+   hasta que llegue Google Places.** Lo decidieron Sebastián y Tony el 12 de
+   septiembre de 2026, sabiendo lo que implica: que una foto es de quien la
+   tomó, que poner el crédito no es tener licencia, y que el reclamo llega a
+   quien publica. La decisión es que **para el MVP una foto que corresponda al
+   negocio vale más que el riesgo de usarla unos meses**, y no se vuelve a
+   discutir mientras esta regla diga esto.
+   En claro: **las fotos se sacan de internet, de donde se encuentren.** No hay
+   que verificar licencia, ni llenar `credito`, ni `licencia`, ni `fuente_url`.
+   **Lo único que importa es que la foto sea del negocio del que habla la
+   ficha** — no una imagen de categoría, no un lugar parecido, no un logo.
+   **Vence cuando llegue `GOOGLE_PLACES_API_KEY`**: ese día entran las fotos
+   licenciadas y esta regla se reescribe. Mientras siga escrita, sigue vigente.
+   Lo que sí se mantiene, porque no es de licencias sino de no mentir:
+   `dst_negocio_foto.es_generica` en `true` marca una imagen que ilustra la
+   categoría y no retrata al negocio. **Con esta regla no debería haber
+   ninguna**: si no hay foto del lugar, la ficha va sin foto.
 
 ---
 
@@ -189,18 +149,18 @@ Monteverde puede tener otra paleta sin tocar una línea.
 | | |
 |---|---|
 | Tablas | 47 (35 del directorio y CRM + 11 de inteligencia + `dst_negocio_seccion`) |
-| Migraciones | 22, todas guardadas en `supabase/plataforma/` y **todas aplicadas** (la 22, el 12 de septiembre de 2026) |
-| Fotos | **91 de 91 con portada**, 148 imágenes, 26 MB en webp en el bucket `negocios`. **34 negocios con foto real suya**, bajada de su propio sitio web (excepción de la regla 11, vence con Google Places); los otros 57, con imagen de categoría de Wikimedia |
+| Migraciones | 23, todas guardadas en `supabase/plataforma/` y **todas aplicadas** (la 22 y la 23, el 12 de septiembre de 2026) |
+| Fotos | **Los 63 publicados tienen foto, el 100%** (176 imágenes en el bucket `negocios`), **elegidas a ojo una por una**. Ninguna genérica; las 63 portadas responden 200. Por sección: dónde dormir 23 · qué hacer 23 · comer y beber 11 · transporte 2 · tours 2 · explorar 2 |
 | Avisos de seguridad | 0 nuevos (queda el aviso previo por `regconfig` en `dst_idioma`) |
 | Destinos | 1 (La Fortuna, encendido) |
 | Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna, 26 con negocios dentro |
 | Idiomas | 5 · es, en, pt, fr, de |
-| Negocios | **91 publicados** (29 de la siembra original + 62 de la 20), 55 con sitio web y 24 con teléfono |
+| Negocios | **101 cargados: 63 publicados y 38 archivados.** Se archivaron los que no tenían foto y se agregaron 10 nuevos que sí la tienen (12 de septiembre de 2026). El sitio solo muestra lo publicado, así que **no queda ninguna tarjeta sin imagen**. No se borró nada: las fichas de los archivados siguen en la base |
 | Fichas con secciones | **91 de 91** ✔, investigadas en internet (`datos/investigacion/fichas-la-fortuna.json`): 231 secciones, 231 traducciones al inglés, 425 etiquetas, 175 días de horario |
 | Tours cargados | 0 |
 | Guías escritas | 0 |
-| Conocimiento de la IA | 22 fichas de La Fortuna, sin verificar por el equipo |
-| Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor) |
+| Conocimiento de la IA | **69 fichas, ninguna verificada por el equipo.** Las 61 investigadas (`datos/investigacion/conocimiento-la-fortuna.md`) se cargaron el 12 de septiembre de 2026 —47 nuevas y 14 que reemplazaron a las genéricas—, más 8 del equipo que no se tocan. 44 traen URL de fuente; 20 están marcadas `(confianza: baja)` y son las que hay que repasar primero en `/admin/ia/conocimiento` |
+| Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor). **NINGUNO HA RESPONDIDO NUNCA.** `dst_agente_ejecucion` tiene 2 filas y las dos son errores 400 del cron de seguimiento. Ver "El agente todavía no ha contestado nunca" |
 | Automatizaciones | 10 de arranque, encendidas |
 | Panel `/admin` | Completo, con moderación de reseñas en `/admin/resenas`; el primer administrador entra con la invitación de `aalvarado@gmail.com` |
 | Sitio | Next.js 15, compila, lee de la base, chat concierge en todas las páginas |
@@ -342,6 +302,129 @@ EMAIL_REMITENTE=hola@visitlafortunacr.com
 5. El canal ya está creado en la base (`dst_canal`: email/smtp, remitente
    `hola@visitlafortunacr.com`, secreto en `SMTP_CLAVE`). No hay que crearlo:
    se revisa en `/admin/ajustes`.
+
+### Supabase · la migración 23 ya está aplicada
+
+**Hecho el 12 de septiembre de 2026.** La pegó Sebastián en el SQL Editor.
+Verificada con la clave de servicio: `conocimiento_base` devuelve
+`id, tipo, titulo, contenido, prioridad, fuente`, `buscar_conocimiento` agrega
+`fuente` antes de `relevancia`, y cada ficha de `contexto_destino.conocimiento`
+trae la llave `fuente`. Es idempotente: volver a pegarla entera no rompe nada.
+
+**Las 61 fichas ya están cargadas** (12 de septiembre de 2026): 69 en la base,
+0 verificadas, sin títulos repetidos, **44 con URL abrible** y 20 marcadas
+`(confianza: baja)`.
+
+**La trampa que salió al verificar, y que explica una línea del prompt**: las
+tres fichas de confianza baja que más se preguntan —`Cómo llegar desde San José
+(SJO)` (p8), `Catarata de La Fortuna` (p7) y `Volcán Arenal` (p7)— son de
+prioridad 7+, así que van en el prompt del sistema, **de donde `web_fetch` no
+puede leer URLs**. Justo los tres precios más consultados eran los únicos no
+comprobables.
+No se arregló bajándoles la prioridad —se perdería tenerlas siempre a mano—
+sino con una instrucción: **si el agente necesita comprobar un dato de una
+ficha que ya trae sabida, la busca antes con `buscar_conocimiento`**, y así la
+fuente entra en la conversación por un resultado de herramienta nuestra, que sí
+es origen válido. Si alguna vez se reordenan las prioridades, esto es lo que
+hay que volver a mirar.
+
+Qué hace: que el agente **vea de dónde sale cada dato**.
+`dst_conocimiento.fuente` existe desde la 11, pero ninguna de las tres
+funciones que alimentan a la IA lo devolvía, así que el agente recibía título
+y contenido y nada más. Con las 61 fichas del punto 10 eso pasó a importar:
+puede decir "la entrada cuesta 20 USD" y no puede decir de dónde lo sacó ni
+pasarle el enlace al viajero que quiera comprobarlo.
+
+**Por qué es DDL y no un parche en el código**: `buscar_conocimiento` y
+`conocimiento_base` tienen `returns table (...)` explícito, y Postgres **no
+deja cambiar el tipo de retorno con `create or replace`** — hay que `drop`
+primero. Por eso la clave de servicio no alcanza. `contexto_destino` sí se
+parchea sola, porque ahí el conocimiento va dentro de un `jsonb`.
+
+**El código ya está puesto y no espera a la migración**: `fuente` es opcional
+en `Conocimiento`, así que hasta que se aplique llega `undefined` y
+`bloqueConocimiento` simplemente no pinta la línea. No hay que desplegar nada
+en un orden concreto.
+
+### El agente todavía no ha contestado nunca
+
+**Hay que saberlo antes de enseñarlo.** Al 12 de septiembre de 2026
+`dst_agente_ejecucion` tiene **2 filas, y las dos son errores**: el cron de
+seguimiento del 11 de septiembre, con este 400 de la API:
+
+> This API key is not scoped to a workspace, so this request must include the
+> `anthropic-workspace-id` header with the ID of the workspace to use.
+
+O sea que el problema **no es el conocimiento ni el prompt**: la clave de
+Anthropic que se estaba usando es de la organización y no de un workspace.
+Hay dos salidas y basta una:
+
+1. **Usar una clave de workspace** (Console → Workspaces → API keys). Es lo
+   más simple y no toca código.
+2. **Mandar el encabezado**: `lib/ia/cliente.ts` ya lo hace si existe
+   `ANTHROPIC_WORKSPACE_ID` en el entorno. Si la variable no está, el cliente
+   queda exactamente como antes.
+
+**Lo que sí está verificado contra la base**, y es todo lo que el agente come:
+69 fichas de conocimiento, 17 de prioridad 7+ que van siempre en el prompt, 44
+con URL de fuente, y `buscar_conocimiento("cuanto cuesta la catarata")`
+devuelve la ficha correcta con su fuente y su marca de confianza. Lo único sin
+probar es la llamada al modelo.
+
+**La prueba que cierra esto**, en cuanto haya clave buena: descomentar
+`ANTHROPIC_API_KEY` en `.env.local`, `npm run dev`, preguntarle al chat de la
+portada cuánto cuesta la catarata, y mirar `dst_agente_ejecucion`. Tiene que
+aparecer una fila **sin `error`**, con `web_fetch` dentro de
+`herramientas_usadas` si fue a comprobar el precio.
+
+### El concierge navega: `web_fetch` está activado
+
+**Decidido por Sebastián el 12 de septiembre de 2026.** El concierge tiene el
+server tool **`web_fetch`** de la API de Anthropic (`HERRAMIENTA_WEB` en
+`lib/ia/cliente.ts`), en sus dos rutas: el chat en vivo y el borrador del panel.
+
+Para qué: los datos que el archivo de conocimiento marca `(confianza: baja)`
+son precios y horarios, y envejecen. Si el viajero está por decidir con uno,
+el agente abre la fuente y lo comprueba antes de responder.
+
+**El límite que hay que tener presente y no es opcional**: `web_fetch` solo
+abre URLs **que ya pasaron por la conversación**, y **las del prompt del
+sistema NO cuentan** (es la defensa de Anthropic contra exfiltración). Como
+`conocimiento_base` —las fichas de prioridad 7+— se inyecta en el prompt del
+sistema, **esas fuentes no se pueden abrir**. Sí las que devuelve
+`buscar_conocimiento`, porque es una herramienta nuestra y los resultados de
+herramientas del cliente sí son origen válido. En claro: **el agente puede
+comprobar la fuente de una ficha que buscó, no la de una que ya traía puesta.**
+No es un problema en la práctica —las 20 fichas de confianza baja son casi
+todas de prioridad 5 y 6, que se buscan— pero explica por qué a veces no la
+abre.
+
+**Cuánto cuesta**: la herramienta **no cobra por llamada**, solo los tokens de
+lo que baja. Con `max_content_tokens: 8000` el techo son unos **4 centavos por
+página**, y una página promedio son 2.500 tokens (~1,3 centavos). Lo que sí
+suma es que lo bajado se arrastra en el resto de la conversación. Topes
+puestos: `max_uses: 3` por petición.
+
+**`blocked_domains` es la regla 4 puesta en código**: Tripadvisor y Booking
+están bloqueados en la propia herramienta. La forma de que no se copie texto de
+reseñas ajenas no es pedírselo al modelo en el prompt, es que no pueda.
+
+**Las llamadas quedan contadas.** Los server tools llegan como bloques
+`server_tool_use`, no `tool_use`, y el medidor de `agente.ts` solo miraba los
+segundos: se corrigieron los dos sitios, o `dst_agente_ejecucion` habría dejado
+de decir la verdad sobre qué herramientas se usaron.
+
+**Lo que quedó sin probar contra la API**, y conviene hacerlo en el primer
+despliegue con clave: `ANTHROPIC_API_KEY` está comentada en `.env.local`, así
+que esto se verificó leyendo el SDK, no ejecutándolo. Lo que se comprobó ahí es
+lo que importaba: `BetaToolRunner` filtra solo bloques `tool_use` (así que no
+intenta ejecutar el server tool ni da "Tool not found") y trata `pause_turn`
+como `resume`, que es como se continúa un turno con herramienta de servidor.
+`npx tsc --noEmit` y `npm run build` pasan.
+
+**Si hay que apagarlo**, es sacar `HERRAMIENTA_WEB` de los dos arreglos de
+herramientas de `agente.ts` y borrar del prompt las cuatro líneas que hablan de
+la fuente. No hay nada en la base que dependa de esto.
 
 ### Supabase · la migración 22 ya está aplicada
 
@@ -511,9 +594,20 @@ un despliegue ya hecho. `/admin/ajustes` muestra cuáles están puestas.
 
 ## Lo que sigue, en orden
 
-1. Poner en Vercel `ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY` y `CRON_SECRET`;
-   entrar a `/admin` con el correo invitado y verificar las 22 fichas de
-   conocimiento.
+1. **Hacer que el agente conteste, que es lo único del MVP que nunca ha
+   funcionado.** La clave de Anthropic tiene que ser de un workspace, o hay que
+   poner `ANTHROPIC_WORKSPACE_ID` (ver "El agente todavía no ha contestado
+   nunca"). Después, poner en Vercel `ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY`
+   y `CRON_SECRET`; entrar a `/admin` y **repasar las 69 fichas de
+   conocimiento**, que ninguna está verificada. Se empieza por las **20 de `(confianza: baja)`**: son
+   precios y horarios sacados de guías de viaje, y son las que pueden estar
+   mal. El texto largo de cada una, con sus fuentes, está en
+   `datos/investigacion/conocimiento-la-fortuna.md`; si se corrige ahí, se
+   vuelve a correr `scripts/cargar-conocimiento.mjs --aplicar` y se pisa la
+   ficha (la llave es el título).
+   Con la clave de Anthropic puesta, **probar que `web_fetch` funciona de
+   verdad**: preguntarle al concierge por el precio de la Catarata y ver que
+   aparezca `web_fetch` en `herramientas_usadas` de `dst_agente_ejecucion`.
 2. Hacer los pasos de **Trabajo a mano**: la migración 19 en Supabase, la
    clave de Google Places, DNS en GoDaddy, buzón en SiteGround, variables en
    Vercel, confirmación de correo apagada en Supabase. Y arrancar el trámite
@@ -791,114 +885,286 @@ hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
    tanda deja las 91 fichas con contacto, mapa y opiniones.
    Todo entra `estado_verificacion = 'pendiente'` y las traducciones al inglés
    `esta_revisada = false`: son textos que nadie del equipo ha leído.
-9. ~~**Fotos en las tarjetas y en la ficha.**~~ **Hecho y aplicado el 12 de
-   septiembre de 2026.** Hasta hoy la tarjeta pintaba un
-   degradado con el color de la sección y `dst_negocio_foto` llevaba desde la
-   migración 02 sin una sola fila.
-   **Lo que hay ahora**: bucket público `negocios` en Supabase Storage, con las
-   rutas `<destino>/<negocio>/<archivo>.webp` —el destino primero, porque es el
-   segmento que miran las políticas para decidir quién puede escribir—;
-   `scripts/buscar-fotos-commons.mjs`, que trae de Wikimedia Commons fotos con
-   licencia libre y **su autor y su licencia**, que es lo que ninguna búsqueda
-   de imágenes da; `scripts/cargar-fotos.mjs`, que sube y escribe las filas; y
-   en el panel un bloque de fotos con subir, marcar portada y borrar.
-   **Las 60 fotos conseguidas son de categoría, no de cada negocio**, y entran
-   con `es_generica = true` (regla 11). Se reparten rotando, para que catorce
-   restaurantes no muestren la misma imagen. En la tarjeta van de fondo con el
-   velo subido; en la ficha se dice que son ilustrativas. **Cuando llegue
-   `GOOGLE_PLACES_API_KEY`, las fotos reales entran con `es_generica = false` y
-   las desplazan sin borrar nada**: `fotos_de_negocio` y `negocios_publicados`
-   ya ordenan poniendo primero lo real.
-   Ojo con el ritmo de Commons: corta con texto plano y HTTP 200, no con un
-   código de error, así que un cliente ingenuo cree que no hay fotos. El
-   script lo detecta, espera y reintenta, y es reanudable.
-   **Una trampa que costó una foto**: Commons puede marcar
-   `AttributionRequired` y aun así no traer campo `Artist`. Una licencia que
-   obliga a nombrar al autor y no dice quién es **no se puede cumplir**, así
-   que esa foto se descarta; no se inventa un crédito. Cuando el archivo dice
-   "Own work", el autor es quien lo subió y el buscador lo usa de respaldo.
-   Hoy son 0 de 104 las que exigen crédito sin traer autor.
+9. **Poner las 91 fotos de los negocios. 35 HECHAS, faltan 56.**
+   **Hecho el 12 de septiembre de 2026**: 90 imágenes de 35 negocios, todas
+   del sitio web del propio negocio y **todas miradas una por una** antes de
+   subirlas. Ninguna genérica. Verificado contra la base: `negocios_publicados`
+   devuelve 35 con `foto_portada_url`, 0 con `foto_portada_generica`, y las
+   imágenes salen por su URL pública (`200 image/webp`).
 
-   **Lo que de verdad hacía ver mal el sitio no era la regla, eran dos errores
-   de oficio.** Quedan escritos porque los dos se repiten solos:
+   **La cadena, que es reanudable y se puede repetir en otro destino:**
+   ```
+   node scripts/traer-fotos-del-sitio.mjs      # baja candidatas a .fotos/
+   node scripts/limpiar-candidatas.mjs --aplicar
+   node scripts/armar-contactos.mjs            # hojas de contacto para revisar
+   # ...mirarlas y escribir datos/investigacion/fotos-elegidas.json...
+   node scripts/preparar-fotos.mjs --aplicar   # copia las elegidas a fotos/
+   node --env-file=.env.local scripts/cargar-fotos.mjs --aplicar
+   ```
+   `.fotos/` es directorio de trabajo y se puede borrar entero; lo único que no
+   se regenera solo es **`datos/investigacion/fotos-elegidas.json`**, que es la
+   revisión a ojo.
 
-   - **Tres fotos por categoría no alcanzan.** Con 91 negocios repartidos en
-     46 imágenes, los seis resorts salían con la MISMA foto uno al lado del
-     otro en la retícula. Eso se ve peor que no tener foto. El buscador ahora
-     pide **tantas fotos como negocios tiene la categoría** (`NECESITA` en
-     `buscar-fotos-commons.mjs`): 104 imágenes, 90 distintas para 91 negocios,
-     y ninguna sección con repetidos. Al agregar negocios hay que subir ese
-     número, o vuelve el problema.
-   - **El velo sobre la foto era una mala idea con buena intención.** Se puso
-     al 96% de opacidad sobre un degradado casi negro para que la imagen "se
-     leyera de ambiente": el resultado fue una tarjeta de barro. Y encima no
-     protegía nada, porque el texto de la tarjeta va DEBAJO de la imagen, no
-     encima. Hoy es un tinte del color de la sección al 28%, en `soft-light`,
-     que es lo que le da ritmo a la retícula sin tapar la foto.
+   **Los dos filtros automáticos que sí valen la pena**, porque los dos
+   problemas aparecieron solos: el **hash perceptual** (el hash de bytes no
+   sirve — el mismo original en dos tamaños entra dos veces, y Baldi bajó sus
+   8 fotos como 4 pares) y la **detección de gráficos** por pocos colores más
+   borde uniforme, que saca logos y recortes sobre negro.
 
-   Para rehacer el reparto cuando cambien las fotos o los negocios:
-   `node --env-file=.env.local scripts/cargar-fotos.mjs --rehacer-genericas --aplicar`.
-   Borra filas y archivos de las genéricas y vuelve a repartir; **no toca las
-   propias**.
+   **Pero el filtro no decide lo que importa.** Lo que hay que mirar no es
+   consultable: aparecieron fotos de stock de hojas y ranas mezcladas con las
+   reales (Nayara, Místico), banners promocionales con precios encima (Casa
+   Luna, Interbus), un pasillo de hotel desenfocado (Roca Negra) y la rana de
+   ojos rojos, que es la imagen más genérica de Costa Rica (Eco Natura).
+   **7 negocios se descartaron enteros** por eso, y están anotados con su
+   motivo en `_sin_nada` dentro de `fotos-elegidas.json`.
 
-   ### Wikimedia Commons fue la fuente equivocada, y hay que decirlo
+   **Lo que sí cambió respecto del intento anterior**: los operadores de
+   aventura —que antes quedaron en cero por la regla de "sin gente"— ahora
+   entran, y son de los mejores: sus fotos llevan **su propia marca** en balsas,
+   cascos y góndolas (Wave, Sky, La Roca), que es la prueba más fuerte de que
+   la foto es de ese negocio y no de cualquiera.
 
-   Las 104 imágenes de Commons **quedaron feas**, y el motivo no es cosmético:
-   **Commons es un archivo documental, no un banco de fotos**. Para "hoteles"
-   devolvió un Marriott de Albuquerque y un cuarto de hostal en Delhi; para
-   "resorts", un spa en Kampala; para "comida típica", al secretario de Estado
-   de EE.UU. cocinando gallo pinto; y para "cocina internacional", **un PDF
-   escaneado de un catálogo médico de 1895** —el filtro no miraba el tipo de
-   archivo, ya está corregido—.
+   ### Dos errores de extracción que costaron 10 negocios
 
-   Se eligió Commons porque su API entrega la licencia y el autor servidos, y
-   eso resolvía la regla 11 sin fricción. **Fue optimizar por lo demostrable en
-   vez de por lo que hay que mirar**: "se ve bien" no es una propiedad
-   consultable por API, y ningún filtro automático la sustituye.
+   La primera pasada dejó 13 sitios en CERO candidatas y parecía que no tenían
+   fotos. Ninguno era verdad. Los dos fallos, porque los dos se repiten solos:
 
-   **El camino bueno es elegirlas a mano en Pexels o Unsplash**, que la regla 11
-   ya permitía desde el principio: son bancos profesionales, uso comercial
-   libre y sin atribución obligatoria. El cargador lee
-   `fotos-entrada/_categorias/<categoria>/*.jpg` y **esas mandan sobre las de
-   Commons**, categoría por categoría, así que se puede ir haciendo por partes
-   sin dejar el sitio a medias. La lista de cuántas hace falta por categoría
-   está en `fotos-entrada/_categorias/LEEME.md`.
+   - **Filtrar por subcadena en vez de por palabra.** La lista de nombres
+     basura era una sola expresión regular contra la URL entera, y **`star`
+     coincidía dentro de "co-STAR-ica"**: eso bloqueó en silencio todas las
+     imágenes de cualquier dominio `*costarica*.com`. The Springs tenía 122
+     fotos y bajó cero. Ahora se compara por palabras del nombre de archivo y
+     su carpeta, partiendo por `- _ . /`.
+   - **Mirar solo `<img>` y `og:image`.** Media web moderna sirve la portada
+     como fondo CSS, en `<picture><source>` o desde su propia API en otro host
+     (La Choza de Laurel sirve desde `railway.app`). Hay que barrer también
+     `url(...)`, `srcset`, JSON-LD y, de último recurso, cualquier URL absoluta
+     que termine en imagen.
 
-   Openverse se probó como tercera vía y **no sirve**: sin clave, sí, pero su
-   fondo comercial es casi el mismo Commons y devuelve lo mismo.
+   Con eso arreglado, The Springs pasó de 0 a 8, El Silencio del Campo a 8 de
+   123 vistas, y entraron Don Rufino y La Choza.
 
-   ### Las fotos del sitio de cada negocio (excepción de la regla 11)
+   ### Buscarle el sitio web al que no lo tiene
 
-   **34 de 91 negocios tienen foto real suya**, bajada de su propia web:
-   `scripts/traer-fotos-del-sitio.mjs` recorre los 55 con `sitio_web`, saca la
-   `og:image` y las imágenes del cuerpo, y deja hasta 6 candidatas por negocio
-   en `fotos-entrada/_sitios/`. **Bajar no es aprobar**: solo se sube lo que
-   está en `_sitios/elegidas.json`, y esa lista salió de mirar las 188
-   candidatas en hojas de contacto (`scripts/armar-contactos.mjs`).
+   `scripts/buscar-sitio-web.mjs` arma dominios probables desde el nombre y los
+   prueba. **Lo difícil no es encontrar un sitio, es no quedarse con el
+   equivocado**, y la trampa es que Costa Rica es un país chico con nombres
+   repetidos. Con solo pedir que la página mencione el nombre y algo local,
+   se colaron seis: **Acacia** era la Asociación Costarricense de Agencias de
+   Carga, **Mirador Steak House** una inmobiliaria, **Soda Rodríguez** el sitio
+   de un expresidente de la República y **Soda Víquez** un estudio de
+   arquitectura — todos ticos, todos decían "Costa Rica".
+   **Lo que lo resuelve es leer el `<title>`**, que es lo único que dice de qué
+   es el sitio. Está metido en el script, pero **la comprobación final se hace
+   igual mirando**: `bosque.cr` pasó todos los filtros y resultó ser un sitio
+   de ilustraciones.
+   Salieron 7 buenos, y de ahí 5 negocios más con foto: Amor Arenal, Nayara
+   Gardens, Royal Corin, Que Rico y Cavernas de Venado.
 
-   **Por qué la revisión es a ojo y no un filtro.** Hay tres cosas que ningún
-   filtro decide, y las tres aparecieron:
-   - **Fotos que no son del lugar.** La Fortuna Lodge tenía en su web una foto
-     de **Río de Janeiro**; North Fields, un tractor en un campo de colza
-     europeo. Un filtro no las distingue de una foto legítima.
-   - **Gente.** El criterio que eligió Sebastián es **"sujeto"**: fuera
-     retratos, grupos y gente posando; pasan figuras pequeñas, de espaldas o al
-     fondo.
-   - **Logos, textos superpuestos, capturas y collages**, que son la mitad de
-     lo que devuelve una portada.
+   **Los 7 ya están en `dst_negocio.sitio_web`** (12 de septiembre de 2026):
+   de 55 a **62 con sitio web**. Los escribió
+   `scripts/cargar-sitios-web.mjs` desde
+   `datos/investigacion/sitios-web-encontrados.json`, que guarda cada URL
+   **junto al `<title>` con el que se verificó** — y también los ocho dominios
+   descartados con su motivo, para no volver a caer en ellos.
+   El cargador **vuelve a pedir la página y comparar el título antes de
+   escribir**, porque un dominio puede cambiar de dueño entre que se investiga
+   y que se carga, y meter en la ficha de un hotel el sitio de otra cosa es
+   peor que dejarlo vacío. Solo rellena lo que esté vacío (`is('sitio_web',
+   null)` también en el UPDATE), así que lo que corrigió una persona no se pisa.
+   Esto además le sirve a Google Places: busca el `place_id` por nombre y
+   dirección, y tener el sitio ayuda a no traer el negocio de al lado.
 
-   **Los operadores de aventura se quedaron en cero**, y no por descuido: su
-   producto *es* gente haciendo algo, así que todas sus fotos tienen personas
-   como sujeto. Son siete —Desafío, Pure Trek, La Roca, Wave, Ecoglide, Arenal
-   Jungle Tours y Ecotermales— y siguen con imagen de categoría. Si alguna vez
-   se afloja el criterio, ahí están las candidatas ya bajadas.
+   ### Los lugares públicos son el caso al revés
 
-   Reparto final: **que hacer 13/30 · dónde dormir 13/29 · comer y beber 6/26 ·
-   transporte 2/2**. Las 57 restantes, con genérica de Wikimedia.
-10. **Entrenar al agente local mientras llega el experto.** Recopilar de
-   internet todo lo que haya sobre La Fortuna y dejarlo en un `.md` de
-   entrenamiento, **para revisión de Tony antes de cargarlo** a
-   `dst_conocimiento`. Es el puente hasta que el experto real pase su archivo.
+   `scripts/traer-fotos-de-lugares.mjs` trae de Wikimedia Commons las fotos de
+   las fichas que **no son un negocio sino un sitio público**: el lago Arenal y
+   el Parque Nacional entraron así.
+
+   **Esto no repite el error de Commons de la primera vez, y la diferencia
+   importa**: entonces se buscó "hoteles" y devolvía un Marriott de
+   Albuquerque —una imagen de CATEGORÍA—. Aquí se busca un lugar con nombre
+   propio, y **una foto del lago Arenal ES el lago Arenal**. No hay categoría de
+   por medio. Por eso la lista de lugares del script está escrita a mano y es
+   corta: un hotel nunca va ahí.
+   Aun así hay que mirar: "El Salto" devolvió otro sitio del mismo nombre —un
+   edificio azul con iguanas— y quedó fuera.
+
+   ### Los que no tienen foto están archivados, no borrados
+
+   **Decidido por Sebastián el 12 de septiembre de 2026.** Los 39 sin foto
+   pasaron a `estado_publicacion = 'archivado'` con
+   `scripts/archivar-sin-foto.mjs`, así que **el sitio no muestra ninguna
+   tarjeta sin imagen**: `negocios_publicados` devuelve 52 y las 52 tienen
+   portada.
+
+   **Por qué archivar y no borrar**, que fue la pregunta: un DELETE se habría
+   llevado **98 de las 231 secciones de ficha investigadas**, más 149
+   etiquetas, 63 días de horario, 78 rutas y 78 traducciones al inglés. Y choca
+   con el plan: las fotos que faltan las está consiguiendo Sebastián a mano, y
+   el día que llegue la de Soda Víquez el negocio tiene que existir todavía.
+   Archivado desaparece del sitio, del buscador y del catálogo de la IA
+   exactamente igual que borrado —todo lee `publicado`— pero la ficha se queda.
+
+   **El camino de vuelta, que es el que se va a usar seguido**: después de cada
+   tanda de fotos nuevas,
+   `node --env-file=.env.local scripts/archivar-sin-foto.mjs --reactivar --aplicar`
+   republica lo archivado que ya tenga foto.
+
+   **Ojo con lo que se fue**, porque no son todos negocios menores: se
+   archivaron **Místico** (los puentes colgantes), **Kalambu**,
+   **Ecotermales**, **Bogarín Trail**, **Desafío**, **Tifakara** y **Selina**,
+   y la sección **transporte se quedó en cero** — Interbus y Adobe eran sus dos
+   únicos negocios. Un sitio de La Fortuna sin los puentes colgantes se nota,
+   así que esos son los primeros a los que conviene conseguirles foto.
+
+   ### Volver a llenar el directorio con negocios que SÍ tienen foto
+
+   **Hecho el 12 de septiembre de 2026.** Archivar dejó el directorio en 52, así
+   que se buscaron negocios reales de La Fortuna que no estuvieran en la base
+   **y cuya web tuviera fotos suyas**. Entraron 10 y el directorio quedó en 63,
+   con transporte y tours saliendo de su hueco.
+
+   La cadena: `datos/investigacion/candidatos-negocios.json` (escrito a mano,
+   con dominios a probar) → `scripts/explorar-candidatos.mjs` verifica y baja
+   fotos → revisión a ojo → `scripts/cargar-negocios-nuevos.mjs` inserta.
+
+   **El cargador escribe TRES cosas y las tres hacen falta**: la fila en
+   `dst_negocio`, **una `dst_ruta` por idioma** —sin eso la ficha no tiene URL y
+   no abre— y `dst_traduccion` con resumen y descripción en inglés. Entra todo
+   `estado_verificacion = 'pendiente'` y la traducción `esta_revisada = false`.
+   **Los textos son propios**, escritos para este sitio: copiarlos de la web del
+   negocio sería contenido duplicado, que es lo que hunde la apuesta de GEO.
+
+   **De 30 candidatos solo 10 sirvieron, y los descartes enseñan más**:
+   - **Chachagua Rainforest Hotel**: sus fotos no eran del hotel. Una era Río
+     Celeste y otra un bote con `canoa-aventura.com` rotulado en el costado.
+   - **MonteTours**: opera todo el país, y sus fotos son de Manuel Antonio,
+     Puerto Viejo y el Teatro Nacional. No es un negocio de La Fortuna.
+   - **Jacamar Naturalist Tours**: el dominio resolvió a "Arenal Tours", otro
+     nombre. Un negocio con un nombre y un sitio con otro no se dan por el mismo.
+   - **Arenal Natura** resultó ser `naturaecopark.com`, que **ya estaba en la
+     base** como `parque-eco-natura`. En vez de duplicarlo, sus fotos sirvieron
+     para reactivarlo.
+
+   **Ojo con `rango_precio`**: el enum es `economico · moderado · alto · lujo`.
+   No existe "medio", y el cargador se planta antes de escribir nada.
+
+   ### Poner fotos a mano en `fotos/`
+
+   Es el camino cuando alguien las consigue por su cuenta, y **es compatible con
+   todo lo automático**: una subcarpeta por negocio con el nombre de su babosa,
+   y `cargar-fotos.mjs` las sube igual que las demás.
+
+   `node --env-file=.env.local scripts/listar-fotos-que-faltan.mjs` escribe
+   **`fotos/FALTAN.md`** con quién falta, **cómo se tiene que llamar su
+   carpeta** y dónde queda cada uno. Se genera desde la base a propósito: el
+   nombre de la carpeta tiene que ser la babosa exacta y varias no se parecen al
+   nombre del negocio. Se puede volver a correr para ver cómo va.
+
+   **Ojo, aquí había una trampa que ya está desactivada**: `preparar-fotos.mjs`
+   vaciaba `fotos/` entera con un `rmSync` recursivo antes de copiar lo suyo, así
+   que se habría llevado por delante las fotos puestas a mano sin avisar. Ahora
+   solo rehace las carpetas que están en `fotos-elegidas.json` y **avisa cuáles
+   no toca**. Si alguna vez se toca ese script, esto es lo que hay que respetar.
+
+   **Cómo seguir con los 39 que faltan.** El hueco real es **comer y beber,
+   9 de 26**: son sodas y restaurantes de pueblo que no tienen web (Soda
+   Víquez, Tica Grill, El Turnito, Pollo Fortuneño). Ahí no hay nada que
+   raspar y la respuesta es `GOOGLE_PLACES_API_KEY`.
+   **Un callejón sin salida que ya se probó, para no repetirlo**: los
+   restaurantes que están dentro de un hotel —Acacia en Noah's Forest, Bosque
+   en Tifakara, Cuenca en Casa del Río— comparten el sitio web del hotel y
+   devuelven **sus mismas fotos**. Cuenca trajo literalmente la imagen que ya
+   es portada de Casa del Río. Poner la misma foto en dos fichas es el mismo
+   error con otra cara.
+   Quedan dos por reintentar otro día: **Desafío** (vio 49 imágenes, las
+   rechazó todas por tamaño y después dejó de conectar) y **Bogarín Trail**,
+   que no abre desde aquí.
+   **Ojo con las babosas**: varias no son las que uno supondría del nombre
+   (Baldi es `baldi-hot-springs`, el Observatory es `arenal-observatory-lodge`,
+   Kenko es `kenko-bar-restaurante`). Se consultan en la base antes de crear la
+   carpeta; el cargador avisa y se salta la que no corresponda a nadie.
+   Lo que sí quedó hecho y funciona: la migración 22, el bloque de fotos del
+   panel en `/admin/negocios/[id]`, la galería de la ficha
+   (`componentes/GaleriaNegocio.tsx`) y la portada en la tarjeta. **Falta solo
+   el contenido.**
+   Dos cosas aprendidas que no hay que repetir: buscar imágenes por API sin
+   mirarlas no sirve —se colaron un PDF de 1895, una foto de Río de Janeiro en
+   la web de un lodge de La Fortuna y un tractor en un campo de colza europeo—,
+   y apagar la foto con un velo para disimular que es genérica solo hace ver
+   peor el sitio.
+10. ~~**Entrenar al agente local mientras llega el experto.**~~ **Escrito el 12
+   de septiembre de 2026. Falta que Tony lo lea: no se ha cargado nada.**
+   El borrador es `datos/investigacion/conocimiento-la-fortuna.md`: **61
+   fichas** (48 datos, 7 preguntas frecuentes, 3 avisos, 2 guiones y 1 regla),
+   investigadas en internet, cada una con su fuente.
+   **El formato es markdown y eso es la decisión del punto**: cada `### título`
+   es una fila de `dst_conocimiento`, con una línea de metadatos
+   (`tipo · prioridad · para · confianza`) que el cargador lee. Tenía que
+   poderlo corregir alguien que sepa de La Fortuna y no de SQL, y un `.json`
+   no lo permite.
+   **`confianza` es el campo que hace útil la revisión**: `alta` es un hecho
+   estable, `baja` es un precio o un horario. **20 de las 61 son de confianza
+   baja** y son exactamente las que hay que mirar primero. No es columna de la
+   tabla; el cargador la pega al final de `fuente` para que se vea en el panel.
+   Se carga con `scripts/cargar-conocimiento.mjs` (en seco y luego
+   `--aplicar`), que valida tipo, prioridad y títulos repetidos **y se planta
+   sin escribir nada si algo está mal**: media carga es peor que ninguna.
+   Deja 47 fichas nuevas y **reemplaza 14 de las 22 que ya estaban**, que eran
+   genéricas y con fuente "equipo (verificar)" — la entrada a la catarata decía
+   18 USD y son 20, y las termales eran 6 cuando son 14.
+   **La llave es el título, y por eso existe `reemplaza`**: cinco fichas viejas
+   decían lo mismo con otro nombre (`Cerro Chato`, `Lago Arenal`, `Río Celeste
+   (Parque Nacional Tenorio)`, `Salud y seguridad`, `Hacia Monteverde`).
+   Sin ese campo habrían quedado vivas junto a las nuevas y **el agente tendría
+   dos versiones del mismo dato con precios distintos**. Al renombrar una ficha
+   hay que acordarse de esto.
+   Las 8 que el archivo **no toca** son las 4 reglas de la casa, la política de
+   reservas, los 2 guiones y `Tours: horarios y recogida`: eso lo escribió el
+   equipo, no sale de internet, y no es lo que este punto viene a resolver.
+   **Todo entra `esta_verificado = false`**, incluso lo que Tony ya haya leído
+   en el `.md`: la marca de verificado se pone desde `/admin/ia/conocimiento`,
+   que es donde queda constancia de quién la puso.
+   El propio archivo cierra con **lo que no tiene y nadie va a encontrar en
+   internet** —qué guía es bueno para aves, quién abre los domingos, qué pasó
+   de verdad en 1968 contado por alguien de aquí—. Eso es el encargo del
+   experto real, y ahora está escrito en vez de supuesto.
+11. **Imágenes representativas en el mosaico de "Qué hacer" de la portada.**
+   Las tarjetas de las fichas ya tienen foto desde el punto 9, pero **el
+   mosaico de la portada sigue con degradados de color**, y es lo primero que
+   ve cualquiera que entre. Hoy son cinco tarjetas —**aguas termales, vida
+   silvestre, canopy, café y chocolate, y volcán**— y cada una pinta
+   `AMBIENTE[c.babosa]`, un degradado CSS al 50% de opacidad, en
+   `app/[idioma]/page.tsx`.
+
+   **Ojo: esas cinco no están escritas en el código.** El mosaico es
+   `conContenido` filtrado por sección, **ordenado por `c.total` y cortado en
+   5**, así que **cambian solas** en cuanto se agreguen negocios: hoy volcán
+   entra con 2, y cataratas, canyoning y tours de aventura están empatados
+   detrás. Atar cinco imágenes a cinco nombres se rompe el día que alguien
+   cargue un negocio más.
+
+   Dos caminos, y **el primero es el que yo haría**:
+
+   - **Prestarle la foto al negocio mejor valorado de esa categoría.** La
+     portada **ya hace exactamente eso con el texto**: `mejorDe(c)` busca el
+     negocio mejor calificado de la categoría y la tarjeta usa su `resumen`.
+     Desde la migración 22 ese mismo objeto trae `foto_portada_url`, así que
+     es usar lo que ya está en la mano: **cero migraciones, cero imágenes
+     nuevas, y funciona para cualquier categoría que suba al mosaico**,
+     incluidas las de Monteverde el día que exista.
+   - **Una imagen propia por categoría y destino.** Más control editorial, pero
+     **no va en `dst_categoria`**, que es el catálogo global: la foto de volcán
+     de La Fortuna no sirve para Monteverde. Va en `dst_destino_categoria`, que
+     es la tabla por destino, con una columna nueva — o sea **migración 23** y
+     SQL Editor.
+
+   En los dos casos el degradado **no se tira**: se queda de respaldo para
+   cuando una categoría no tenga foto, y de velo encima para que el título y el
+   conteo sigan legibles. El `.fondo` ya está posicionado en `inset: 0` con su
+   zoom al pasar el mouse, así que la pieza de CSS está hecha.
 
 **La regla 4 quedó resuelta, no pospuesta.** El punto 7 se hizo por la API de
 Google, que sí licencia el texto, con autor, enlace y vencimiento de 30 días.
