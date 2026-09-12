@@ -7,7 +7,7 @@ import type { Rol } from '@/lib/supabase-sesion';
  */
 export type Seccion =
   | 'tablero' | 'leads' | 'conversaciones' | 'viajeros' | 'reservas' | 'tareas'
-  | 'negocios' | 'tours' | 'guias' | 'ia' | 'reportes' | 'equipo' | 'ajustes';
+  | 'negocios' | 'tours' | 'guias' | 'resenas' | 'ia' | 'reportes' | 'equipo' | 'ajustes';
 
 export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: string }[] = [
   { seccion: 'tablero',        ruta: '/admin',                nombre: 'Tablero',        grupo: '' },
@@ -19,6 +19,7 @@ export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: stri
   { seccion: 'negocios',       ruta: '/admin/negocios',       nombre: 'Negocios',       grupo: 'Contenido' },
   { seccion: 'tours',          ruta: '/admin/tours',          nombre: 'Tours',          grupo: 'Contenido' },
   { seccion: 'guias',          ruta: '/admin/guias',          nombre: 'Guías',          grupo: 'Contenido' },
+  { seccion: 'resenas',        ruta: '/admin/resenas',        nombre: 'Reseñas',        grupo: 'Contenido' },
   { seccion: 'ia',             ruta: '/admin/ia',             nombre: 'Inteligencia',   grupo: 'IA' },
   { seccion: 'reportes',       ruta: '/admin/reportes',       nombre: 'Reportes',       grupo: 'Dirección' },
   { seccion: 'equipo',         ruta: '/admin/equipo',         nombre: 'Equipo',         grupo: 'Dirección' },
@@ -30,8 +31,8 @@ const TODAS = MENU.map((m) => m.seccion);
 export const PERMISOS: Record<Rol, Seccion[]> = {
   admin:     TODAS,
   vendedor:  ['tablero', 'leads', 'conversaciones', 'viajeros', 'reservas', 'tareas', 'ia', 'reportes'],
-  editor:    ['tablero', 'negocios', 'tours', 'guias', 'ia'],
-  moderador: ['tablero', 'conversaciones', 'negocios', 'ia'],
+  editor:    ['tablero', 'negocios', 'tours', 'guias', 'resenas', 'ia'],
+  moderador: ['tablero', 'conversaciones', 'negocios', 'resenas', 'ia'],
   socio:     ['tablero', 'reportes'],
 };
 

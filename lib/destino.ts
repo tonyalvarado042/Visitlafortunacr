@@ -146,20 +146,105 @@ export async function negocioPorBabosa(
   return filas[0] ?? null;
 }
 
+export type Seccion = { clave: string; orden: number; contenido: string };
+
+/**
+ * Los bloques plegables de la ficha, ya resueltos al idioma pedido. El título
+ * visible no viene de la base: lo pone `lib/idiomas.ts`, para que salga
+ * traducido a los cinco idiomas sin repetir el texto en cada negocio.
+ */
+export async function seccionesDe(negocioId: string, idioma: Idioma): Promise<Seccion[]> {
+  const { data, error } = await supabase.rpc('secciones_de_negocio', {
+    p_negocio_id: negocioId,
+    p_idioma: idioma,
+  });
+  if (error) return [];
+  return (data ?? []) as Seccion[];
+}
+
+export type Horario = { dia_semana: number; abre_a: string | null; cierra_a: string | null; esta_cerrado: boolean };
+
+/** El horario de atención, ordenado de lunes a domingo y no de domingo a sábado. */
+export async function horarioDe(negocioId: string): Promise<Horario[]> {
+  const { data, error } = await supabase
+    .from('dst_negocio_horario')
+    .select('dia_semana, abre_a, cierra_a, esta_cerrado')
+    .eq('negocio_id', negocioId);
+  if (error) return [];
+  // dia_semana 0 es domingo en la base; aquí se muestra al final de la semana.
+  return ((data ?? []) as Horario[]).sort(
+    (a, b) => ((a.dia_semana + 6) % 7) - ((b.dia_semana + 6) % 7)
+  );
+}
+
+export type EtiquetaNegocio = { babosa: string; grupo: string; nombre: string };
+
+/** Servicios, ambiente, accesibilidad, público y formas de pago del negocio. */
+export async function etiquetasDe(negocioId: string, idioma: Idioma): Promise<EtiquetaNegocio[]> {
+  const { data, error } = await supabase
+    .from('dst_negocio_etiqueta')
+    .select('etiqueta:dst_etiqueta(id, babosa, grupo, nombre)')
+    .eq('negocio_id', negocioId);
+  if (error || !data) return [];
+
+  const etiquetas = data
+    .map((f) => (Array.isArray(f.etiqueta) ? f.etiqueta[0] : f.etiqueta))
+    .filter(Boolean) as { id: string; babosa: string; grupo: string; nombre: string }[];
+  if (!etiquetas.length || idioma === 'es') {
+    return etiquetas.map(({ babosa, grupo, nombre }) => ({ babosa, grupo, nombre }));
+  }
+
+  // El nombre del catálogo está en español; los demás idiomas en dst_traduccion.
+  const { data: trad } = await supabase
+    .from('dst_traduccion')
+    .select('entidad_id, texto')
+    .eq('entidad', 'etiqueta')
+    .eq('campo', 'nombre')
+    .eq('idioma', idioma)
+    .in('entidad_id', etiquetas.map((e) => e.id));
+
+  const porId = Object.fromEntries((trad ?? []).map((t) => [t.entidad_id, t.texto]));
+  return etiquetas.map((e) => ({ babosa: e.babosa, grupo: e.grupo, nombre: porId[e.id] ?? e.nombre }));
+}
+
+export type ExtractoExterno = {
+  autor_nombre: string;
+  autor_url: string | null;
+  autor_avatar_url: string | null;
+  calificacion: number | null;
+  texto: string;
+  publicada_en: string | null;
+  url_original: string;
+};
+
 export type NotaExterna = {
   plataforma: string;
   calificacion: number | null;
   total_resenas: number | null;
   url_fuente: string;
+  extractos: ExtractoExterno[];
 };
 
-/** Notas de otras plataformas, solo las que siguen vigentes. */
+/**
+ * Lo que dicen en otras plataformas: la nota, el conteo y —cuando la fuente da
+ * licencia para mostrarlo— las reseñas con texto, cada una con su autor y su
+ * enlace al original.
+ *
+ * Solo las vigentes. El vencimiento no es cosmético: Google no permite guardar
+ * su contenido de forma indefinida, así que una fila vencida deja de verse
+ * aunque nadie la borre. Los extractos cuelgan de la fila, de modo que vencen
+ * con ella.
+ */
 export async function notasExternasDe(negocioId: string): Promise<NotaExterna[]> {
   const { data, error } = await supabase
     .from('dst_resena_externa')
-    .select('plataforma, calificacion, total_resenas, url_fuente')
+    .select(`plataforma, calificacion, total_resenas, url_fuente,
+             extractos:dst_resena_externa_extracto(autor_nombre, autor_url, autor_avatar_url, calificacion, texto, publicada_en, url_original)`)
     .eq('negocio_id', negocioId)
     .gt('expira_en', new Date().toISOString());
   if (error) return [];
-  return (data ?? []) as NotaExterna[];
+  return (data ?? []).map((fila) => ({
+    ...fila,
+    extractos: (fila.extractos ?? []) as ExtractoExterno[],
+  })) as NotaExterna[];
 }

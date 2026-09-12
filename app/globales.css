@@ -184,6 +184,123 @@ section { padding: 84px 0; }
 .aviso-error p { color: var(--humo); }
 .aviso-error code { background: #1E1E1E; padding: 2px 6px; border-radius: 3px; font-size: 13px; }
 
+/* ---- Reseñas ---- */
+/* Cinco volcanes, no cinco estrellas. La fila llena se recorta por ancho
+   sobre la apagada, así que una nota de 4,3 se ve como 4,3 y no como 4. */
+.volcanes { position: relative; display: inline-flex; vertical-align: middle; }
+.volcanes .fila { display: flex; gap: 2px; color: #2F2F2F; }
+.volcanes .fila.llena {
+  position: absolute; left: 0; top: 0; overflow: hidden; color: var(--naranja);
+}
+.volcanes svg { flex-shrink: 0; display: block; }
+
+.resumen-nota { display: flex; align-items: center; gap: 16px; padding-bottom: 18px; }
+.resumen-nota .cifra-nota { font-size: 42px; font-weight: 900; letter-spacing: -.04em; line-height: 1; }
+.resumen-nota .cuantas { font-size: 13px; color: var(--humo); margin-top: 4px; }
+
+.calificar { border-top: 1px solid var(--borde); padding-top: 18px; }
+.calificar .pregunta { font-size: 14px; font-weight: 600; color: #D6D4D0; margin-bottom: 8px; }
+.volcanes-elegir, .volcanes-vistos { display: flex; gap: 4px; }
+.volcanes-elegir button, .volcanes-vistos span {
+  background: none; border: 0; padding: 2px; color: #2F2F2F;
+  display: flex; transition: color .15s, transform .15s;
+}
+.volcanes-elegir button { cursor: pointer; }
+.volcanes-elegir button:hover { transform: translateY(-2px); }
+.volcanes-elegir button.on, .volcanes-vistos span.on { color: var(--naranja); }
+
+.resena { border-top: 1px solid var(--borde); padding: 18px 0 4px; }
+.resena .quien { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; color: var(--humo); }
+.resena .quien strong { color: var(--blanco); font-size: 13.5px; }
+.resena h4 { margin: 10px 0 0; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+.resena > p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.6; color: #D6D4D0; }
+.resena .respuesta { margin-top: 12px; padding-left: 14px; border-left: 2px solid var(--borde); }
+.resena .respuesta span { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--verde); }
+.resena .respuesta p { margin: 5px 0 0; font-size: 13.5px; color: var(--humo); line-height: 1.55; }
+
+/* Pastillas de servicios y plegables de la ficha. Los <details> se usan como
+   en la barra: sin JavaScript en el cliente, y el navegador ya trae el manejo
+   de teclado y de lector de pantalla resuelto. */
+.pastillas { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+.pastillas span {
+  font-size: 12px; font-weight: 600; color: #C2C0BC;
+  background: #1A1A1A; border: 1px solid var(--borde); border-radius: 100px; padding: 5px 12px;
+}
+
+.plegables { margin-top: 30px; border-top: 1px solid var(--borde); }
+.plegable { border-bottom: 1px solid var(--borde); }
+.plegable summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 16px 2px; font-size: 15.5px; font-weight: 700; letter-spacing: -.01em;
+}
+.plegable summary::marker, .plegable summary::-webkit-details-marker { display: none; content: ''; }
+.plegable summary::after {
+  content: ''; width: 9px; height: 9px; flex-shrink: 0; margin-right: 4px;
+  border-right: 2px solid var(--humo); border-bottom: 2px solid var(--humo);
+  transform: rotate(45deg) translateY(-2px); transition: transform .2s;
+}
+.plegable[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
+.plegable summary:hover { color: var(--naranja); }
+.plegable .dentro { padding: 0 2px 18px; }
+.plegable .dentro p { margin: 0; font-size: 14.5px; line-height: 1.65; color: #C2C0BC; }
+.plegable .dentro ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; }
+.plegable .dentro li { font-size: 14.5px; line-height: 1.55; color: #C2C0BC; }
+
+.horario { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.horario td { padding: 7px 0; border-top: 1px solid var(--borde); color: #C2C0BC; }
+.horario tr:first-child td { border-top: none; }
+.horario td:first-child { text-transform: capitalize; color: var(--humo); }
+.horario td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Lo que dicen afuera: se ve como cita, no como reseña nuestra. La barra
+   lateral y el tono más apagado son justamente para que no se confundan. */
+.extracto { margin: 0; padding: 14px 0 14px 14px; border-left: 2px solid #2A2A2A; }
+.extracto .quien { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; font-size: 12px; color: var(--humo); }
+.extracto .quien strong { color: #D6D4D0; font-size: 13px; }
+.extracto .nota-ajena { background: #1C1C1C; border-radius: 100px; padding: 1px 8px; font-weight: 700; color: #C2C0BC; }
+.extracto p { margin: 7px 0 6px; font-size: 13.5px; line-height: 1.55; color: #ABA9A5; }
+.extracto a { font-size: 12px; font-weight: 700; color: var(--humo); }
+.extracto a:hover { color: var(--naranja); }
+.atribucion { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--borde); font-size: 11.5px; color: #5E5C58; }
+
+/* El modal de la reseña */
+.modal-fondo {
+  position: fixed; inset: 0; z-index: 120; display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: rgba(6, 6, 6, .78); backdrop-filter: blur(6px);
+  animation: aparece .2s ease both; overflow-y: auto;
+}
+.modal {
+  width: min(560px, 100%); max-height: calc(100vh - 40px); overflow-y: auto;
+  background: var(--carbon); border: 1px solid var(--borde); border-radius: 10px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.7);
+}
+.modal header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  padding: 18px 22px; border-bottom: 1px solid var(--borde);
+  position: sticky; top: 0; background: var(--carbon); z-index: 1;
+}
+.modal header strong { display: block; font-size: 16px; }
+.modal header small { color: var(--humo); font-size: 12.5px; }
+.modal header button { background: none; border: 0; color: var(--humo); font-size: 26px; line-height: 1; cursor: pointer; }
+.modal form { padding: 20px 22px 24px; display: flex; flex-direction: column; gap: 15px; }
+.modal label { display: block; }
+.modal label > span { display: block; font-size: 12.5px; font-weight: 600; color: #C2C0BC; margin-bottom: 6px; }
+.modal label > small { display: block; font-size: 11.5px; color: var(--humo); margin-top: 5px; }
+.modal label > small.falta { color: var(--naranja); }
+.modal input, .modal textarea {
+  width: 100%; background: #101010; border: 1px solid #262626; border-radius: 6px;
+  padding: 11px 12px; color: var(--blanco); font-family: inherit; font-size: 14px; line-height: 1.5;
+}
+.modal input:focus, .modal textarea:focus { outline: none; border-color: var(--naranja); }
+.modal textarea { resize: vertical; min-height: 110px; }
+.modal .par { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.modal .trampa { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.modal .error { margin: 0; font-size: 13px; color: #FF8A6B; }
+.modal .nota-legal { margin: 0; font-size: 11.5px; color: var(--humo); line-height: 1.5; }
+.modal .gracias { padding: 34px 22px 30px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.modal .gracias p { margin: 0; color: #D6D4D0; font-size: 15px; max-width: 38ch; }
+@media (max-width: 560px) { .modal .par { grid-template-columns: 1fr; } }
+
 footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40px; }
 .pie-caja { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
 .pie-caja .legal { font-size: 12.5px; color: #5E5C58; }

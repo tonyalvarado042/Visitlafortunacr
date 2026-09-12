@@ -51,33 +51,53 @@ se hace con una vista, nunca mezclando tablas.
    idioma en `dst_ruta`. Agregar japonés es insertar filas, no alterar tablas.
    Si falta una traducción, cae al idioma principal: una ficha a medio traducir
    se ve completa. Excepción: `dst_negocio.nombre` no se traduce.
-4. **Las reseñas ajenas no se copian.** Se muestra la nota y el conteo con
-   enlace a la fuente. Solo Google Places entrega texto, y con vencimiento
-   (`expira_en`), que además está metido en la política de lectura.
+4. **Las reseñas ajenas no se copian ni se pegan a mano.** Se muestra la nota
+   y el conteo con enlace a la fuente. Solo Google Places entrega texto, y con
+   vencimiento (`expira_en`), que además está metido en la política de lectura.
+   Ese texto **entra por la API oficial** (`lib/externas/`, botón en el panel y
+   cron diario), nunca raspando páginas ni escribiendo filas en Supabase: si
+   hay que pegarlo a mano, es que no hay licencia para mostrarlo.
+   **Tripadvisor y Booking no tienen puerta abierta**: Tripadvisor exige pedir
+   acceso a su Content API y mostrar su logo; Booking solo abre reseñas a sus
+   afiliados. Hasta que haya acuerdo, de esas dos solo la nota y el enlace,
+   cargados a mano en `/admin/negocios/[id]`.
 5. **Neutralidad editorial.** Bike & Bed y los hoteles propios llevan
    `es_casa = true`, que es **interno y nunca se muestra**. Aparecen donde
    genuinamente corresponden ("mejores hoteles para ciclistas"). La ventaja
    viene de controlar el canal, no de decir que somos los dueños.
 6. **El dinero no mueve la nota.** Un destacado se ve arriba y se rotula como
    pagado. Su calificación es la que sea.
-7. **El sitio público escribe por una sola puerta**: la función
-   `destinos.registrar_solicitud(...)`. No hay INSERT directo desde la llave
-   pública a ninguna tabla.
+7. **El sitio público escribe solo por funciones, nunca contra una tabla.**
+   Hay dos puertas y no se abren más sin anotarlo aquí:
+   `destinos.registrar_solicitud(...)` para los leads y
+   `destinos.registrar_resena(...)` para las reseñas. Cada una valida el
+   destino, valida lo suyo y no deja tocar ninguna otra columna. No hay INSERT
+   directo desde la llave pública a ninguna tabla.
 8. **Dos sesiones trabajan a la vez, dos personas.** La rama
    `claude/la-fortuna-directory-design-l8qnxg` la empuja más de uno. Antes de
    publicar: `git fetch` y **rebase** sobre el remoto, nunca `push --force` ni
    descartar lo ajeno. Si el rebase choca, se avisa y se resuelve a mano; el
    trabajo del otro no se pisa.
+   **Ojo con `definir-fases`**: esa rama tiene su propia versión de este
+   archivo, divergente. No se trae con `git checkout <rama> -- CLAUDE.md`
+   —eso pisa el archivo entero y se lleva por delante lo del otro sin
+   avisar—: se mira la diferencia y se injerta a mano lo que falte.
 9. **No todas las sesiones pueden lo mismo, y hay que decirlo de entrada.**
    Una sesión en **la nube** (Claude Code on the web) corre en un contenedor de
    Anthropic detrás de un proxy de egress: **no** alcanza GoDaddy, Vercel,
    `*.supabase.co` ni el sitio desplegado, y **no** ve el navegador de nadie;
    sí trabaja la base por el conector de Supabase, lee DNS, compila y publica
-   en git. Una sesión **local** (Claude Code en la máquina de Tony) no tiene
-   ese proxy: alcanza todo y puede manejar un navegador de verdad, con Tony
-   haciendo el login cuando haga falta. Al arrancar una tarea que dependa de un
-   panel externo, **se aclara en la primera respuesta desde dónde se está
-   corriendo**, en vez de dejar que se descubra a la tercera vez.
+   en git. Una sesión **local** (Claude Code en la máquina de Tony o de
+   Sebastián) no tiene ese proxy: alcanza todo y puede manejar un navegador de
+   verdad, con quien corresponda haciendo el login cuando haga falta. Al
+   arrancar una tarea que dependa de un panel externo, **se aclara en la
+   primera respuesta desde dónde se está corriendo**, en vez de dejar que se
+   descubra a la tercera vez.
+   **Comprobado el 11 de septiembre de 2026 desde la máquina de Sebastián**:
+   con `SUPABASE_SECRET_KEY` en `.env.local` se leen y escriben datos por
+   PostgREST sin el conector. Lo que ni así se puede es **DDL** —`alter table`,
+   `create function`, `grant`—: eso no pasa por PostgREST y necesita el SQL
+   Editor del panel o la contraseña de la base.
 10. **Lo que se hace a mano se anota aquí, no se pregunta.** Claude no tiene
    acceso a GoDaddy, Vercel, el panel de Supabase, Meta ni SiteGround. Cuando
    Tony diga "entrá a GoDaddy" (o a cualquiera de esas), la respuesta NO es
@@ -107,23 +127,24 @@ Monteverde puede tener otra paleta sin tocar una línea.
 
 ---
 
-## Estado actual (3 de septiembre de 2026)
+## Estado actual (11 de septiembre de 2026)
 
 | | |
 |---|---|
-| Tablas | 46 (35 del directorio y CRM + 11 de inteligencia) |
-| Migraciones | 18, todas guardadas en `supabase/plataforma/` |
+| Tablas | 47 (35 del directorio y CRM + 11 de inteligencia + `dst_negocio_seccion`) |
+| Migraciones | 21, todas guardadas en `supabase/plataforma/` y **todas aplicadas** (la 19, 20 y 21, el 11 de septiembre de 2026) |
 | Avisos de seguridad | 0 nuevos (queda el aviso previo por `regconfig` en `dst_idioma`) |
 | Destinos | 1 (La Fortuna, encendido) |
-| Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna |
+| Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna, 26 con negocios dentro |
 | Idiomas | 5 · es, en, pt, fr, de |
-| Negocios | 29 publicados, 9 con datos verificados en fuente oficial |
+| Negocios | **91 publicados** (29 de la siembra original + 62 de la 20), 9 con datos verificados en fuente oficial |
+| Fichas con secciones | 20 de 91, investigadas en internet (`datos/investigacion/fichas-la-fortuna.json`) |
 | Tours cargados | 0 |
 | Guías escritas | 0 |
 | Conocimiento de la IA | 22 fichas de La Fortuna, sin verificar por el equipo |
 | Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor) |
 | Automatizaciones | 10 de arranque, encendidas |
-| Panel `/admin` | Completo; el primer administrador entra con la invitación de `aalvarado@gmail.com` |
+| Panel `/admin` | Completo, con moderación de reseñas en `/admin/resenas`; el primer administrador entra con la invitación de `aalvarado@gmail.com` |
 | Sitio | Next.js 15, compila, lee de la base, chat concierge en todas las páginas |
 
 ---
@@ -139,21 +160,29 @@ Next.js 15 (App Router) en la raíz del repo. Rutas:
 /[idioma]/[categoria]/[babosa]   ficha
 /[idioma]/plan/[babosa] el itinerario que armó la IA para un viajero
 /api/solicitud          captura de leads (POST); si es itinerario, dispara el planificador
+/api/resena             reseña propia con calificación (POST) → registrar_resena
 /api/ia/conversar       chat del sitio (POST habla, GET consulta respuestas humanas)
 /api/ia/planificar      generar un plan (sesión del equipo o CRON_SECRET)
 /api/webhooks/whatsapp  WhatsApp Cloud API (GET verifica, POST recibe)
 /api/cron/automatizaciones  el motor de seguimiento (vercel.json: diario en Hobby, cada hora en Pro)
+/api/cron/externas          renueva las opiniones de Google antes de que venzan (diario, 5:00)
 /admin                  el panel (CRM + IA + contenido + equipo)
 ```
 
 El destino se resuelve por el `Host` de cada petición contra
 `dst_destino.dominio`. Un solo despliegue sirve todos los destinos.
 
-**Ojo con el entorno de Claude Code**: el proxy de egress deniega
-`*.supabase.co` y `*.vercel.app`, así que desde el contenedor no se puede
-llamar a la API REST ni abrir el sitio. La base se trabaja por el conector de
-Supabase, y el sitio y el panel se prueban desplegados. `npx tsc --noEmit` y
-`npm run build` sí corren aquí.
+**Ojo con el entorno de Claude Code**: en el **contenedor**, el proxy de
+egress deniega `*.supabase.co` y `*.vercel.app`, así que ahí no se puede
+llamar a la API REST ni abrir el sitio; la base se trabaja por el conector de
+Supabase. **En la máquina de Sebastián no hay ese bloqueo**: con
+`SUPABASE_SECRET_KEY` en `.env.local` (ya está, y el archivo está en
+`.gitignore`), un script suelto con `node --env-file=.env.local` lee y escribe
+datos por PostgREST. Así se aplicó la siembra del punto 8 del MVP.
+**Lo que esa llave NO permite es DDL**: `alter table`, `create function` y
+`grant` no pasan por PostgREST. Para eso hace falta el SQL Editor del panel o
+la contraseña de la base. `npx tsc --noEmit` y `npm run build` corren en los
+dos lados.
 
 **El DNS sí se puede leer** (`pip install dnspython`, la resolución no pasa por
 el proxy). Así que después de cada cambio en GoDaddy se verifica desde aquí:
@@ -256,6 +285,121 @@ EMAIL_REMITENTE=hola@visitlafortunacr.com
    `hola@visitlafortunacr.com`, secreto en `SMTP_CLAVE`). No hay que crearlo:
    se revisa en `/admin/ajustes`.
 
+### Supabase · las migraciones 19, 20 y 21 ya están aplicadas
+
+**Hecho el 11 de septiembre de 2026.** La 20 la aplicó Claude desde la máquina
+de Sebastián con la clave de servicio (62 negocios, 124 traducciones, 124
+rutas); la 19 y la 21 se corrieron en el SQL Editor, porque son DDL y la clave
+de servicio escribe datos pero no cambia el esquema.
+
+La 21 hubo que correrla **dos veces**: la primera versión se olvidó de los
+`grant` de la tabla nueva y todo daba `permission denied`. Está corregida en el
+archivo y es idempotente, así que volver a pegarla entera no rompe nada.
+
+La 19 quedó verificada de punta a punta contra la base real, con la clave
+publicable y no con la de servicio, que es lo que de verdad prueba algo:
+`registrar_resena` y `resenas_de_negocio` responden a `anon`, el autor sale
+abreviado ("Prueba C."), el idioma `de` se acepta, el trigger recalcula el
+promedio, y el `INSERT` directo a `dst_resena` desde `anon` sigue dando
+`permission denied` — la regla 7 se sostiene.
+
+**El método, para la próxima migración:** el DDL va por el SQL Editor; los
+datos y la verificación los hace Claude desde aquí. Si algún día hace falta
+que el DDL también lo corra Claude, lo que hay que pedir es la contraseña de
+la base (Settings → Database) de `visitdestinos`, nunca un personal access
+token de la cuenta: ese abriría también el CRM de inversionistas.
+
+Lo que sigue faltando: **Traer opiniones de Google** (necesita la clave de más
+abajo). Completa las 91 fichas con teléfono, sitio web, dirección,
+coordenadas, nota y reseñas. Son 25 por tanda, así que hay que darle cuatro
+veces.
+
+### Google Cloud · la clave de Places (opiniones de afuera)
+
+Sin esto, el bloque "Lo que dicen en otras plataformas" se queda vacío: no hay
+otra forma legal de traer texto de reseñas ajenas.
+
+1. <https://console.cloud.google.com> → crear (o elegir) un proyecto, por
+   ejemplo `visit-destinos`.
+2. *APIs & Services* → *Library* → habilitar **Places API (New)**. Ojo: la
+   vieja "Places API" a secas no sirve, el código llama a `places.googleapis.com/v1`.
+3. *APIs & Services* → *Credentials* → *Create credentials* → *API key*.
+4. Editar esa clave → *Application restrictions*: **None** (la llama el
+   servidor de Vercel, no el navegador; restringir por dominio la rompería).
+   → *API restrictions*: **Restrict key** y marcar solo **Places API (New)**.
+5. *Billing*: hay que tener tarjeta asociada. Traer reseñas es el SKU caro de
+   Places ("Place Details Essentials + Atmosphere"): con 29 negocios y refresco
+   mensual son unas 30 llamadas al mes, muy dentro del crédito gratis. El
+   riesgo no es el uso normal, es un bucle: por eso el botón del listado trae
+   25 como máximo por tanda. Conviene poner un *Budget alert* en 10 USD.
+6. Vercel → *Settings* → *Environment Variables*:
+
+```
+GOOGLE_PLACES_API_KEY=<la clave que muestra Google Cloud>
+```
+
+7. **Volver a desplegar** y entrar a `/admin/negocios`: aparece el botón
+   "Traer opiniones de Google". La primera tanda también rellena las
+   coordenadas que falten.
+
+### TripAdvisor y Booking · pedir acceso (trámite, no código)
+
+Esto no lo puede hacer Claude ni se arregla programando: es pedir permiso y
+esperar. Mientras no estén, de esas dos plataformas solo se puede mostrar la
+**nota y el enlace**, cargados a mano en `/admin/negocios/[id]`. Su texto no se
+copia (regla 4), y no por cautela nuestra: raspar sus páginas es lo que rompe
+el trato con ellos y lo que puede tumbar el dominio.
+
+**TripAdvisor — Content API.** Es la que más falta hace: el directorio se llena
+desde ahí (punto 8 del MVP).
+
+1. <https://www.tripadvisor.com/developers> → crear cuenta de desarrollador y
+   pedir una clave de la **Content API**. Pide datos del sitio: el dominio
+   `visitlafortunacr.com` tiene que estar en línea y con contenido — conviene
+   hacer antes el trabajo de GoDaddy de más arriba.
+2. Hay una capa gratuita mensual; pasado ese tope se cobra. Al recibir la
+   clave, **anotar aquí cuál es el tope** y cada cuánto exigen refrescar.
+3. Sus condiciones mandan sobre cómo se muestra: logo de TripAdvisor, sus
+   íconos de calificación y enlace de vuelta a la ficha. **Cuando llegue el
+   acceso hay que leerlas y ajustar dos cosas del código**: `expira_en` (hoy
+   30 días, que es lo de Google) y el bloque de la ficha, que hoy pinta todas
+   las plataformas igual.
+4. Falta escribir `lib/externas/tripadvisor.ts`, hermano de `google.ts`. La
+   base no hay que tocarla: `plataforma_externa` ya incluye `tripadvisor`,
+   `booking` y `facebook`, y `refrescarExternasDeNegocio` ya está hecho para
+   más de una fuente. Guardar el `location_id` de TripAdvisor sí pide una
+   columna nueva (o una llave en `dst_negocio.atributos`, que ya existe).
+
+**Booking — no hay puerta pública.** Las reseñas viven en su Demand API, que es
+solo para partners aprobados: <https://www.booking.com/affiliate-program> o el
+programa de conectividad si el trato es como proveedor. Hasta que alguien
+apruebe el caso de uso, Booking se queda en nota y enlace.
+
+**Mientras tanto, el bloque no se ve vacío**: Google ya trae hasta cinco
+reseñas con texto por lugar, que es lo que sostiene la demo.
+
+**Pendiente de decidir: sacar el texto de las reseñas por scraping.** Se habló
+el 11 de septiembre de 2026 y quedó sin resolver, a propósito. Para que no se
+discuta dos veces desde cero, lo que se dijo:
+
+- **Los datos del negocio sí se raspan** —nombre, dirección, teléfono,
+  categoría— y eso no está en duda: son hechos, no son obra de nadie, y es el
+  punto 8 del MVP.
+- **El texto de una reseña lo escribió una persona**, así que republicarlo en
+  visitlafortunacr.com no es citar un dato. Ahí está el riesgo, no en el resto.
+- No corre donde hace falta: TripAdvisor va detrás de Cloudflare y Booking
+  detrás de DataDome, y las IP de datacenter —las de Vercel— se bloquean de
+  entrada. Pide navegador headless, proxies residenciales, costo mensual y
+  arreglarlo cada vez que cambian el HTML.
+- Le pega a la propia estrategia: la Fase 5 quiere que la IA recomiende este
+  sitio de primero, y eso se gana con contenido propio. Párrafos idénticos a
+  los de TripAdvisor son contenido duplicado, que es justo lo que hunde esa
+  apuesta.
+- Y no hace falta para la demo: Google ya llena el bloque.
+
+**Si algún día se decide que sí, se cambia la regla 4 primero.** Mientras diga
+lo que dice, el código no raspa texto de reseñas.
+
 ### Supabase · dejar de depender de su SMTP
 
 Panel de Supabase → *Authentication*:
@@ -268,7 +412,8 @@ Panel de Supabase → *Authentication*:
 
 ### Vercel · variables que faltan
 
-`ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY`, `CRON_SECRET` y las `SMTP_*`.
+`ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY`, `CRON_SECRET`, `GOOGLE_PLACES_API_KEY`
+y las `SMTP_*`.
 Después de agregarlas hay que **volver a desplegar**: Vercel no las inyecta en
 un despliegue ya hecho. `/admin/ajustes` muestra cuáles están puestas.
 
@@ -277,21 +422,26 @@ un despliegue ya hecho. `/admin/ajustes` muestra cuáles están puestas.
 1. Poner en Vercel `ANTHROPIC_API_KEY`, `SUPABASE_SECRET_KEY` y `CRON_SECRET`;
    entrar a `/admin` con el correo invitado y verificar las 22 fichas de
    conocimiento.
-2. Hacer los pasos de **Trabajo a mano**: DNS en GoDaddy, buzón en SiteGround,
-   variables en Vercel, confirmación de correo apagada en Supabase.
+2. Hacer los pasos de **Trabajo a mano**: la migración 19 en Supabase, la
+   clave de Google Places, DNS en GoDaddy, buzón en SiteGround, variables en
+   Vercel, confirmación de correo apagada en Supabase. Y arrancar el trámite
+   de TripAdvisor, que es el que tarda.
 3. Conectar WhatsApp Cloud API (canal en Ajustes + `WHATSAPP_*`).
 4. Cargar los primeros 30 tours reservables con precio y comisión (desde
    `/admin/tours`).
 5. Escribir las 10 guías SEO de arranque (borradores con `/admin/guias`).
-6. Google Places para coordenadas, horarios y agregados externos.
+6. Google Places: **coordenadas y agregados externos ya están hechos** (se
+   traen solos, ver punto 7 del MVP). Falta **horarios** — misma API, misma
+   función, otro campo.
 7. Traducir a pt, fr y de lo que ya está en es/en.
 
 ---
 
 ## Fase MVP — la demo (esto es lo que se hace AHORA)
 
-Sale de la charla del 11 de septiembre de 2026 (`CHARLA2.md`). Manda sobre
-todo lo demás: primero esto, después Fase 0 y el resto.
+Sale de la charla del 11 de septiembre de 2026. Manda sobre todo lo demás:
+primero esto, después Fase 0 y el resto. Todo lo que importaba de esa charla
+está volcado aquí.
 
 **El marco**: es un MVP para presentar. **La veracidad del dato no bloquea.**
 Se carga lo que haya en internet y se corrige después con Google Places
@@ -300,7 +450,11 @@ Se carga lo que haya en internet y se corrige después con Google Places
 `esta_verificado = false`; así se sabe qué hay que repasar cuando lleguen
 los datos buenos. Se carga en es y en; pt, fr y de después.
 
-Los puntos, en el orden en que se van a hacer:
+Los puntos, en el orden en que se van a hacer. **Ojo con el 8**: aunque esté
+octavo en la lista, es el que la charla marcó como el más importante, y el 6 y
+el 7 dependen de él — no tiene sentido diseñar la ficha desplegable ni el
+bloque de reseñas externas con 29 negocios a medio llenar. Lo sensato es
+hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
 
 1. ~~**Responsivo para tablet.**~~ **Hecho el 11 de septiembre de 2026.** El
    diseño fue primero en Figma con el MCP, y de ahí al código:
@@ -339,7 +493,9 @@ Los puntos, en el orden en que se van a hacer:
    código** — la columna ya existía y el panel ya la editaba
    (`/admin/ajustes` → Marca). Por eso Monteverde apunta a su propio video sin
    tocar una línea, y por eso **si esa columna está vacía el hero se queda con
-   el volcán dibujado**.
+   el volcán dibujado**. En La Fortuna ya está puesta
+   (`/video/visitlafortunaloop1080p.mp4`, cargada a mano el 11 de septiembre
+   de 2026): el video se ve.
    Pendientes menores: el archivo va a 2,4 Mbps y una versión a 720p pesaría la
    mitad; y falta mirar en movimiento si el bucle corta bien a los 14,5 s.
 3. ~~**Buscador del hero funcional.**~~ **Hecho el 11 de septiembre de 2026.**
@@ -361,37 +517,120 @@ Los puntos, en el orden en que se van a hacer:
    `/es?ver=todo`, enlazado desde el "29 lugares" de la cabecera de "Qué
    hacer". Filtra por categoría con las mismas pastillas del listado, y los
    conteos son dentro de la búsqueda actual, no del directorio entero.
-5. **Reseñas propias con calificación.** Fuera el "Todavía sin reseñas"
-   (`sin_resenas` en `lib/idiomas.ts`, usado en la tarjeta, el listado y la
-   ficha). En su lugar, cinco íconos para calificar — **no estrellas**:
-   volcanes u otra cosa, se va probando. Al calificar se abre un modal para
-   dejar el comentario, como en cualquier sistema de reseñas. La tabla es
-   `dst_resena` y ya existe.
-6. **Ficha de negocio completa y con desplegables.** Conforme entran los
-   negocios se llena su ficha con toda la información. Referencia de
-   maquetación: `ref/REFERENCIA_INFO_NEGOCIO.png` (TripAdvisor) — secciones
-   plegables ("Servicios incluidos", "Qué esperar", "Encuentro y recogida",
-   "Información adicional") para que quepa todo sin que se vea denso.
-7. **"Lo que dicen en otras plataformas" con extractos reales.** Hoy ese
-   bloque muestra `sin_resenas`. Debe mostrar opiniones de Google, Booking y
-   demás, cada una con el nombre del usuario tal como aparece en la fuente,
-   la nota y el enlace. Las tablas ya existen: `dst_resena_externa` (nota y
-   conteo por plataforma) y `dst_resena_externa_extracto` (autor, texto,
-   enlace). Las nuestras se mezclan ahí cuando las haya.
-8. **Llenar la página de negocios. Este es el punto más importante.** Fuente:
-   TripAdvisor La Fortuna —
-   `https://www.tripadvisor.es/Attractions-g309226-Activities-La_Fortuna_de_San_Carlos_Arenal_Volcano_National_Park_Province_of_Alajuela.html`.
-   Cada negocio entra con su ficha llena (punto 6), no solo con el nombre.
+5. ~~**Reseñas propias con calificación.**~~ **Hecho el 11 de septiembre de
+   2026.** `sin_resenas` ya no existe: en la tarjeta y en la ficha salen
+   **cinco volcanes** (`componentes/Volcanes.tsx`, una sola ruta SVG que se
+   lee igual a 13 px que a 28), llenos según la nota y **apagados cuando no
+   hay ninguna**, con "Calificá vos" al lado. Tocar un volcán abre el modal
+   (`componentes/Calificar.tsx`): nota, texto, título opcional, nombre,
+   correo y fecha de la visita.
+   **Ojo, el vacío estaba mal puesto en dos sitios más**: el listado sin
+   negocios decía "Todavía sin reseñas" (ahora `sin_lugares`) y el bloque de
+   otras plataformas decía que no teníamos reseñas *nuestras* cuando lo que
+   falta son las *ajenas* (ahora `sin_externas`, hasta que se haga el punto 7).
+   La fila "VLF" que había en ese bloque se fue: la nota propia ya tiene su
+   sección arriba, con el promedio grande y las reseñas una debajo de otra.
+   **La regla 7 se respeta**: el sitio no hace INSERT. La migración **19**
+   abre la segunda puerta, hermana de `registrar_solicitud`:
+   `destinos.registrar_resena(...)` valida que el negocio sea de ese destino y
+   esté publicado, exige 1–5 y 40 caracteres, y crea o completa el viajero.
+   Para leerlas hay `destinos.resenas_de_negocio(...)`, que firma con **nombre
+   de pila más inicial** — el nombre vive en `dst_viajero`, que es el CRM, y
+   dar SELECT sobre esa tabla para poder firmar publicaría correos, fechas de
+   viaje y presupuestos.
+   **Quien reseña entra al CRM como viajero, pero sin `acepta_marketing`**:
+   escribir una opinión no es pedir correos.
+   **Y "toda reseña entra pendiente" se cayó**: con ese diseño un destino
+   recién lanzado no muestra una sola reseña hasta que alguien se acuerde de
+   entrar al panel. Ahora lo decide el destino
+   (`dst_destino.resenas_moderadas`, nace apagado) y se cambia desde
+   `/admin/resenas` — sección nueva del panel, con publicar, ocultar,
+   rechazar con motivo y responder como el negocio.
+   Pendiente menor: falta ver los cinco volcanes en pantalla y decidir si la
+   silueta queda o se prueba otra cosa; el icono se cambia en un solo archivo.
+6. ~~**Ficha de negocio completa y con desplegables.**~~ **Hecho el 11 de
+   septiembre de 2026; falta terminar de llenarlo.** La migración **21** creó
+   `dst_negocio_seccion`: una fila por bloque plegable, con las seis claves de
+   la charla (`incluye`, `no_incluye`, `que_esperar`, `encuentro`,
+   `accesibilidad`, `adicional`), traducible como todo lo demás y ordenable.
+   **Una tabla y no seis columnas** porque casi ninguna ficha las llena todas,
+   porque el orden es parte del contenido —un tour quiere el encuentro arriba,
+   un hotel ni lo tiene— y porque agregar "Política de cancelación" mañana es
+   insertar filas, no alterar tablas.
+   En la ficha los plegables son `<details>`, como la hamburguesa de la barra:
+   **cero JavaScript en el cliente**, y el navegador ya trae resuelto el
+   teclado y el lector de pantalla. Debajo de la descripción salen además las
+   pastillas de servicios, y en la columna derecha el **horario** de lunes a
+   domingo. Horarios y etiquetas no necesitaron tabla nueva: `dst_negocio_horario`
+   y `dst_negocio_etiqueta` ya existían.
+   **Ojo con las tablas nuevas**: los `grant ... on all tables in schema` de la
+   migración 11 solo alcanzaron a las tablas de ese día. Una tabla nueva nace
+   sin permisos y da `permission denied` hasta con la clave de servicio, así
+   que **cada migración que cree una tiene que dar los grants a mano** —le pasó
+   a la 21 y está anotado dentro del propio archivo.
+   **El contenido se investiga, no se inventa**: va en
+   `datos/investigacion/fichas-la-fortuna.json` y lo carga
+   `scripts/cargar-fichas.mjs` (upsert, se puede correr las veces que haga
+   falta; el contacto solo rellena lo que esté vacío). Cada negocio lleva sus
+   `fuentes`, y **lo que no aparece en ninguna no se escribe**: una ficha corta
+   y cierta vale más que una larga y falsa.
+   Van **20 de 91**, las de más peso. Faltan unas 12 de Qué hacer, 28 hoteles y
+   25 de comer y beber. Para los restaurantes la investigación rinde poco: de
+   una soda no hay web ni horario publicado, y lo que importa lo da Google
+   Places completo. Lo que queda pendiente del punto es la **tarjeta fija de
+   reserva** de la derecha (precio total, fecha, personas), que depende de los
+   tours de la Fase 0: hoy esa columna tiene contacto, horario y precio.
+7. ~~**"Lo que dicen en otras plataformas" con extractos reales.**~~
+   **Hecho el 11 de septiembre de 2026, salvo poner la clave.** La ficha ya
+   muestra, bajo la nota de cada plataforma, las reseñas con texto: nombre del
+   autor tal como aparece en la fuente, su nota, la fecha y el enlace a la
+   reseña original, con la barra lateral y el tono apagado que las separan de
+   las nuestras.
+   **No se cargan a mano.** `lib/externas/` las pide a la API de Google Places
+   (hasta cinco por lugar) y las guarda en `dst_resena_externa` y
+   `dst_resena_externa_extracto`. Tres bocas la llaman: el botón
+   "Buscar y traer de Google" de cada ficha en el panel, el botón "Traer
+   opiniones de Google" del listado (hasta 25 por tanda, porque cada negocio
+   es una llamada facturada) y el cron `/api/cron/externas`, diario a las 5:00.
+   El place_id se busca solo por nombre y dirección, sesgado a 30 km del
+   destino, y se guarda; de paso rellena latitud y longitud **si faltaban** —
+   lo que escribió una persona no se pisa.
+   **Vence a los 30 días y esa fecha manda**: la política de lectura esconde lo
+   vencido aunque nadie lo borre, y por eso el cron existe: sin él las fichas
+   se irían quedando mudas de a una. Cada pasada reemplaza los extractos
+   viejos en vez de acumularlos.
+   Falta `GOOGLE_PLACES_API_KEY` (ver Trabajo a mano). Sin ella el botón no
+   aparece y el bloque muestra `sin_externas`.
+8. ~~**Llenar la página de negocios. Este es el punto más importante.**~~
+   **Hecho el 11 de septiembre de 2026, y ya aplicado en la base.** La
+   migración **20** (`20_siembra_negocios_la_fortuna.sql`) agregó **62
+   negocios**: de 29 a 91, con sus 124 traducciones al inglés y sus 124 rutas. Reparto: 19 en Qué hacer, 22 en Dónde dormir, 19 en Comer y
+   beber, 2 en Explorar.
+   Fuente: los listados públicos de TripAdvisor La Fortuna —
+   `https://www.tripadvisor.es/Attractions-g309226-Activities-La_Fortuna_de_San_Carlos_Arenal_Volcano_National_Park_Province_of_Alajuela.html`
+   y sus páginas de hoteles, restaurantes y tours. **De ahí salen los nombres,
+   la categoría y la zona, que son hechos. Los textos son propios**, escritos
+   para este sitio: copiar los suyos sería, además del problema con ellos,
+   contenido duplicado, que es justo lo que hunde la apuesta de GEO de la
+   Fase 5.
+   **Lo que la siembra NO trae, a propósito: teléfonos, correos y sitios web.**
+   No se inventan. Los rellena `lib/externas/` desde Google Places junto con
+   las coordenadas, la nota y las reseñas — por eso el orden es correr la
+   migración y después darle al botón "Traer opiniones de Google", que en una
+   tanda deja las 91 fichas con contacto, mapa y opiniones.
+   Todo entra `estado_verificacion = 'pendiente'` y las traducciones al inglés
+   `esta_revisada = false`: son textos que nadie del equipo ha leído.
 9. **Entrenar al agente local mientras llega el experto.** Recopilar de
    internet todo lo que haya sobre La Fortuna y dejarlo en un `.md` de
    entrenamiento, **para revisión de Tony antes de cargarlo** a
    `dst_conocimiento`. Es el puente hasta que el experto real pase su archivo.
 
-**Ojo con la regla 4** (las reseñas ajenas no se copian). El punto 7 la roza:
-para la demo se cargan extractos con autor y enlace a la fuente, y se guardan
-con `expira_en` como cualquier otro dato externo. Antes de producción hay que
-resolverlo de verdad — Google Places sí entrega texto con licencia;
-TripAdvisor y Booking no. No se olvida.
+**La regla 4 quedó resuelta, no pospuesta.** El punto 7 se hizo por la API de
+Google, que sí licencia el texto, con autor, enlace y vencimiento de 30 días.
+De TripAdvisor y Booking no se copia nada: si alguna vez se quiere su texto,
+es pedir acceso a la Content API de TripAdvisor (y mostrar su logo) o entrar
+al programa de afiliados de Booking. Mientras tanto, de esas dos solo la nota
+y el enlace.
 
 Lo que falte de la charla lo irá pasando Tony; se agrega aquí, no en otro
 archivo.

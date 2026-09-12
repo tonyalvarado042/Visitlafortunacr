@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { IconoVerificado } from './Marca';
-import { t, type Idioma } from '@/lib/idiomas';
+import { Volcanes } from './Volcanes';
+import { resenas, t, type Idioma } from '@/lib/idiomas';
+import { nota } from '@/lib/resenas';
 import { SIMBOLO_PRECIO, type Negocio } from '@/lib/destino';
 
 /* El color del marcador sale de la sección, para que la retícula tenga ritmo
@@ -41,10 +43,23 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
         <h3><Link href={`/${idioma}/${negocio.categoria_babosa}/${negocio.babosa}`}>{negocio.nombre}</Link></h3>
         <p>{negocio.resumen}</p>
 
+        {/* Sin calificación no se anuncia el vacío: se muestran los cinco
+            volcanes apagados y se invita a calificar. Un "todavía sin
+            reseñas" repetido en 29 tarjetas hace ver muerto el directorio. */}
         <div className="pie">
-          {negocio.promedio_calificacion
-            ? <><b>{negocio.promedio_calificacion.toFixed(1).replace('.', ',')}</b> · {negocio.total_resenas}</>
-            : <span>{t('sin_resenas', idioma)}</span>}
+          {negocio.promedio_calificacion ? (
+            <>
+              <Volcanes nota={negocio.promedio_calificacion} tamano={14}
+                        etiqueta={`${nota(negocio.promedio_calificacion, idioma)} ${t('de_cinco', idioma)}`} />
+              <b>{nota(negocio.promedio_calificacion, idioma)}</b>
+              <span>{negocio.total_resenas} {resenas(negocio.total_resenas, idioma)}</span>
+            </>
+          ) : (
+            <>
+              <Volcanes nota={0} tamano={14} etiqueta={t('se_el_primero', idioma)} />
+              <span>{t('se_el_primero', idioma)}</span>
+            </>
+          )}
           {negocio.rango_precio && <span style={{ marginLeft: 'auto' }}>{SIMBOLO_PRECIO[negocio.rango_precio]}</span>}
         </div>
       </div>

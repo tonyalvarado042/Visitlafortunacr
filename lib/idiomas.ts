@@ -65,8 +65,53 @@ export const T: Record<string, Diccionario> = {
   precio:            { es: 'Rango de precio', en: 'Price range', pt: 'Faixa de preço', fr: 'Gamme de prix', de: 'Preisklasse' },
   sobre:             { es: 'Sobre', en: 'About', pt: 'Sobre', fr: 'À propos de', de: 'Über' },
   otras_plataformas: { es: 'Lo que dicen en otras plataformas', en: 'What other platforms say', pt: 'O que dizem outras plataformas', fr: "Ce que disent les autres plateformes", de: 'Was andere Plattformen sagen' },
-  sin_resenas:       { es: 'Todavía sin reseñas nuestras', en: 'No reviews here yet', pt: 'Ainda sem avaliações nossas', fr: 'Pas encore d’avis chez nous', de: 'Noch keine eigenen Bewertungen' },
   escribi_primera:   { es: 'Escribí la primera', en: 'Write the first one', pt: 'Escreva a primeira', fr: 'Écrivez le premier', de: 'Schreiben Sie die erste' },
+
+  /* ---- Ficha: secciones plegables, horario y servicios ---- */
+  sec_incluye:       { es: 'Qué incluye', en: 'What is included', pt: 'O que inclui', fr: 'Ce qui est inclus', de: 'Inbegriffen' },
+  sec_no_incluye:    { es: 'Qué no incluye', en: 'What is not included', pt: 'O que não inclui', fr: 'Ce qui n’est pas inclus', de: 'Nicht inbegriffen' },
+  sec_que_esperar:   { es: 'Qué esperar', en: 'What to expect', pt: 'O que esperar', fr: 'À quoi s’attendre', de: 'Was dich erwartet' },
+  sec_encuentro:     { es: 'Encuentro y recogida', en: 'Meeting and pickup', pt: 'Encontro e transporte', fr: 'Point de rencontre et navette', de: 'Treffpunkt und Abholung' },
+  sec_accesibilidad: { es: 'Accesibilidad', en: 'Accessibility', pt: 'Acessibilidade', fr: 'Accessibilité', de: 'Barrierefreiheit' },
+  sec_adicional:     { es: 'Información adicional', en: 'Additional information', pt: 'Informações adicionais', fr: 'Informations complémentaires', de: 'Weitere Informationen' },
+  horario:           { es: 'Horario', en: 'Opening hours', pt: 'Horário', fr: 'Horaires', de: 'Öffnungszeiten' },
+  cerrado:           { es: 'Cerrado', en: 'Closed', pt: 'Fechado', fr: 'Fermé', de: 'Geschlossen' },
+  servicios:         { es: 'Servicios y ambiente', en: 'Amenities and atmosphere', pt: 'Serviços e ambiente', fr: 'Services et ambiance', de: 'Ausstattung und Ambiente' },
+  consultar:         { es: 'Consultar disponibilidad', en: 'Ask about availability', pt: 'Consultar disponibilidade', fr: 'Demander les disponibilités', de: 'Verfügbarkeit anfragen' },
+
+  /* ---- Reseñas propias ---- */
+  resenas_titulo:    { es: 'Lo que dice quien ya fue', en: 'What people who went say', pt: 'O que diz quem já foi', fr: 'Ce qu’en disent ceux qui y sont allés', de: 'Was Besucher sagen' },
+  resena_una:        { es: 'reseña', en: 'review', pt: 'avaliação', fr: 'avis', de: 'Bewertung' },
+  resena_varias:     { es: 'reseñas', en: 'reviews', pt: 'avaliações', fr: 'avis', de: 'Bewertungen' },
+  se_el_primero:     { es: 'Calificá vos', en: 'Rate it yourself', pt: 'Avalie você', fr: 'Donnez votre avis', de: 'Jetzt bewerten' },
+  tu_calificacion:   { es: '¿Cuántos volcanes le das?', en: 'How many volcanoes would you give it?', pt: 'Quantos vulcões você dá?', fr: 'Combien de volcans lui donnez-vous ?', de: 'Wie viele Vulkane gibst du?' },
+  calificar_con:     { es: 'Calificar con', en: 'Rate it', pt: 'Avaliar com', fr: 'Noter', de: 'Bewerten mit' },
+  de_cinco:          { es: 'de 5', en: 'out of 5', pt: 'de 5', fr: 'sur 5', de: 'von 5' },
+  escribi_resena:    { es: 'Contanos cómo te fue', en: 'Tell us how it went', pt: 'Conte como foi', fr: 'Racontez-nous', de: 'Erzähl uns davon' },
+  contanos:          { es: 'Tu reseña', en: 'Your review', pt: 'Sua avaliação', fr: 'Votre avis', de: 'Deine Bewertung' },
+  contanos_pista:    { es: 'Qué hiciste, qué te sorprendió y qué le dirías a alguien que va por primera vez.', en: 'What you did, what surprised you, and what you would tell someone going for the first time.', pt: 'O que fez, o que surpreendeu e o que diria a quem vai pela primeira vez.', fr: 'Ce que vous avez fait, ce qui vous a surpris, et ce que vous diriez à quelqu’un qui y va pour la première fois.', de: 'Was du gemacht hast, was dich überrascht hat und was du jemandem beim ersten Mal sagen würdest.' },
+  titulo_opcional:   { es: 'Un título (opcional)', en: 'A title (optional)', pt: 'Um título (opcional)', fr: 'Un titre (facultatif)', de: 'Ein Titel (optional)' },
+  tu_nombre:         { es: 'Tu nombre', en: 'Your name', pt: 'Seu nome', fr: 'Votre nom', de: 'Dein Name' },
+  tu_email:          { es: 'Tu correo', en: 'Your email', pt: 'Seu e-mail', fr: 'Votre e-mail', de: 'Deine E-Mail' },
+  email_privado:     { es: 'No se publica. Sirve para verificar la reseña y para escribirte si el negocio responde.', en: 'Not published. We use it to verify the review and to reach you if the business replies.', pt: 'Não é publicado. Serve para verificar a avaliação e avisar se o negócio responder.', fr: 'Non publié. Il sert à vérifier l’avis et à vous prévenir si l’établissement répond.', de: 'Wird nicht veröffentlicht. Nur zur Prüfung der Bewertung und für eine Antwort des Betriebs.' },
+  cuando_fuiste:     { es: '¿Cuándo fuiste?', en: 'When did you go?', pt: 'Quando você foi?', fr: 'Quand y êtes-vous allé ?', de: 'Wann warst du dort?' },
+  faltan:            { es: 'Faltan', en: 'Still need', pt: 'Faltam', fr: 'Encore', de: 'Es fehlen' },
+  asi_esta_bien:     { es: 'Así está bien', en: 'That works', pt: 'Assim está bom', fr: 'C’est bon', de: 'So passt es' },
+  publicar_resena:   { es: 'Publicar mi reseña', en: 'Publish my review', pt: 'Publicar minha avaliação', fr: 'Publier mon avis', de: 'Bewertung veröffentlichen' },
+  una_por_persona:   { es: 'Una reseña por persona y por lugar. Si ya escribiste una, esta la reemplaza.', en: 'One review per person and place. If you already wrote one, this replaces it.', pt: 'Uma avaliação por pessoa e por lugar. Se já escreveu uma, esta a substitui.', fr: 'Un avis par personne et par lieu. Si vous en avez déjà écrit un, celui-ci le remplace.', de: 'Eine Bewertung pro Person und Ort. Eine frühere wird ersetzt.' },
+  resena_gracias:    { es: '¡Gracias! Tu reseña ya está publicada.', en: 'Thank you! Your review is live.', pt: 'Obrigado! Sua avaliação já está publicada.', fr: 'Merci ! Votre avis est en ligne.', de: 'Danke! Deine Bewertung ist online.' },
+  resena_en_revision:{ es: '¡Gracias! La leemos y la publicamos en cuanto podamos.', en: 'Thank you! We will read it and publish it shortly.', pt: 'Obrigado! Vamos ler e publicar em breve.', fr: 'Merci ! Nous la lisons et la publions bientôt.', de: 'Danke! Wir lesen sie und veröffentlichen sie bald.' },
+  resena_error:      { es: 'No se pudo guardar la reseña. Probá de nuevo en un momento.', en: 'We could not save your review. Please try again in a moment.', pt: 'Não foi possível salvar a avaliação. Tente de novo em instantes.', fr: 'Impossible d’enregistrer votre avis. Réessayez dans un instant.', de: 'Die Bewertung konnte nicht gespeichert werden. Versuch es gleich noch einmal.' },
+  resena_invalida:   { es: 'Revisá los datos: algo quedó incompleto.', en: 'Check the form: something is missing.', pt: 'Revise os dados: falta algo.', fr: 'Vérifiez le formulaire : il manque quelque chose.', de: 'Bitte prüfen: etwas fehlt noch.' },
+  resena_corta:      { es: 'Contanos un poco más: al menos 40 caracteres.', en: 'Tell us a bit more: at least 40 characters.', pt: 'Conte um pouco mais: ao menos 40 caracteres.', fr: 'Dites-nous en un peu plus : 40 caractères minimum.', de: 'Erzähl etwas mehr: mindestens 40 Zeichen.' },
+  correo_invalido:   { es: 'Ese correo no parece válido.', en: 'That email does not look valid.', pt: 'Esse e-mail não parece válido.', fr: 'Cet e-mail ne semble pas valide.', de: 'Diese E-Mail sieht nicht gültig aus.' },
+  respuesta_negocio: { es: 'Respuesta del negocio', en: 'Reply from the business', pt: 'Resposta do negócio', fr: 'Réponse de l’établissement', de: 'Antwort des Betriebs' },
+  visito_en:         { es: 'Fue en', en: 'Visited', pt: 'Foi em', fr: 'Visite en', de: 'Besuch im' },
+  cerrar:            { es: 'Cerrar', en: 'Close', pt: 'Fechar', fr: 'Fermer', de: 'Schließen' },
+  sin_lugares:       { es: 'Todavía no hay lugares en esta categoría.', en: 'No places in this category yet.', pt: 'Ainda não há lugares nesta categoria.', fr: 'Aucun lieu dans cette catégorie pour l’instant.', de: 'In dieser Kategorie gibt es noch nichts.' },
+  ver_en:            { es: 'Ver en', en: 'See on', pt: 'Ver em', fr: 'Voir sur', de: 'Ansehen auf' },
+  datos_de_google:   { es: 'Calificaciones y reseñas de Google, mostradas con enlace a su fuente.', en: 'Ratings and reviews from Google, shown with a link to the source.', pt: 'Notas e avaliações do Google, exibidas com link para a fonte.', fr: 'Notes et avis de Google, affichés avec un lien vers la source.', de: 'Bewertungen von Google, mit Link zur Quelle.' },
+  sin_externas:      { es: 'Todavía no traemos opiniones de otras plataformas para este lugar.', en: 'We have not pulled in other platforms for this place yet.', pt: 'Ainda não trouxemos opiniões de outras plataformas para este lugar.', fr: 'Nous n’avons pas encore repris les avis d’autres plateformes pour ce lieu.', de: 'Für diesen Ort haben wir noch keine Bewertungen anderer Plattformen.' },
   lugares:           { es: 'lugares', en: 'places', pt: 'lugares', fr: 'lieux', de: 'Orte' },
   volver:            { es: 'Volver', en: 'Back', pt: 'Voltar', fr: 'Retour', de: 'Zurück' },
   inicio:            { es: 'Inicio', en: 'Home', pt: 'Início', fr: 'Accueil', de: 'Start' },
@@ -146,4 +191,9 @@ export function t(clave: string, idioma: Idioma): string {
 /** "1 lugar" y no "1 lugares". Devuelve solo la palabra, no el número. */
 export function lugares(cuantos: number, idioma: Idioma): string {
   return t(cuantos === 1 ? 'lugar' : 'lugares', idioma);
+}
+
+/** Igual que lugares, para "1 reseña" / "12 reseñas". */
+export function resenas(cuantas: number, idioma: Idioma): string {
+  return t(cuantas === 1 ? 'resena_una' : 'resena_varias', idioma);
 }

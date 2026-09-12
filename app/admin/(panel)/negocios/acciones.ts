@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
+import { refrescarExternasDeNegocio, refrescarExternasPendientes } from '@/lib/externas';
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -100,4 +101,32 @@ export async function traducirCampo(datos: FormData) {
     );
   }
   revalidatePath(`/admin/${entidad === 'negocio' ? 'negocios' : entidad === 'tour' ? 'tours' : 'guias'}/${entidadId}`);
+}
+
+/* ---- Opiniones de afuera ---- */
+
+/**
+ * Trae de Google la nota, el conteo y hasta cinco reseñas con texto de UN
+ * negocio. No se pegan a mano en Supabase: se piden a la API oficial, que es
+ * la única que da licencia para mostrar ese texto, y vencen a los 30 días.
+ */
+export async function traerOpiniones(datos: FormData) {
+  await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  const resultado = await refrescarExternasDeNegocio(id);
+  if (!resultado.ok) console.error('traerOpiniones:', resultado.motivo);
+  refrescar(id);
+}
+
+/**
+ * Los que no tienen nada y los que vencen en tres días. Con tope: cada
+ * negocio es una llamada facturada a Google.
+ */
+export async function traerOpinionesDeTodos(datos: FormData) {
+  const { destino } = await contextoPanel('negocios');
+  const limite = Number(texto(datos, 'limite')) || 25;
+  const resumen = await refrescarExternasPendientes({ destino_id: destino.id, limite });
+  console.log(`traerOpinionesDeTodos: ${resumen.ok} ok, ${resumen.fallos} fallos`);
+  refrescar();
 }

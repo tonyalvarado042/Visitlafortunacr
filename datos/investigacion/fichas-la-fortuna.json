@@ -1,0 +1,959 @@
+{
+  "_lee_esto": {
+    "que_es": "Contenido de ficha investigado en internet para los negocios de La Fortuna: secciones plegables, horarios, servicios y contacto. Lo carga scripts/cargar-fichas.mjs contra dst_negocio_seccion, dst_negocio_horario, dst_negocio_etiqueta y dst_negocio.",
+    "por_que_aqui_y_no_en_una_migracion": "Son datos de contenido, no de esquema, y se corrigen seguido. La migracion 21 crea la tabla; esto la llena y se puede volver a correr.",
+    "regla": "Cada negocio lleva 'fuentes'. Lo que no se encontro en ninguna fuente NO se inventa: se deja fuera. Una ficha corta y cierta vale mas que una larga y falsa.",
+    "verificacion": "Todo entra con estado_verificacion 'pendiente' salvo que la fuente sea el sitio oficial del negocio. Google Places corregira lo que este mal cuando haya clave.",
+    "formato_secciones": "Texto plano, una linea por punto. El sitio parte por salto de linea y arma la lista.",
+    "dias": "0 es domingo, 6 es sabado, como dst_negocio_horario."
+  },
+  "negocios": [
+    {
+      "babosa": "ecoglide-arenal-park",
+      "sitio_web": "https://arenalecoglide.com",
+      "fuentes": [
+        "arenalecoglide.com",
+        "arenalcanopy.com",
+        "arenal.net"
+      ],
+      "etiquetas": [
+        "transporte-hotel",
+        "guia-bilingue",
+        "estacionamiento"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "16:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Once cables y trece plataformas, repartidos en dos secciones.\nUn puente colgante en medio del recorrido.\nAl terminar el cable ocho está el Tarzan Swing: un columpio al vacío, opcional.\nEl recorrido completo dura unas dos horas.\nGuías especializados que van explicando la flora y la fauna del camino.",
+          "en": "Eleven cables and thirteen platforms, split into two sections.\nA suspension bridge halfway through.\nAfter cable eight comes the Tarzan Swing: a free-fall swing, optional.\nThe full circuit takes about two hours.\nSpecialist guides explain the plants and wildlife along the way."
+        },
+        "incluye": {
+          "es": "Transporte desde La Fortuna o desde Tabacón.\nEquipo completo de canopy y charla de seguridad.\nGuías bilingües.\nBebidas al terminar.",
+          "en": "Transport from La Fortuna or from Tabacon.\nFull zip line gear and the safety briefing.\nBilingual guides.\nDrinks at the end."
+        },
+        "encuentro": {
+          "es": "Salidas programadas a las 8:00, 10:00 y 13:00.\nEl parque recoge en los hoteles de La Fortuna y de Tabacón; conviene confirmar la hora exacta de recogida al reservar.",
+          "en": "Scheduled departures at 8:00, 10:00 and 13:00.\nThe park picks up at hotels in La Fortuna and Tabacon; confirm your exact pickup time when booking."
+        }
+      }
+    },
+    {
+      "babosa": "la-roca-canyoning",
+      "sitio_web": "https://larocacanyoning.com",
+      "fuentes": [
+        "larocacanyoning.com",
+        "arenalcanopy.com",
+        "seventours.com"
+      ],
+      "etiquetas": [
+        "transporte-hotel",
+        "guia-bilingue",
+        "restaurante-en-sitio"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cuatro rappeles por las paredes del cañón del río Arenal, con cascada.\nTres saltos a pozas naturales, todos opcionales.\nDos cables de canopy que cruzan el cañón.\nCaminata por el río Arenal para terminar.\nNo hace falta experiencia previa: los guías dan la inducción completa y acompañan todo el recorrido.",
+          "en": "Four rappels down the walls of the Arenal river canyon, waterfalls included.\nThree jumps into natural pools, all optional.\nTwo zip lines crossing the canyon.\nA walk along the Arenal river to finish.\nNo previous experience needed: the guides run a full briefing and stay with you throughout."
+        },
+        "incluye": {
+          "es": "Equipo profesional completo y guías certificados.\nAlmuerzo en La Roca Bistró al terminar.\nTransporte, con la hora de recogida según dónde se hospede.",
+          "en": "Full professional gear and certified guides.\nLunch at La Roca Bistro afterwards.\nTransport, with pickup time depending on where you are staying."
+        },
+        "adicional": {
+          "es": "Edad mínima: 6 años.\nQué llevar: zapatos cerrados o tenis, traje de baño, ropa de cambio, repelente, bloqueador y cámara.\nSe termina mojado; los guías indican qué se puede llevar durante el descenso.",
+          "en": "Minimum age: 6.\nWhat to bring: closed shoes or trainers, swimsuit, a change of clothes, repellent, sunscreen and a camera.\nYou will get wet; the guides will tell you what you can carry during the descent."
+        }
+      }
+    },
+    {
+      "babosa": "cavernas-de-venado",
+      "fuentes": [
+        "seventours.com",
+        "arenalcanopy.com",
+        "adventuretourscostarica.com"
+      ],
+      "etiquetas": [
+        "transporte-hotel",
+        "guia-bilingue"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Unas dos horas dentro de la cueva, más el traslado: el tour completo toma entre cuatro y seis horas.\nSe camina con agua hasta el tobillo y en algunos tramos hay que agacharse y pasar apretado.\nEstalactitas, formaciones con nombre propio y murciélagos.\nNo es apto para quien sufre con los espacios cerrados.",
+          "en": "About two hours inside the cave, plus travel: the whole tour takes four to six hours.\nYou walk in ankle-deep water and in some passages you have to crouch and squeeze through.\nStalactites, named rock formations and bats.\nNot suitable for anyone who struggles with enclosed spaces."
+        },
+        "incluye": {
+          "es": "Casco, foco y botas de hule, incluidos en la entrada.\nGuía dentro de la caverna.\nSegún el operador, transporte desde el hotel, bebidas y bocadillos.",
+          "en": "Helmet, torch and rubber boots, included with the entrance.\nA guide inside the cave.\nDepending on the operator, hotel transport, drinks and snacks."
+        },
+        "encuentro": {
+          "es": "Salidas a las 7:30 y a la 1:00 de la tarde.\nVenado queda a unos 45 km de La Fortuna: la mayoría de operadores recoge en el hotel.",
+          "en": "Departures at 7:30 and 1:00 pm.\nVenado is about 45 km from La Fortuna: most operators pick you up at your hotel."
+        },
+        "adicional": {
+          "es": "Qué llevar: zapatos cerrados que se puedan mojar, medias, toalla, ropa de cambio y repelente.\nSe sale mojado y con barro. No es el tour para estrenar ropa.",
+          "en": "What to bring: closed shoes you do not mind soaking, socks, a towel, a change of clothes and repellent.\nYou come out wet and muddy. Not the tour for new clothes."
+        }
+      }
+    },
+    {
+      "babosa": "bogarin-trail",
+      "sitio_web": "https://www.bogarintrail.com",
+      "fuentes": [
+        "bogarintrail.com",
+        "visitcostarica.com",
+        "twoweeksincostarica.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "sin-escaleras",
+        "solo-efectivo",
+        "en-el-centro"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Un sendero principal en círculo de 2,5 km, plano y de tierra compacta, con ramales.\nSe recorre en una o dos horas, según cuánto se pare a mirar.\nPerezosos de dos y tres dedos, tucanes, ranas y aves.\nSe puede entrar por cuenta propia, pero con guía se ve mucho más: trabajan con telescopio.",
+          "en": "A main 2.5 km loop, flat and hard-packed, with side trails.\nIt takes one to two hours, depending on how often you stop to look.\nTwo- and three-toed sloths, toucans, frogs and birds.\nYou can walk it on your own, but a guide finds far more: they work with a spotting scope."
+        },
+        "encuentro": {
+          "es": "Visitas guiadas a las 6:00, 9:00, 12:00 y 15:00.\nQueda a pocos minutos a pie del parque de La Fortuna: no hace falta carro ni transporte.",
+          "en": "Guided visits at 6:00, 9:00, 12:00 and 15:00.\nA few minutes walk from the park in La Fortuna: no car or transfer needed."
+        },
+        "incluye": {
+          "es": "La visita guiada dura unas dos horas e incluye la entrada y el guía.",
+          "en": "The guided visit lasts about two hours and includes entrance and guide."
+        },
+        "adicional": {
+          "es": "La entrada se paga en efectivo. Conviene llevar colones.\nLa primera salida, la de las 6 de la mañana, es la mejor para ver animales activos.",
+          "en": "Entrance is cash only. Bring colones.\nThe 6 am slot is the best one for seeing animals active."
+        }
+      }
+    },
+    {
+      "babosa": "lomas-del-volcan",
+      "telefono": "+50624799000",
+      "fuentes": [
+        "arenal.net",
+        "expedia",
+        "tripadvisor"
+      ],
+      "etiquetas": [
+        "piscina",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "wifi-gratis",
+        "estacionamiento",
+        "desayuno-incluido",
+        "vista-al-volcan",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Bungalows de madera independientes, repartidos en una finca al pie del volcán, a unos 4 km del pueblo.\nCada uno con su terraza y vista al cono; sin pasillos ni vecinos pared con pared.\nDos piscinas al aire libre, spa y restaurante.",
+          "en": "Free-standing wooden bungalows spread over a farm at the foot of the volcano, about 4 km from town.\nEach with its own porch and a view of the cone; no corridors and no neighbours through the wall.\nTwo outdoor pools, a spa and a restaurant."
+        },
+        "incluye": {
+          "es": "Desayuno buffet.\nWifi en áreas comunes y estacionamiento, sin costo.\nAire acondicionado, minibar y caja fuerte en la habitación.",
+          "en": "Buffet breakfast.\nWifi in public areas and self parking, both free.\nAir conditioning, minibar and safe in the room."
+        }
+      }
+    },
+    {
+      "babosa": "catarata-rio-fortuna",
+      "precio_desde_usd": 18,
+      "fuentes": [
+        "cataratalafortuna.com",
+        "viajeroscallejeros.com",
+        "capturetheatlas.com"
+      ],
+      "etiquetas": [
+        "estacionamiento",
+        "en-la-naturaleza",
+        "tarifa-nacional"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "07:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 1,
+          "abre": "07:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 2,
+          "abre": "07:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 3,
+          "abre": "07:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 4,
+          "abre": "07:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 5,
+          "abre": "07:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 6,
+          "abre": "07:00",
+          "cierra": "17:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Una caída de unos 70 metros por una pared de roca volcánica, rodeada de bosque.\nSe baja por una escalera de unos 500 escalones, y hay que volver a subirlos: esa es la parte dura.\nAbajo hay una poza donde se puede nadar. El agua es clara y fría.\nCalculá entre hora y media y dos horas con calma.",
+          "en": "A drop of about 70 metres down a volcanic rock face, ringed by forest.\nYou go down some 500 steps, and you have to climb back up: that is the hard part.\nAt the bottom there is a pool you can swim in. The water is clear and cold.\nAllow an hour and a half to two hours at a relaxed pace."
+        },
+        "adicional": {
+          "es": "Entrada: unos 18 dólares para extranjeros y 9 para nacionales. Los menores de 8 años no pagan.\nComprarla por internet cuesta un par de dólares más y evita la fila.\nQué llevar: traje de baño, toalla, zapatos con agarre y agua.\nLa administra ADIFORT, la asociación de desarrollo de La Fortuna, que reinvierte lo recaudado en la comunidad.",
+          "en": "Entrance: about 18 dollars for foreign visitors and 9 for nationals. Under 8s go free.\nBuying online costs a couple of dollars more and saves you the queue.\nWhat to bring: swimsuit, towel, shoes with grip and water.\nIt is run by ADIFORT, the local development association, which reinvests the fees in the community."
+        }
+      }
+    },
+    {
+      "babosa": "mistico-arenal-hanging-bridges-park",
+      "sitio_web": "https://misticopark.com",
+      "precio_desde_usd": 32,
+      "fuentes": [
+        "misticopark.com",
+        "arenal.net",
+        "getyourguide.com"
+      ],
+      "etiquetas": [
+        "estacionamiento",
+        "guia-bilingue",
+        "en-la-naturaleza",
+        "apto-para-ninos"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "06:00",
+          "cierra": "15:50"
+        },
+        {
+          "dia": 1,
+          "abre": "06:00",
+          "cierra": "15:50"
+        },
+        {
+          "dia": 2,
+          "abre": "06:00",
+          "cierra": "15:50"
+        },
+        {
+          "dia": 3,
+          "abre": "06:00",
+          "cierra": "15:50"
+        },
+        {
+          "dia": 4,
+          "abre": "06:00",
+          "cierra": "15:50"
+        },
+        {
+          "dia": 5,
+          "abre": "06:00",
+          "cierra": "15:50"
+        },
+        {
+          "dia": 6,
+          "abre": "06:00",
+          "cierra": "15:50"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "3,2 km de senderos por bosque lluvioso, con seis puentes colgantes.\nSe camina del suelo del bosque hasta el dosel, con vistas al volcán en los tramos abiertos.\nEntre dos y tres horas el recorrido completo.\nSe puede hacer por cuenta propia o con guía naturalista; con guía se ven muchos más animales.",
+          "en": "3.2 km of rainforest trails with six hanging bridges.\nYou walk from the forest floor up to the canopy, with volcano views on the open stretches.\nTwo to three hours for the full circuit.\nYou can go on your own or with a naturalist guide; with a guide you see far more wildlife."
+        },
+        "adicional": {
+          "es": "Entrada: unos 32 dólares por adulto. Los menores de 5 años no pagan.\nLas entradas se compran por adelantado: conviene reservar por internet.\nLa primera hora de la mañana es la mejor para ver animales y la que menos gente tiene.",
+          "en": "Entrance: about 32 dollars per adult. Under 5s go free.\nTickets are bought in advance: book online.\nThe first hour of the morning is the best for wildlife and the emptiest."
+        }
+      }
+    },
+    {
+      "babosa": "sky-adventures-arenal-park",
+      "precio_desde_usd": 110,
+      "fuentes": [
+        "arenalcanopy.com",
+        "costaricatravelblog.com",
+        "expedia.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "transporte-hotel",
+        "estacionamiento"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Tres cosas distintas en el mismo parque, que se toman juntas o por separado.\nSky Tram: una góndola que sube 236 metros a lo largo de 1.250, hasta el mirador Mano del Arenal.\nSky Trek: siete cables de canopy, de hasta 750 metros de largo y 200 de altura, a unos 70 km/h.\nSky Walk: puentes colgantes y senderos, la opción tranquila.\nCada actividad ronda las dos horas.",
+          "en": "Three different things in the same park, taken together or separately.\nSky Tram: a gondola climbing 236 metres over a 1,250-metre route to the Mano del Arenal viewpoint.\nSky Trek: seven zip lines, up to 750 metres long and 200 metres high, at around 70 km/h.\nSky Walk: hanging bridges and trails, the quiet option.\nEach activity runs about two hours."
+        },
+        "incluye": {
+          "es": "Charla de seguridad y equipo certificado: casco, guantes y arnés.\nGuía certificado y bilingüe.",
+          "en": "Safety briefing and certified gear: helmet, gloves and harness.\nCertified bilingual guide."
+        }
+      }
+    },
+    {
+      "babosa": "parque-nacional-volcan-arenal",
+      "precio_desde_usd": 15,
+      "fuentes": [
+        "sinac.go.cr",
+        "viajeroscallejeros.com",
+        "costarica-spirit.com"
+      ],
+      "etiquetas": [
+        "estacionamiento",
+        "en-la-naturaleza",
+        "tarifa-nacional"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "16:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Dos sectores, Volcán y Península, los dos con vistas al cono.\nEl sendero más caminado es Las Coladas, de casi 2 km, que llega a los restos de la colada de lava de 1992.\nEl Ceibo, otros 2 km, pasa por un ceibo gigante y un higuerón estrangulador enorme.\nEn la Península hay un sendero pensado para personas con movilidad reducida y un mirador al final.",
+          "en": "Two sectors, Volcan and Peninsula, both with views of the cone.\nThe most walked trail is Las Coladas, nearly 2 km, reaching the remains of the 1992 lava flow.\nEl Ceibo, another 2 km, passes a giant kapok tree and an enormous strangler fig.\nIn the Peninsula sector there is a trail designed for reduced mobility and a viewpoint at the end."
+        },
+        "adicional": {
+          "es": "Entrada: 15 dólares para extranjeros y unos 1.000 colones para nacionales.\nAbre todos los días del año, incluidos feriados.\nEstá prohibido subir al cono y sus alrededores, y no se permiten fogatas. No es capricho: el volcán sigue activo.\nLas entradas se compran en la boletería el mismo día.",
+          "en": "Entrance: 15 dollars for foreign visitors, about 1,000 colones for nationals.\nOpen every day of the year, holidays included.\nClimbing the cone and its immediate surroundings is forbidden, and fires are not allowed. It is not fussiness: the volcano is still active.\nTickets are bought at the gate on the day."
+        },
+        "accesibilidad": {
+          "es": "El sector Península tiene un sendero pensado para personas con movilidad reducida.\nLos senderos del sector Volcán son de tierra y piedra suelta sobre lava: no son aptos para silla de ruedas.",
+          "en": "The Peninsula sector has a trail designed for visitors with reduced mobility.\nThe trails in the Volcan sector are dirt and loose rock over lava: not wheelchair accessible."
+        }
+      }
+    },
+    {
+      "babosa": "tabacon-thermal-resort-spa",
+      "precio_desde_usd": 99,
+      "fuentes": [
+        "tabacon.com",
+        "viator.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "romantico",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 1,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 2,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 3,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 4,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 5,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 6,
+          "abre": "10:00",
+          "cierra": "22:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cascadas y pozas construidas dentro del bosque, siguiendo el cauce del río Tabacón, que baja caliente desde el volcán.\nEl pase de día da acceso de 10 de la mañana a 10 de la noche.\nDe noche, con las pozas iluminadas, es otra cosa: mucha gente entra tarde a propósito.",
+          "en": "Waterfalls and pools built into the forest along the Tabacon river, which runs hot down from the volcano.\nThe day pass gives access from 10 in the morning to 10 at night.\nAfter dark, with the pools lit, it is a different place: plenty of people go late on purpose."
+        },
+        "incluye": {
+          "es": "Acceso a todas las pozas termales, las cascadas y los senderos.\nDuchas y vestidores.\nEl spa y las comidas se pagan aparte, salvo que se compre el pase con almuerzo o cena.",
+          "en": "Access to all the thermal pools, the waterfalls and the trails.\nShowers and changing rooms.\nSpa treatments and meals are extra, unless you buy the pass with lunch or dinner."
+        },
+        "adicional": {
+          "es": "Pase de día: alrededor de 99 dólares por adulto y 55 por niño; con una comida incluida sube a unos 168 y 90.\nEl cupo del pase de día es limitado: conviene reservar con antelación.\nEn temporada alta los precios suben.",
+          "en": "Day pass: around 99 dollars per adult and 55 per child; with a meal included it goes to about 168 and 90.\nDay pass availability is limited: book ahead.\nPrices rise in high season."
+        }
+      }
+    },
+    {
+      "babosa": "ecotermales-fortuna",
+      "precio_desde_usd": 43,
+      "fuentes": [
+        "ecotermalesfortuna.cr",
+        "twoweeksincostarica.com",
+        "puravidatraveling.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "romantico",
+        "tranquilo",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 1,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 2,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 3,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 4,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 5,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 6,
+          "abre": "10:00",
+          "cierra": "22:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Pozas de agua termal escalonadas entre el bosque, sin toboganes y sin música: la apuesta aquí es el silencio.\nDos pases al día: el de mañana, de 10 a 4, y el de noche, de 5 a 10.\nSolo entran 100 personas por bloque. Es la razón por la que nunca se siente lleno, y también por la que hay que reservar.",
+          "en": "Thermal pools terraced into the forest, with no slides and no music: the bet here is quiet.\nTwo passes a day: the morning one, 10 to 4, and the evening one, 5 to 10.\nOnly 100 people per block. That is why it never feels crowded, and also why you have to book."
+        },
+        "adicional": {
+          "es": "Entrada: unos 43 dólares por adulto y 25 por niño de 5 a 11 años, más impuesto. Los menores de 4 no pagan.\nCon comida incluida ronda los 60 dólares por persona.\nHay que reservar. En temporada seca, de diciembre a abril, conviene hacerlo con dos semanas de antelación: se llena.",
+          "en": "Entrance: about 43 dollars per adult and 25 per child aged 5 to 11, plus tax. Under 4s go free.\nWith a meal included it comes to around 60 dollars per person.\nBooking is required. In the dry season, December to April, book two weeks ahead: it sells out."
+        }
+      }
+    },
+    {
+      "babosa": "baldi-hot-springs",
+      "precio_desde_usd": 60,
+      "fuentes": [
+        "baldicostarica.cr",
+        "viator.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Veinticinco pozas termales a distintas temperaturas, alimentadas por cascadas.\nToboganes que arrancan en la parte alta del complejo, y una sauna natural.\nEs el complejo más grande de la zona y el más movido: si lo que se busca es silencio, este no es.\nEl pase da acceso durante doce horas, y se entra a la hora que uno quiera dentro de esa ventana.",
+          "en": "Twenty-five thermal pools at different temperatures, fed by waterfalls.\nSlides that start at the top of the resort, and a natural sauna.\nIt is the largest complex in the area and the liveliest: if you are after quiet, this is not it.\nThe pass gives twelve hours of access, and you go in whenever you like within that window."
+        },
+        "adicional": {
+          "es": "Pase de día: alrededor de 60 dólares, con la opción de sumarle comidas.\nLas comidas van por turnos: almuerzo entre mediodía y las 3, cena entre las 5 y las 8.\nDe 0 a 5 años no pagan; de 6 a 10 pagan tarifa de niño; de 11 en adelante, de adulto.",
+          "en": "Day pass: around 60 dollars, with the option to add meals.\nMeals run in shifts: lunch between noon and 3, dinner between 5 and 8.\nUnder 5s go free; 6 to 10 pay the child rate; 11 and over pay as adults."
+        }
+      }
+    },
+    {
+      "babosa": "kalambu-hot-springs",
+      "fuentes": [
+        "kalambu.com",
+        "viator.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "apto-para-ninos",
+        "tarifa-nacional"
+      ],
+      "horario": [
+        {
+          "dia": 3,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 0,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 1,
+          "cerrado": true
+        },
+        {
+          "dia": 2,
+          "cerrado": true
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Doce pozas de agua termal, frías y calientes, y tres toboganes: el Ciclón, la Avalancha de 10,5 metros y el Mamut, de 12,6 metros, donde bajan hasta cuatro personas en la misma balsa.\nZona de juegos con un cubo gigante que se llena y descarga como una cascada sobre los niños.\nRestaurante y bar dentro del agua.\nEs parque acuático antes que spa. Con niños funciona muy bien; para una tarde romántica, no.",
+          "en": "Twelve thermal pools, hot and cold, and three slides: the Ciclon, the 10.5-metre Avalancha and the Mamut, 12.6 metres, where up to four people ride the same raft.\nA play area with a giant bucket that fills and tips like a waterfall over the children.\nRestaurant and a swim-up bar.\nIt is a water park before it is a spa. With children it works beautifully; for a romantic afternoon, no."
+        },
+        "adicional": {
+          "es": "Abre de miércoles a domingo. Lunes y martes está cerrado: es el error clásico del que llega sin mirar.\nTiene tarifa para nacionales, bastante más baja que la de extranjeros. Los menores de 4 años no pagan.",
+          "en": "Open Wednesday to Sunday. It is closed Monday and Tuesday: the classic mistake of turning up without checking.\nThere is a local resident rate, well below the foreign one. Under 4s go free."
+        }
+      }
+    },
+    {
+      "babosa": "proyecto-asis",
+      "sitio_web": "https://institutoasis.com",
+      "precio_desde_usd": 31,
+      "fuentes": [
+        "institutoasis.com",
+        "anywhere.com",
+        "viator.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "08:30",
+          "cierra": "15:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:30",
+          "cierra": "15:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:30",
+          "cierra": "15:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:30",
+          "cierra": "15:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:30",
+          "cierra": "15:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:30",
+          "cierra": "15:00"
+        },
+        {
+          "dia": 0,
+          "cerrado": true
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Centro de rescate que recibe animales decomisados o entregados, no un zoológico: se explica de dónde vino cada uno y por qué muchos ya no pueden volver al bosque.\nEl tour regular dura hora y media e incluye la caminata guiada por los senderos.\nCon el añadido de voluntariado son dos horas y media: se preparan las dietas y el enriquecimiento de guacamayas, monos y demás.",
+          "en": "A rescue centre that takes in confiscated or surrendered animals, not a zoo: they explain where each one came from and why many can never go back to the forest.\nThe regular tour lasts an hour and a half and includes the guided walk along the trails.\nWith the volunteering add-on it runs two and a half hours: you prepare diets and enrichment for macaws, monkeys and the rest."
+        },
+        "encuentro": {
+          "es": "Salidas de lunes a sábado, a las 8:30 de la mañana y a la 1 de la tarde.\nQueda en Javillos de Florencia, a unos 25 km de La Fortuna, camino a Ciudad Quesada.",
+          "en": "Departures Monday to Saturday, at 8:30 am and 1 pm.\nIt is in Javillos de Florencia, about 25 km from La Fortuna, on the road to Ciudad Quesada."
+        },
+        "adicional": {
+          "es": "Tour regular: unos 31 dólares por persona, 18 para niños de 4 a 9 años.\nTour con voluntariado: unos 54 dólares, 31 para niños de 5 a 9.",
+          "en": "Regular tour: about 31 dollars per person, 18 for children aged 4 to 9.\nTour with volunteering: about 54 dollars, 31 for children aged 5 to 9."
+        }
+      }
+    },
+    {
+      "babosa": "ecocentro-danaus",
+      "fuentes": [
+        "arenal.net",
+        "lonelyplanet.com",
+        "entercostarica.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "16:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Una reserva chica con senderos bien hechos, a unos 4 km al este del pueblo.\nLa entrada incluye el mariposario, el ranario con ranas venenosas y una laguna con caimanes y tortugas.\nDe día se puede recorrer por cuenta propia, de 8 a 4.",
+          "en": "A small reserve with well-made trails, about 4 km east of town.\nAdmission includes the butterfly garden, the frog house with poison dart frogs, and a lagoon with caimans and turtles.\nBy day you can walk it on your own, 8 to 4."
+        },
+        "encuentro": {
+          "es": "El tour nocturno dura unas dos horas, con guía de la reserva.\nEs cuando se ve lo bueno: ranas, serpientes, insectos, murciélagos, zorrillos, perezosos activos y a veces caimanes.\nPara el nocturno y para el de aves de la mañana hay que reservar.",
+          "en": "The night tour lasts about two hours, with a reserve guide.\nThat is when the good stuff comes out: frogs, snakes, insects, bats, skunks, active sloths and sometimes caimans.\nBook ahead for the night tour and for the early morning birding one."
+        }
+      }
+    },
+    {
+      "babosa": "the-springs-resort-spa",
+      "sitio_web": "https://www.thespringscostarica.com",
+      "precio_desde_usd": 125,
+      "fuentes": [
+        "thespringscostarica.com",
+        "mytanfeet.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "vista-al-volcan",
+        "apto-para-ninos"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "22:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Pozas termales escalonadas ladera abajo, con vista frontal al volcán, cinco restaurantes y seis bares dentro del complejo.\nSe entra desde las 8 de la mañana y se puede quedar hasta que cierra, a las 10 de la noche.\nAbajo, junto al río Arenal, está Club Río: tubing, kayak inflable, cabalgata, escalada y rappel, pesca y tours de naturaleza.",
+          "en": "Thermal pools stepped down the hillside with a head-on volcano view, five restaurants and six bars inside the resort.\nYou can arrive from 8 in the morning and stay until it closes at 10 at night.\nDown by the Arenal river is Club Rio: tubing, inflatable kayaking, horseback riding, climbing and rappelling, fishing and nature tours."
+        },
+        "incluye": {
+          "es": "Entrada a las aguas termales y las piscinas durante dos días consecutivos, no uno.\nEstacionamiento, casilleros y toallas.\nAcceso a los restaurantes y bares del complejo; la comida y las bebidas se pagan aparte.",
+          "en": "Access to the hot springs and pools for two consecutive days, not one.\nParking, lockers and towels.\nAccess to the resort restaurants and bars; food and drinks are paid separately."
+        },
+        "adicional": {
+          "es": "Pase de día: unos 125 dólares más 13% de impuesto, la misma tarifa para adultos y para niños de 3 a 12 años.\nEl santuario de animales rescatados, dentro de Club Río, tiene costo aparte.\nQue el pase valga dos días seguidos es lo que lo vuelve razonable: se aprovecha una tarde y la mañana siguiente.",
+          "en": "Day pass: about 125 dollars plus 13% tax, the same rate for adults and for children aged 3 to 12.\nThe rescued animal sanctuary inside Club Rio costs extra.\nThe pass covering two consecutive days is what makes it add up: you use an afternoon and the next morning."
+        }
+      }
+    },
+    {
+      "babosa": "paradise-hot-springs",
+      "sitio_web": "https://paradisehotsprings.net",
+      "precio_desde_usd": 47,
+      "fuentes": [
+        "paradisehotsprings.net",
+        "tripadvisor.com",
+        "booking.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "tranquilo",
+        "romantico"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "11:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 1,
+          "abre": "11:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 2,
+          "abre": "11:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 3,
+          "abre": "11:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "11:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "11:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "11:00",
+          "cierra": "21:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Ocho pozas termales y jacuzzis entre jardines, a 4,8 km al noroeste de la iglesia de La Fortuna.\nMás chico y más tranquilo que los grandes de la ruta, sin toboganes ni multitudes.\nBar dentro del agua, restaurante y masajes.",
+          "en": "Eight thermal pools and hot tubs among gardens, 4.8 km northwest of the church in La Fortuna.\nSmaller and quieter than the big names along the road, with no slides and no crowds.\nSwim-up bar, restaurant and massages."
+        },
+        "adicional": {
+          "es": "Entrada: unos 47 dólares por adulto y 33 por niño.\nCon comida incluida sube a unos 74 y 46.\nAbre a las 11 de la mañana, más tarde que el resto: no sirve para un plan de media mañana.",
+          "en": "Entrance: about 47 dollars per adult and 33 per child.\nWith a meal included it goes to about 74 and 46.\nIt opens at 11 in the morning, later than the rest: no good for a mid-morning plan."
+        }
+      }
+    },
+    {
+      "babosa": "pure-trek-canyoning",
+      "sitio_web": "https://puretrek.com",
+      "fuentes": [
+        "puretrek.com",
+        "expedia.com",
+        "seventours.com"
+      ],
+      "etiquetas": [
+        "transporte-hotel",
+        "guia-bilingue",
+        "opciones-vegetarianas"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cinco rappeles por cascadas, el más alto de unos 50 metros.\nUn tramo corto de escalada en roca y el Monkey Drop.\nEs tour de medio día.\nOperan desde 2001 con guías certificados; es el operador de canyoning más conocido de La Fortuna.",
+          "en": "Five waterfall rappels, the tallest about 50 metres.\nA short stretch of rock climbing and the Monkey Drop.\nIt is a half-day tour.\nThey have run since 2001 with certified guides; it is the best-known canyoning operator in La Fortuna."
+        },
+        "incluye": {
+          "es": "Transporte ida y vuelta desde el hotel o el alquiler en La Fortuna.\nTodo el equipo de canyoning y escalada.\nAlmuerzo costarricense en su sede, con opciones vegetarianas, veganas y sin gluten.",
+          "en": "Round-trip transport from your hotel or rental in La Fortuna.\nAll canyoning and climbing gear.\nA Costa Rican lunch at their base, with vegetarian, vegan and gluten-free options."
+        }
+      }
+    },
+    {
+      "babosa": "wave-expeditions",
+      "sitio_web": "https://www.waveexpeditions.com",
+      "fuentes": [
+        "waveexpeditions.com",
+        "costaricadaytrip.com",
+        "govisitcostarica.co.cr"
+      ],
+      "etiquetas": [
+        "transporte-hotel",
+        "guia-bilingue",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Rafting por el río Balsa, clase II y III: 13 kilómetros y 22 rápidos.\nEs el nivel que sirve para familias y para quien nunca ha hecho rafting, con el volcán de fondo.\nA mitad del recorrido hay una parada en la orilla donde los guías preparan fruta fresca.\nPara quien busca algo más fuerte, también salen al río Toro, de clase III y IV.",
+          "en": "Rafting the Balsa river, class II and III: 13 kilometres and 22 rapids.\nIt is the level that works for families and first-timers, with the volcano behind you.\nHalfway down there is a stop on the bank where the guides prepare fresh fruit.\nFor anything stronger, they also run the Toro river, class III and IV."
+        },
+        "incluye": {
+          "es": "Transporte ida y vuelta desde La Fortuna.\nFruta tropical y bebidas durante el recorrido.\nAlmuerzo costarricense orgánico en una finca local al terminar.",
+          "en": "Round-trip transport from La Fortuna.\nTropical fruit and drinks along the way.\nAn organic Costa Rican lunch at a local farm afterwards."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-mundo-aventura",
+      "sitio_web": "https://www.arenalmundoaventura.com",
+      "fuentes": [
+        "arenalmundoaventura.com",
+        "costaricatravelblog.com",
+        "arenalcanopy.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "estacionamiento",
+        "en-la-naturaleza",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Parque ecológico a 1,5 km al sur de la iglesia de La Fortuna: se llega en minutos desde el pueblo.\nEl canopy tiene un cable de 980 metros, el más largo de la zona, con vista al Arenal, al Cerro Chato y a la catarata. Dura unas dos horas y se llega al punto de partida en carreta tirada por tractor.\nTambién hay rappel, cabalgata hasta la Catarata Río Fortuna por un sendero de 600 metros, tour de aves temprano y tour nocturno.",
+          "en": "An ecological park 1.5 km south of the church in La Fortuna: minutes from town.\nThe zip line has a 980-metre cable, the longest in the area, with views of Arenal, Cerro Chato and the waterfall. It runs about two hours and you reach the start in a tractor-drawn cart.\nThere is also rappelling, horseback riding to the Rio Fortuna waterfall along a 600-metre trail, early morning birding and a night tour."
+        },
+        "adicional": {
+          "es": "En Villa Maleku, dentro del parque, hay presentaciones de miembros de la comunidad indígena maleku.\nLas actividades se combinan en paquetes de medio día o de día completo.",
+          "en": "At Villa Maleku, inside the park, members of the Maleku indigenous community give presentations.\nThe activities combine into half-day or full-day packages."
+        }
+      }
+    }
+  ]
+}

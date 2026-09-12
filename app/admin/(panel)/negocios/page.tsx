@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { crearNegocio } from './acciones';
+import { crearNegocio, traerOpinionesDeTodos } from './acciones';
+import { hayClaveDePlaces } from '@/lib/externas';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,18 @@ export default async function PaginaNegocios({ searchParams }: { searchParams: P
 
   return (
     <>
-      <Cabecera titulo="Negocios" sub={`${data?.length ?? 0} en ${destino.nombre}`} />
+      <Cabecera titulo="Negocios" sub={`${data?.length ?? 0} en ${destino.nombre}`}>
+        {hayClaveDePlaces() ? (
+          <form action={traerOpinionesDeTodos}>
+            <input type="hidden" name="limite" value="25" />
+            <BotonAccion clase="boton secundario" confirmar="Trae de Google la nota y las reseñas de hasta 25 negocios que no tengan o estén por vencer. Cada uno es una llamada facturada. ¿Seguir?">
+              Traer opiniones de Google
+            </BotonAccion>
+          </form>
+        ) : (
+          <span className="gris" style={{ fontSize: 12.5, color: '#8B8B87' }}>Falta GOOGLE_PLACES_API_KEY para traer opiniones</span>
+        )}
+      </Cabecera>
       <div className="filtros">
         <form action="/admin/negocios" method="get"><input type="search" name="q" placeholder="Buscar" defaultValue={f.q ?? ''} /></form>
         {['borrador', 'pendiente', 'publicado', 'archivado'].map((e) => <Link key={e} href={`/admin/negocios?estado=${f.estado === e ? '' : e}`} className={f.estado === e ? 'activo' : ''}>{e}</Link>)}

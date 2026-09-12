@@ -4,7 +4,8 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, traducirCampo } from '../acciones';
+import { editarNegocio, traducirCampo, traerOpiniones } from '../acciones';
+import { hayClaveDePlaces } from '@/lib/externas';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
-    db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en').eq('negocio_id', id),
+    db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(count)').eq('negocio_id', id),
     db.from('dst_negocio_foto').select('id, url, es_portada, orden').eq('negocio_id', id).order('orden'),
     db.from('dst_solicitud').select('id, tipo, etapa, creado_en').eq('negocio_id', id).order('creado_en', { ascending: false }).limit(10),
   ]);
@@ -101,10 +102,29 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
             </div>
 
             <div className="tarjeta">
-              <h2>Calificaciones externas</h2>
-              {!externas?.length ? <Vacio texto="Sin datos de Google, TripAdvisor o Booking todavía." /> : externas.map((x) => (
-                <div key={x.plataforma} style={{ fontSize: 13, marginBottom: 6 }}><strong>{x.plataforma}</strong>: {x.calificacion} ({x.total_resenas}) · <a href={x.url_fuente ?? '#'} target="_blank" rel="noreferrer">fuente</a> <span className="gris">vence {fecha(x.expira_en, destino.zona_horaria, false)}</span></div>
-              ))}
+              <h2>Opiniones de afuera <small>{hayClaveDePlaces() ? 'Google conectado' : 'falta GOOGLE_PLACES_API_KEY'}</small></h2>
+              {!externas?.length ? <Vacio texto="Nada traído todavía." /> : externas.map((x) => {
+                const cuantos = (x.extractos as unknown as { count: number }[] | null)?.[0]?.count ?? 0;
+                return (
+                  <div key={x.plataforma} style={{ fontSize: 13, marginBottom: 6 }}>
+                    <strong>{x.plataforma}</strong>: {x.calificacion} ({x.total_resenas}) · {cuantos} con texto · <a href={x.url_fuente ?? '#'} target="_blank" rel="noreferrer">fuente</a>{' '}
+                    <span className="gris">vence {fecha(x.expira_en, destino.zona_horaria, false)}</span>
+                  </div>
+                );
+              })}
+              {/* formAction y no un <form>: esta tarjeta vive dentro del
+                  formulario grande, y un formulario dentro de otro no es HTML
+                  válido. El id lo aporta el hidden de arriba. */}
+              <div className="acciones-fila" style={{ marginTop: 10 }}>
+                <button type="submit" formAction={traerOpiniones} className="boton chico secundario">
+                  {n.google_place_id ? 'Actualizar desde Google' : 'Buscar y traer de Google'}
+                </button>
+              </div>
+              <p className="gris" style={{ fontSize: 11.5, color: '#8B8B87', margin: '8px 0 0', lineHeight: 1.45 }}>
+                Se piden a la API de Google, con autor y enlace al original, y vencen a los 30 días: es lo que
+                permiten sus términos. De Tripadvisor y Booking solo se puede mostrar la nota y el enlace,
+                cargados a mano; su texto no se copia.
+              </p>
             </div>
 
             <div className="tarjeta">

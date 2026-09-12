@@ -83,7 +83,7 @@ export default async function Listado({ params }: { params: Parametros }) {
           {negocios.length === 0 && (
             <div className="vacio" style={{ marginTop: 34 }}>
               <h3>{actual.nombre}</h3>
-              <p>{t('sin_resenas', idioma)}</p>
+              <p>{t('sin_lugares', idioma)}</p>
             </div>
           )}
         </div>
