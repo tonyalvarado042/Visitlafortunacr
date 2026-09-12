@@ -105,6 +105,63 @@ se hace con una vista, nunca mezclando tablas.
    **Trabajo a mano** de este archivo el paso exacto, con los valores exactos
    que hay que pegar, y avisar que quedó anotado. Si un valor lo decide el
    proveedor en pantalla, se dice cuál manda.
+11. **Las fotos ajenas tampoco se pegan a mano, y el crédito no es una
+   licencia.** Es la regla 4 aplicada a las imágenes, y hace falta decirla
+   aparte porque la confusión es específica: poner "foto de Fulano" debajo no
+   da derecho a publicarla. La atribución es una *condición* de algunas
+   licencias, no un sustituto de tenerlas. Una foto la sacó una persona y es
+   suya desde que apretó el botón.
+   **De dónde sí puede salir una foto**, en este orden: propia o de Tony ·
+   cedida por el negocio (y entonces `credito` dice quién) · de la API de
+   Google Places, que licencia con atribución · de Wikimedia Commons,
+   Unsplash o Pexels con licencia comercial. **De dónde no**: capturas de
+   Tripadvisor, Booking o Google Maps, blogs de viaje, Pinterest y búsquedas
+   de imágenes. Las licencias `NC` ("non commercial") quedan fuera: esto es un
+   sitio comercial.
+   **`dst_negocio_foto.es_generica` es la otra mitad de la regla, y no es de
+   licencias sino de honestidad.** `true` significa que la foto ilustra la
+   categoría y no retrata a ese negocio. Mostrar una piscina cualquiera en la
+   ficha de un hotel, sin avisar, es afirmar algo falso sobre el negocio —y es
+   lo que nadie puede desmentir cuando el cliente ya reservó—.
+   **EXCEPCIÓN ABIERTA, decidida el 12 de septiembre de 2026 y con fecha de
+   cierre.** Sebastián decidió, sabiendo lo de arriba, que para el MVP las
+   tarjetas muestren fotos **del sitio web de cada negocio**, porque una imagen
+   genérica que no corresponde al lugar hace más daño a la demo que el riesgo
+   de usarlas un par de meses. **Tony lo confirmó el mismo día**, con el
+   planteo completo delante: que el derecho de autor nace con la foto, que el
+   crédito no es una licencia, y que el riesgo que de verdad muerde no es el
+   negocio —al que le conviene la publicidad— sino que ese negocio **no sea
+   dueño de la foto de su propia web** y detrás haya un banco de imágenes con
+   búsqueda inversa automatizada, cuyo reclamo llega a quien publica.
+   Lo que la excepción permite y lo que no:
+   - **Sí**: la `og:image` y las fotos de portada del **sitio propio del
+     negocio**, que es la fuente más defendible sin la API —la `og:image`
+     existe para que otros sitios la muestren al enlazar, y un negocio de un
+     directorio gana con que se le muestre la suya—. Van con `es_generica =
+     false`, `fuente_url` apuntando a su web y `credito` con el nombre del
+     negocio, para poder borrarlas de una si alguno reclama.
+   - **No**: raspar Tripadvisor ni Booking. No es por cautela: sus imágenes
+     están recomprimidas y con marca de agua, y es lo que este mismo archivo
+     marca como riesgo para el dominio.
+   - **Sin gente.** Es condición de Sebastián y además baja el problema: una
+     foto de un edificio no tiene derechos de imagen de nadie encima.
+   - **Vence cuando llegue `GOOGLE_PLACES_API_KEY`.** Ese día las fotos
+     licenciadas entran con `es_generica = false` y desplazan a estas, y esta
+     excepción se borra de aquí. Mientras siga escrita, sigue vigente.
+   **Dos cosas que quedaron dichas y conviene no olvidar**: si en la demo
+   alguien pregunta por las fotos, la respuesta es que son provisionales
+   mientras se conecta la API de Google —no se esconde—; y **antes de hacer
+   publicidad del sitio** (anuncios, prensa, redes) conviene que ya estén las
+   licenciadas, porque el riesgo sube con el tráfico, no con el tiempo.
+   La clave de Places cuesta prácticamente cero —unas 90 llamadas al mes, dentro
+   del crédito gratis— y lo que la bloquea no es plata sino asociar una tarjeta
+   a la cuenta de Google Cloud.
+
+   **Decirlo NO significa afearlo**, y conviene tenerlo claro porque el primer
+   intento se fue por ahí: la foto se ve entera y bien, y lo que es se dice con
+   tres palabras en el pie, junto al crédito. Apagar la imagen con un velo para
+   que "se lea de ambiente" no informa a nadie: solo hace ver mal el sitio, que
+   es distinto de ser honesto.
 
 ---
 
@@ -127,18 +184,19 @@ Monteverde puede tener otra paleta sin tocar una línea.
 
 ---
 
-## Estado actual (11 de septiembre de 2026)
+## Estado actual (12 de septiembre de 2026)
 
 | | |
 |---|---|
 | Tablas | 47 (35 del directorio y CRM + 11 de inteligencia + `dst_negocio_seccion`) |
-| Migraciones | 21, todas guardadas en `supabase/plataforma/` y **todas aplicadas** (la 19, 20 y 21, el 11 de septiembre de 2026) |
+| Migraciones | 22, todas guardadas en `supabase/plataforma/` y **todas aplicadas** (la 22, el 12 de septiembre de 2026) |
+| Fotos | **91 de 91 con portada**, 148 imágenes, 26 MB en webp en el bucket `negocios`. **34 negocios con foto real suya**, bajada de su propio sitio web (excepción de la regla 11, vence con Google Places); los otros 57, con imagen de categoría de Wikimedia |
 | Avisos de seguridad | 0 nuevos (queda el aviso previo por `regconfig` en `dst_idioma`) |
 | Destinos | 1 (La Fortuna, encendido) |
 | Categorías en catálogo | 48 globales, 47 encendidas en La Fortuna, 26 con negocios dentro |
 | Idiomas | 5 · es, en, pt, fr, de |
-| Negocios | **91 publicados** (29 de la siembra original + 62 de la 20), 9 con datos verificados en fuente oficial |
-| Fichas con secciones | 20 de 91, investigadas en internet (`datos/investigacion/fichas-la-fortuna.json`) |
+| Negocios | **91 publicados** (29 de la siembra original + 62 de la 20), 55 con sitio web y 24 con teléfono |
+| Fichas con secciones | **91 de 91** ✔, investigadas en internet (`datos/investigacion/fichas-la-fortuna.json`): 231 secciones, 231 traducciones al inglés, 425 etiquetas, 175 días de horario |
 | Tours cargados | 0 |
 | Guías escritas | 0 |
 | Conocimiento de la IA | 22 fichas de La Fortuna, sin verificar por el equipo |
@@ -285,6 +343,38 @@ EMAIL_REMITENTE=hola@visitlafortunacr.com
    `hola@visitlafortunacr.com`, secreto en `SMTP_CLAVE`). No hay que crearlo:
    se revisa en `/admin/ajustes`.
 
+### Supabase · la migración 22 ya está aplicada
+
+**Hecho el 12 de septiembre de 2026.** La pegó Tony en el SQL Editor y Claude
+subió las 91 fotos desde la máquina de Sebastián con la clave de servicio.
+
+Qué hizo, en tres partes:
+
+1. Le agrega a `dst_negocio_foto` las columnas `licencia`, `fuente_url` y
+   `es_generica`, más un check que impide guardar una foto con origen pero sin
+   autor ni licencia.
+2. Reemplaza `negocios_publicados` para que devuelva `foto_portada_url` y
+   `foto_portada_generica`. **Hay que reemplazar la función entera** porque
+   tiene `returns table (...)` explícito; las columnas nuevas van al final,
+   para no mover el orden de las que ya estaban.
+3. Crea las políticas de `storage.objects` del bucket `negocios`, que son las
+   que dejan al panel subir con la sesión del usuario en vez de con la clave
+   de servicio.
+
+**Verificada con la clave publicable y no con la de servicio**, que es lo que
+de verdad prueba algo: `negocios_publicados` devuelve las 91 con portada,
+`fotos_de_negocio` responde a `anon` con su crédito y su licencia, la imagen
+sale por su URL pública (`200 image/webp`), y el `INSERT` directo a
+`dst_negocio_foto` desde `anon` sigue dando `permission denied` — la regla 7
+se sostiene también aquí.
+
+Para volver a correr el cargador (es idempotente, reconoce por URL):
+
+```
+node --env-file=.env.local scripts/cargar-fotos.mjs             (en seco)
+node --env-file=.env.local scripts/cargar-fotos.mjs --aplicar
+```
+
 ### Supabase · las migraciones 19, 20 y 21 ya están aplicadas
 
 **Hecho el 11 de septiembre de 2026.** La 20 la aplicó Claude desde la máquina
@@ -310,9 +400,11 @@ la base (Settings → Database) de `visitdestinos`, nunca un personal access
 token de la cuenta: ese abriría también el CRM de inversionistas.
 
 Lo que sigue faltando: **Traer opiniones de Google** (necesita la clave de más
-abajo). Completa las 91 fichas con teléfono, sitio web, dirección,
-coordenadas, nota y reseñas. Son 25 por tanda, así que hay que darle cuatro
-veces.
+abajo). Completa las 91 fichas con teléfono, sitio web, coordenadas, nota y
+reseñas. Son 25 por tanda, así que hay que darle cuatro veces.
+La búsqueda del `place_id` va por nombre **y dirección**, y desde el 12 de
+septiembre de 2026 las 91 direcciones son las reales, no "La Fortuna centro":
+eso es lo que hace que traiga el negocio correcto y no el de al lado.
 
 ### Google Cloud · la clave de Places (opiniones de afuera)
 
@@ -328,8 +420,8 @@ otra forma legal de traer texto de reseñas ajenas.
    servidor de Vercel, no el navegador; restringir por dominio la rompería).
    → *API restrictions*: **Restrict key** y marcar solo **Places API (New)**.
 5. *Billing*: hay que tener tarjeta asociada. Traer reseñas es el SKU caro de
-   Places ("Place Details Essentials + Atmosphere"): con 29 negocios y refresco
-   mensual son unas 30 llamadas al mes, muy dentro del crédito gratis. El
+   Places ("Place Details Essentials + Atmosphere"): con 91 negocios y refresco
+   mensual son unas 90 llamadas al mes, dentro del crédito gratis. El
    riesgo no es el uso normal, es un bucle: por eso el botón del listado trae
    25 como máximo por tanda. Conviene poner un *Budget alert* en 10 USD.
 6. Vercel → *Settings* → *Environment Variables*:
@@ -549,7 +641,7 @@ hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
    Pendiente menor: falta ver los cinco volcanes en pantalla y decidir si la
    silueta queda o se prueba otra cosa; el icono se cambia en un solo archivo.
 6. ~~**Ficha de negocio completa y con desplegables.**~~ **Hecho el 11 de
-   septiembre de 2026; falta terminar de llenarlo.** La migración **21** creó
+   septiembre de 2026, y llenado de punta a punta el 12.** La migración **21** creó
    `dst_negocio_seccion`: una fila por bloque plegable, con las seis claves de
    la charla (`incluye`, `no_incluye`, `que_esperar`, `encuentro`,
    `accesibilidad`, `adicional`), traducible como todo lo demás y ordenable.
@@ -574,12 +666,91 @@ hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
    falta; el contacto solo rellena lo que esté vacío). Cada negocio lleva sus
    `fuentes`, y **lo que no aparece en ninguna no se escribe**: una ficha corta
    y cierta vale más que una larga y falsa.
-   Van **20 de 91**, las de más peso. Faltan unas 12 de Qué hacer, 28 hoteles y
-   25 de comer y beber. Para los restaurantes la investigación rinde poco: de
-   una soda no hay web ni horario publicado, y lo que importa lo da Google
-   Places completo. Lo que queda pendiente del punto es la **tarjeta fija de
-   reserva** de la derecha (precio total, fecha, personas), que depende de los
-   tours de la Fase 0: hoy esa columna tiene contacto, horario y precio.
+   Lo que queda pendiente del punto es la **tarjeta fija de reserva** de la
+   derecha (precio total, fecha, personas), que depende de los tours de la
+   Fase 0: hoy esa columna tiene contacto, horario y precio.
+
+   ### El llenado de fichas está terminado (12 de septiembre de 2026)
+
+   **91 de 91** con secciones: 231 secciones con sus 231 traducciones al
+   inglés, 425 etiquetas, 175 días de horario, 55 negocios con sitio web
+   (eran 21) y 24 con teléfono.
+
+   | Sección | |
+   |---|---|
+   | Qué hacer | **30/30** ✔ |
+   | Dónde dormir | **29/29** ✔ |
+   | Comer y beber | **26/26** ✔ |
+   | Tours | **2/2** ✔ |
+   | Explorar | **2/2** ✔ |
+   | Transporte | **2/2** ✔ |
+
+   Las últimas 27 (25 de comer y beber, más Interbus y Adobe Rent a Car) se
+   investigaron y cargaron el 12 de septiembre de 2026.
+
+   **El método, si hay que repetirlo en otro destino**: se busca en internet,
+   se agregan al JSON con sus `fuentes`, y se corre
+   `node --env-file=.env.local scripts/cargar-fichas.mjs` (en seco) y luego
+   `--aplicar`. El script valida contra la base antes de escribir: si una
+   babosa o una etiqueta no existe, se planta y no escribe nada.
+   **Ojo con las babosas**: varias no son las que uno supondría del nombre
+   (Baldi es `baldi-hot-springs`, el Observatory es `arenal-observatory-lodge`).
+   Se consultan en la base antes de escribirlas.
+
+   **De los restaurantes rindió más de lo esperado**, al contrario de lo que
+   decía aquí antes: de 27 salieron 13 teléfonos y 5 sitios web que la siembra
+   no traía, y direcciones exactas para 20 —"50 metros sur del Parque
+   Central" en vez de "La Fortuna centro"—. Eso **no es cosmético**: Google
+   Places busca el `place_id` por nombre **y dirección**, así que una
+   dirección precisa es lo que evita que traiga el negocio equivocado.
+   Lo que sigue sin aparecer publicado en ningún lado es el horario de las
+   sodas de pueblo; eso sí lo dará Places.
+
+   ### La trampa de los nombres de Tripadvisor
+
+   Cinco de los negocios sembrados estaban **mal clasificados**, casi todos por
+   fiarse del nombre con el que aparecen en Tripadvisor. Los cinco están
+   corregidos, pero el patrón importa porque se va a repetir en el próximo
+   destino:
+
+   - **Kenko** estaba en Aguas termales por llamarse ahí "Kenko Hot Springs".
+     Es un bar y restaurante con piscina, y la piscina no es termal. Pasó a
+     Cocina internacional, con la babosa `kenko-bar-restaurante`.
+   - **The Jungle Tours** estaba en Cuadraciclos. Es un operador general con
+     quince tours. Pasó a Aventura, como `arenal-jungle-tours`.
+   - **Casa del Río** estaba en Cabinas y rango económico, descrito como
+     hospedaje sencillo. Es un hotel boutique de lujo con piscina de agua
+     salada, spa y gimnasio. Pasó a Hoteles, rango alto.
+   - **Cuenca Restaurante** estaba en Saludable, descrito como "platos latinos
+     en versión liviana". Es el restaurante del hotel Casa del Río, de cocina
+     italiana, peruana y española. Pasó a Cocina internacional.
+   - **Acacia** estaba en Cafeterías, como sitio de desayuno. Es el restaurante
+     del hotel Noah´s Forest, con cena, brunch y reserva obligatoria. Pasó a
+     Cocina internacional.
+
+   Los dos últimos no vienen del nombre sino de **suponer qué es un negocio por
+   su resumen de siembra**. Los dos son, además, restaurantes de hotel que ya
+   estaban en el directorio como hospedaje: cuando un nombre suena a "el
+   restaurante de algo", conviene buscar si ese algo ya es una ficha.
+
+   Cuando haya `GOOGLE_PLACES_API_KEY`, el tipo de lugar que devuelve Places
+   delata a los que sigan mal clasificados. Mientras tanto, al investigar un
+   negocio **se verifica también que su categoría tenga sentido**, no solo se
+   le escriben secciones.
+
+   Cambiar categoría, nombre, resumen o dirección **no lo hace el cargador**:
+   eso va en `scripts/corregir-negocios.mjs`, que es el que aplicó estas dos
+   últimas correcciones y las 20 direcciones. Se corre en seco y luego con
+   `--aplicar`, igual que el cargador. **La babosa sí obliga a más**: si
+   cambia, hay que mover también `dst_ruta`, que es la tabla que resuelve la
+   URL de cada idioma. Estas correcciones no la tocaron.
+
+   **Queda una duda sin resolver, para que Tony decida**: `pollo-fortuneno` y
+   `restaurante-fortuneno` son dos fichas distintas, y puede que sean el mismo
+   negocio. Tienen listados separados en Tripadvisor y direcciones distintas
+   (Calle 474 frente al Colono / 200 metros este del parque), y una fuente dice
+   que Pollo Fortuneño tiene dos locales con carta parecida. Si son el mismo,
+   sobra una ficha. Se confirma yendo o llamando, no buscando más en internet.
 7. ~~**"Lo que dicen en otras plataformas" con extractos reales.**~~
    **Hecho el 11 de septiembre de 2026, salvo poner la clave.** La ficha ya
    muestra, bajo la nota de cada plataforma, las reseñas con texto: nombre del
@@ -620,7 +791,111 @@ hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
    tanda deja las 91 fichas con contacto, mapa y opiniones.
    Todo entra `estado_verificacion = 'pendiente'` y las traducciones al inglés
    `esta_revisada = false`: son textos que nadie del equipo ha leído.
-9. **Entrenar al agente local mientras llega el experto.** Recopilar de
+9. ~~**Fotos en las tarjetas y en la ficha.**~~ **Hecho y aplicado el 12 de
+   septiembre de 2026.** Hasta hoy la tarjeta pintaba un
+   degradado con el color de la sección y `dst_negocio_foto` llevaba desde la
+   migración 02 sin una sola fila.
+   **Lo que hay ahora**: bucket público `negocios` en Supabase Storage, con las
+   rutas `<destino>/<negocio>/<archivo>.webp` —el destino primero, porque es el
+   segmento que miran las políticas para decidir quién puede escribir—;
+   `scripts/buscar-fotos-commons.mjs`, que trae de Wikimedia Commons fotos con
+   licencia libre y **su autor y su licencia**, que es lo que ninguna búsqueda
+   de imágenes da; `scripts/cargar-fotos.mjs`, que sube y escribe las filas; y
+   en el panel un bloque de fotos con subir, marcar portada y borrar.
+   **Las 60 fotos conseguidas son de categoría, no de cada negocio**, y entran
+   con `es_generica = true` (regla 11). Se reparten rotando, para que catorce
+   restaurantes no muestren la misma imagen. En la tarjeta van de fondo con el
+   velo subido; en la ficha se dice que son ilustrativas. **Cuando llegue
+   `GOOGLE_PLACES_API_KEY`, las fotos reales entran con `es_generica = false` y
+   las desplazan sin borrar nada**: `fotos_de_negocio` y `negocios_publicados`
+   ya ordenan poniendo primero lo real.
+   Ojo con el ritmo de Commons: corta con texto plano y HTTP 200, no con un
+   código de error, así que un cliente ingenuo cree que no hay fotos. El
+   script lo detecta, espera y reintenta, y es reanudable.
+   **Una trampa que costó una foto**: Commons puede marcar
+   `AttributionRequired` y aun así no traer campo `Artist`. Una licencia que
+   obliga a nombrar al autor y no dice quién es **no se puede cumplir**, así
+   que esa foto se descarta; no se inventa un crédito. Cuando el archivo dice
+   "Own work", el autor es quien lo subió y el buscador lo usa de respaldo.
+   Hoy son 0 de 104 las que exigen crédito sin traer autor.
+
+   **Lo que de verdad hacía ver mal el sitio no era la regla, eran dos errores
+   de oficio.** Quedan escritos porque los dos se repiten solos:
+
+   - **Tres fotos por categoría no alcanzan.** Con 91 negocios repartidos en
+     46 imágenes, los seis resorts salían con la MISMA foto uno al lado del
+     otro en la retícula. Eso se ve peor que no tener foto. El buscador ahora
+     pide **tantas fotos como negocios tiene la categoría** (`NECESITA` en
+     `buscar-fotos-commons.mjs`): 104 imágenes, 90 distintas para 91 negocios,
+     y ninguna sección con repetidos. Al agregar negocios hay que subir ese
+     número, o vuelve el problema.
+   - **El velo sobre la foto era una mala idea con buena intención.** Se puso
+     al 96% de opacidad sobre un degradado casi negro para que la imagen "se
+     leyera de ambiente": el resultado fue una tarjeta de barro. Y encima no
+     protegía nada, porque el texto de la tarjeta va DEBAJO de la imagen, no
+     encima. Hoy es un tinte del color de la sección al 28%, en `soft-light`,
+     que es lo que le da ritmo a la retícula sin tapar la foto.
+
+   Para rehacer el reparto cuando cambien las fotos o los negocios:
+   `node --env-file=.env.local scripts/cargar-fotos.mjs --rehacer-genericas --aplicar`.
+   Borra filas y archivos de las genéricas y vuelve a repartir; **no toca las
+   propias**.
+
+   ### Wikimedia Commons fue la fuente equivocada, y hay que decirlo
+
+   Las 104 imágenes de Commons **quedaron feas**, y el motivo no es cosmético:
+   **Commons es un archivo documental, no un banco de fotos**. Para "hoteles"
+   devolvió un Marriott de Albuquerque y un cuarto de hostal en Delhi; para
+   "resorts", un spa en Kampala; para "comida típica", al secretario de Estado
+   de EE.UU. cocinando gallo pinto; y para "cocina internacional", **un PDF
+   escaneado de un catálogo médico de 1895** —el filtro no miraba el tipo de
+   archivo, ya está corregido—.
+
+   Se eligió Commons porque su API entrega la licencia y el autor servidos, y
+   eso resolvía la regla 11 sin fricción. **Fue optimizar por lo demostrable en
+   vez de por lo que hay que mirar**: "se ve bien" no es una propiedad
+   consultable por API, y ningún filtro automático la sustituye.
+
+   **El camino bueno es elegirlas a mano en Pexels o Unsplash**, que la regla 11
+   ya permitía desde el principio: son bancos profesionales, uso comercial
+   libre y sin atribución obligatoria. El cargador lee
+   `fotos-entrada/_categorias/<categoria>/*.jpg` y **esas mandan sobre las de
+   Commons**, categoría por categoría, así que se puede ir haciendo por partes
+   sin dejar el sitio a medias. La lista de cuántas hace falta por categoría
+   está en `fotos-entrada/_categorias/LEEME.md`.
+
+   Openverse se probó como tercera vía y **no sirve**: sin clave, sí, pero su
+   fondo comercial es casi el mismo Commons y devuelve lo mismo.
+
+   ### Las fotos del sitio de cada negocio (excepción de la regla 11)
+
+   **34 de 91 negocios tienen foto real suya**, bajada de su propia web:
+   `scripts/traer-fotos-del-sitio.mjs` recorre los 55 con `sitio_web`, saca la
+   `og:image` y las imágenes del cuerpo, y deja hasta 6 candidatas por negocio
+   en `fotos-entrada/_sitios/`. **Bajar no es aprobar**: solo se sube lo que
+   está en `_sitios/elegidas.json`, y esa lista salió de mirar las 188
+   candidatas en hojas de contacto (`scripts/armar-contactos.mjs`).
+
+   **Por qué la revisión es a ojo y no un filtro.** Hay tres cosas que ningún
+   filtro decide, y las tres aparecieron:
+   - **Fotos que no son del lugar.** La Fortuna Lodge tenía en su web una foto
+     de **Río de Janeiro**; North Fields, un tractor en un campo de colza
+     europeo. Un filtro no las distingue de una foto legítima.
+   - **Gente.** El criterio que eligió Sebastián es **"sujeto"**: fuera
+     retratos, grupos y gente posando; pasan figuras pequeñas, de espaldas o al
+     fondo.
+   - **Logos, textos superpuestos, capturas y collages**, que son la mitad de
+     lo que devuelve una portada.
+
+   **Los operadores de aventura se quedaron en cero**, y no por descuido: su
+   producto *es* gente haciendo algo, así que todas sus fotos tienen personas
+   como sujeto. Son siete —Desafío, Pure Trek, La Roca, Wave, Ecoglide, Arenal
+   Jungle Tours y Ecotermales— y siguen con imagen de categoría. Si alguna vez
+   se afloja el criterio, ahí están las candidatas ya bajadas.
+
+   Reparto final: **que hacer 13/30 · dónde dormir 13/29 · comer y beber 6/26 ·
+   transporte 2/2**. Las 57 restantes, con genérica de Wikimedia.
+10. **Entrenar al agente local mientras llega el experto.** Recopilar de
    internet todo lo que haya sobre La Fortuna y dejarlo en un `.md` de
    entrenamiento, **para revisión de Tony antes de cargarlo** a
    `dst_conocimiento`. Es el puente hasta que el experto real pase su archivo.

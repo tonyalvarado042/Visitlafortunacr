@@ -569,7 +569,8 @@
       "fuentes": [
         "kalambu.com",
         "viator.com",
-        "tripadvisor.com"
+        "getyourguide.com",
+        "trip.com"
       ],
       "etiquetas": [
         "aguas-termales-propias",
@@ -618,9 +619,13 @@
           "es": "Doce pozas de agua termal, frías y calientes, y tres toboganes: el Ciclón, la Avalancha de 10,5 metros y el Mamut, de 12,6 metros, donde bajan hasta cuatro personas en la misma balsa.\nZona de juegos con un cubo gigante que se llena y descarga como una cascada sobre los niños.\nRestaurante y bar dentro del agua.\nEs parque acuático antes que spa. Con niños funciona muy bien; para una tarde romántica, no.",
           "en": "Twelve thermal pools, hot and cold, and three slides: the Ciclon, the 10.5-metre Avalancha and the Mamut, 12.6 metres, where up to four people ride the same raft.\nA play area with a giant bucket that fills and tips like a waterfall over the children.\nRestaurant and a swim-up bar.\nIt is a water park before it is a spa. With children it works beautifully; for a romantic afternoon, no."
         },
+        "incluye": {
+          "es": "La entrada da acceso a todas las atracciones del parque: pozas termales, zona interactiva y toboganes.\nEstacionamiento, casilleros y toallas van incluidos.",
+          "en": "Admission covers every attraction in the park: thermal pools, interactive area and slides.\nParking, lockers and towels are included."
+        },
         "adicional": {
-          "es": "Abre de miércoles a domingo. Lunes y martes está cerrado: es el error clásico del que llega sin mirar.\nTiene tarifa para nacionales, bastante más baja que la de extranjeros. Los menores de 4 años no pagan.",
-          "en": "Open Wednesday to Sunday. It is closed Monday and Tuesday: the classic mistake of turning up without checking.\nThere is a local resident rate, well below the foreign one. Under 4s go free."
+          "es": "Abre de miércoles a domingo, de 9 de la mañana a 9 de la noche. Lunes y martes está cerrado: es el error clásico del que llega sin mirar.\nQueda a 4 km del centro, sobre la ruta al volcán, frente a Baldi.\nTiene tarifa para nacionales, bastante más baja que la de extranjeros. Los menores de 4 años no pagan.",
+          "en": "Open Wednesday to Sunday, 9 in the morning to 9 at night. It is closed Monday and Tuesday: the classic mistake of turning up without checking.\nIt is 4 km from the centre, on the volcano road, across from Baldi.\nThere is a local resident rate, well below the foreign one. Under 4s go free."
         }
       }
     },
@@ -952,6 +957,2495 @@
         "adicional": {
           "es": "En Villa Maleku, dentro del parque, hay presentaciones de miembros de la comunidad indígena maleku.\nLas actividades se combinan en paquetes de medio día o de día completo.",
           "en": "At Villa Maleku, inside the park, members of the Maleku indigenous community give presentations.\nThe activities combine into half-day or full-day packages."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-1968",
+      "sitio_web": "https://www.arenal1968.com",
+      "precio_desde_usd": 25,
+      "fuentes": [
+        "arenal1968.com",
+        "uprootedtraveler.com",
+        "vamosrentacar.com"
+      ],
+      "etiquetas": [
+        "estacionamiento",
+        "en-la-naturaleza",
+        "vista-al-volcan"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "17:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "17:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Dos senderos sobre el campo de lava que dejó la erupción de 1968.\nColada 1968: 2,5 km, entre hora y media y dos horas. Es el de las mejores vistas al cono con el menor esfuerzo.\nBosque 1968: 4,5 km, entre dos y dos horas y media. Rodea la laguna Los Patos por bosque denso, con subidas más fuertes.\nSe pueden encadenar los dos en un circuito de unos 7 km, si se llega temprano.",
+          "en": "Two trails over the lava field left by the 1968 eruption.\nColada 1968: 2.5 km, an hour and a half to two hours. The best cone views for the least effort.\nBosque 1968: 4.5 km, two to two and a half hours. It loops around Los Patos lake through dense forest, with steeper climbs.\nYou can link both into a 7 km circuit if you arrive early."
+        },
+        "adicional": {
+          "es": "Entrada: entre 25 y 28 dólares por adulto, unos 15 para niños de 6 a 11 años. Los menores de 6 no pagan.\nAbre de 8 de la mañana a 5 de la tarde, pero la última entrada es a las 4.\nQueda a unos 20 minutos al oeste del centro y no llega transporte público: hay que ir en carro o en taxi, que ronda los 15 dólares.",
+          "en": "Entrance: 25 to 28 dollars per adult, about 15 for children aged 6 to 11. Under 6s go free.\nOpen 8 in the morning to 5 in the afternoon, but last entry is at 4.\nIt is about 20 minutes west of the centre and no public transport goes there: you need a car or a taxi, around 15 dollars."
+        }
+      }
+    },
+    {
+      "babosa": "mirador-el-silencio",
+      "sitio_web": "https://miradorelsilencio.com",
+      "precio_desde_usd": 10,
+      "fuentes": [
+        "miradorelsilencio.com",
+        "twoweeksincostarica.com",
+        "alltrails.com"
+      ],
+      "etiquetas": [
+        "estacionamiento",
+        "en-la-naturaleza",
+        "vista-al-volcan",
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Reserva privada de 225 hectáreas, más de 100 de ellas de bosque primario.\nSenderos de fácil a moderado que suben hasta un mirador alto, de frente al cono.\nQueda a 12 km de La Fortuna y a 5 del volcán.\nRecibe mucha menos gente que el parque nacional: es de los pocos sitios donde se oye el bosque.",
+          "en": "A private 225-hectare reserve, more than 100 of it primary forest.\nEasy to moderate trails climbing to a high viewpoint facing the cone.\nIt is 12 km from La Fortuna and 5 from the volcano.\nFar fewer visitors than the national park: one of the few places where you can hear the forest."
+        },
+        "adicional": {
+          "es": "Entrada: alrededor de 10 dólares por persona, de lo más barato de la zona para lo que se ve.\nEs parque privado, no parte del Parque Nacional: son entradas distintas.",
+          "en": "Entrance: around 10 dollars per person, among the cheapest in the area for what you get.\nIt is a private park, not part of the National Park: separate tickets."
+        }
+      }
+    },
+    {
+      "babosa": "north-fields-cafe",
+      "sitio_web": "https://www.northfieldscr.com",
+      "precio_desde_usd": 46,
+      "fuentes": [
+        "northfieldscr.com",
+        "viator.com",
+        "twoweeksincostarica.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "estacionamiento"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Finca familiar: se camina el cafetal, se ve cómo se procesa el grano y se toma café colado en chorreador.\nDel cacao se ve la mazorca en el árbol y se sigue todo el proceso.\nUno mismo ayuda a hacer el chocolate, y se prueba de todo.\nEntre dos horas y dos horas y media.",
+          "en": "A family farm: you walk the coffee field, see how the bean is processed and drink coffee brewed in a chorreador.\nWith the cacao you see the pod on the tree and follow the whole process.\nYou help make the chocolate yourself, and there are tastings throughout.\nTwo to two and a half hours."
+        },
+        "encuentro": {
+          "es": "Salidas a las 8:00, 10:00, 12:00, 14:00 y 15:00.",
+          "en": "Departures at 8:00, 10:00, 12:00, 14:00 and 15:00."
+        },
+        "adicional": {
+          "es": "Precio: unos 46 dólares por adulto y 36 por niño de 6 a 11 años, con la visita guiada y las degustaciones.\nEs de los planes que mejor funcionan con lluvia, que en La Fortuna no es poca cosa.",
+          "en": "Price: about 46 dollars per adult and 36 per child aged 6 to 11, guided visit and tastings included.\nOne of the plans that works best in the rain, which in La Fortuna counts for a lot."
+        }
+      }
+    },
+    {
+      "babosa": "don-juan-coffee-chocolate-tour",
+      "fuentes": [
+        "getyourguide.com",
+        "entercostarica.com",
+        "tourcacao.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "transporte-hotel",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "El proceso del café completo, de la semilla a la taza.\nEl del cacao también, con degustación en cada etapa.\nAl final se muele el grano y cada quien arma su propia barra de chocolate.\nEntre dos y tres horas contando actividades y catas.",
+          "en": "The full coffee process, from seed to cup.\nThe cacao one too, with a tasting at each stage.\nAt the end you grind the beans and make your own chocolate bar.\nTwo to three hours counting activities and tastings."
+        },
+        "incluye": {
+          "es": "Guía bilingüe.\nTodas las entradas.\nTransporte ida y vuelta desde los hoteles de la zona de Arenal.",
+          "en": "Bilingual guide.\nAll entrance fees.\nRound-trip transport from hotels in the Arenal area."
+        },
+        "encuentro": {
+          "es": "Sale todos los días a las 9:00, 10:00, 14:00 y 15:00.",
+          "en": "Runs daily at 9:00, 10:00, 14:00 and 15:00."
+        }
+      }
+    },
+    {
+      "babosa": "desafio-adventure-company",
+      "precio_desde_usd": 62,
+      "fuentes": [
+        "desafiocostarica.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "transporte-hotel",
+        "en-el-centro"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "El operador más veterano de la zona: abrió en 1992.\nRafting, canyoning, bicicleta, caminatas, observación de aves, kayak, paddle y clases de cocina.\nEstán en el centro de La Fortuna, al lado de la catarata El Salto.\nLos tours arrancan alrededor de los 62 dólares y suben según la actividad.",
+          "en": "The longest-running operator in the area: it opened in 1992.\nRafting, canyoning, biking, hiking, birdwatching, kayaking, paddleboarding and cooking classes.\nThey are in the centre of La Fortuna, next to the El Salto waterfall.\nTours start around 62 dollars and climb depending on the activity."
+        },
+        "adicional": {
+          "es": "Su especialidad son las \"conexiones de aventura\": el traslado a Monteverde, Guanacaste, San José, Manuel Antonio o Sámara convertido en tour, en vez de cuatro horas mirando por la ventana.\nEl de Monteverde arranca cerca de los 153 dólares.",
+          "en": "Their speciality is the \"adventure connections\": the transfer to Monteverde, Guanacaste, San Jose, Manuel Antonio or Samara turned into a tour, instead of four hours staring out of a window.\nThe Monteverde one starts around 153 dollars."
+        }
+      }
+    },
+    {
+      "babosa": "los-lagos-hot-springs",
+      "precio_desde_usd": 16,
+      "fuentes": [
+        "entercostarica.com",
+        "costaricatravelblog.com",
+        "twoweeksincostarica.com"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "apto-para-ninos"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 1,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 2,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 3,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 4,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 5,
+          "abre": "10:00",
+          "cierra": "22:00"
+        },
+        {
+          "dia": 6,
+          "abre": "10:00",
+          "cierra": "22:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Pozas termales con cascadas, dos toboganes y un bar dentro del agua.\nEl pase de día da acceso de 10 de la mañana a 10 de la noche.\nEntra también el mariposario y la laguna de tortugas.\nEs de los más baratos de la zona y por eso de los más llenos los fines de semana.",
+          "en": "Thermal pools with waterfalls, two slides and a swim-up bar.\nThe day pass runs from 10 in the morning to 10 at night.\nThe butterfly garden and the turtle pond are included.\nIt is one of the cheapest in the area, and for that reason one of the busiest at weekends."
+        },
+        "adicional": {
+          "es": "Entrada: alrededor de 16 dólares por adulto y 8 por niño de 6 a 9 años. Los menores de 6 no pagan.\nSe le puede sumar almuerzo o cena por aparte.\nLos casilleros van incluidos; la toalla se alquila por un par de dólares.",
+          "en": "Entrance: around 16 dollars per adult and 8 per child aged 6 to 9. Under 6s go free.\nLunch or dinner can be added separately.\nLockers are included; a towel rents for a couple of dollars."
+        }
+      }
+    },
+    {
+      "babosa": "don-olivo-chocolate-tour",
+      "sitio_web": "https://donolivochocolatetour.net",
+      "precio_desde_usd": 30,
+      "fuentes": [
+        "donolivochocolatetour.net",
+        "viator.com",
+        "getyourguide.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Una finca con 96 años de historia y 1.600 árboles de cacao criollo, la variedad fina.\nTodo se cultiva ahí mismo: el cacao, la vainilla y la caña de azúcar.\nHay unas 40 especies de árboles frutales y se prueba lo que esté de cosecha ese mes.\nDos horas, en grupos chicos y sin guion aprendido.",
+          "en": "A farm with 96 years of history and 1,600 criollo cacao trees, the fine variety.\nEverything is grown on site: the cacao, the vanilla and the sugar cane.\nThere are some 40 species of fruit tree, and you taste whatever is in season that month.\nTwo hours, in small groups and with no rehearsed script."
+        },
+        "adicional": {
+          "es": "Precio: unos 30 dólares por adulto.\nLa primera salida es a las 8 de la mañana y el resto se acomoda a la hora que se pida, dentro de su horario.",
+          "en": "Price: about 30 dollars per adult.\nThe first departure is at 8 in the morning and the rest are arranged for the time you ask, within their hours."
+        }
+      }
+    },
+    {
+      "babosa": "monkey-park-la-fortuna",
+      "fuentes": [
+        "tripadvisor.com",
+        "viator.com",
+        "getyourguide.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "16:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "16:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Santuario de monos rescatados en La Perla, a las afueras del pueblo.\nLa visita es una caminata suave por sendero, buscando carablancas y congos, y de paso tucanes, perezosos y ranas.\nAl final del sendero dan café y bocadillos.",
+          "en": "A sanctuary for rescued monkeys at La Perla, on the edge of town.\nThe visit is a gentle walk along a trail, looking for white-faced and howler monkeys, and along the way toucans, sloths and frogs.\nCoffee and snacks at the end of the trail."
+        },
+        "adicional": {
+          "es": "Abre todos los días de 8 de la mañana a 4 de la tarde.\nHay un combo que suma la visita a una finca: carreta de madera, cosecha de temporada, ganado brahman y almuerzo típico.",
+          "en": "Open daily from 8 in the morning to 4 in the afternoon.\nThere is a combo that adds a farm visit: wooden ox cart, seasonal harvest, Brahman cattle and a local lunch."
+        }
+      }
+    },
+    {
+      "babosa": "parque-eco-natura",
+      "sitio_web": "https://naturaecopark.com",
+      "precio_desde_usd": 43,
+      "fuentes": [
+        "naturaecopark.com",
+        "costaricatravelblog.com",
+        "getyourguide.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "apto-para-ninos",
+        "estacionamiento",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "08:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 1,
+          "abre": "08:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 2,
+          "abre": "08:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 3,
+          "abre": "08:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 4,
+          "abre": "08:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 5,
+          "abre": "08:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 6,
+          "abre": "08:00",
+          "cierra": "18:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "El ranario más grande de Costa Rica: ocho módulos con unas 30 especies, diurnas y nocturnas.\nMariposario de 980 m² y 15 metros de alto, con vuelo libre y unas 20 especies de la región, entre ellas la morfo azul y la búho.\nSerpentario con los hábitats recreados, además de cocodrilos, caimanes, tortugas y senderos.\nSe entra por cuenta propia o con guía.",
+          "en": "The largest frog garden in Costa Rica: eight modules with some 30 species, day and night dwellers.\nA 980 m2 butterfly house, 15 metres high, free-flight, with around 20 regional species including the blue morpho and the owl butterfly.\nA snake exhibit with recreated habitats, plus crocodiles, caimans, turtles and trails.\nYou can go on your own or with a guide."
+        },
+        "adicional": {
+          "es": "Abre todos los días del año, de 8 de la mañana a 6 de la tarde.\nEntrada desde unos 43 dólares por persona.\nCon guía se ve bastante más: mucho de lo que hay es pequeño y está quieto.",
+          "en": "Open every day of the year, 8 in the morning to 6 in the afternoon.\nEntrance from about 43 dollars per person.\nWith a guide you see considerably more: much of what is here is small and sits still."
+        }
+      }
+    },
+    {
+      "babosa": "termales-los-laureles",
+      "sitio_web": "https://termaleslaureles.com",
+      "telefono": "+50640016262",
+      "precio_desde_usd": 10,
+      "fuentes": [
+        "termaleslaureles.com",
+        "tripadvisor.com",
+        "sitiosticos.cr"
+      ],
+      "etiquetas": [
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "apto-para-ninos",
+        "solo-efectivo",
+        "tarifa-nacional"
+      ],
+      "horario": [
+        {
+          "dia": 0,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 1,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 2,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 3,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "09:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "09:00",
+          "cierra": "21:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Siete pozas de agua termal y dos de agua fría, con toboganes.\nCancha de fútbol, de voleibol de playa, de básquet y parque infantil: es tanto balneario de familia como termal.\nDos restaurantes dentro: uno de comida típica, con casados, y otro de comida rápida.\nQueda a unos 5 km al oeste del pueblo, sobre la ruta al volcán.",
+          "en": "Seven thermal pools and two cold ones, with slides.\nA football pitch, beach volleyball and basketball courts and a playground: it is as much a family swimming spot as a hot spring.\nTwo restaurants on site: one serving local food and casados, the other fast food.\nIt is about 5 km west of town, on the volcano road."
+        },
+        "adicional": {
+          "es": "Entrada: unos 10 dólares por persona, alrededor de 6.000 colones.\nSolo efectivo: no aceptan tarjeta. Es el detalle que arruina la tarde si nadie lo avisa.\nTiene tarifa para nacionales.",
+          "en": "Entrance: about 10 dollars per person, around 6,000 colones.\nCash only: they do not take cards. It is the detail that ruins an afternoon when nobody warns you.\nThere is a local resident rate."
+        }
+      }
+    },
+    {
+      "babosa": "lago-arenal",
+      "fuentes": [
+        "costarica.org",
+        "mytanfeet.com",
+        "arenal.net",
+        "misticopark.com"
+      ],
+      "etiquetas": [
+        "en-la-naturaleza",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "El lago se triplicó de tamaño con la represa de 1979, que está en su extremo este.\nSe recorre por la carretera de la orilla, parando en los miradores con vista al volcán. Conviene madrugar: a media mañana suele nublarse.\nEn el agua: kayak entre islas, catamarán con almuerzo, tobogán y trampolín, o simplemente cruzarlo camino a Monteverde.\nAlrededor hay senderos, rutas de bici, observación de aves y cabalgatas.",
+          "en": "The lake tripled in size with the 1979 dam, at its eastern end.\nYou drive the shore road, stopping at viewpoints facing the volcano. Go early: it usually clouds over by mid-morning.\nOn the water: kayaking between islands, a catamaran with lunch, a slide and a diving board, or simply crossing it on the way to Monteverde.\nAround it there are trails, cycling routes, birdwatching and horseback riding."
+        },
+        "adicional": {
+          "es": "De noviembre a abril el viento en la punta oeste es casi garantía, y ahí llegan los de windsurf y kitesurf: está considerado de las mejores zonas del mundo para eso. Hay alquiler de equipo en la zona.\nLos tours de catamarán piden reserva previa.",
+          "en": "From November to April the wind at the western end is close to guaranteed, and that is when the windsurfers and kitesurfers arrive: it is rated among the best spots in the world for it. Gear rental is available locally.\nCatamaran tours need booking ahead."
+        }
+      }
+    },
+    {
+      "babosa": "el-chollin",
+      "fuentes": [
+        "costaricatravelblog.com",
+        "mytanfeet.com"
+      ],
+      "etiquetas": [
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "El tramo del río Tabacón que baja caliente desde el volcán y pasa bajo el puente de la ruta.\nEs gratis, no hay entrada ni horario, y es donde va la gente de la zona.\nQueda a unos 15 minutos al oeste de La Fortuna por la ruta 142, pasando Tabacón.",
+          "en": "The stretch of the Tabacon river that runs hot down from the volcano and passes under the road bridge.\nIt is free, there is no ticket and no opening hours, and it is where locals go.\nIt is about 15 minutes west of La Fortuna on Route 142, past Tabacon."
+        },
+        "encuentro": {
+          "es": "El acceso público es un camino de grava frente a la entrada de las termales de Tabacón.\nEl parqueo es una franja plana al costado de la carretera y es limitado: los fines de semana cuesta encontrar campo.",
+          "en": "The public access is a gravel path opposite the entrance to the Tabacon hot springs.\nParking is a flat strip by the roadside and it is limited: at weekends it is hard to find a spot."
+        },
+        "adicional": {
+          "es": "No hay salvavidas, ni baños, ni teléfono de emergencia, ni nadie a cargo.\nLas piedras resbalan muchísimo cuando están mojadas, y la corriente sube con las lluvias.\nDe noche no: el sendero no tiene luz y queda metido bajo la carretera. Conviene ir de día, cuando hay otra gente.\nNo dejar nada en la orilla.",
+          "en": "There is no lifeguard, no bathrooms, no emergency phone and nobody in charge.\nThe rocks are extremely slippery when wet, and the current rises with the rain.\nNot at night: the path is unlit and tucked away under the road. Go during the day, when other people are around.\nDo not leave anything on the bank."
+        }
+      }
+    },
+    {
+      "babosa": "el-salto",
+      "fuentes": [
+        "costaricatravelblog.com",
+        "uprootedtraveler.com",
+        "mytanfeet.com"
+      ],
+      "etiquetas": [
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Una poza del río Arenal con una cuerda colgada de un árbol, a 2,5 km del centro.\nEl salto es de unos seis metros al agua.\nEs gratis y es donde van los jóvenes de La Fortuna. En temporada alta se llena.",
+          "en": "A pool on the Arenal river with a rope hanging from a tree, 2.5 km from the centre.\nThe jump is about six metres into the water.\nIt is free, and it is where young people from La Fortuna go. In high season it gets crowded."
+        },
+        "encuentro": {
+          "es": "Desde el parque de La Fortuna se sigue la señalización hacia la Catarata Río Fortuna.\nA mitad de camino se cruza un puente chico sobre el río Arenal; justo antes del puente sale un sendero al costado que baja al agua.",
+          "en": "From the park in La Fortuna, follow the signs towards the Rio Fortuna waterfall.\nHalfway there you cross a small bridge over the Arenal river; just before the bridge a side trail drops down to the water."
+        },
+        "adicional": {
+          "es": "No es una atracción con vigilancia: no hay nadie a cargo ni servicios de ningún tipo.\nAntes de tirarse conviene mirar la profundidad y que no haya nadie abajo. El nivel del río cambia con las lluvias.",
+          "en": "It is not a supervised attraction: nobody is in charge and there are no facilities of any kind.\nBefore jumping, check the depth and that nobody is below. The river level changes with the rain."
+        }
+      }
+    },
+    {
+      "babosa": "kuru-natural-springs",
+      "fuentes": [
+        "getyourguide.com",
+        "activities.marriott.com",
+        "tripadvisor.com",
+        "facebook.com/arenal1968"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "en-la-naturaleza",
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Senderos de bosque que llevan a pozas naturales de manantial y a cascadas, con el agua clara.\nLa visita dura unas dos horas y media.\nSolo dejan entrar a veinte personas a la vez: es la razón por la que se siente vacío y la razón por la que hay que reservar.\nEs reciente: abrió hace poco y todavía no aparece en la mayoría de las guías.",
+          "en": "Forest trails leading to natural spring-fed pools and waterfalls, with clear water.\nThe visit lasts about two and a half hours.\nOnly twenty people are allowed in at a time: that is why it feels empty, and why you have to book.\nIt is recent: it opened not long ago and is still missing from most guides."
+        },
+        "encuentro": {
+          "es": "Se sale del parqueo de Arenal 1968 y se sigue al guía en carro entre cinco y diez minutos hasta las pozas.\nO sea que hace falta vehículo propio o transporte contratado; no se llega solo.",
+          "en": "You start from the Arenal 1968 car park and follow the guide in your own car for five to ten minutes to the springs.\nSo you need your own vehicle or arranged transport; you cannot just turn up on foot."
+        },
+        "adicional": {
+          "es": "Quienes han ido mencionan que dan toallas, bebidas y comida, pero conviene confirmarlo al reservar: no está publicado en fuente oficial.\nHorario y precio tampoco están publicados todavía.",
+          "en": "Visitors mention that towels, drinks and food are provided, but confirm when booking: it is not published by an official source.\nOpening hours and prices are not published yet either."
+        }
+      }
+    },
+    {
+      "babosa": "kenko-bar-restaurante",
+      "sitio_web": "https://restaurantekenko.com",
+      "telefono": "+50689977777",
+      "fuentes": [
+        "restaurantekenko.com"
+      ],
+      "etiquetas": [
+        "piscina",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "en-el-centro"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "10:00",
+          "cierra": "23:00"
+        },
+        {
+          "dia": 2,
+          "abre": "10:00",
+          "cierra": "23:00"
+        },
+        {
+          "dia": 3,
+          "abre": "10:00",
+          "cierra": "23:00"
+        },
+        {
+          "dia": 4,
+          "abre": "10:00",
+          "cierra": "23:00"
+        },
+        {
+          "dia": 5,
+          "abre": "10:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 6,
+          "abre": "10:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 0,
+          "abre": "10:00",
+          "cierra": "22:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cocina de fusión: sushi artesanal, pizza gourmet, comida mexicana, italiana y platos a la parrilla.\nPiscina con bar dentro del agua y jardín tropical con tumbonas alrededor.\nQueda a 600 metros al oeste del parque de La Fortuna.\nDe jueves a sábado cierra tarde; es de los pocos sitios del pueblo que aguantan pasada la medianoche.",
+          "en": "Fusion cooking: handmade sushi, gourmet pizza, Mexican and Italian dishes and grilled plates.\nA pool with a swim-up bar and a tropical garden with loungers around it.\nIt is 600 metres west of the park in La Fortuna.\nThursday to Saturday it closes late; one of the few places in town that runs past midnight."
+        },
+        "adicional": {
+          "es": "Aparece en varias listas como \"Kenko Hot Springs\", pero no es un complejo de aguas termales: la piscina no es de agua termal.\nTienen un Party Bus para bodas, cumpleaños y despedidas, y tours nocturnos.\nHay otro Kenko en Ciudad Quesada; este es el de La Fortuna.",
+          "en": "It appears in several listings as \"Kenko Hot Springs\", but it is not a thermal complex: the pool is not thermal water.\nThey run a Party Bus for weddings, birthdays and stag and hen nights, plus night tours.\nThere is another Kenko in Ciudad Quesada; this is the La Fortuna one."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-jungle-tours",
+      "sitio_web": "https://jungletourscr.com",
+      "telefono": "+50622277680",
+      "precio_desde_usd": 48,
+      "fuentes": [
+        "jungletourscr.com"
+      ],
+      "etiquetas": [
+        "guia-bilingue",
+        "transporte-hotel",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Quince tours propios, así que sirve para armar varios días con un solo operador.\nCortos, de hora y media: perezosos, y café con chocolate y caña (53 dólares cada uno).\nDe medio día: canopy 2 h (48), tubing 2 h (60), caminata nocturna 2 h (53), canyoning con rappel 4 h (89), cabalgata 4 h (80), puentes colgantes de Místico 4 h (81) y las caminatas al volcán, de mañana o de tarde, 4 h (50).\nDe día completo: rafting 6 h (75), volcán con río caliente 7 h (56), canyoning con rafting 7 h (150), Río Celeste y Tenorio 8 h (84) y Caño Negro 8 h (80).\nCuadraciclos de 2 y de 3 horas, con el precio a consultar.",
+          "en": "Fifteen of their own tours, so you can build several days with a single operator.\nShort ones, an hour and a half: sloths, and coffee with chocolate and sugar cane (53 dollars each).\nHalf day: zip line 2 h (48), tubing 2 h (60), night walk 2 h (53), canyoning with rappel 4 h (89), horseback riding 4 h (80), the Mistico hanging bridges 4 h (81) and the volcano hikes, morning or afternoon, 4 h (50).\nFull day: rafting 6 h (75), volcano with hot river 7 h (56), canyoning with rafting 7 h (150), Rio Celeste and Tenorio 8 h (84) and Cano Negro 8 h (80).\nATV tours of 2 and 3 hours, price on request."
+        },
+        "encuentro": {
+          "es": "El punto de encuentro es el Sloth Park de La Fortuna.",
+          "en": "The meeting point is the Sloth Park in La Fortuna."
+        },
+        "adicional": {
+          "es": "Cuando se juntan dos o más actividades venden combos, que van de 92 a 146 dólares.\nLos precios son los publicados en su sitio; conviene confirmar al reservar qué incluye cada uno, porque eso no lo detallan.",
+          "en": "When you combine two or more activities they sell combos, from 92 to 146 dollars.\nThese are the prices published on their site; confirm what each one includes when booking, as they do not spell that out."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-observatory-lodge",
+      "sitio_web": "https://www.arenalobservatorylodge.com",
+      "fuentes": [
+        "arenalobservatorylodge.com",
+        "arenal.net",
+        "booking.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "estacionamiento",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "piscina",
+        "vista-al-volcan",
+        "en-la-naturaleza",
+        "guia-bilingue"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Es el único hotel dentro del Parque Nacional Volcán Arenal, y era antes una estación de investigación: de ahí el nombre.\n352 hectáreas de finca: 110 de bosque primario con senderos marcados, 160 de reforestación y 80 de finca agrícola.\nSenderos de 2 a 3,4 km que cruzan bosque secundario hasta coladas endurecidas y miradores; algunos llegan a cascadas y a un puente colgante.\n48 habitaciones repartidas en cuatro edificios, la mayoría con vista al cono desde la cama.",
+          "en": "It is the only hotel inside Arenal Volcano National Park, and it used to be a research station: hence the name.\n352 hectares of grounds: 110 of primary rainforest with marked trails, 160 of reforestation and 80 of working farm.\nTrails of 2 to 3.4 km crossing secondary forest to hardened lava flows and viewpoints; some reach waterfalls and a hanging bridge.\n48 rooms in four separate buildings, most with a view of the cone from the bed."
+        },
+        "incluye": {
+          "es": "Caminata guiada cada mañana con los naturalistas de la casa, sin costo.\nDesayuno, wifi y estacionamiento.\nAcceso a todos los senderos de la propiedad.",
+          "en": "A guided walk every morning with the resident naturalists, at no charge.\nBreakfast, wifi and parking.\nAccess to every trail on the property."
+        }
+      }
+    },
+    {
+      "babosa": "nayara-gardens",
+      "fuentes": [
+        "costaricaexperts.com",
+        "forbestravelguide.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "romantico",
+        "en-la-naturaleza",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Todas las habitaciones son bungalows independientes, en cuatro categorías.\nCasita Deluxe: cama king o dos dobles, con terraza hacia la selva o hacia el volcán.\nRainforest Villa: más grande, con jacuzzi al aire libre en el balcón y jardín privado.\nArenal Villa: dos dormitorios, pensada para familias.\nEn los jardines viven perezosos: no es un reclamo publicitario, se ven desde los senderos del hotel.",
+          "en": "Every room is a free-standing bungalow, in four categories.\nCasita Deluxe: king bed or two doubles, with a terrace facing the jungle or the volcano.\nRainforest Villa: larger, with an outdoor hot tub on the balcony and a private garden.\nArenal Villa: two bedrooms, built for families.\nSloths live in the gardens: it is not marketing, you see them from the hotel trails."
+        },
+        "incluye": {
+          "es": "Desayuno, arreglo de habitación dos veces al día y llamadas internacionales.\nCoctel de frutas de bienvenida.\nYoga todos los días y acceso al gimnasio.\nUn tour de observación de aves.",
+          "en": "Breakfast, twice-daily housekeeping and international calls.\nA welcome fruit cocktail.\nDaily yoga and gym access.\nA birdwatching tour."
+        },
+        "adicional": {
+          "es": "El spa está sobre un acantilado que da al bosque, con los tratamientos en bungalows al aire libre: masajes con barro volcánico y exfoliaciones con café de Costa Rica.\nComparte finca con Nayara Springs y Nayara Tented Camp.",
+          "en": "The spa sits on a cliff over the rainforest, with treatments in open-air bungalows: volcanic mud massages and scrubs made with Costa Rican coffee.\nIt shares grounds with Nayara Springs and Nayara Tented Camp."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-kioro-suites-spa",
+      "sitio_web": "https://www.hotelarenalkioro.com",
+      "fuentes": [
+        "hotelarenalkioro.com",
+        "expedia.com",
+        "horizontes.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "vista-al-volcan",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Once hectáreas de jardines y quebradas sobre la ladera, con vista panorámica al cono.\n53 habitaciones, todas con sala de estar y comedor aparte, aire acondicionado y batas.\nPiscinas alimentadas por agua termal natural dentro de la propiedad.\nQueda a pasos de las termales de Titokú y a tres minutos en carro de Tabacón.",
+          "en": "Eleven hectares of gardens and streams on the hillside, with a panoramic view of the cone.\n53 rooms, all with a separate sitting and dining area, air conditioning and robes.\nPools fed by natural thermal water on the property.\nIt is steps from the Titoku hot springs and three minutes by car from Tabacon."
+        },
+        "incluye": {
+          "es": "Acceso a las piscinas de agua termal durante toda la estadía.\nDesayuno completo, wifi y estacionamiento.\nBar junto a la piscina y recepción diaria del gerente.",
+          "en": "Access to the thermal pools throughout your stay.\nFull breakfast, wifi and parking.\nPoolside bar and a daily manager reception."
+        },
+        "adicional": {
+          "es": "Tres restaurantes dentro, uno de ellos Heliconias.\nSpa completo: masajes, envolturas corporales y faciales.\nHay zona infantil y gimnasio.",
+          "en": "Three restaurants on site, one of them Heliconias.\nFull spa: massages, body wraps and facials.\nThere is a children's area and a gym."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-springs-resort-spa",
+      "sitio_web": "https://hotelarenalspring.com",
+      "fuentes": [
+        "hotelarenalspring.com",
+        "aaa.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Aguas termales naturales propias con vista al volcán: una piscina grande con bar dentro del agua y varias más chicas a distintas temperaturas, además de jacuzzis.\nHabitaciones de techo alto, con madera, granito y obra de artistas locales.\nLas duchas tienen un jardincito tropical dentro, así que se bañan uno como al aire libre.\nSpa Natria dentro del hotel.",
+          "en": "Its own natural hot springs with volcano views: a large pool with a swim-up bar and several smaller ones at different temperatures, plus hot tubs.\nHigh-ceilinged rooms with wood, granite and work by local artists.\nThe showers have a small tropical garden inside them, so you shower as if outdoors.\nThe Natria spa is on site."
+        },
+        "incluye": {
+          "es": "Desayuno completo.\nInternet de alta velocidad en todo el hotel.\nAcceso a las aguas termales y las piscinas.",
+          "en": "Full breakfast.\nHigh-speed internet throughout the hotel.\nAccess to the hot springs and pools."
+        }
+      }
+    },
+    {
+      "babosa": "selina-la-fortuna",
+      "fuentes": [
+        "booking.com",
+        "expedia.com",
+        "trivago.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "estacionamiento",
+        "piscina",
+        "restaurante-en-sitio",
+        "en-el-centro"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Hostal de ambiente social, pensado para quien viaja solo y quiere conocer gente.\nCocina compartida, sala común, restaurante y mesa de tours.\nDos zonas de piscina y jardín.\nEstá en pleno centro: la plaza, los restaurantes y la parada de buses quedan caminando.",
+          "en": "A social hostel, aimed at solo travellers who want to meet people.\nShared kitchen, common lounge, restaurant and tour desk.\nTwo pool areas and a garden.\nIt is right in the centre: the square, the restaurants and the bus stop are all walkable."
+        },
+        "incluye": {
+          "es": "Wifi y estacionamiento privado, sin costo.",
+          "en": "Wifi and private parking, at no charge."
+        },
+        "adicional": {
+          "es": "Tras la caída de la cadena Selina, la propiedad aparece en algunos buscadores como Socialtel La Fortuna. Sigue operando, pero conviene confirmar bajo qué nombre está la reserva.",
+          "en": "After the Selina chain collapsed, the property shows up on some booking sites as Socialtel La Fortuna. It is still operating, but check which name your booking is under."
+        }
+      }
+    },
+    {
+      "babosa": "amor-arenal",
+      "fuentes": [
+        "booking.com",
+        "expedia.com",
+        "centraldereservas.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "solo-adultos",
+        "romantico",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Solo adultos, 31 habitaciones con vista al valle, y todo el hotel libre de humo.\nLas Canyon Casitas tienen piscina privada, balcón amueblado y habitación insonorizada.\nTres piscinas al aire libre, jacuzzi y pediluvio.\nGimnasio abierto las 24 horas y clases de yoga.",
+          "en": "Adults only, 31 rooms with valley views, and the whole hotel is non-smoking.\nThe Canyon Casitas have a private plunge pool, a furnished balcony and soundproofed rooms.\nThree outdoor pools, a hot tub and a foot bath.\nA 24-hour gym and yoga classes."
+        },
+        "incluye": {
+          "es": "Desayuno completo.\nWifi de alta velocidad.\nEstacionamiento.",
+          "en": "Full breakfast.\nHigh-speed wifi.\nParking."
+        },
+        "adicional": {
+          "es": "Spa completo dentro del hotel: masajes, tratamientos corporales y faciales.\nHay senderos en la propiedad.",
+          "en": "A full spa on site: massages, body treatments and facials.\nThere are trails on the property."
+        }
+      }
+    },
+    {
+      "babosa": "volcano-lodge",
+      "fuentes": [
+        "expedia.com",
+        "trivago.com",
+        "facebook.com/volcanolodgecr"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "apto-para-ninos",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Dos zonas de aguas termales y sauna, con bar dentro del agua y una piscina infantil poco profunda.\nBaño de vapor, jacuzzi y baños calientes.\nSe puede reservar habitación con piscina termal propia, que es lo que lo diferencia del resto del corredor a este precio.\nTerraza, jardín y sala de juegos.",
+          "en": "Two hot spring areas and a sauna, with a swim-up bar and a shallow children's pool.\nSteam room, hot tub and hot baths.\nYou can book a room with its own thermal pool, which is what sets it apart from the rest of the corridor at this price.\nTerrace, garden and a games room."
+        },
+        "incluye": {
+          "es": "Desayuno completo.\nWifi en la habitación, de 50 Mbps o más.\nEstacionamiento propio.",
+          "en": "Full breakfast.\nIn-room wifi, 50 Mbps or more.\nSelf parking."
+        },
+        "adicional": {
+          "es": "El restaurante Sura sirve desayuno, almuerzo, cena y happy hour.\nTienen mesa de tours para reservar las actividades desde el hotel.",
+          "en": "The Sura restaurant serves breakfast, lunch, dinner and happy hour.\nThere is a tour desk to book activities from the hotel."
+        }
+      }
+    },
+    {
+      "babosa": "montana-de-fuego",
+      "sitio_web": "https://montanadefuego.com",
+      "fuentes": [
+        "montanadefuego.com",
+        "booking.com",
+        "adventuretourscostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "aguas-termales-propias",
+        "apto-para-ninos",
+        "vista-al-volcan",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "35 hectáreas de bosque tropical en regeneración, con el volcán de frente.\nBungalows en tres niveles —estándar, superior y deluxe— y dos tipos de suite. Todos con aire acondicionado, minibar y balcón o terraza.\nTres piscinas termominerales, piscina al aire libre, piscina infantil y jacuzzi techado.\nParque de aventura y senderos dentro de la finca.",
+          "en": "35 hectares of regenerating tropical forest, with the volcano straight ahead.\nBungalows at three levels — standard, superior and deluxe — and two types of suite. All with air conditioning, minibar and a balcony or terrace.\nThree thermal-mineral pools, an outdoor pool, a children's pool and a covered hot tub.\nAn adventure park and trails on the grounds."
+        },
+        "incluye": {
+          "es": "Tours guiados sin costo: observación de aves, experiencia con la comunidad indígena maleku y visita a la finca.\nTransporte interno dentro de la propiedad.\nWifi en áreas comunes.",
+          "en": "Free guided tours: birdwatching, an experience with the Maleku indigenous community and a farm visit.\nInternal transport around the property.\nWifi in public areas."
+        },
+        "adicional": {
+          "es": "Dos restaurantes: Rocca Grill, de cocina a fuego vivo con vista al volcán, y Fuego Pizzería & Gastro Pub.\nEn el spa hay masaje con piedras volcánicas y masaje de chocolate para dos.\nHay servicio médico 24 horas, lavandería y taxis.",
+          "en": "Two restaurants: Rocca Grill, live-fire cooking with a volcano view, and Fuego Pizzeria & Gastro Pub.\nThe spa offers volcanic stone massages and a chocolate massage for two.\nThere is 24-hour medical service, laundry and taxis."
+        }
+      }
+    },
+    {
+      "babosa": "nayara-springs",
+      "sitio_web": "https://nayarasprings.com",
+      "fuentes": [
+        "nayarasprings.com",
+        "forbestravelguide.com",
+        "entercostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "solo-adultos",
+        "romantico",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "35 villas, solo adultos, dentro del bosque lluvioso.\nCada una con piscina privada alimentada por manantial mineral, ducha al aire libre y baño de tamaño desmedido.\nMadera de la zona y piedra local, pisos pulidos, cama con dosel, doble lavabo, cafetera espresso y minibar.\nEl desayuno se puede pedir a la villa.",
+          "en": "35 villas, adults only, inside the rainforest.\nEach with a private plunge pool fed by a mineral spring, an outdoor shower and an oversized bathroom.\nLocal wood and stone, polished floors, a four-poster bed, double vanities, an espresso machine and a minibar.\nBreakfast can be delivered to the villa."
+        },
+        "incluye": {
+          "es": "Desayuno.\nYoga diario en un pabellón al aire libre, dentro de la selva.\nDos piscinas grandes y acceso al spa al aire libre.",
+          "en": "Breakfast.\nDaily yoga in an open-air pavilion inside the jungle.\nTwo large pools and access to the open-air spa."
+        },
+        "adicional": {
+          "es": "Tres restaurantes, dos bares y una cafetería con catas de espresso. Uno de los restaurantes tiene música en vivo; otro es italiano, con pizza de horno de leña.\nComparte finca con Nayara Gardens y Nayara Tented Camp.",
+          "en": "Three restaurants, two bars and a coffee shop with espresso tastings. One restaurant has live music; another is Italian, with wood-fired pizza.\nIt shares grounds with Nayara Gardens and Nayara Tented Camp."
+        }
+      }
+    },
+    {
+      "babosa": "nayara-tented-camp",
+      "sitio_web": "https://nayaratentedcamp.com",
+      "fuentes": [
+        "nayaratentedcamp.com",
+        "expedia.com",
+        "vacationscostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "romantico",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "29 tiendas de lujo sobre plataformas: piso de madera, cama con dosel de cuatro postes, baño en suite con bañera grande y ducha al aire libre.\nCada tienda con piscina privada alimentada por manantiales geotérmicos.\nHay además varias pozas de inmersión repartidas en la selva, con la misma agua mineral caliente.\nEn la finca viven perezosos y se ven desde los senderos.",
+          "en": "29 luxury tents on platforms: wooden floors, a four-poster canopy bed, an en-suite bathroom with a large tub and an outdoor shower.\nEach tent has its own plunge pool fed by geothermal springs.\nThere are also several soaking pools scattered through the jungle, with the same hot mineral water.\nSloths live on the grounds and are seen from the trails."
+        },
+        "incluye": {
+          "es": "Desayuno cocinado a la orden.\nBar junto a la piscina y terrazas.\nPiscina al aire libre y gimnasio.",
+          "en": "Cooked-to-order breakfast.\nPoolside bar and terraces.\nOutdoor pool and gym."
+        },
+        "adicional": {
+          "es": "Tres restaurantes dentro, de cocina mediterránea.\nSpa con masajes, envolturas corporales y faciales.\nDesde aquí salen las actividades de siempre: rafting, canyoning, canopy y caminatas al volcán.",
+          "en": "Three restaurants on site, Mediterranean cooking.\nSpa with massages, body wraps and facials.\nThe usual activities run from here: rafting, canyoning, zip lining and volcano hikes."
+        }
+      }
+    },
+    {
+      "babosa": "royal-corin",
+      "fuentes": [
+        "booking.com",
+        "expedia.com",
+        "hotels.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "solo-adultos",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "54 habitaciones, todas con patio o balcón, minibar y ducha amplia.\nTres piscinas al aire libre, dos jacuzzis y aguas termales propias.\nBar junto a la piscina y gimnasio.",
+          "en": "54 rooms, all with a patio or balcony, a minibar and a walk-in shower.\nThree outdoor pools, two hot tubs and its own hot springs.\nPoolside bar and gym."
+        },
+        "incluye": {
+          "es": "Desayuno.\nWifi y estacionamiento.\nAcceso a las piscinas termales.",
+          "en": "Breakfast.\nWifi and parking.\nAccess to the thermal pools."
+        },
+        "adicional": {
+          "es": "Es solo para adultos y el límite son 16 años: no se admiten menores de esa edad, ni acompañados.\nTres restaurantes dentro, con opción de cena privada y opciones veganas.\nSpa completo: masajes, tratamientos corporales y faciales.",
+          "en": "It is adults only and the cut-off is 16: under-16s are not admitted, not even accompanied.\nThree restaurants on site, with private dining and vegan options available.\nFull spa: massages, body treatments and facials."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-manoa",
+      "sitio_web": "https://arenalmanoa.com",
+      "fuentes": [
+        "arenalmanoa.com",
+        "booking.com",
+        "oyster.com",
+        "arenal.net"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "apto-para-ninos",
+        "vista-al-volcan",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "82 habitaciones repartidas en 27 hectáreas, con una de las vistas más limpias al cono.\nSon suites individuales amplias, con sala aparte, aire acondicionado, refrigerador y balcón o patio.\nLa zona de aguas termales tiene bar en la piscina, barra de sushi, piscina para niños y jacuzzi.\nEl hotel está dentro de una finca lechera en activo, y la leche que se sirve sale de ahí.",
+          "en": "82 rooms spread over 27 hectares, with one of the cleanest views of the cone.\nThey are large individual suites, with a separate sitting area, air conditioning, a fridge and a balcony or patio.\nThe hot springs area has a pool bar, a sushi bar, a children's pool and a hot tub.\nThe hotel sits on a working dairy farm, and the milk served comes from it."
+        },
+        "incluye": {
+          "es": "Tour de la finca lechera, todos los días y sin costo. En el de la tarde se participa en el ordeño.\nDesayuno.\nAcceso a las aguas termales y las piscinas.",
+          "en": "A dairy farm tour, every day and at no charge. On the afternoon one you take part in the milking.\nBreakfast.\nAccess to the hot springs and the pools."
+        },
+        "adicional": {
+          "es": "El restaurante Dorado sirve cocina local e internacional.\nHay lavandería, piscina de adultos y de niños, jacuzzi y bar dentro del agua.",
+          "en": "The Dorado restaurant serves local and international cooking.\nThere is laundry, an adults pool and a children's pool, a hot tub and a swim-up bar."
+        }
+      }
+    },
+    {
+      "babosa": "el-silencio-del-campo",
+      "sitio_web": "https://www.hotelsilenciodelcampo.com",
+      "fuentes": [
+        "hotelsilenciodelcampo.com",
+        "tripadvisor.com",
+        "expedia.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "apto-para-ninos",
+        "vista-al-volcan",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "23 villas independientes, cada una con su patio mirando al volcán, entre jardines.\nSon suites amplias de un dormitorio.\nAguas termales naturales con servicio de bar, más piscinas de agua fría.\nQueda a pocos minutos del pueblo, sobre la ruta del volcán.",
+          "en": "23 free-standing villas, each with its own patio facing the volcano, set among gardens.\nThey are large one-bedroom suites.\nNatural hot springs with bar service, plus cold-water pools.\nIt is a few minutes from town, on the volcano road."
+        },
+        "incluye": {
+          "es": "Desayuno.\nAcceso a las aguas termales y las piscinas.",
+          "en": "Breakfast.\nAccess to the hot springs and the pools."
+        },
+        "adicional": {
+          "es": "Hay una granja pequeña dentro: por la mañana se puede ordeñar las vacas y recoger huevos, y a la hora de comer, dar de comer a los peces. También hay paseos en pony.\nEs de los pocos hoteles de la zona donde eso no es una demostración para turistas sino la rutina de la finca.",
+          "en": "There is a small farm on site: in the morning you can milk the cows and collect eggs, and at mealtimes feed the fish. There are pony rides too.\nIt is one of the few hotels here where that is not a tourist demonstration but the farm's actual routine."
+        }
+      }
+    },
+    {
+      "babosa": "los-lagos-hotel-spa-resort",
+      "fuentes": [
+        "booking.com",
+        "expedia.com",
+        "twoweeksincostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "aguas-termales-propias",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "apto-para-ninos",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "96 habitaciones en una finca de 425 hectáreas, a unos 6 km de La Fortuna.\nOnce piscinas al aire libre, de las cuales ocho son termales a distintas temperaturas, y cinco de ellas alimentadas por manantial natural.\nHay desde toboganes hasta rincones tranquilos tipo spa: cabe la familia entera con gustos distintos.\nHabitaciones y villas con aire, TV por cable, minibar y caja fuerte; las villas suman cocineta y sala.",
+          "en": "96 rooms on a 425-hectare property, about 6 km from La Fortuna.\nEleven outdoor pools, eight of them thermal at different temperatures, five fed by natural spring water.\nThere is everything from waterslides to quiet spa-like corners: a whole family with different tastes fits.\nRooms and villas with air conditioning, cable TV, minibar and safe; the villas add a kitchenette and a lounge."
+        },
+        "incluye": {
+          "es": "Desayuno.\nAcceso a las once piscinas y a las aguas termales del complejo.",
+          "en": "Breakfast.\nAccess to the eleven pools and the resort's hot springs."
+        },
+        "adicional": {
+          "es": "Spa completo dentro del hotel.\nEs de los resorts con termales más baratos de la zona, y eso se nota en el volumen de gente los fines de semana.",
+          "en": "A full spa on site.\nIt is one of the cheapest hot spring resorts in the area, and that shows in the weekend crowds."
+        }
+      }
+    },
+    {
+      "babosa": "casa-luna",
+      "sitio_web": "https://casalunahotel.com",
+      "fuentes": [
+        "casalunahotel.com",
+        "arenal.net",
+        "vacationscostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "romantico",
+        "vista-al-volcan",
+        "apto-ciclistas"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "42 habitaciones de estilo rústico colonial, con aire acondicionado, minibar, caja fuerte y balcón o patio.\nHay suites con jacuzzi y terraza mirando al cono.\nJardines cuidados con quebradas de agua clara alrededor.\nQueda a 3 km de La Fortuna y a 1 km de la catarata.",
+          "en": "42 rooms in rustic colonial style, with air conditioning, minibar, safe and a balcony or patio.\nThere are suites with a hot tub and a terrace facing the cone.\nWell-kept gardens with clear streams running through them.\nIt is 3 km from La Fortuna and 1 km from the waterfall."
+        },
+        "incluye": {
+          "es": "Desayuno completo.\nEstacionamiento.\nAcceso a los cuatro jacuzzis.",
+          "en": "Full breakfast.\nParking.\nAccess to the four hot tubs."
+        },
+        "adicional": {
+          "es": "El restaurante Luna Grill sirve cocina internacional con vista al jardín.\nSpa con masajes, tratamientos corporales y faciales.\nAlquilan bicicletas, que con la catarata a un kilómetro tiene sentido.",
+          "en": "The Luna Grill restaurant serves international cooking with garden views.\nSpa with massages, body treatments and facials.\nThey rent bicycles, which makes sense with the waterfall a kilometre away."
+        }
+      }
+    },
+    {
+      "babosa": "magic-mountain",
+      "sitio_web": "https://www.hotelmagicmountain.com",
+      "fuentes": [
+        "hotelmagicmountain.com",
+        "entercostarica.com",
+        "fortunawelcome.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "spa-en-sitio",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "vista-al-volcan",
+        "en-el-centro",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "36 habitaciones estándar y 6 junior suites, todas con balcón privado y vista directa al cono.\nLas estándar traen dos camas queen, aire acondicionado, minibar, TV por cable, caja fuerte, cafetera y secador.\nPiscina con cascadas y jacuzzis entre jardines tropicales.\nHasta el ascensor tiene vista panorámica al volcán.",
+          "en": "36 standard rooms and 6 junior suites, all with a private balcony and a direct view of the cone.\nThe standard rooms have two queen beds, air conditioning, minibar, cable TV, safe, coffee maker and hairdryer.\nA pool with waterfalls and hot tubs among tropical gardens.\nEven the lift has a panoramic view of the volcano."
+        },
+        "adicional": {
+          "es": "Dos sitios para comer: el restaurante Lina's, de cocina internacional, y el Magic Sport's Bar.\nMagic Grand Spa: masajes, faciales, tratamientos corporales y depilación.\nTiene centro de conferencias, así que a veces hay grupos de trabajo.",
+          "en": "Two places to eat: Lina's restaurant, international cooking, and the Magic Sport's Bar.\nMagic Grand Spa: massages, facials, body treatments and waxing.\nIt has a conference centre, so there are sometimes corporate groups."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-oasis",
+      "sitio_web": "https://arenaloasis.com",
+      "fuentes": [
+        "arenaloasis.com",
+        "costarica.org",
+        "entercostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "estacionamiento",
+        "guia-bilingue",
+        "en-la-naturaleza",
+        "vista-al-volcan",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Once cabinas: diez bungalows y una villa para grupos o familias.\nRústicas y de madera, con ventilador, armario, escritorio y refrigerador; baño privado con bañera, ducha y secador.\nTodas miran al jardín y al volcán.\nQueda a unos 3 km del centro de La Fortuna.",
+          "en": "Eleven cabins: ten bungalows and one villa for groups or families.\nRustic and wooden, with a fan, wardrobe, desk and fridge; private bathroom with bath, shower and hairdryer.\nAll of them face the garden and the volcano.\nIt is about 3 km from the centre of La Fortuna."
+        },
+        "adicional": {
+          "es": "Dentro del terreno hay un santuario de ranas silvestres: al menos 28 especies viven en sus pozas.\nEl tour nocturno recorre senderos fáciles con guía, buscando lo que sale de noche. Es de los más reconocidos de la zona.\nDesde el lodge organizan caminatas al volcán, cabalgatas, observación de aves y rafting.",
+          "en": "On the grounds there is a wild frog sanctuary: at least 28 species live in its ponds.\nThe night tour follows easy trails with a guide, looking for what comes out after dark. It is one of the best known in the area.\nThe lodge arranges volcano hikes, horseback riding, birdwatching and rafting."
+        }
+      }
+    },
+    {
+      "babosa": "hotel-la-pradera-del-arenal",
+      "sitio_web": "https://lapraderadelarenal.com",
+      "fuentes": [
+        "lapraderadelarenal.com",
+        "booking.com",
+        "expedia.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "vista-al-volcan",
+        "en-el-centro"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "33 habitaciones con terraza, aire acondicionado y TV con canales por cable o satélite.\nTodas dan al jardín y al volcán.\nPiscina al aire libre con bar al lado y dos jacuzzis.\nA cinco minutos de la plaza central: se llega caminando a todo el pueblo.",
+          "en": "33 rooms with a terrace, air conditioning and TV with cable or satellite channels.\nAll of them face the garden and the volcano.\nOutdoor pool with a bar beside it and two hot tubs.\nFive minutes from the central square: the whole town is walkable."
+        },
+        "incluye": {
+          "es": "Desayuno preparado a la orden.\nWifi y estacionamiento.",
+          "en": "Cooked-to-order breakfast.\nWifi and parking."
+        },
+        "adicional": {
+          "es": "Restaurante a la carta, sala de juegos, mesa de tours y guardaequipaje.",
+          "en": "A la carte restaurant, games room, tour desk and luggage storage."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-backpackers-resort",
+      "fuentes": [
+        "arenalbackpackers.com",
+        "hostelworld.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "en-el-centro",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Hostal con vista al volcán, a pocos minutos a pie del centro y de la parada de buses.\nTres formas de dormir: habitación privada, dormitorio compartido —mixto o de un solo sexo, con literas, casilleros y baño privado, hasta ocho personas— o tienda permanente tipo safari, con colchón doble, luz, enchufes y casillero afuera, bajo techo.\nPiscina grande, recién renovada, con bar dentro del agua.",
+          "en": "A hostel with a volcano view, a few minutes walk from the centre and the bus stop.\nThree ways to sleep: a private room, a shared dorm — mixed or single-sex, with bunks, lockers and a private bathroom, up to eight people — or a permanent safari-style tent, with a double mattress, lighting, power sockets and an outside locker, under cover.\nA large, recently renovated pool with a swim-up bar."
+        },
+        "incluye": {
+          "es": "Wifi, piscina y jacuzzi.\nAire acondicionado en las habitaciones, menos en las tiendas.\nRecepción las 24 horas y conserjería de tours.",
+          "en": "Wifi, pool and hot tub.\nAir conditioning in the rooms, though not in the tents.\n24-hour reception and a tour concierge."
+        },
+        "adicional": {
+          "es": "Tiene restaurante y bar propios, con cocina local e internacional.\nHay terrazas para tomar sol y servicio de lavandería.",
+          "en": "It has its own restaurant and bar, local and international cooking.\nThere are sun terraces and a laundry service."
+        }
+      }
+    },
+    {
+      "babosa": "sangregado-lodge",
+      "sitio_web": "https://www.sangregadolodge.com",
+      "fuentes": [
+        "sangregadolodge.com",
+        "entercostarica.com",
+        "vacationscostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "estacionamiento",
+        "en-la-naturaleza",
+        "vista-al-volcan",
+        "tranquilo",
+        "romantico"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Diez casitas escondidas dentro de 27 hectáreas de bosque, separadas entre sí lo suficiente como para no ver a nadie.\nVentanales o paredes de vidrio con el volcán y el bosque de frente, y balcón privado.\nSenderos propios y jardines dentro de la finca.\nQueda caminando de los puentes colgantes de Místico.",
+          "en": "Ten casitas hidden inside 27 hectares of forest, far enough apart that you see nobody.\nLarge windows or glass walls facing the volcano and the forest, and a private balcony.\nIts own trails and gardens on the property.\nIt is walking distance from the Mistico hanging bridges."
+        },
+        "incluye": {
+          "es": "Desayuno completo.\nWifi y estacionamiento.\nAcceso a los senderos privados.",
+          "en": "Full breakfast.\nWifi and parking.\nAccess to the private trails."
+        },
+        "adicional": {
+          "es": "Personal que habla varios idiomas, conserjería y mesa de tours.\nEs de los sitios donde la gracia es el silencio: si se busca animación, este no.",
+          "en": "Multilingual staff, concierge and a tour desk.\nIt is one of those places where the point is the quiet: if you want a lively hotel, this is not it."
+        }
+      }
+    },
+    {
+      "babosa": "tifakara-lodge",
+      "sitio_web": "https://tifakara.com",
+      "fuentes": [
+        "tifakara.com",
+        "expedia.com",
+        "hotels.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "en-la-naturaleza",
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Once habitaciones amplias, con aire acondicionado, minibar, ropa de cama de buena calidad, cafetera y TV con cable.\nPiscina al aire libre, piscina cubierta y jacuzzi, con jardín alrededor.\nEstá pensado para observar aves: de ahí lo de \"birding oasis\".\nQueda caminando de la Catarata Río Fortuna.",
+          "en": "Eleven large rooms, with air conditioning, minibar, good bedding, a coffee maker and cable TV.\nAn outdoor pool, an indoor pool and a hot tub, with a garden around them.\nIt is built for birdwatching: hence the \"birding oasis\".\nIt is walking distance from the Rio Fortuna waterfall."
+        },
+        "incluye": {
+          "es": "Desayuno a la carta, no de buffet.\nWifi y estacionamiento.\nArreglo de habitación diario.",
+          "en": "A la carte breakfast, not a buffet.\nWifi and parking.\nDaily housekeeping."
+        },
+        "adicional": {
+          "es": "Su restaurante es Bosque Restaurant, que también tiene ficha propia en este directorio: carta continental y de temporada, con peso en pescados y filetes.\nOrganizan traslados a los tours de la zona: volcán, puentes colgantes, cabalgata y rafting.",
+          "en": "Its restaurant is Bosque Restaurant, which has its own listing in this directory: a continental and seasonal menu, leaning on fish and steaks.\nThey arrange transfers to the area's tours: volcano, hanging bridges, horseback riding and rafting."
+        }
+      }
+    },
+    {
+      "babosa": "noahs-forest",
+      "sitio_web": "https://tifakara.com/noahsforest/",
+      "fuentes": [
+        "tifakara.com",
+        "tripadvisor.com",
+        "kimkim.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "restaurante-en-sitio",
+        "estacionamiento",
+        "en-la-naturaleza",
+        "vista-al-volcan",
+        "romantico",
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cabinas separadas, escondidas por el bosque: desde una no se ve la otra. Algunas tienen jacuzzi privado.\nUn río cruza la propiedad y hay bungalows a la orilla, además de una laguna natural.\nVista al volcán y mucha ave: es de los sitios buenos para madrugar con binoculares.\nQueda a 1,3 km al norte del parque de La Fortuna.",
+          "en": "Separate cabins hidden by the forest: from one you cannot see the next. Some have a private hot tub.\nA river runs through the property and there are bungalows on its bank, plus a natural lagoon.\nVolcano views and plenty of birds: one of the good places to get up early with binoculars.\nIt is 1.3 km north of the park in La Fortuna."
+        },
+        "adicional": {
+          "es": "Su restaurante es Acacia, que también tiene ficha propia aquí: cocina internacional con acento argentino, italiano y mediterráneo, y música local en vivo por las noches.\nEs del mismo grupo que Tifakara Boutique Lodge.",
+          "en": "Its restaurant is Acacia, which also has its own listing here: international cooking with Argentine, Italian and Mediterranean accents, and live local music in the evenings.\nIt belongs to the same group as Tifakara Boutique Lodge."
+        }
+      }
+    },
+    {
+      "babosa": "roca-negra-del-arenal",
+      "sitio_web": "https://hotelrocanegradelarenal.com",
+      "fuentes": [
+        "hotelrocanegradelarenal.com",
+        "booking.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "piscina",
+        "estacionamiento",
+        "vista-al-volcan",
+        "en-la-naturaleza",
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Habitaciones en tres niveles —Standard Queen, Superior Queen y Deluxe King— todas con terraza, aire acondicionado, refrigerador, comedor y TV por cable.\nPiscina al aire libre y jacuzzi.\nJardines tropicales con senderos para caminar dentro de la propiedad.\nEstá a las afueras del pueblo, con el volcán a la vista.",
+          "en": "Rooms at three levels — Standard Queen, Superior Queen and Deluxe King — all with a terrace, air conditioning, fridge, dining area and cable TV.\nOutdoor pool and hot tub.\nTropical gardens with walking trails on the property.\nIt sits on the edge of town, with the volcano in view."
+        },
+        "incluye": {
+          "es": "Desayuno.\nWifi y estacionamiento.",
+          "en": "Breakfast.\nWifi and parking."
+        },
+        "adicional": {
+          "es": "Tienen mostrador de alquiler de autos, venta de tiques y conserjería.\nEl Parque Nacional Volcán Arenal queda a unos 15 km.",
+          "en": "There is a car rental desk, ticket sales and a concierge.\nArenal Volcano National Park is about 15 km away."
+        }
+      }
+    },
+    {
+      "babosa": "lavas-tacotal",
+      "fuentes": [
+        "booking.com",
+        "centraldereservas.com",
+        "kimkim.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "spa-en-sitio",
+        "vista-al-volcan",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "24 habitaciones, con aire acondicionado y TV por cable. Los bungalows tienen terraza propia hacia el jardín.\nEl hotel está armado como un pueblito: un edificio principal de dos pisos y bungalows de madera conectados por senderos entre jardines de aire selvático.\nDos piscinas, una en cada extremo del terreno, y una de ellas con vista al volcán.\nEl volcán queda a 10 minutos en carro y la catarata a 20.",
+          "en": "24 rooms, with air conditioning and cable TV. The bungalows have their own terrace facing the garden.\nThe hotel is laid out like a small village: a two-storey main building and wooden bungalows linked by paths through jungle-like gardens.\nTwo pools, one at each end of the grounds, one of them with a volcano view.\nThe volcano is 10 minutes by car and the waterfall 20."
+        },
+        "incluye": {
+          "es": "Desayuno.\nWifi.",
+          "en": "Breakfast.\nWifi."
+        },
+        "adicional": {
+          "es": "Restaurante a la carta y de menú del día.\nHay centro de bienestar con faciales y masajes de cuerpo entero, de espalda y de cabeza.",
+          "en": "An a la carte restaurant plus a set menu.\nThere is a wellness centre with facials and full-body, back and head massages."
+        }
+      }
+    },
+    {
+      "babosa": "arenal-montechiari",
+      "fuentes": [
+        "entercostarica.com",
+        "centraldereservas.com",
+        "expedia.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "vista-al-volcan",
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "35 habitaciones con aire acondicionado, refrigerador y patio o balcón privado.\nLas estándar traen techo artesonado, TV por cable, cafetera, y baño con ducha amplia y sanitario aparte.\nPiscina con bar dentro del agua y jardines tropicales alrededor.\nEstá en la montaña, a unos cinco minutos en carro de los puentes colgantes.",
+          "en": "35 rooms with air conditioning, a fridge and a private patio or balcony.\nThe standard rooms have coffered ceilings, cable TV, a coffee maker, and a bathroom with a walk-in shower and a separate toilet.\nA pool with a swim-up bar and tropical gardens around it.\nIt is up in the hills, about five minutes by car from the hanging bridges."
+        },
+        "incluye": {
+          "es": "Desayuno.\nWifi.\nEstacionamiento.",
+          "en": "Breakfast.\nWifi.\nParking."
+        },
+        "adicional": {
+          "es": "Tiene restaurante propio, conserjería y servicio de lavandería.",
+          "en": "It has its own restaurant, a concierge and a laundry service."
+        }
+      }
+    },
+    {
+      "babosa": "hotel-secreto-la-fortuna",
+      "sitio_web": "https://www.hotelsecretolafortuna.com",
+      "fuentes": [
+        "hotelsecretolafortuna.com",
+        "booking.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "piscina",
+        "estacionamiento",
+        "en-el-centro",
+        "tranquilo",
+        "apto-ciclistas"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "22 habitaciones dobles o twin, con aire acondicionado, terraza, comedor y escritorio.\nAlgunas dan a la montaña y otras a la piscina.\nJardín donde se ven aves sin salir del hotel.\nEstá en pleno centro, pero es de los sitios silenciosos del pueblo.",
+          "en": "22 double or twin rooms, with air conditioning, a terrace, a dining area and a writing desk.\nSome face the mountain and others the pool.\nA garden where you see birds without leaving the hotel.\nIt is right in the centre, yet one of the quiet spots in town."
+        },
+        "incluye": {
+          "es": "Desayuno.\nWifi.\nEstacionamiento.",
+          "en": "Breakfast.\nWifi.\nParking."
+        },
+        "adicional": {
+          "es": "Alquilan bicicletas y hacen traslado desde el aeropuerto.\nTienen bar lounge y mesa de tours.",
+          "en": "They rent bicycles and arrange airport transfers.\nThere is a lounge bar and a tour desk."
+        }
+      }
+    },
+    {
+      "babosa": "la-fortuna-lodge",
+      "sitio_web": "https://www.lafortunalodge.com",
+      "fuentes": [
+        "lafortunalodge.com",
+        "expedia.com",
+        "hotels.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "spa-en-sitio",
+        "estacionamiento",
+        "en-el-centro"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Queda a tres cuadras del parque central: se sale caminando a los restaurantes y a la parada de buses.\nHabitaciones con aire acondicionado y paredes insonorizadas, que en pleno pueblo se agradece.\nTV plana con satélite, caja fuerte y cafetera en la habitación.\nBaño privado con ducha, bidé y sanitario aparte.",
+          "en": "It is three blocks from the central park: the restaurants and the bus stop are a walk away.\nRooms with air conditioning and soundproofed walls, which counts for a lot in the middle of town.\nFlat-screen TV with satellite, a safe and a coffee maker in the room.\nPrivate bathroom with shower, bidet and a separate toilet."
+        },
+        "incluye": {
+          "es": "Desayuno.\nWifi.\nEstacionamiento.",
+          "en": "Breakfast.\nWifi.\nParking."
+        },
+        "adicional": {
+          "es": "Tiene restaurante y spa dentro.\nFunciona bien como campamento base: desde aquí se arman los días de volcán, canopy, rafting en el Sarapiquí y la salida a Río Celeste.",
+          "en": "It has a restaurant and a spa on site.\nIt works well as a base camp: volcano days, zip lining, rafting on the Sarapiqui and the trip to Rio Celeste all start from here."
+        }
+      }
+    },
+    {
+      "babosa": "casa-del-rio",
+      "sitio_web": "https://casadelrio.net",
+      "fuentes": [
+        "casadelrio.net",
+        "booking.com",
+        "entercostarica.com"
+      ],
+      "etiquetas": [
+        "wifi-gratis",
+        "desayuno-incluido",
+        "restaurante-en-sitio",
+        "spa-en-sitio",
+        "piscina",
+        "estacionamiento",
+        "apto-para-ninos",
+        "acepta-mascotas",
+        "apto-ciclistas",
+        "en-la-naturaleza"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Hotel boutique a la orilla del río Fortuna, entre vegetación.\nHabitaciones con aire acondicionado, cocineta, TV plana, caja fuerte, cafetera y balcón; hay habitaciones familiares.\nPiscina de agua salada, jacuzzi, terraza para tomar sol y gimnasio.\nPara los niños hay piscina pequeña con tobogán, cancha de fútbol, de básquet y mesa de ping pong.",
+          "en": "A boutique hotel on the bank of the Fortuna river, surrounded by greenery.\nRooms with air conditioning, a kitchenette, flat-screen TV, safe, coffee maker and balcony; there are family rooms.\nA saltwater pool, hot tub, sun terrace and gym.\nFor children there is a small pool with a slide, a football pitch, a basketball court and a ping pong table."
+        },
+        "incluye": {
+          "es": "Desayuno, con jugo y fruta.\nWifi.\nBicicletas.",
+          "en": "Breakfast, with juice and fruit.\nWifi.\nBicycles."
+        },
+        "adicional": {
+          "es": "Aceptan mascotas, que en La Fortuna no es común.\nHay spa con masajes, minisúper dentro y servicio a la habitación.\nEl restaurante sirve cocina local y latinoamericana en la cena.",
+          "en": "They accept pets, which is not common in La Fortuna.\nThere is a spa with massages, a minimarket on site and room service.\nThe restaurant serves local and Latin American cooking at dinner."
+        }
+      }
+    },
+    {
+      "babosa": "tierra-mia-restaurante",
+      "fuentes": [
+        "tripadvisor.com",
+        "mindtrip.ai",
+        "happycow.net",
+        "vacationscostarica.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas",
+        "acepta-tarjeta",
+        "silla-de-ruedas"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 2,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 3,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 0,
+          "abre": "12:00",
+          "cierra": "21:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cocina costarricense de casa, en un local pequeño que lleva una familia.\nCasado, gallo pinto y ceviche, más dos platos que casi todo el mundo pide: el pollo tropical con piña asada y el lomito con costra de café.\nEstá sobre la ruta 702, unos 50 metros al sur de la iglesia católica.\nEs chico y se llena. A la hora de cenar conviene reservar o llegar temprano.",
+          "en": "Home-style Costa Rican cooking in a small room run by one family.\nCasado, gallo pinto and ceviche, plus two dishes almost everyone orders: the tropical chicken with grilled pineapple and the coffee-crusted beef tenderloin.\nIt sits on Route 702, about 50 metres south of the Catholic church.\nIt is small and it fills up. At dinner time it is worth booking or turning up early."
+        },
+        "accesibilidad": {
+          "es": "El local es accesible en silla de ruedas.\nHay opciones vegetarianas, veganas y sin gluten en la carta.",
+          "en": "The dining room is wheelchair accessible.\nThere are vegetarian, vegan and gluten-free options on the menu."
+        },
+        "adicional": {
+          "es": "Abre todos los días de mediodía a 9 de la noche.\nAcepta tarjeta.",
+          "en": "Open every day from noon to 9 at night.\nCards accepted."
+        }
+      }
+    },
+    {
+      "babosa": "pollo-fortuneno",
+      "fuentes": [
+        "tripadvisor.com",
+        "adventuretourscostarica.com",
+        "evendo.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Pollo rostizado a la leña, que es el plato por el que existe el sitio: sale jugoso y se desprende del hueso.\nLa carta no se queda ahí: costillas, cerdo, frijoles negros, elote y otras guarniciones para armar plato.\nSalón amplio y ruidoso, de mesas largas y familias. Funciona igual para una cena rápida que para celebrar algo.\nAbrió en 2016 y desde entonces no ha parado.",
+          "en": "Wood-fired rotisserie chicken, the dish the place exists for: juicy and falling off the bone.\nThe menu does not stop there: ribs, pork, black beans, corn on the cob and other sides to build a plate.\nA big, noisy room of long tables and families. It works for a quick dinner as well as for celebrating something.\nIt opened in 2016 and has not let up since."
+        },
+        "adicional": {
+          "es": "Hay dos locales en el pueblo con este nombre y carta parecida; el original queda 200 metros al este del parque.\nEs de los sitios que llenan los fines de semana.",
+          "en": "There are two places in town with this name and a similar menu; the original is 200 metres east of the park.\nIt is one of those places that fill up at weekends."
+        }
+      }
+    },
+    {
+      "babosa": "la-choza-de-laurel",
+      "fuentes": [
+        "lachozadelaurel.com",
+        "tripadvisor.com",
+        "fodors.com",
+        "wanderboat.ai"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Comida típica bajo un rancho abierto, a unos 300 metros al oeste del parque central.\nEl casado es el plato de la casa: arroz, frijoles, plátano, ensalada y la proteína que se elija.\nLa carta también trae costillas de cerdo, sopas y ceviche, y se sale de lo típico con pastas, ensaladas y postres para quien no quiera casado.\nEs de los restaurantes más conocidos del pueblo y vive lleno de visitantes; aun así el servicio es rápido.",
+          "en": "Traditional Costa Rican food under an open rancho, about 300 metres west of the central park.\nThe casado is the house plate: rice, beans, plantain, salad and the protein you pick.\nThe menu also runs to pork ribs, soups and ceviche, and steps outside traditional food with pasta, salads and desserts.\nIt is one of the best known restaurants in town and it lives full of visitors; service is quick anyway."
+        },
+        "adicional": {
+          "es": "La marca nació en La Fortuna hace unas tres décadas y hoy tiene también un local en Liberia, que es el que muestra su sitio web.\nAntes de ir, conviene confirmar el horario por teléfono.",
+          "en": "The brand was born in La Fortuna some three decades ago and today also has a place in Liberia, which is the one its website shows.\nBefore going, it is worth confirming opening hours by phone."
+        }
+      }
+    },
+    {
+      "babosa": "soda-viquez",
+      "telefono": "+50624798772",
+      "fuentes": [
+        "tripadvisor.com",
+        "happycow.net",
+        "foursquare.com",
+        "letsjetkids.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "silla-de-ruedas"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Soda de pueblo a 50 metros al sur del parque central, de las que come el que vive aquí.\nCasado con arroz, frijoles, ensalada y la carne que se elija, gallo pinto de desayuno y platos de almuerzo sin vuelta.\nPorciones grandes y precio de soda, no de restaurante de turista.\nTambién despachan para llevar.",
+          "en": "A village soda 50 metres south of the central park, the kind the people who live here eat at.\nCasado with rice, beans, salad and the meat you choose, gallo pinto for breakfast and plain lunch plates.\nBig portions and soda prices, not tourist-restaurant prices.\nThey also do takeaway."
+        },
+        "accesibilidad": {
+          "es": "El local es accesible en silla de ruedas.",
+          "en": "The place is wheelchair accessible."
+        }
+      }
+    },
+    {
+      "babosa": "soda-el-turnito",
+      "fuentes": [
+        "tripadvisor.com",
+        "mindtrip.ai",
+        "letsjetkids.com",
+        "evendo.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "solo-efectivo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Soda familiar sobre la calle principal que atraviesa La Fortuna, junto al Hotel Villas Vilma.\nComida típica de la que ya casi no se cocina fuera de una casa: tamales, chorreadas, olla de carne, tortillas caseras y chileros hechos ahí.\nBatidos de fruta para acompañar; los de tamarindo, piña, fresa y mango son los que más se piden.\nPorciones generosas y cuenta corta.",
+          "en": "A family soda on the main road through La Fortuna, next to Hotel Villas Vilma.\nTraditional food of the kind barely cooked outside a home any more: tamales, chorreadas, olla de carne, handmade tortillas and their own chilero.\nFruit smoothies alongside; tamarind, pineapple, strawberry and mango are the ones most ordered.\nGenerous portions and a short bill."
+        },
+        "adicional": {
+          "es": "Quienes han comido ahí reportan que cobran solo en efectivo. Conviene llevar colones.",
+          "en": "Diners report they take cash only. Worth carrying colones."
+        }
+      }
+    },
+    {
+      "babosa": "soda-rodriguez",
+      "fuentes": [
+        "tripadvisor.com",
+        "mindtrip.ai",
+        "evendo.com"
+      ],
+      "etiquetas": [
+        "tranquilo",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Soda familiar a 300 metros al norte del parque central, con la cocina típica de siempre: casado con arroz, frijoles, plátano, ensalada y la carne que se pida.\nLo que la distingue no es la carta sino el patio: mesas repartidas en un jardín, apartadas unas de otras, y senderos con rótulos que fueron dejando los clientes.\nAndan sueltos un perro, gatos y un cerdo.\nMás de un comensal ha visto perezosos en los árboles de arriba.",
+          "en": "A family soda 300 metres north of the central park, with the usual traditional cooking: casado with rice, beans, plantain, salad and the meat you ask for.\nWhat sets it apart is not the menu but the yard: tables spread across a garden, set apart from one another, and paths lined with signs left behind by customers.\nA dog, cats and a pig wander loose.\nMore than one diner has spotted sloths in the trees above."
+        }
+      }
+    },
+    {
+      "babosa": "restaurante-tiquicia",
+      "sitio_web": "https://www.tiquiciarestaurant.com",
+      "telefono": "+50663030988",
+      "fuentes": [
+        "tiquiciarestaurant.com",
+        "tripadvisor.com",
+        "mindtrip.ai"
+      ],
+      "etiquetas": [
+        "tranquilo",
+        "apto-para-ninos"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 2,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 3,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 0,
+          "abre": "12:00",
+          "cierra": "21:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cocina costarricense de familia, 700 metros al sur del polideportivo.\nLo llevan Alberto y Mayela Pérez Chaves, y la carta la armó Sonia Conejo, la matriarca de la casa.\nCasado, arroz con pollo, chicharrones con pico de gallo, tortillas, frijoles y yuca frita, garbanzos con pollo y tilapia al horno en salsa de mariscos.\nCafé chorreado y cócteles de fruta tropical hechos con el tequila de la casa.",
+          "en": "Family Costa Rican cooking, 700 metres south of the sports centre.\nAlberto and Mayela Pérez Chaves run it, and the menu was put together by Sonia Conejo, the matriarch of the house.\nCasado, rice with chicken, chicharrones with pico de gallo, tortillas, beans and fried yuca, chickpeas with chicken and baked tilapia in seafood sauce.\nDrip-brewed café chorreado and tropical fruit cocktails made with the house tequila."
+        },
+        "adicional": {
+          "es": "Abre todos los días de mediodía a 9 de la noche. Conviene reservar con un día de antelación.\nLa misma familia tiene La Tabernita Tiquicia, una taberna con carta típica y rock y metal de los setenta a los noventa.",
+          "en": "Open every day from noon to 9 at night. Worth booking a day ahead.\nThe same family runs La Tabernita Tiquicia, a tavern with a traditional menu and rock and metal from the seventies to the nineties."
+        }
+      }
+    },
+    {
+      "babosa": "restaurante-fortuneno",
+      "sitio_web": "https://xn--fortuneo-j3a.com",
+      "fuentes": [
+        "xn--fortuneo-j3a.com",
+        "tripadvisor.com",
+        "mindtrip.ai"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Carta larga a 200 metros al este del parque: chifrijo y nachos volcánicos para compartir, arroz con pollo, pollo asado con patacones, tacos de pescado, pulpo y costillas de cerdo cocinadas despacio.\nPara vegetarianos hay quesadillas de vegetales.\nDe beber, jugos naturales, piña colada, cerveza artesanal y sangría.\nDecoración de colores, plantas y música: bulle, pero sin apuro.",
+          "en": "A long menu 200 metres east of the park: chifrijo and volcanic nachos to share, rice with chicken, grilled chicken with patacones, fish tacos, octopus and slow-cooked pork ribs.\nFor vegetarians there are vegetable quesadillas.\nTo drink, fresh juices, piña colada, craft beer and sangría.\nColourful decor, plants and music: lively, but unhurried."
+        },
+        "adicional": {
+          "es": "Llena de gente del pueblo y de visitantes por igual, y los fines de semana se hace fila.\nLa carta completa está en su sitio web.",
+          "en": "It fills with locals and visitors alike, and at weekends there is a queue.\nThe full menu is on their website."
+        }
+      }
+    },
+    {
+      "babosa": "dmi-tierra",
+      "fuentes": [
+        "tripadvisor.com",
+        "happycow.net",
+        "puravidatraveling.com",
+        "wanderlog.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "12:00",
+          "cierra": "18:00"
+        },
+        {
+          "dia": 2,
+          "abre": "12:00",
+          "cierra": "19:30"
+        },
+        {
+          "dia": 3,
+          "cerrado": true
+        },
+        {
+          "dia": 4,
+          "abre": "12:00",
+          "cierra": "19:30"
+        },
+        {
+          "dia": 5,
+          "abre": "12:00",
+          "cierra": "19:30"
+        },
+        {
+          "dia": 6,
+          "abre": "12:00",
+          "cierra": "19:30"
+        },
+        {
+          "dia": 0,
+          "abre": "12:00",
+          "cierra": "18:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Comida típica de cocina de casa, con precio de soda y porciones que llenan.\nCasado, fajitas, parrillada mixta, carnitas de mi Tierra y rice and beans, con sopas, jugos naturales y postres caseros como los churros.\nEl local es artesanal, de madera y planta, y queda cerca de la entrada al parque nacional.",
+          "en": "Traditional home-kitchen food, at soda prices and in portions that fill you.\nCasado, fajitas, mixed grill, carnitas de mi Tierra and rice and beans, with soups, fresh juices and homemade desserts like churros.\nThe room is handmade, all wood and plants, and it sits near the national park entrance."
+        },
+        "accesibilidad": {
+          "es": "La carta rotula los platos veganos. El casado vegano lleva una torta de yuca hecha en la casa en lugar de la carne.",
+          "en": "The menu labels its vegan dishes. The vegan casado swaps the meat for a house-made cassava cake."
+        },
+        "adicional": {
+          "es": "Cierra los miércoles. Lunes y domingo cierra a las 6 de la tarde; el resto de días, a las 7:30.\nNo es un sitio de cena tardía: a las 8 ya está cerrado.",
+          "en": "Closed on Wednesdays. Monday and Sunday it closes at 6 in the evening; the other days at 7:30.\nIt is not a late-dinner place: by 8 it is shut."
+        }
+      }
+    },
+    {
+      "babosa": "tica-grill",
+      "fuentes": [
+        "tripadvisor.com",
+        "opentable.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cocina costarricense hecha a la antigua, a dos cuadras de la iglesia central.\nGallo pinto, casado, chifrijo, ceviche de pescado, sopa negra, sopa de pollo, arroz con pollo, arroz con camarones, patacones, empanadas y tortillas hechas a mano.\nTambién cortes de res, salmón fresco, salsas picantes de la casa y postres naturales.\nCocinan con manteca, sebo, grasa de pollo, aceite de oliva y de coco, y sin ingredientes ultraprocesados.",
+          "en": "Costa Rican cooking done the old way, two blocks from the central church.\nGallo pinto, casado, chifrijo, fish ceviche, black bean soup, chicken soup, rice with chicken, rice with shrimp, patacones, empanadas and handmade tortillas.\nAlso beef cuts, fresh salmon, house hot sauces and natural desserts.\nThey cook with lard, tallow, chicken fat, olive oil and coconut oil, and no ultra-processed ingredients."
+        },
+        "accesibilidad": {
+          "es": "Hay platos keto, vegetarianos y sin gluten.",
+          "en": "There are keto, vegetarian and gluten-free dishes."
+        },
+        "adicional": {
+          "es": "Se puede reservar mesa.",
+          "en": "Tables can be booked."
+        }
+      }
+    },
+    {
+      "babosa": "don-rufino",
+      "fuentes": [
+        "donrufino.com",
+        "opentable.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas",
+        "acepta-tarjeta"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "12:00",
+          "cierra": "21:30"
+        },
+        {
+          "dia": 2,
+          "abre": "12:00",
+          "cierra": "21:30"
+        },
+        {
+          "dia": 3,
+          "abre": "12:00",
+          "cierra": "21:30"
+        },
+        {
+          "dia": 4,
+          "abre": "12:00",
+          "cierra": "21:30"
+        },
+        {
+          "dia": 5,
+          "abre": "12:00",
+          "cierra": "21:30"
+        },
+        {
+          "dia": 6,
+          "abre": "12:00",
+          "cierra": "21:30"
+        },
+        {
+          "dia": 0,
+          "abre": "12:00",
+          "cierra": "21:30"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Cocina costarricense de autor en el centro del pueblo, abierta desde 2005.\nEl plato de la casa es el pollo al estilo de la abuela; también son suyas las croquetas de trucha, las alitas picantes envueltas en hoja de plátano y las costillas.\nPara vegetarianos hay lasaña de hongos y ensalada marroquí, no una guarnición de compromiso.\nBar completo con sommelier propio, Andrey, y una barra donde se come bien solo.",
+          "en": "Chef-driven Costa Rican cooking in the middle of town, open since 2005.\nThe house dish is the grandmother-style chicken; the trout croquettes, the spicy wings wrapped in banana leaf and the ribs are theirs too.\nFor vegetarians there is mushroom lasagne and a Moroccan salad, not a token side.\nA full bar with its own sommelier, Andrey, and a counter where eating alone works well."
+        },
+        "incluye": {
+          "es": "El menú degustación Huetar Norte son cinco tiempos con producto local, diseñado por el chef Santiago.\nTiene cupo limitado y se reserva con antelación.",
+          "en": "The Huetar Norte tasting menu is five courses of local produce, designed by chef Santiago.\nPlaces are limited and it is booked in advance."
+        },
+        "adicional": {
+          "es": "Abre todos los días de mediodía a 9:30 de la noche. Se puede llegar sin reserva, pero los fines de semana conviene reservarla, por OpenTable, por teléfono o por WhatsApp al +506 8466 4288.\nNo hay código de vestimenta: se puede entrar con la ropa con la que se bajó del volcán.\nPara grupos hay menús cerrados, avisando con 72 horas.",
+          "en": "Open every day from noon to 9:30 at night. Walk-ins are fine, but at weekends it is worth booking, through OpenTable, by phone or on WhatsApp at +506 8466 4288.\nThere is no dress code: the clothes you came down the volcano in are fine.\nFor groups there are set menus, with 72 hours' notice."
+        }
+      }
+    },
+    {
+      "babosa": "mirador-steak-house",
+      "telefono": "+50624791926",
+      "fuentes": [
+        "tripadvisor.com",
+        "foursquare.com",
+        "facebook.com",
+        "theguide.tab.travel"
+      ],
+      "etiquetas": [
+        "vista-al-volcan",
+        "estacionamiento",
+        "wifi-gratis",
+        "tranquilo",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Parrilla con el volcán de frente, a 8 kilómetros del centro sobre la ruta al volcán, pasando el Hotel Montaña de Fuego.\nCortes: lomito, lomo, churrasco, rib eye y cow boy, hechos a la parrilla.\nLa carta no es solo carne: hay mariscos, pastas, arroces y platos típicos.\nEdificio rústico con salón techado y mesas al aire libre, y estacionamiento propio.",
+          "en": "A grill with the volcano straight ahead, 8 kilometres from the centre on the volcano road, past Hotel Montaña de Fuego.\nCuts: lomito, sirloin, churrasco, rib eye and cowboy, all off the grill.\nThe menu is not only meat: there is seafood, pasta, rice dishes and traditional plates.\nA rustic building with a covered room and open-air tables, and its own parking."
+        },
+        "adicional": {
+          "es": "Tiene tres zonas de mesas y un salón aparte, El Potro, para 50 personas, con baños, aire acondicionado y wifi: se usa para reuniones y eventos.",
+          "en": "It has three seating areas and a separate room, El Potro, for 50 people, with bathrooms, air conditioning and wifi: it is used for meetings and events."
+        }
+      }
+    },
+    {
+      "babosa": "restaurante-cafe-mediterraneo",
+      "telefono": "+50624797497",
+      "fuentes": [
+        "tripadvisor.com",
+        "desafiocostarica.com",
+        "visitearenal.com",
+        "infoguiasancarlos.com"
+      ],
+      "etiquetas": [
+        "apto-para-ninos",
+        "estacionamiento",
+        "opciones-vegetarianas",
+        "vista-al-volcan",
+        "romantico"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Italiano a 400 metros al sur del centro, con una de las mejores vistas del volcán que hay en un restaurante del pueblo.\nPizza en horno de leña y pasta hecha a mano, más ensaladas, cortes de carne y carta de vinos.\nHay bastantes platos vegetarianos, no uno solo.\nDe día es sitio de familia; de noche, con la luz baja, se vuelve otra cosa.",
+          "en": "An Italian 400 metres south of the centre, with one of the best volcano views of any restaurant in town.\nWood-fired pizza and handmade pasta, plus salads, steaks and a wine list.\nThere are plenty of vegetarian dishes, not just one.\nBy day it is a family place; at night, with the lights down, it turns into something else."
+        },
+        "incluye": {
+          "es": "Tiene zona de juegos para niños y estacionamiento amplio.",
+          "en": "There is a children's play area and plenty of parking."
+        },
+        "adicional": {
+          "es": "Hacen servicio exprés por teléfono, al 2479 7497 y al 2479 1057.",
+          "en": "They do express service by phone, on 2479 7497 and 2479 1057."
+        }
+      }
+    },
+    {
+      "babosa": "maria-bonita-steak-house",
+      "sitio_web": "https://www.mariabonitasteakhouse.com",
+      "telefono": "+50640001290",
+      "fuentes": [
+        "mariabonitasteakhouse.com",
+        "opentable.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "acepta-tarjeta",
+        "romantico"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "11:30",
+          "cierra": "22:30"
+        },
+        {
+          "dia": 2,
+          "abre": "11:30",
+          "cierra": "22:30"
+        },
+        {
+          "dia": 3,
+          "abre": "11:30",
+          "cierra": "22:30"
+        },
+        {
+          "dia": 4,
+          "abre": "11:30",
+          "cierra": "22:30"
+        },
+        {
+          "dia": 5,
+          "abre": "11:30",
+          "cierra": "22:30"
+        },
+        {
+          "dia": 6,
+          "abre": "11:30",
+          "cierra": "22:30"
+        },
+        {
+          "dia": 0,
+          "abre": "11:30",
+          "cierra": "22:30"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Parrilla de carbón natural y leña en la calle 470, a 25 metros al sur de la iglesia católica, junto al parque.\nCortes premium: res nacional, Black Angus certificado y cordero.\nLa otra mitad de la carta es libanesa: las entradas son lo que separa este sitio de cualquier otra parrilla del pueblo.\nTambién ceviches y mariscos de las dos costas, y postres flameados en la mesa.\nLa cocina la dirige el chef Javier Esteban Chacón Rojas.",
+          "en": "A charcoal and wood grill on Calle 470, 25 metres south of the Catholic church, by the park.\nPremium cuts: Costa Rican beef, certified Black Angus and lamb.\nThe other half of the menu is Lebanese: the starters are what set this apart from any other grill in town.\nThere are also ceviches and seafood from both coasts, and desserts flambéed at the table.\nThe kitchen is run by chef Javier Esteban Chacón Rojas."
+        },
+        "incluye": {
+          "es": "Coctelería de barra y carta de vinos premium, con catas guiadas.\nHay música en vivo.",
+          "en": "Bar cocktails and a premium wine list, with guided tastings.\nThere is live music."
+        },
+        "adicional": {
+          "es": "Abre todos los días de 11:30 de la mañana a 10:30 de la noche. Se reserva por OpenTable, por teléfono o al correo experiencias@mariabonitacr.com.\nTienen una ventanita para llevar.",
+          "en": "Open every day from 11:30 in the morning to 10:30 at night. Book through OpenTable, by phone or at experiencias@mariabonitacr.com.\nThey have a takeaway window."
+        }
+      }
+    },
+    {
+      "babosa": "restaurante-travesia",
+      "telefono": "+50621008916",
+      "fuentes": [
+        "tripadvisor.com",
+        "mindtrip.ai",
+        "evendo.com",
+        "tripboba.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "romantico",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Carnes ahumadas y mariscos en la calle 468, unos 400 metros al norte del Banco Nacional.\nLa cocina se ordena así: se elige la proteína, la guarnición y la salsa.\nNew York steak, corvina fresca, tártara de atún y parrillada mixta de cerdo, pollo y camarón; también hamburguesas, sándwiches y tacos.\nTiene carta aparte para niños.",
+          "en": "Smoked meats and seafood on Calle 468, about 400 metres north of Banco Nacional.\nThe menu works like this: you pick the protein, the side and the sauce.\nNew York steak, fresh sea bass, tuna tartare and a mixed grill of pork, chicken and shrimp; also burgers, sandwiches and tacos.\nThere is a separate children's menu."
+        },
+        "adicional": {
+          "es": "El local es pequeño y se llena. Para cenar después de las 5:30 de la tarde conviene reservar, al +506 2100 8916 o al correo travesiaresta@gmail.com.",
+          "en": "The room is small and it fills up. For dinner after 5:30 in the afternoon it is worth booking, on +506 2100 8916 or at travesiaresta@gmail.com."
+        }
+      }
+    },
+    {
+      "babosa": "bosque-restaurant",
+      "fuentes": [
+        "opentable.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "en-la-naturaleza",
+        "romantico",
+        "vista-al-volcan"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Está dentro del hotel Tifakara, a 300 metros de la catarata de La Fortuna, rodeado de bosque y con el volcán a la vista.\nCocina internacional con toque costarricense y producto local; no hace falta estar hospedado para comer ahí.\nSe come entre vegetación y pájaros: es de los pocos sitios del pueblo donde el paisaje es parte del plato.\nLos viernes por la noche hay música en vivo.",
+          "en": "It sits inside Hotel Tifakara, 300 metres from the La Fortuna waterfall, surrounded by forest and with the volcano in view.\nInternational cooking with a Costa Rican turn and local produce; you do not need to be staying there to eat.\nYou eat among vegetation and birds: one of the few places in town where the setting is part of the plate.\nOn Friday nights there is live music."
+        },
+        "adicional": {
+          "es": "El ambiente es romántico, pero reciben familias sin problema.\nSe puede reservar por OpenTable.",
+          "en": "The mood is romantic, but families are welcome without fuss.\nTables can be booked through OpenTable."
+        }
+      }
+    },
+    {
+      "babosa": "jalapas-restaurant",
+      "telefono": "+50686058493",
+      "fuentes": [
+        "tripadvisor.com",
+        "evendo.com",
+        "allworld.com",
+        "wanderlog.com"
+      ],
+      "etiquetas": [
+        "tranquilo",
+        "en-la-naturaleza"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 2,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 3,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "12:00",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 0,
+          "abre": "12:00",
+          "cierra": "21:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Salón abierto con ventanales corridos sobre las montañas y las fincas: la vista es la mitad de la razón para ir.\nLa carta cruza clásicos costarricenses con platos internacionales: fettuccini de salmón, casado de pescado y el pollo Luigi.\nLos patacones y el pollo caribeño son de lo más pedido.\nLo lleva Luis con su familia, y se nota en cómo atienden.",
+          "en": "An open dining room with wraparound windows over the mountains and farmland: the view is half the reason to go.\nThe menu crosses Costa Rican classics with international dishes: salmon fettuccine, fish casado and the Luigi chicken.\nThe patacones and the Caribbean chicken are what people order most.\nLuis runs it with his family, and it shows in the service."
+        },
+        "adicional": {
+          "es": "Abre todos los días de mediodía a 9 de la noche.\nPara conseguir mesa junto a la ventana conviene reservar, sobre todo en temporada alta.",
+          "en": "Open every day from noon to 9 at night.\nTo get a table by the window it is worth booking, especially in high season."
+        }
+      }
+    },
+    {
+      "babosa": "chifa-la-familia-feliz",
+      "fuentes": [
+        "tripadvisor.com",
+        "frommers.com",
+        "happycow.net",
+        "evendo.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Chifa: cocina peruana con raíz china, y según ellos la primera de Costa Rica.\nLomo saltado y una tanda de ceviches, con versión vegana de varios.\nLa carta rotula los platos vegetarianos y veganos, así que no hay que preguntar plato por plato.\nEl chef Martín sale a las mesas y recomienda según lo que uno come.\nQueda sobre la ruta 702, diagonal a Alamo Rent a Car, con arte callejero peruano en las paredes.",
+          "en": "Chifa: Peruvian cooking with Chinese roots, and by their account the first in Costa Rica.\nLomo saltado and a run of ceviches, several with a vegan version.\nThe menu labels the vegetarian and vegan dishes, so there is no need to ask plate by plate.\nChef Martín comes out to the tables and recommends according to what you eat.\nIt is on Route 702, diagonal to Alamo Rent a Car, with Peruvian street art on the walls."
+        },
+        "adicional": {
+          "es": "Es un negocio de familia y se siente: mucha gente vuelve dos veces en el mismo viaje.",
+          "en": "It is a family business and it feels like one: plenty of people come back twice in the same trip."
+        }
+      }
+    },
+    {
+      "babosa": "kappa-sushi-fortuna",
+      "sitio_web": "https://kappasushifortuna.com",
+      "telefono": "+50624791639",
+      "fuentes": [
+        "kappasushifortuna.com",
+        "tripadvisor.com",
+        "findmeglutenfree.com",
+        "abillion.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas",
+        "acepta-tarjeta"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Sushi a 25 metros al norte del Banco Nacional, para cuando ya se comió suficiente casado.\nRolls de fusión que meten producto costarricense en la receta japonesa, más sashimi, gyozas y coctelería.\nHay bastante opción vegetariana y vegana, incluido un roll de hongos.\nMesas adentro y afuera; el precio es más bajo de lo que el plato sugiere.",
+          "en": "Sushi 25 metres north of Banco Nacional, for when you have had enough casado.\nFusion rolls that put Costa Rican produce into the Japanese recipe, plus sashimi, gyoza and cocktails.\nThere is a good deal of vegetarian and vegan choice, including a mushroom roll.\nTables inside and out; the price is lower than the plate suggests."
+        },
+        "adicional": {
+          "es": "Acepta tarjeta. Consultas y pedidos por WhatsApp al +506 8793 2020 o al correo kappafortuna@gmail.com.",
+          "en": "Cards accepted. Questions and orders on WhatsApp at +506 8793 2020 or at kappafortuna@gmail.com."
+        }
+      }
+    },
+    {
+      "babosa": "que-rico-arenal",
+      "fuentes": [
+        "opentable.com",
+        "tripadvisor.com",
+        "vacationscostarica.com",
+        "foursquare.com"
+      ],
+      "etiquetas": [
+        "vista-al-volcan",
+        "transporte-hotel",
+        "apto-para-ninos"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Pizza en horno de leña, masa delgada y bien cargada, a 6,5 kilómetros al noroeste de la iglesia de La Fortuna, contiguo al Arenal Volcano Inn.\nNo es solo italiano: la carta también trae platos internacionales y costarricenses.\nLa vista al volcán desde el salón es de las buenas.\nLo lleva una familia y abrió en 2008.",
+          "en": "Wood-fired pizza, thin crust and generously topped, 6.5 kilometres north-west of the La Fortuna church, next to the Arenal Volcano Inn.\nIt is not only Italian: the menu also carries international and Costa Rican dishes.\nThe volcano view from the dining room is one of the good ones.\nA family runs it and it opened in 2008."
+        },
+        "incluye": {
+          "es": "Transporte gratuito desde hoteles seleccionados entre las 6:00 y las 9:30 de la noche: Nayara, Arenal Manoa, Arenal Paraíso, Arenal Springs, Los Lagos, Mussaenda, Kokoro, Miradas Arenal, El Silencio del Campo, Royal Corin y Baldi.",
+          "en": "Free transport from selected hotels between 6:00 and 9:30 at night: Nayara, Arenal Manoa, Arenal Paraíso, Arenal Springs, Los Lagos, Mussaenda, Kokoro, Miradas Arenal, El Silencio del Campo, Royal Corin and Baldi."
+        },
+        "adicional": {
+          "es": "Está fuera del pueblo: sin carro, el transporte del hotel es la forma de llegar.",
+          "en": "It is outside town: without a car, the hotel shuttle is the way to get there."
+        }
+      }
+    },
+    {
+      "babosa": "rojo-coral",
+      "fuentes": [
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "tranquilo"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Marisquería y parrilla a 2 kilómetros al oeste del parque de La Fortuna, contiguo al Hotel Vista Al Cerro.\nLa Fortuna está lejos de las dos costas, así que un sitio dedicado al marisco no es cosa menor aquí.\nEstá fuera del casco central: se llega en carro o en taxi.",
+          "en": "A seafood house and grill 2 kilometres west of the La Fortuna park, next to Hotel Vista Al Cerro.\nLa Fortuna is far from either coast, so a place dedicated to seafood is no small thing here.\nIt is outside the town centre: you get there by car or taxi."
+        }
+      }
+    },
+    {
+      "babosa": "cuenca-restaurante",
+      "fuentes": [
+        "casadelrio.net",
+        "tripadvisor.com",
+        "mindtrip.ai"
+      ],
+      "etiquetas": [
+        "vista-al-volcan",
+        "romantico",
+        "restaurante-en-sitio"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Es el restaurante del hotel boutique Casa del Río, en la avenida 301, y está abierto a quien no se hospeda.\nLa cocina cruza tres tradiciones: Italia, Perú y España, con producto local.\nPastas, mariscos y cortes, en porciones grandes y con presentación cuidada.\nHay vista al volcán desde el salón.",
+          "en": "It is the restaurant of the Casa del Río boutique hotel, on Avenida 301, and it is open to people not staying there.\nThe kitchen crosses three traditions: Italy, Peru and Spain, with local produce.\nPasta, seafood and steaks, in big portions and carefully plated.\nThere is a volcano view from the dining room."
+        },
+        "adicional": {
+          "es": "Conviene reservar: el salón no es grande.",
+          "en": "Worth booking: the dining room is not large."
+        }
+      }
+    },
+    {
+      "babosa": "acacia-restaurant",
+      "fuentes": [
+        "opentable.com",
+        "tripadvisor.com"
+      ],
+      "etiquetas": [
+        "en-la-naturaleza",
+        "vista-al-volcan",
+        "opciones-vegetarianas",
+        "restaurante-en-sitio"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Está dentro del hotel Noah's Forest, a un kilómetro del centro, rodeado de bosque.\nTerraza techada con vista al volcán y pájaros entrando y saliendo: el desayuno es lo que más se recomienda.\nRecetas internacionales con toque costarricense, hechas con producto fresco traído de distintas regiones del país.\nAbre para desayuno y cena todos los días, y hay brunch los fines de semana.",
+          "en": "It sits inside the Noah's Forest hotel, a kilometre from the centre, surrounded by forest.\nA covered terrace with a volcano view and birds coming and going: breakfast is what people recommend most.\nInternational recipes with a Costa Rican turn, made with fresh produce brought in from different regions of the country.\nOpen for breakfast and dinner every day, with brunch at weekends."
+        },
+        "accesibilidad": {
+          "es": "Hay opciones sin gluten y veganas.",
+          "en": "There are gluten-free and vegan options."
+        },
+        "adicional": {
+          "es": "Hay que reservar con antelación, también para desayunar.\nAlgunas noches hay música en vivo.",
+          "en": "Booking ahead is required, breakfast included.\nSome nights there is live music."
+        }
+      }
+    },
+    {
+      "babosa": "selva-negra-bar",
+      "sitio_web": "https://selvanegra.bar",
+      "telefono": "+50689662422",
+      "fuentes": [
+        "selvanegra.bar",
+        "tripadvisor.com",
+        "instagram.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "romantico"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "12:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 2,
+          "abre": "12:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 3,
+          "abre": "12:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 4,
+          "abre": "12:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 5,
+          "abre": "12:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 6,
+          "abre": "12:00",
+          "cierra": "23:59"
+        },
+        {
+          "dia": 0,
+          "abre": "12:00",
+          "cierra": "23:59"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Bar de coctelería y vinos a 25 metros al sur del parque, montado como un speakeasy tropical.\nDos cartas de tragos: los de autor, que son clásicos retorcidos con ingredientes de selva —Raíces Ancestrales, Volcán Arenal—, y los tiki, servidos en vasijas.\nPara comer hay hamburguesas Wagyu y Black Angus, arroz con mariscos y cordon bleu, entre 10.500 y 18.500 colones.\nEs de lo poco que abre de noche en el pueblo.",
+          "en": "A cocktail and wine bar 25 metres south of the park, built as a tropical speakeasy.\nTwo drinks lists: the signature ones, classics twisted with jungle ingredients — Raíces Ancestrales, Volcán Arenal — and the tiki ones, served in vessels.\nTo eat there are Wagyu and Black Angus burgers, seafood rice and cordon bleu, between 10,500 and 18,500 colones.\nIt is one of the few places in town that opens at night."
+        },
+        "incluye": {
+          "es": "Hacen masterclasses de coctelería y catas.\nHay una promoción distinta cada día de la semana.",
+          "en": "They run cocktail masterclasses and tastings.\nThere is a different promotion every day of the week."
+        },
+        "adicional": {
+          "es": "Abre todos los días de mediodía a medianoche.\nSe reserva por OpenTable o por WhatsApp al +506 8966 2422.",
+          "en": "Open every day from noon to midnight.\nBook through OpenTable or on WhatsApp at +506 8966 2422."
+        }
+      }
+    },
+    {
+      "babosa": "chante-verde",
+      "telefono": "+50624797097",
+      "fuentes": [
+        "tripadvisor.com",
+        "mindtrip.ai",
+        "evendo.com",
+        "facebook.com"
+      ],
+      "etiquetas": [
+        "en-el-centro",
+        "opciones-vegetarianas",
+        "apto-para-ninos"
+      ],
+      "horario": [
+        {
+          "dia": 1,
+          "abre": "11:30",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 2,
+          "abre": "11:30",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 3,
+          "abre": "11:30",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 4,
+          "abre": "11:30",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 5,
+          "abre": "11:30",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 6,
+          "abre": "11:30",
+          "cierra": "21:00"
+        },
+        {
+          "dia": 0,
+          "abre": "11:30",
+          "cierra": "21:00"
+        }
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Restaurante, café y bar en el centro, con carta pensada para que el vegetariano y el que no lo es coman en la misma mesa.\nLomo saltado en versión de aquí y una hamburguesa de lentejas, quinoa y papa que no imita a la carne.\nBatidos de fruta y postres como los churros con helado.\nSalón adentro y mesas afuera, con música en vivo y juegos de mesa.",
+          "en": "A restaurant, café and bar in the centre, with a menu built so a vegetarian and a non-vegetarian can eat at the same table.\nLomo saltado in a local version and a burger of lentils, quinoa and potato that does not pretend to be meat.\nFruit smoothies and desserts like churros with ice cream.\nA room inside and tables outside, with live music and board games."
+        },
+        "adicional": {
+          "es": "Abre todos los días de 11:30 de la mañana a 9 de la noche.\nPorciones generosas para lo que cuesta.",
+          "en": "Open every day from 11:30 in the morning to 9 at night.\nGenerous portions for what it costs."
+        }
+      }
+    },
+    {
+      "babosa": "interbus-la-fortuna",
+      "fuentes": [
+        "interbusonline.com",
+        "book.interbusonline.com",
+        "costarica-spirit.com",
+        "bookaway.com"
+      ],
+      "etiquetas": [
+        "transporte-hotel"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Shuttles de hotel a hotel, compartidos o privados, con más de 180 rutas en el país. Operan desde 1996.\nDesde La Fortuna salen las conexiones que casi todo itinerario necesita: San José, Monteverde, Liberia y las playas del Pacífico.\nLas vans son con aire acondicionado, no fumado y con seguro completo, y llevan menos pasajeros de los que caben para dejar espacio a las piernas.\nRecogen y dejan en la puerta del hotel: no hay que llegar a ninguna terminal.",
+          "en": "Hotel-to-hotel shuttles, shared or private, on more than 180 routes across the country. They have run since 1996.\nFrom La Fortuna leave the connections almost every itinerary needs: San José, Monteverde, Liberia and the Pacific beaches.\nThe vans are air-conditioned, non-smoking and fully insured, and carry fewer passengers than they seat so there is legroom.\nThey pick up and drop off at the hotel door: there is no terminal to get to."
+        },
+        "incluye": {
+          "es": "Venden también circuitos de varios destinos desde 185 dólares por persona, con descuento a partir del tercer servicio.",
+          "en": "They also sell multi-destination circuits from 185 dollars per person, with a discount from the third service on."
+        },
+        "adicional": {
+          "es": "Para Monteverde conviene preguntar por la opción que cruza el lago Arenal —van, bote y van—: baja el viaje de unas cuatro horas y media por la carretera del sur a unas tres.\nReservas al +506 4100 0888 o a reservations@interbusonline.com. Los horarios exactos se confirman al reservar.",
+          "en": "For Monteverde it is worth asking for the option that crosses Lake Arenal — van, boat and van: it cuts the trip from about four and a half hours by the southern road to about three.\nBookings on +506 4100 0888 or at reservations@interbusonline.com. Exact times are confirmed when booking."
+        }
+      }
+    },
+    {
+      "babosa": "adobe-rent-a-car-la-fortuna",
+      "fuentes": [
+        "adobecar.com",
+        "mytanfeet.com"
+      ],
+      "etiquetas": [
+        "en-el-centro"
+      ],
+      "secciones": {
+        "que_esperar": {
+          "es": "Empresa costarricense de alquiler de vehículos, con oficina en La Fortuna a 75 metros al sur de la gasolinera, contiguo al Hotel La Fortuna.\nFlota de 4x4, SUV y sedán. Para las rutas de tierra que llevan a varias cataratas y miradores, el 4x4 no es un capricho.\nSe puede devolver el carro en otra oficina del país pagando el recargo de una vía.",
+          "en": "A Costa Rican car rental company, with an office in La Fortuna 75 metres south of the petrol station, next to Hotel La Fortuna.\nA fleet of 4x4s, SUVs and sedans. For the dirt roads that lead to several waterfalls and lookouts, a 4x4 is not a whim.\nThe car can be returned at another office in the country by paying the one-way surcharge."
+        },
+        "no_incluye": {
+          "es": "El seguro obligatorio de ley no siempre coincide con lo que cubre la tarjeta de crédito. Conviene aclarar qué cubre cada uno antes de firmar.",
+          "en": "The insurance required by law does not always match what a credit card covers. Worth clarifying what each one covers before signing."
+        },
+        "adicional": {
+          "es": "La edad mínima para alquilar es 23 años, y hay que presentar el pasaporte.\nAtención por WhatsApp al +506 8499 6000. La oficina de Ciudad Quesada, al +506 2460 0650 o a cquesada@adobecar.com, también atiende la zona.",
+          "en": "The minimum age to rent is 23, and a passport must be shown.\nSupport on WhatsApp at +506 8499 6000. The Ciudad Quesada office, on +506 2460 0650 or at cquesada@adobecar.com, also covers the area."
         }
       }
     }

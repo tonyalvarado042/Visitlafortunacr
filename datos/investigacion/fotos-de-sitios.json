@@ -1,0 +1,1420 @@
+{
+  "_lee_esto": "Imagenes candidatas bajadas del sitio web de cada negocio, para que la ficha muestre algo que corresponde mientras no haya GOOGLE_PLACES_API_KEY. Cada una guarda de que URL salio. NO estan aprobadas: la eleccion final es a ojo, porque si sale gente y si la foto es del lugar no lo decide un filtro. Ver regla 11 del CLAUDE.md: esto es temporal.",
+  "generado_en": "2026-09-12",
+  "negocios": {
+    "adobe-rent-a-car-la-fortuna": {
+      "nombre": "Adobe Rent a Car La Fortuna",
+      "sitio_web": "https://www.adobecar.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.adobecar.com/wp-content/uploads/2022/08/adobe-rent-a-car-san-jose.jpg",
+          "ancho": 1920,
+          "alto": 1070
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.adobecar.com/wp-content/uploads/2018/12/playa-samara-1.jpg",
+          "ancho": 1200,
+          "alto": 900
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.adobecar.com/wp-content/uploads/2024/05/Alquiler-de-autos-en-Costa-Rica-Adobe-Car-Rental.webp",
+          "ancho": 1920,
+          "alto": 1280
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.adobecar.com/wp-content/uploads/2022/06/lealtad-bg.jpg",
+          "ancho": 1400,
+          "alto": 520
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.adobecar.com/wp-content/uploads/2024/03/AdobeCar-Reservar-en-linea.png",
+          "ancho": 1400,
+          "alto": 260
+        }
+      ]
+    },
+    "arenal-1968": {
+      "nombre": "Arenal 1968 Volcano View & Trails",
+      "sitio_web": "https://www.arenal1968.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.arenal1968.com/wp-content/uploads/2024/09/av-hiking.jpg",
+          "ancho": 1200,
+          "alto": 800
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.arenal1968.com/wp-content/uploads/2024/09/av-hiking-1024x683.jpg",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.arenal1968.com/wp-content/uploads/2025/01/atv-tours-1.jpg",
+          "ancho": 1200,
+          "alto": 800
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.arenal1968.com/wp-content/uploads/2025/01/atv-tours-1-1024x683.jpg",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.arenal1968.com/wp-content/uploads/2025/04/floating-basket-picnic-6.jpg",
+          "ancho": 1200,
+          "alto": 800
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.arenal1968.com/wp-content/uploads/2025/04/floating-basket-picnic-6-1024x683.jpg",
+          "ancho": 1024,
+          "alto": 683
+        }
+      ]
+    },
+    "arenal-backpackers-resort": {
+      "nombre": "Arenal Backpackers Resort",
+      "sitio_web": "https://arenalbackpackers.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://arenalbackpackers.com/og.jpg",
+          "ancho": 1200,
+          "alto": 630
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://arenalbackpackers.com/images/abr/vista-volcan.jpg",
+          "ancho": 1448,
+          "alto": 1086
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://arenalbackpackers.com/images/abr/arenal-backpackers-volcano-view.jpg",
+          "ancho": 1448,
+          "alto": 1086
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://arenalbackpackers.com/images/abr/jacuzzi-089.jpg",
+          "ancho": 1448,
+          "alto": 1086
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://arenalbackpackers.com/images/abr/la-fortuna-waterfall-enhanced.jpg",
+          "ancho": 1535,
+          "alto": 1024
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://arenalbackpackers.com/images/abr/pool-jacuzzi-07.jpg",
+          "ancho": 1536,
+          "alto": 1024
+        }
+      ]
+    },
+    "arenal-jungle-tours": {
+      "nombre": "Arenal Jungle Tours",
+      "sitio_web": "https://jungletourscr.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://jungletourscr.com/wp-content/uploads/2024/11/Hoja-1-768x585.webp",
+          "ancho": 768,
+          "alto": 585
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://jungletourscr.com/wp-content/uploads/2024/11/Hoja-1.webp",
+          "ancho": 870,
+          "alto": 663
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://jungletourscr.com/wp-content/uploads/2025/04/Tucan-volcal-arenal-la-fortuna-600x272.webp",
+          "ancho": 600,
+          "alto": 272
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://jungletourscr.com/wp-content/uploads/2025/04/Tucan-volcal-arenal-la-fortuna.webp",
+          "ancho": 1328,
+          "alto": 602
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://jungletourscr.com/wp-content/uploads/2025/05/tubing-arenal-la-fortuna-636x426.jpg",
+          "ancho": 636,
+          "alto": 426
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://jungletourscr.com/wp-content/uploads/2025/05/safari-float-arenal-636x426.jpg",
+          "ancho": 636,
+          "alto": 426
+        }
+      ]
+    },
+    "arenal-kioro-suites-spa": {
+      "nombre": "Arenal Kioro Suites & Spa",
+      "sitio_web": "https://www.hotelarenalkioro.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-b0mjlabu5iapzzb2prfueqf5x/couples-suite-1_standard.jpg?crop=143%2C0%2C855%2C641",
+          "ancho": 855,
+          "alto": 641
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-4y9ip6tdmxj6ycb1vrtgom42b/family-suite-1_standard.jpg?crop=143%2C0%2C855%2C641",
+          "ancho": 855,
+          "alto": 641
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-ahri7br21a103mgtj08lpstjg/kioro-suite-2_standard.jpg?crop=112%2C0%2C1777%2C1333",
+          "ancho": 1777,
+          "alto": 1333
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-dkrsvwzymqkggef0wfyqhoq4d/4_standard.jpg?crop=112%2C0%2C1777%2C1333",
+          "ancho": 1777,
+          "alto": 1333
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-1i56kgj4vcm8pbf1ddw1d4u2c/volcan.jpg?width=1920",
+          "ancho": 1920,
+          "alto": 1280
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://image-tc.galaxy.tf/wipng-51tp7obfm38kdsqwg4pwyhyxk/piscina.png?width=860",
+          "ancho": 860,
+          "alto": 573
+        }
+      ]
+    },
+    "arenal-manoa": {
+      "nombre": "Arenal Manoa Hot Spring Resort",
+      "sitio_web": "https://arenalmanoa.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://arenalmanoa.com/wp-content/uploads/2026/08/preview-la-saca.webp",
+          "ancho": 2560,
+          "alto": 1400
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://arenalmanoa.com/wp-content/uploads/2026/08/preview-alambique.webp",
+          "ancho": 2560,
+          "alto": 1400
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://arenalmanoa.com/wp-content/uploads/2026/08/preview-ohashi.webp",
+          "ancho": 2560,
+          "alto": 1400
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://arenalmanoa.com/wp-content/uploads/2026/07/TABLET-ENG.webp",
+          "ancho": 921,
+          "alto": 201
+        }
+      ]
+    },
+    "arenal-mundo-aventura": {
+      "nombre": "Arenal Mundo Aventura",
+      "sitio_web": "https://www.arenalmundoaventura.com",
+      "candidatas": []
+    },
+    "arenal-oasis": {
+      "nombre": "Arenal Oasis Eco Lodge & Wildlife Refuge",
+      "sitio_web": "https://arenaloasis.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://arenaloasis.com/wp-content/uploads/2024/04/arenal-oasis-eco-lodge-2.jpg",
+          "ancho": 1400,
+          "alto": 933
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://arenaloasis.com/wp-content/uploads/2024/04/arenal-oasis-eco-lodge-600x400.jpg",
+          "ancho": 600,
+          "alto": 400
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://arenaloasis.com/wp-content/uploads/2024/04/arenal-oasis-eco-lodge.jpg",
+          "ancho": 1400,
+          "alto": 933
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://arenaloasis.com/wp-content/uploads/2024/04/space.fw_-600x315.png",
+          "ancho": 600,
+          "alto": 315
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://arenaloasis.com/wp-content/uploads/2024/04/space.fw_.png",
+          "ancho": 713,
+          "alto": 374
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://arenaloasis.com/wp-content/uploads/2024/05/BUNGALOW-DOBLE.jpg",
+          "ancho": 1440,
+          "alto": 960
+        }
+      ]
+    },
+    "arenal-observatory-lodge": {
+      "nombre": "Arenal Observatory Lodge & Trails",
+      "sitio_web": "https://www.arenalobservatorylodge.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.arenalobservatorylodge.com/wp-content/uploads/2025/02/New-featured-image.jpg",
+          "ancho": 1200,
+          "alto": 630
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.arenalobservatorylodge.com/wp-content/uploads/2023/02/Actividades-gratuitas-inicio-AOL-web.jpg",
+          "ancho": 660,
+          "alto": 480
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.arenalobservatorylodge.com/wp-content/uploads/2023/02/Tours-AOL-inicio.jpg",
+          "ancho": 660,
+          "alto": 480
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.arenalobservatorylodge.com/wp-content/uploads/2022/11/avistamiento-de-aves-arenal.jpg",
+          "ancho": 660,
+          "alto": 480
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.arenalobservatorylodge.com/wp-content/uploads/2022/11/senderos-arenal.jpg",
+          "ancho": 660,
+          "alto": 480
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.arenalobservatorylodge.com/wp-content/uploads/2022/12/Spa-Arenal-Observatory-Lodge.jpg",
+          "ancho": 660,
+          "alto": 480
+        }
+      ]
+    },
+    "arenal-springs-resort-spa": {
+      "error": "http 403"
+    },
+    "baldi-hot-springs": {
+      "nombre": "Baldi Hot Springs Hotel Resort & Spa",
+      "sitio_web": "https://www.baldihotsprings.cr",
+      "candidatas": [
+        {
+          "archivo": "01-ojo.jpg",
+          "origen": "https://www.baldihotsprings.cr/wp-content/uploads/2025/08/Junior_Familiar_rooms_24_3_2021-1536x1025.jpg",
+          "ancho": 1536,
+          "alto": 1025
+        },
+        {
+          "archivo": "02-ojo.jpg",
+          "origen": "https://www.baldihotsprings.cr/wp-content/uploads/2025/08/Junior_Familiar_rooms_24_3_2021.jpg",
+          "ancho": 1600,
+          "alto": 1068
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.baldihotsprings.cr/wp-content/uploads/2025/08/Junior_suite_1-1536x1025.jpg",
+          "ancho": 1536,
+          "alto": 1025
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.baldihotsprings.cr/wp-content/uploads/2025/08/Junior_suite_1.jpg",
+          "ancho": 1600,
+          "alto": 1068
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.baldihotsprings.cr/wp-content/uploads/2025/08/Deluxe_rooms_1-1536x1025.jpg",
+          "ancho": 1536,
+          "alto": 1025
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.baldihotsprings.cr/wp-content/uploads/2025/08/Deluxe_rooms_1.jpg",
+          "ancho": 1600,
+          "alto": 1068
+        }
+      ]
+    },
+    "bogarin-trail": {
+      "error": "fetch failed"
+    },
+    "casa-del-rio": {
+      "nombre": "Casa del Rio",
+      "sitio_web": "https://casadelrio.net",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://casadelrio.net/images/hero/hero-1.jpg",
+          "ancho": 1920,
+          "alto": 1280
+        }
+      ]
+    },
+    "casa-luna": {
+      "error": "http 403"
+    },
+    "catarata-rio-fortuna": {
+      "nombre": "Catarata Río Fortuna",
+      "sitio_web": "https://www.cataratalafortuna.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://adifort.imgix.net/tours/1/fortuna-waterfall-33.jpg?w=1200&h=783",
+          "ancho": 1182,
+          "alto": 783
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://adifort.imgix.net/tours/1/fortuna-waterfall-33.jpg",
+          "ancho": 4928,
+          "alto": 3264
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://adifort.imgix.net/images/slide3.png?fm=png&auto=format&lossless=1",
+          "ancho": 686,
+          "alto": 385
+        }
+      ]
+    },
+    "desafio-adventure-company": {
+      "nombre": "Desafío Adventure Company",
+      "sitio_web": "https://www.desafiocostarica.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.desafiocostarica.com/wp-content/uploads/2026/08/cropped-ChatGPT-Image-21-ago-2026-10_07_11-800x410.png",
+          "ancho": 800,
+          "alto": 410
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.desafiocostarica.com/wp-content/uploads/2026/08/cropped-ChatGPT-Image-21-ago-2026-10_07_11.png",
+          "ancho": 1671,
+          "alto": 856
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.desafiocostarica.com/wp-content/uploads/2026/06/4-9538-2026-08-17-14-10-15-640x480.jpeg",
+          "ancho": 640,
+          "alto": 480
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.desafiocostarica.com/wp-content/uploads/2026/06/4-6219-2023-07-03-09-21-31.jpg",
+          "ancho": 900,
+          "alto": 500
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.desafiocostarica.com/wp-content/uploads/2026/06/4-6582-2023-07-03-11-39-01.jpg",
+          "ancho": 900,
+          "alto": 500
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.desafiocostarica.com/wp-content/uploads/2026/06/4-8798-2023-06-30-15-09-34-scaled.jpg",
+          "ancho": 2560,
+          "alto": 1422
+        }
+      ]
+    },
+    "don-olivo-chocolate-tour": {
+      "nombre": "Don Olivo Chocolate Tour",
+      "sitio_web": "https://donolivochocolatetour.net",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://donolivochocolatetour.net/wp-content/uploads/2023/09/Don-Olivo.png",
+          "ancho": 709,
+          "alto": 228
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://donolivochocolatetour.net/wp-content/uploads/2024/07/cropped-05112023-DSC_0774-scaled-1.jpg",
+          "ancho": 2558,
+          "alto": 1704
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://donolivochocolatetour.net/wp-content/uploads/2023/09/17092023-DSC_0493-1620x1080.jpg",
+          "ancho": 1620,
+          "alto": 1080
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://donolivochocolatetour.net/wp-content/uploads/2023/09/17092023-DSC_0493-1024x683.jpg",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://donolivochocolatetour.net/wp-content/uploads/2023/09/17092023-DSC_0444-1620x1080.jpg",
+          "ancho": 1620,
+          "alto": 1080
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://donolivochocolatetour.net/wp-content/uploads/2023/09/17092023-DSC_0444-1024x683.jpg",
+          "ancho": 1024,
+          "alto": 683
+        }
+      ]
+    },
+    "ecocentro-danaus": {
+      "nombre": "Ecocentro Danaus",
+      "sitio_web": "https://ecocentrodanaus.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://ecocentrodanaus.com/assets/tour-daypass-B5E9ecmO.jpg",
+          "ancho": 1600,
+          "alto": 1066
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://ecocentrodanaus.com/assets/tour-butterflies-Dw2Wit3J.jpg",
+          "ancho": 1280,
+          "alto": 952
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://ecocentrodanaus.com/assets/tour-butterfly-garden-CxOjui_B.jpg",
+          "ancho": 1536,
+          "alto": 1024
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://ecocentrodanaus.com/assets/tour-maleku-6uGrVNxJ.jpg",
+          "ancho": 1280,
+          "alto": 720
+        }
+      ]
+    },
+    "ecoglide-arenal-park": {
+      "nombre": "Ecoglide Arenal Park",
+      "sitio_web": "https://arenalecoglide.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://ecoglide.imgix.net/home/ecoglide-zip-liines.jpeg?w=600&h=392&fit=crop",
+          "ancho": 600,
+          "alto": 392
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://ecoglide.imgix.net/home/ecoglide-zip-liines.jpeg?w=1200&h=783&fit=crop",
+          "ancho": 1200,
+          "alto": 783
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://arenalecoglide.com/images/ie8-panel/warning_bar_0000_us.jpg",
+          "ancho": 820,
+          "alto": 42
+        }
+      ]
+    },
+    "ecotermales-fortuna": {
+      "nombre": "Ecotermales Fortuna",
+      "sitio_web": "https://ecotermalesfortuna.cr",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://ecotermalesfortuna.cr/wp-content/uploads/2023/11/gota-vrd.png",
+          "ancho": 724,
+          "alto": 470
+        }
+      ]
+    },
+    "el-silencio-del-campo": {
+      "nombre": "Hotel El Silencio del Campo",
+      "sitio_web": "https://www.hotelsilenciodelcampo.com",
+      "candidatas": []
+    },
+    "hotel-la-pradera-del-arenal": {
+      "error": "fetch failed"
+    },
+    "magic-mountain": {
+      "nombre": "Hotel Magic Mountain",
+      "sitio_web": "https://www.hotelmagicmountain.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.hotelmagicmountain.com/wp-content/uploads/2025/11/WTTC-SafeTravels-Stamp-Template.png",
+          "ancho": 646,
+          "alto": 555
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.hotelmagicmountain.com/wp-content/uploads/2025/11/junior_suite7-768x448.jpg",
+          "ancho": 768,
+          "alto": 448
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.hotelmagicmountain.com/wp-content/uploads/2025/11/junior_suite7.jpg",
+          "ancho": 1200,
+          "alto": 700
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.hotelmagicmountain.com/wp-content/uploads/2025/11/standard_room4-768x448.jpg",
+          "ancho": 768,
+          "alto": 448
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.hotelmagicmountain.com/wp-content/uploads/2025/11/standard_room4.jpg",
+          "ancho": 1200,
+          "alto": 700
+        }
+      ]
+    },
+    "montana-de-fuego": {
+      "nombre": "Hotel Montana de Fuego",
+      "sitio_web": "https://montanadefuego.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://montanadefuego.com/wp-content/uploads/2026/07/imagen_20260713_002.webp",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://montanadefuego.com/wp-content/uploads/2026/07/imagen_20260713_005.webp",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://montanadefuego.com/wp-content/uploads/2026/07/imagen_20260713_006.webp",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://montanadefuego.com/wp-content/uploads/2026/07/imagen_20260713_007.webp",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://montanadefuego.com/wp-content/uploads/2026/07/imagen_20260713_004.webp",
+          "ancho": 1024,
+          "alto": 683
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://montanadefuego.com/wp-content/uploads/2026/07/imagen_20260713_003.webp",
+          "ancho": 1024,
+          "alto": 683
+        }
+      ]
+    },
+    "roca-negra-del-arenal": {
+      "nombre": "Hotel Roca Negra del Arenal",
+      "sitio_web": "https://hotelrocanegradelarenal.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://hotelrocanegradelarenal.com/featured-shot.jpeg",
+          "ancho": 1280,
+          "alto": 720
+        }
+      ]
+    },
+    "hotel-secreto-la-fortuna": {
+      "nombre": "Hotel Secreto La Fortuna",
+      "sitio_web": "https://www.hotelsecretolafortuna.com",
+      "candidatas": []
+    },
+    "interbus-la-fortuna": {
+      "nombre": "Interbus",
+      "sitio_web": "https://www.interbusonline.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.interbusonline.com/wp-content/uploads/2025/02/banner-fondo-3-1.jpg",
+          "ancho": 1920,
+          "alto": 837
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.interbusonline.com/wp-content/uploads/2026/08/CTA-1-tamano-proporcion-pagina_Mesa-de-trabajo-1-copia-2048x1209.jpg",
+          "ancho": 2048,
+          "alto": 1209
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.interbusonline.com/wp-content/uploads/2026/08/CTA-1-tamano-proporcion-pagina_Mesa-de-trabajo-1-copia.jpg",
+          "ancho": 2306,
+          "alto": 1361
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.interbusonline.com/wp-content/uploads/2025/11/isotipo.png",
+          "ancho": 3062,
+          "alto": 353
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.interbusonline.com/wp-content/uploads/2026/06/BannerWeb.jpg",
+          "ancho": 1921,
+          "alto": 751
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "http://www.interbusonline.com/wp-content/uploads/2025/02/180-routes-interbus.jpg",
+          "ancho": 2000,
+          "alto": 657
+        }
+      ]
+    },
+    "kappa-sushi-fortuna": {
+      "nombre": "Kappa Sushi Fortuna",
+      "sitio_web": "https://kappasushifortuna.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://kappasushifortuna.com/wp-content/uploads/2025/01/Kappa-Sushi.jpg",
+          "ancho": 1200,
+          "alto": 630
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://kappasushifortuna.com/wp-content/uploads/2024/09/Sin-titulo-1000-x-667-px-1.png",
+          "ancho": 1000,
+          "alto": 667
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://kappasushifortuna.com/wp-content/uploads/2021/08/promo-popup.jpg",
+          "ancho": 800,
+          "alto": 582
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://kappasushifortuna.com/wp-content/uploads/2024/02/a-1.png",
+          "ancho": 1920,
+          "alto": 1282
+        }
+      ]
+    },
+    "kenko-bar-restaurante": {
+      "nombre": "Kenko Bar & Restaurant",
+      "sitio_web": "https://restaurantekenko.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://restaurantekenko.com/wp-content/uploads/2025/12/VOLCANO-ROLL.jpg",
+          "ancho": 600,
+          "alto": 400
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://restaurantekenko.com/wp-content/uploads/2025/12/TACOS.jpg",
+          "ancho": 600,
+          "alto": 400
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://restaurantekenko.com/wp-content/uploads/2025/12/Nikkey-Tuna.jpg",
+          "ancho": 600,
+          "alto": 400
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://restaurantekenko.com/wp-content/uploads/2025/12/churrasco-1536x341.jpg",
+          "ancho": 1536,
+          "alto": 341
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://restaurantekenko.com/wp-content/uploads/2025/12/churrasco.jpg",
+          "ancho": 1800,
+          "alto": 400
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://restaurantekenko.com/wp-content/uploads/2025/12/surtida-kenko.jpg",
+          "ancho": 600,
+          "alto": 400
+        }
+      ]
+    },
+    "la-choza-de-laurel": {
+      "nombre": "La Choza de Laurel",
+      "sitio_web": "https://lachozadelaurel.com",
+      "candidatas": []
+    },
+    "la-fortuna-lodge": {
+      "nombre": "La Fortuna Lodge",
+      "sitio_web": "https://www.lafortunalodge.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://static.wixstatic.com/media/05e3dc_e099f1ceb25b41908ca3d6ba88d7bcb8.jpg/v1/fill/w_1920,h_610,al_c,q_85,blur_2,enc_avif,quality_auto/05e3dc_e099f1ceb25b41908ca3d6ba88d7bcb8.jpg",
+          "ancho": 1920,
+          "alto": 610
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://static.wixstatic.com/media/b9dd89_bc88fd2fdc9e4c50b5b791acab7c1e1b~mv2.jpeg/v1/crop/x_0,y_194,w_1536,h_635/fill/w_653,h_270,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/4%20(1).jpeg",
+          "ancho": 653,
+          "alto": 270
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://static.wixstatic.com/media/b9dd89_7879238ef91849a0b95a26ef0fa869a3~mv2.jpg/v1/crop/x_0,y_535,w_7200,h_2977/fill/w_653,h_270,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Optimized-2016-11-21_11-44-19_111%20(1).jpg",
+          "ancho": 653,
+          "alto": 270
+        }
+      ]
+    },
+    "la-roca-canyoning": {
+      "nombre": "La Roca Canyoning",
+      "sitio_web": "https://larocacanyoning.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://larocacanyoning.com/wp-content/uploads/2026/03/LaRocaCanyoningHero.webp",
+          "ancho": 2560,
+          "alto": 1700
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://larocacanyoning.com/wp-content/uploads/2026/02/la-roca-tour-card-canyoning-arenal-001.webp",
+          "ancho": 768,
+          "alto": 512
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://larocacanyoning.com/wp-content/uploads/2026/02/la-roca-tour-card-canyoning-private-00.webp",
+          "ancho": 768,
+          "alto": 512
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://larocacanyoning.com/wp-content/uploads/2026/02/la-roca-tour-card-mistico-hanging-bridges-arenal-costa-rica-00.webp",
+          "ancho": 768,
+          "alto": 512
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://larocacanyoning.com/wp-content/uploads/2026/02/la-roca-tour-card-rafting-class-ii-arenal-00.webp",
+          "ancho": 768,
+          "alto": 512
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://larocacanyoning.com/wp-content/uploads/2026/03/la-roca-tour-card-canyoning-atv-combo-arenal-01.webp",
+          "ancho": 768,
+          "alto": 512
+        }
+      ]
+    },
+    "maria-bonita-steak-house": {
+      "nombre": "Maria Bonita Steak House",
+      "sitio_web": "https://www.mariabonitasteakhouse.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.mariabonitasteakhouse.com/_astro/PortadaTierragastro.9e0t72Gq_ZEjKCG.webp",
+          "ancho": 1920,
+          "alto": 850
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.mariabonitasteakhouse.com/_astro/Mar%C3%ADaBonita.u0HBWX9H_bNlYn.webp",
+          "ancho": 1533,
+          "alto": 1022
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.mariabonitasteakhouse.com/_astro/bar.XNCqXZSg_Z60UX.webp",
+          "ancho": 6720,
+          "alto": 4480
+        },
+        {
+          "archivo": "04-ojo.jpg",
+          "origen": "https://www.mariabonitasteakhouse.com/_astro/personal.Cdf4W229_Z3pEUd.webp",
+          "ancho": 1680,
+          "alto": 1120
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.mariabonitasteakhouse.com/_astro/vinos.CIaWujBK_Z14lyuX.webp",
+          "ancho": 1515,
+          "alto": 1010
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.mariabonitasteakhouse.com/_astro/ColitasTermidor.Bumre7pX_A0Mo3.webp",
+          "ancho": 1149,
+          "alto": 744
+        }
+      ]
+    },
+    "mirador-el-silencio": {
+      "nombre": "Mirador El Silencio",
+      "sitio_web": "https://miradorelsilencio.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://miradorelsilencio.com/wp-content/uploads/2024/03/mirador-el-silencio-arenal-volcano-tour-costa-rica-hero.jpeg",
+          "ancho": 1920,
+          "alto": 1078
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://miradorelsilencio.com/wp-content/uploads/2024/03/mirador-el-silencio-arenal-volcano-tour-costa-rica-hike.jpeg",
+          "ancho": 669,
+          "alto": 446
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://miradorelsilencio.com/wp-content/uploads/2024/03/mirador-el-silencio-arenal-volcano-tour-costa-rica-rocks.jpeg",
+          "ancho": 669,
+          "alto": 446
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://miradorelsilencio.com/wp-content/uploads/2024/03/mirador-el-silencio-arenal-volcano-tour-costa-rica-pizote.jpeg",
+          "ancho": 680,
+          "alto": 510
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://miradorelsilencio.com/wp-content/uploads/2024/03/mirador-el-silencio-arenal-volcano-tour-costa-rica-lagoon.jpeg",
+          "ancho": 680,
+          "alto": 510
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://miradorelsilencio.com/wp-content/uploads/2024/03/mirador-el-silencio-arenal-volcano-tour-costa-rica-family.png",
+          "ancho": 1000,
+          "alto": 568
+        }
+      ]
+    },
+    "mistico-arenal-hanging-bridges-park": {
+      "error": "http 403"
+    },
+    "nayara-springs": {
+      "nombre": "Nayara Springs",
+      "sitio_web": "https://nayarasprings.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://nayarasprings.com/wp-content/uploads/2026/03/Rooms-Springs-Villa-15.jpg",
+          "ancho": 1600,
+          "alto": 1183
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://nayarasprings.com/wp-content/uploads/2021/07/nayara-volcano.jpg",
+          "ancho": 1920,
+          "alto": 969
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://nayarasprings.com/wp-content/themes/nayara/img/experience/bird/img1.png",
+          "ancho": 807,
+          "alto": 647
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://nayarasprings.com/wp-content/themes/nayara/img/experience/bird/img2.png",
+          "ancho": 807,
+          "alto": 647
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://nayarasprings.com/wp-content/themes/nayara/img/experience/bird/img3.png",
+          "ancho": 807,
+          "alto": 647
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://nayarasprings.com/wp-content/uploads/2020/08/Follow-me-to-the-garden-1536x768.jpg",
+          "ancho": 1536,
+          "alto": 768
+        }
+      ]
+    },
+    "nayara-tented-camp": {
+      "nombre": "Nayara Tented Camp",
+      "sitio_web": "https://nayaratentedcamp.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://nayaratentedcamp.com/wp-content/uploads/2020/08/TentedCamp-Inicio-1.jpg",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "archivo": "02-ojo.jpg",
+          "origen": "https://nayaratentedcamp.com/wp-content/uploads/2024/09/DJI_0934-Nayara-Tented-Camp-with-Liv-Law-by-Brice-Ferre-Studio-Vancouver-Portrait-Adventure-and-Athlete-Photographer2.jpg",
+          "ancho": 1920,
+          "alto": 913
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://nayaratentedcamp.com/wp-content/themes/nayara/img/experience/bird/img1.png",
+          "ancho": 1166,
+          "alto": 657
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://nayaratentedcamp.com/wp-content/uploads/2022/08/New-Area-Brice-Ferre-14-1536x864.jpg",
+          "ancho": 1536,
+          "alto": 864
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://nayaratentedcamp.com/wp-content/uploads/2022/08/New-Area-Brice-Ferre-14.jpg",
+          "ancho": 1920,
+          "alto": 1080
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://nayaratentedcamp.com/wp-content/themes/nayara/img/calltoaction/home/home1.jpg",
+          "ancho": 1920,
+          "alto": 780
+        }
+      ]
+    },
+    "noahs-forest": {
+      "error": "http 403"
+    },
+    "north-fields-cafe": {
+      "nombre": "North Fields Cafe",
+      "sitio_web": "https://www.northfieldscr.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.northfieldscr.com/wp-content/uploads/2025/11/northfields-la-fortuna.jpg",
+          "ancho": 1440,
+          "alto": 960
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.northfieldscr.com/wp-content/uploads/2025/11/northfields.webp",
+          "ancho": 1859,
+          "alto": 1239
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.northfieldscr.com/wp-content/uploads/2026/01/Costa-Rica-NorthFields-Tour-Coffee.webp",
+          "ancho": 1339,
+          "alto": 892
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.northfieldscr.com/wp-content/uploads/2025/10/image-63.webp",
+          "ancho": 1920,
+          "alto": 1260
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.northfieldscr.com/wp-content/uploads/2025/06/north-fields-coffee-la-fortuna-1024x682.webp",
+          "ancho": 1024,
+          "alto": 682
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.northfieldscr.com/wp-content/uploads/2025/06/north-fields-chocolate-la-fortuna-1024x682.webp",
+          "ancho": 1024,
+          "alto": 682
+        }
+      ]
+    },
+    "paradise-hot-springs": {
+      "nombre": "Paradise Hot Springs",
+      "sitio_web": "https://paradisehotsprings.net",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://paradisehotsprings.net/wp-content/uploads/2025/02/pools_above_sc.jpg",
+          "ancho": 1600,
+          "alto": 1198
+        }
+      ]
+    },
+    "parque-eco-natura": {
+      "nombre": "Parque Eco Natura Costa Rica",
+      "sitio_web": "https://naturaecopark.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://naturaecopark.com/wp-content/uploads/sites/2417/2019/03/Agalychnis-callidryas9.jpg?w=700&h=700&zoom=2",
+          "ancho": 1400,
+          "alto": 933
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://naturaecopark.com/wp-content/uploads/sites/2417/2019/03/Agalychnis-callidryas9.jpg?w=1600&zoom=2",
+          "ancho": 3200,
+          "alto": 2133
+        }
+      ]
+    },
+    "parque-nacional-volcan-arenal": {
+      "error": "fetch failed"
+    },
+    "proyecto-asis": {
+      "nombre": "Proyecto Asis",
+      "sitio_web": "https://institutoasis.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://institutoasis.com/wp-content/uploads/2026/02/Frase_Inicio.png",
+          "ancho": 1370,
+          "alto": 770
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://i0.wp.com/institutoasis.com/wp-content/uploads/2026/02/Frase_Inicio.png?w=1100&#038;ssl=1",
+          "ancho": 1100,
+          "alto": 618
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://i0.wp.com/institutoasis.com/wp-content/uploads/2025/10/Wildlife-Volunteer-in-Costa-Rica-2-scaled.webp?w=1100&#038;ssl=1",
+          "ancho": 1100,
+          "alto": 733
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://i0.wp.com/institutoasis.com/wp-content/uploads/2025/10/Sloth-Sanctuary-Costa-Rica-19.webp?w=1100&#038;ssl=1",
+          "ancho": 1024,
+          "alto": 678
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://i0.wp.com/institutoasis.com/wp-content/uploads/2025/10/Full-Day-Tour-Costa-Rica-scaled.webp?w=1100&#038;ssl=1",
+          "ancho": 1100,
+          "alto": 733
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://i0.wp.com/institutoasis.com/wp-content/uploads/2025/10/Homestay-Costa-Rica.webp?w=1100&#038;ssl=1",
+          "ancho": 1100,
+          "alto": 776
+        }
+      ]
+    },
+    "pure-trek-canyoning": {
+      "nombre": "Pure Trek Canyoning",
+      "sitio_web": "https://puretrek.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://puretrek.com/wp-content/uploads/2020/06/RG5A3558-min-scaled-e1591643689907.jpg",
+          "ancho": 2560,
+          "alto": 960
+        }
+      ]
+    },
+    "restaurante-fortuneno": {
+      "nombre": "Restaurante Fortuneno",
+      "sitio_web": "https://xn--fortuneo-j3a.com",
+      "candidatas": []
+    },
+    "restaurante-tiquicia": {
+      "nombre": "Restaurante Tiquicia La Fortuna",
+      "sitio_web": "https://www.tiquiciarestaurant.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_9000,w_1200,f_auto,q_auto/9845286/846417_949308.png",
+          "ancho": 885,
+          "alto": 595
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_1500,w_2000,f_auto,q_auto/9845286/870834_422400.jpeg",
+          "ancho": 2000,
+          "alto": 1333
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_1500,w_2000,f_auto,q_auto/9845286/474366_483826.jpeg",
+          "ancho": 2000,
+          "alto": 1334
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_1500,w_2000,f_auto,q_auto/9845286/349004_766762.png",
+          "ancho": 1956,
+          "alto": 1205
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_1500,w_2000,f_auto,q_auto/9845286/134710_608117.jpg",
+          "ancho": 2000,
+          "alto": 1333
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_1500,w_2000,f_auto,q_auto/9845286/926945_716368.png",
+          "ancho": 1000,
+          "alto": 646
+        }
+      ]
+    },
+    "sangregado-lodge": {
+      "nombre": "Sangregado Lodge",
+      "sitio_web": "https://www.sangregadolodge.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://static.wixstatic.com/media/6c4307_34bb4bf9c3ba43679599dacf42461277~mv2.jpeg/v1/fill/w_1280,h_960,al_c/6c4307_34bb4bf9c3ba43679599dacf42461277~mv2.jpeg",
+          "ancho": 1280,
+          "alto": 960
+        }
+      ]
+    },
+    "selva-negra-bar": {
+      "nombre": "Selva Negra Cocktail & Wine Bar",
+      "sitio_web": "https://selvanegra.bar",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://selvanegra.bar/_astro/SNBlanco.Ctd3An90_2rhHN1.webp",
+          "ancho": 1500,
+          "alto": 401
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://selvanegra.bar/_astro/Imagen-Portada.iWqcZEhM_222WfN.webp",
+          "ancho": 2400,
+          "alto": 1157
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://cdn.arenalcloud.com/selvanegra/espacio_9a6b5ab8.webp",
+          "ancho": 8192,
+          "alto": 5464
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://cdn.arenalcloud.com/selvanegra/guardian-Selva_53cd3fba.webp",
+          "ancho": 6430,
+          "alto": 5836
+        }
+      ]
+    },
+    "sky-adventures-arenal-park": {
+      "nombre": "Sky Adventures Arenal Park",
+      "sitio_web": "https://skyadventures.travel",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://skyadventures.travel/wp-content/uploads/meta-sky.jpg",
+          "ancho": 1600,
+          "alto": 840
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://skyadventures.travel/wp-content/uploads/Captura-de-pantalla-2025-05-14-a-las-12.21.26%E2%80%AFp.-m-768x525.png",
+          "ancho": 768,
+          "alto": 525
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://skyadventures.travel/wp-content/uploads/Sky-Adventures-2-46-768x512.jpg",
+          "ancho": 768,
+          "alto": 512
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://skyadventures.travel/wp-content/uploads/sectionbg-zipline01.jpg",
+          "ancho": 1200,
+          "alto": 630
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://skyadventures.travel/wp-content/uploads/Slider1-v12.jpg",
+          "ancho": 2560,
+          "alto": 1310
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://skyadventures.travel/wp-content/uploads/Slider2-v10.jpg",
+          "ancho": 2558,
+          "alto": 1313
+        }
+      ]
+    },
+    "tabacon-thermal-resort-spa": {
+      "nombre": "Tabacón Thermal Resort & Spa",
+      "sitio_web": "https://www.tabacon.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-5xmccmodiov3cbayqgovgo6q5/3-hot-springs-paralax.jpg?width=1920",
+          "ancho": 1920,
+          "alto": 1025
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-7rjtohxkcltuetlcfzvokb4ib/two-bedroom-arenal-suite-header_standard.jpg?crop=240%2C0%2C1440%2C1080",
+          "ancho": 1440,
+          "alto": 1080
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-819jsadjm84k7yjjd9vjdaqvu/8-honeymoon-suite-with-plunge-pool_standard.jpg?crop=0%2C1%2C1138%2C854",
+          "ancho": 1138,
+          "alto": 854
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-dx0hyw5vcg2hlr2leqet025y6/tabacoi-n-suite-header_standard.jpg?crop=200%2C0%2C1200%2C900",
+          "ancho": 1200,
+          "alto": 900
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-avxs35uiorcntekh22w7khsey/honeymoon-suite-header_standard.jpg?crop=240%2C0%2C1440%2C1080",
+          "ancho": 1440,
+          "alto": 1080
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://image-tc.galaxy.tf/wijpeg-djboqnitn4rhtjp1yey5c7gwv/1-rainforest-suite-1_standard.jpg?crop=143%2C0%2C855%2C641",
+          "ancho": 855,
+          "alto": 641
+        }
+      ]
+    },
+    "termales-los-laureles": {
+      "error": "http 403"
+    },
+    "the-springs-resort-spa": {
+      "nombre": "The Springs Resort & Spa",
+      "sitio_web": "https://www.thespringscostarica.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.thespringscostarica.com/wp-content/uploads/2021/10/50-Perdido-Springs-HR-JPEG-scaled.jpg",
+          "ancho": 2560,
+          "alto": 1920
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.thespringscostarica.com/wp-content/uploads/2025/10/400x200.png",
+          "ancho": 1667,
+          "alto": 834
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.thespringscostarica.com/wp-content/uploads/2020/05/virtuoso.png",
+          "ancho": 952,
+          "alto": 560
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.thespringscostarica.com/wp-content/uploads/2020/05/1568818135_5d8243d79b438-thumb.jpg",
+          "ancho": 1920,
+          "alto": 1282
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.thespringscostarica.com/wp-content/uploads/2020/05/1576875876_5dfd37649dc57-thumb.jpg",
+          "ancho": 1920,
+          "alto": 1280
+        },
+        {
+          "archivo": "06-ojo.jpg",
+          "origen": "https://www.thespringscostarica.com/wp-content/uploads/2015/01/wedding_featured.jpg",
+          "ancho": 1000,
+          "alto": 262
+        }
+      ]
+    },
+    "tifakara-lodge": {
+      "error": "http 403"
+    },
+    "wave-expeditions": {
+      "nombre": "Wave Expeditions",
+      "sitio_web": "https://www.waveexpeditions.com",
+      "candidatas": [
+        {
+          "archivo": "01.jpg",
+          "origen": "https://www.waveexpeditions.com/wp-content/uploads/2025/04/Fun-Filled-Rafting-with-WAVE-%E2%80%93-Costa-Rica-Tours.webp",
+          "ancho": 1764,
+          "alto": 852
+        },
+        {
+          "archivo": "02.jpg",
+          "origen": "https://www.waveexpeditions.com/wp-content/uploads/2026/05/Balsa-Promo-Banner-Wave-Rafting2.webp",
+          "ancho": 1500,
+          "alto": 724
+        },
+        {
+          "archivo": "03.jpg",
+          "origen": "https://www.waveexpeditions.com/wp-content/uploads/2026/05/Promo-of-White-Water-Rafting-Adventure-with-WAVE-%E2%80%93-Class-III-IV2.webp",
+          "ancho": 1500,
+          "alto": 724
+        },
+        {
+          "archivo": "04.jpg",
+          "origen": "https://www.waveexpeditions.com/wp-content/uploads/2026/05/Wave-expeditions-promos-slide-hero-banner2.webp",
+          "ancho": 1500,
+          "alto": 724
+        },
+        {
+          "archivo": "05.jpg",
+          "origen": "https://www.waveexpeditions.com/wp-content/uploads/2025/03/Rafting-Class-IV-III-Sarapiqui-River-.webp",
+          "ancho": 1696,
+          "alto": 679
+        },
+        {
+          "archivo": "06.jpg",
+          "origen": "https://www.waveexpeditions.com/wp-content/uploads/2025/03/Rafting-Class-III-II-Balsa-River.webp",
+          "ancho": 1696,
+          "alto": 679
+        }
+      ]
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, SIMBOLO_PRECIO } from '@/lib/destino';
 import { nota, resenasDe } from '@/lib/resenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -9,6 +9,7 @@ import { Pie } from '@/componentes/Pie';
 import { IconoVerificado } from '@/componentes/Marca';
 import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
+import { GaleriaNegocio } from '@/componentes/GaleriaNegocio';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,13 +37,14 @@ export default async function Ficha({ params }: { params: Parametros }) {
   const negocio = await negocioPorBabosa(destino, babosa, idioma);
   if (!negocio) notFound();
 
-  const [categorias, externas, propias, secciones, horario, etiquetas] = await Promise.all([
+  const [categorias, externas, propias, secciones, horario, etiquetas, fotos] = await Promise.all([
     categoriasDe(destino, idioma),
     notasExternasDe(negocio.id),
     resenasDe(negocio.id),
     seccionesDe(negocio.id, idioma),
     horarioDe(negocio.id),
     etiquetasDe(negocio.id, idioma),
+    fotosDe(negocio.id, idioma),
   ]);
 
   // El nombre del día sale de Intl y no del diccionario: son 7 palabras por 5
@@ -116,6 +118,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
       <div className="caja">
         <div className="ficha-cuerpo">
           <div>
+            <GaleriaNegocio fotos={fotos} idioma={idioma} />
+
             {negocio.descripcion && (
               <>
                 <h2 style={{ fontSize: 24, marginBottom: 14 }}>{t('sobre', idioma)} {negocio.nombre}</h2>

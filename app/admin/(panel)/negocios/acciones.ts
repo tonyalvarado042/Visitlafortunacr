@@ -103,6 +103,119 @@ export async function traducirCampo(datos: FormData) {
   revalidatePath(`/admin/${entidad === 'negocio' ? 'negocios' : entidad === 'tour' ? 'tours' : 'guias'}/${entidadId}`);
 }
 
+/* ---- Fotos ---- */
+
+const BUCKET = 'negocios';
+const ANCHO_MAX = 1600;
+
+/**
+ * Sube una foto a Storage y la anota en dst_negocio_foto.
+ *
+ * Va con la sesión del usuario, no con la clave de servicio: las políticas de
+ * la migración 22 miran el primer segmento de la ruta —la babosa del destino—
+ * y con eso deciden si esta persona puede escribir ahí. Por eso la ruta es
+ * <destino>/<negocio>/<archivo> y no al revés.
+ *
+ * Se redimensiona y se pasa a webp antes de subir: el bucket corta en 10 MB y
+ * una foto de teléfono los pasa sin esfuerzo.
+ */
+export async function subirFoto(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const archivo = datos.get('archivo');
+  if (!esUuid(id) || !(archivo instanceof File) || !archivo.size) return;
+
+  const { data: negocio } = await db.from('dst_negocio')
+    .select('id, babosa, nombre').eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!negocio) return;
+
+  // Una foto que no es propia tiene que decir de quién es y bajo qué licencia:
+  // es lo que exige el check de la migración 22, y la razón por la que existe.
+  const credito = texto(datos, 'credito') || null;
+  const licencia = texto(datos, 'licencia') || null;
+  const fuente = texto(datos, 'fuente_url') || null;
+  if (fuente && (!credito || !licencia)) return;
+
+  let webp: Buffer;
+  try {
+    const sharp = (await import('sharp')).default;
+    webp = await sharp(Buffer.from(await archivo.arrayBuffer()))
+      .rotate()
+      .resize({ width: ANCHO_MAX, withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+  } catch (e) {
+    console.error('subirFoto: no se pudo procesar la imagen', e);
+    return;
+  }
+
+  const base = archivo.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60) || 'foto';
+  const ruta = `${destino.babosa}/${negocio.babosa}/${base}-${Date.now().toString(36)}.webp`;
+
+  const { error: eSubida } = await db.storage.from(BUCKET).upload(ruta, webp, { contentType: 'image/webp' });
+  if (eSubida) { console.error('subirFoto:', eSubida.message); return; }
+
+  const { data: publica } = db.storage.from(BUCKET).getPublicUrl(ruta);
+  const { count } = await db.from('dst_negocio_foto')
+    .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+
+  const { error } = await db.from('dst_negocio_foto').insert({
+    negocio_id: id,
+    url: publica.publicUrl,
+    orden: count ?? 0,
+    // La primera foto real que entra manda; las genéricas nunca son portada.
+    es_portada: !count,
+    es_generica: false,
+    credito, licencia, fuente_url: fuente,
+    texto_alternativo_es: texto(datos, 'texto_alternativo') || negocio.nombre,
+    texto_alternativo_en: texto(datos, 'texto_alternativo') || negocio.nombre,
+  });
+  if (error) console.error('subirFoto fila:', error.message);
+  refrescar(id);
+}
+
+/** Marca una foto como la portada. El índice único parcial deja solo una. */
+export async function marcarPortada(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(id) || !esUuid(fotoId)) return;
+
+  const { data: negocio } = await db.from('dst_negocio')
+    .select('id').eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!negocio) return;
+
+  // Primero se apaga la anterior: uq_dst_foto_portada no deja dos a la vez.
+  await db.from('dst_negocio_foto').update({ es_portada: false }).eq('negocio_id', id).eq('es_portada', true);
+  const { error } = await db.from('dst_negocio_foto').update({ es_portada: true }).eq('id', fotoId).eq('negocio_id', id);
+  if (error) console.error('marcarPortada:', error.message);
+  refrescar(id);
+}
+
+/** Borra la fila y el archivo. Si queda huérfano el archivo, el bucket engorda solo. */
+export async function borrarFoto(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(id) || !esUuid(fotoId)) return;
+
+  const { data: negocio } = await db.from('dst_negocio')
+    .select('id').eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!negocio) return;
+
+  const { data: foto } = await db.from('dst_negocio_foto')
+    .select('id, url').eq('id', fotoId).eq('negocio_id', id).maybeSingle();
+  if (!foto) return;
+
+  const marca = `/object/public/${BUCKET}/`;
+  const corte = foto.url.indexOf(marca);
+  if (corte !== -1) await db.storage.from(BUCKET).remove([foto.url.slice(corte + marca.length)]);
+
+  const { error } = await db.from('dst_negocio_foto').delete().eq('id', fotoId).eq('negocio_id', id);
+  if (error) console.error('borrarFoto:', error.message);
+  refrescar(id);
+}
+
 /* ---- Opiniones de afuera ---- */
 
 /**

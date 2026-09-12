@@ -4,7 +4,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, traducirCampo, traerOpiniones } from '../acciones';
+import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto } from '../acciones';
 import { hayClaveDePlaces } from '@/lib/externas';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(count)').eq('negocio_id', id),
-    db.from('dst_negocio_foto').select('id, url, es_portada, orden').eq('negocio_id', id).order('orden'),
+    db.from('dst_negocio_foto').select('id, url, es_portada, orden, credito, licencia, fuente_url, es_generica').eq('negocio_id', id).order('es_generica').order('orden'),
     db.from('dst_solicitud').select('id, tipo, etapa, creado_en').eq('negocio_id', id).order('creado_en', { ascending: false }).limit(10),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
@@ -129,7 +129,61 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
 
             <div className="tarjeta">
               <h2>Fotos</h2>
-              {!fotos?.length ? <Vacio texto="Sin fotos." /> : <div className="acciones-fila">{fotos.map((f) => <a key={f.id} href={f.url} target="_blank" rel="noreferrer"><img src={f.url} alt="" style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 6, border: f.es_portada ? '2px solid var(--naranja)' : '1px solid #ddd' }} /></a>)}</div>}
+              {!fotos?.length ? <Vacio texto="Sin fotos." /> : (
+                <div className="rejilla-fotos">
+                  {fotos.map((f) => (
+                    <div key={f.id} className="foto-admin">
+                      <a href={f.url} target="_blank" rel="noreferrer">
+                        <img src={f.url} alt="" className={f.es_portada ? 'es-portada' : ''} />
+                      </a>
+                      <div className="foto-pie">
+                        {f.es_portada && <span className="marca-portada">Portada</span>}
+                        {f.es_generica && <span className="marca-generica">Genérica</span>}
+                      </div>
+                      {(f.credito || f.licencia) && (
+                        <p className="gris foto-credito">
+                          {f.credito}{f.licencia ? ` · ${f.licencia}` : ''}
+                        </p>
+                      )}
+                      <div className="acciones-fila">
+                        {!f.es_portada && !f.es_generica && (
+                          <form action={marcarPortada}>
+                            <input type="hidden" name="id" value={id} />
+                            <input type="hidden" name="foto_id" value={f.id} />
+                            <BotonAccion clase="boton tenue">Portada</BotonAccion>
+                          </form>
+                        )}
+                        <form action={borrarFoto}>
+                          <input type="hidden" name="id" value={id} />
+                          <input type="hidden" name="foto_id" value={f.id} />
+                          <BotonAccion clase="boton tenue" confirmar="Se borra la foto y su archivo. No se puede deshacer.">Borrar</BotonAccion>
+                        </form>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* El crédito y la licencia no son opcionales cuando la foto no
+                  es propia: sin los dos, el check de la migración 22 rechaza
+                  la fila. Se piden aquí y no después, que es cuando ya nadie
+                  se acuerda de dónde salió la imagen. */}
+              <form action={subirFoto} className="subir-foto">
+                <input type="hidden" name="id" value={id} />
+                <div className="campo">
+                  <label>Agregar una foto</label>
+                  <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" required />
+                </div>
+                <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={n.nombre} /></div>
+                <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra" /></div>
+                <div className="campo"><label>Licencia</label><input name="licencia" placeholder="CC BY 4.0, cedida por el negocio…" /></div>
+                <div className="campo"><label>Enlace de origen</label><input name="fuente_url" placeholder="https://…" /></div>
+                <p className="gris" style={{ fontSize: 12, margin: '6px 0 10px' }}>
+                  Si ponés enlace de origen, el autor y la licencia son obligatorios. Se
+                  redimensiona a 1600 px y se convierte a webp al subir.
+                </p>
+                <BotonAccion>Subir foto</BotonAccion>
+              </form>
             </div>
 
             {(leads?.length ?? 0) > 0 && (

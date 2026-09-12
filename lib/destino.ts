@@ -109,6 +109,11 @@ export type Negocio = {
   atributos: Record<string, unknown>;
   total_resenas: number;
   promedio_calificacion: number | null;
+  /* La portada, desde la migración 22. `generica` en true significa que la
+     foto ilustra la categoría y no retrata a este negocio: la tarjeta la usa
+     de fondo y nunca la presenta como una imagen del lugar. */
+  foto_portada_url: string | null;
+  foto_portada_generica: boolean | null;
 };
 
 /** Los negocios publicados del destino, ya resueltos al idioma pedido. */
@@ -160,6 +165,31 @@ export async function seccionesDe(negocioId: string, idioma: Idioma): Promise<Se
   });
   if (error) return [];
   return (data ?? []) as Seccion[];
+}
+
+export type FotoNegocio = {
+  url: string;
+  texto_alternativo: string | null;
+  credito: string | null;
+  licencia: string | null;
+  fuente_url: string | null;
+  es_generica: boolean;
+  es_portada: boolean;
+};
+
+/**
+ * La galería de una ficha: primero las fotos reales del negocio y al final las
+ * genéricas de categoría. Devuelve crédito, licencia y enlace de origen porque
+ * CC BY y CC BY-SA exigen mostrarlos junto a la imagen, no en una página
+ * aparte.
+ */
+export async function fotosDe(negocioId: string, idioma: Idioma): Promise<FotoNegocio[]> {
+  const { data, error } = await supabase.rpc('fotos_de_negocio', {
+    p_negocio_id: negocioId,
+    p_idioma: idioma,
+  });
+  if (error) return [];
+  return (data ?? []) as FotoNegocio[];
 }
 
 export type Horario = { dia_semana: number; abre_a: string | null; cierra_a: string | null; esta_cerrado: boolean };

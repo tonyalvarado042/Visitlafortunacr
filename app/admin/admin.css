@@ -143,3 +143,16 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 .linea-tiempo .evento .cuando { color: #8B8B87; font-size: 12px; }
 .md h2, .md h3 { margin: 18px 0 6px; }
 .md p { margin: 0 0 10px; }
+
+/* ---- Fotos de una ficha ---- */
+.rejilla-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.foto-admin img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; display: block; }
+.foto-admin img.es-portada { border: 2px solid var(--naranja); }
+.foto-pie { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.marca-portada, .marca-generica { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 3px; padding: 2px 7px; }
+.marca-portada { background: var(--naranja); color: #fff; }
+/* Genérica quiere decir "ilustra la categoría, no es este lugar". Se marca en
+   gris y no en color: es un aviso, no un logro. */
+.marca-generica { background: #EEE; color: #666; }
+.foto-credito { font-size: 11px; margin: 5px 0 7px; line-height: 1.4; }
+.subir-foto { border-top: 1px solid #E5E5E5; padding-top: 16px; }

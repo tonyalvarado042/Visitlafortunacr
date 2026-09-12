@@ -1,0 +1,52 @@
+{
+  "_lee_esto": "Las candidatas aprobadas a ojo, hoja por hoja, con el criterio 'sujeto': se descartan retratos, grupos y gente posando; se dejan pasar figuras pequenas, de espaldas o al fondo. Tambien se descartan logos, textos superpuestos, capturas de pantalla, collages y fotos que no son del lugar (habia una de Rio de Janeiro y un tractor en un campo de colza europeo). El primer archivo de cada lista es la portada. Revisado el 12 de septiembre de 2026.",
+  "_criterio": "sujeto",
+  "elegidas": {
+    "adobe-rent-a-car-la-fortuna": ["03.jpg"],
+    "arenal-1968": ["01.jpg"],
+    "arenal-backpackers-resort": ["02.jpg", "06.jpg", "03.jpg", "05.jpg"],
+    "arenal-kioro-suites-spa": ["03.jpg", "05.jpg", "01.jpg", "02.jpg", "04.jpg"],
+    "arenal-manoa": ["02.jpg", "03.jpg", "01.jpg"],
+    "arenal-oasis": ["06.jpg", "01.jpg"],
+    "arenal-observatory-lodge": ["01.jpg", "04.jpg", "05.jpg"],
+    "baldi-hot-springs": ["03.jpg", "04.jpg", "05.jpg", "01-ojo.jpg"],
+    "casa-del-rio": ["01.jpg"],
+    "catarata-rio-fortuna": ["01.jpg"],
+    "don-olivo-chocolate-tour": ["02.jpg", "05.jpg", "03.jpg"],
+    "don-rufino": ["01.jpg"],
+    "ecocentro-danaus": ["03.jpg", "01.jpg", "02.jpg"],
+    "interbus-la-fortuna": ["01.jpg", "05.jpg"],
+    "kappa-sushi-fortuna": ["01.jpg", "04.jpg"],
+    "kenko-bar-restaurante": ["01.jpg", "03.jpg", "06.jpg", "02.jpg", "04.jpg"],
+    "la-fortuna-lodge": ["02.jpg"],
+    "magic-mountain": ["02.jpg", "04.jpg"],
+    "maria-bonita-steak-house": ["01.jpg", "06.jpg", "05.jpg", "03.jpg", "02.jpg"],
+    "mirador-el-silencio": ["01.jpg", "04.jpg", "05.jpg"],
+    "montana-de-fuego": ["06.jpg", "05.jpg", "01.jpg", "02.jpg", "04.jpg"],
+    "nayara-springs": ["01.jpg", "02.jpg", "04.jpg"],
+    "nayara-tented-camp": ["06.jpg", "04.jpg", "03.jpg", "01.jpg"],
+    "north-fields-cafe": ["06.jpg", "03.jpg", "05.jpg", "02.jpg"],
+    "paradise-hot-springs": ["01.jpg"],
+    "parque-eco-natura": ["01.jpg", "02.jpg"],
+    "proyecto-asis": ["04.jpg"],
+    "restaurante-tiquicia": ["03.jpg", "02.jpg", "05.jpg", "04.jpg", "06.jpg"],
+    "roca-negra-del-arenal": ["01.jpg"],
+    "sangregado-lodge": ["01.jpg"],
+    "selva-negra-bar": ["03.jpg", "02.jpg", "04.jpg"],
+    "sky-adventures-arenal-park": ["04.jpg"],
+    "tabacon-thermal-resort-spa": ["01.jpg", "05.jpg", "03.jpg", "02.jpg", "04.jpg", "06.jpg"],
+    "the-springs-resort-spa": ["01.jpg", "05.jpg"]
+  },
+  "_sin_ninguna": {
+    "_por_que": "Son operadores de aventura: su producto ES gente haciendo algo, asi que todas sus fotos tienen personas como sujeto. Con el criterio 'sujeto' no sobrevive ninguna. Se quedan con la imagen de categoria.",
+    "negocios": [
+      "arenal-jungle-tours",
+      "desafio-adventure-company",
+      "ecoglide-arenal-park",
+      "ecotermales-fortuna",
+      "la-roca-canyoning",
+      "pure-trek-canyoning",
+      "wave-expeditions"
+    ]
+  }
+}

@@ -25,9 +25,19 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
     <article className="tarjeta">
       <Link href={`/${idioma}/${negocio.categoria_babosa}/${negocio.babosa}`}>
         <div className="imagen" style={{ background: `linear-gradient(150deg, ${color}1F, #0B0B0B 72%)` }}>
+          {negocio.foto_portada_url && (
+            <img className="foto" src={negocio.foto_portada_url} alt=""
+                 loading="lazy" decoding="async" />
+          )}
+          {/* Un tinte con el color de la sección, para que la retícula tenga
+              ritmo. Suave a propósito: la foto tiene que verse. */}
+          {negocio.foto_portada_url && (
+            <span className={`velo-foto${negocio.foto_portada_generica ? ' generica' : ''}`}
+                  style={{ background: `linear-gradient(160deg, ${color}, #0B0B0B 85%)` }} />
+          )}
           {negocio.logo_url
-            ? <img src={negocio.logo_url} alt="" style={{ maxHeight: 110, width: 'auto' }} />
-            : <span className="inicial" style={{ color }}>{negocio.nombre.charAt(0)}</span>}
+            ? <img src={negocio.logo_url} alt="" style={{ maxHeight: 110, width: 'auto', position: 'relative' }} />
+            : !negocio.foto_portada_url && <span className="inicial" style={{ color }}>{negocio.nombre.charAt(0)}</span>}
         </div>
       </Link>
 

@@ -113,6 +113,11 @@ export const T: Record<string, Diccionario> = {
   datos_de_google:   { es: 'Calificaciones y reseñas de Google, mostradas con enlace a su fuente.', en: 'Ratings and reviews from Google, shown with a link to the source.', pt: 'Notas e avaliações do Google, exibidas com link para a fonte.', fr: 'Notes et avis de Google, affichés avec un lien vers la source.', de: 'Bewertungen von Google, mit Link zur Quelle.' },
   sin_externas:      { es: 'Todavía no traemos opiniones de otras plataformas para este lugar.', en: 'We have not pulled in other platforms for this place yet.', pt: 'Ainda não trouxemos opiniões de outras plataformas para este lugar.', fr: 'Nous n’avons pas encore repris les avis d’autres plateformes pour ce lieu.', de: 'Für diesen Ort haben wir noch keine Bewertungen anderer Plattformen.' },
   lugares:           { es: 'lugares', en: 'places', pt: 'lugares', fr: 'lieux', de: 'Orte' },
+  fotos:             { es: 'Fotos', en: 'Photos', pt: 'Fotos', fr: 'Photos', de: 'Fotos' },
+  /* Va en el pie de la foto, junto al crédito, no en un aviso aparte. Corto a
+     propósito: dice lo que hay que decir sin sonar a advertencia legal. */
+  foto_generica:     { es: 'Imagen ilustrativa', en: 'Illustrative image', pt: 'Imagem ilustrativa', fr: 'Image d’illustration', de: 'Illustrationsbild' },
+  foto_de:           { es: 'Foto de', en: 'Photo by', pt: 'Foto de', fr: 'Photo de', de: 'Foto von' },
   volver:            { es: 'Volver', en: 'Back', pt: 'Voltar', fr: 'Retour', de: 'Zurück' },
   inicio:            { es: 'Inicio', en: 'Home', pt: 'Início', fr: 'Accueil', de: 'Start' },
   cuando_llegas:     { es: '¿Cuándo llegás?', en: 'When do you arrive?', pt: 'Quando chega?', fr: 'Quand arrivez-vous ?', de: 'Wann kommen Sie an?' },
