@@ -12,8 +12,10 @@ import { Planificador } from '@/componentes/Planificador';
 
 export const dynamic = 'force-dynamic';
 
-/* Cada categoría del mosaico lleva su propio ambiente. No son fotos: son
-   gradientes, que es lo que hará el sitio hasta que haya imágenes propias. */
+/* El ambiente de cada categoría del mosaico. Desde que las fichas tienen foto
+   (punto 9 del MVP) esto ya no es el fondo, sino el TINTE que va encima: le da
+   a la tarjeta el color de su categoría sin tapar la imagen. Sigue haciendo de
+   fondo entero cuando la categoría no tiene ni un negocio con foto. */
 const AMBIENTE: Record<string, string> = {
   'volcan':            'linear-gradient(160deg,#1A0E04 0%,#0B0B0B 62%), radial-gradient(circle at 72% 22%, rgba(255,106,0,.40) 0%, transparent 55%)',
   'parques-nacionales':'linear-gradient(160deg,#1A0E04 0%,#0B0B0B 62%), radial-gradient(circle at 72% 22%, rgba(255,106,0,.40) 0%, transparent 55%)',
@@ -71,12 +73,23 @@ export default async function Portada({ params, searchParams }: {
 
   const conContenido = categorias.filter((c) => c.total > 0);
 
-  /* Para cada categoría del mosaico, su negocio mejor valorado presta el
-     resumen: así la portada dice algo concreto en vez de un texto de relleno. */
+  /* Para cada categoría del mosaico, un negocio suyo le presta el resumen Y la
+     foto: así la portada dice algo concreto y enseña un lugar real, en vez de
+     un texto de relleno sobre un degradado.
+
+     Primero pesa TENER foto propia y después la calificación, en ese orden y no
+     al revés: una categoría cuyo mejor valorado no tiene imagen se vería peor
+     que sus vecinas por premiar una nota que hoy casi nadie tiene. Que el texto
+     y la foto salgan del mismo negocio es a propósito — la tarjeta se lee como
+     un lugar, no como un collage. */
+  const puntos = (n: Negocio): number =>
+    (n.foto_portada_url && !n.foto_portada_generica ? 200 : n.foto_portada_url ? 100 : 0)
+    + (n.promedio_calificacion ?? 0);
+
   const mejorDe = (c: Categoria): Negocio | undefined =>
     negocios
       .filter((n) => n.categoria_id === c.categoria_id)
-      .sort((a, b) => (b.promedio_calificacion ?? 0) - (a.promedio_calificacion ?? 0))[0];
+      .sort((a, b) => puntos(b) - puntos(a))[0];
 
   const mosaico = conContenido
     .filter((c) => ['que_hacer', 'tours'].includes(c.seccion))
@@ -127,7 +140,17 @@ export default async function Portada({ params, searchParams }: {
               return (
                 <Link key={c.categoria_id} href={`/${idioma}/${c.babosa}`}
                       className={`ficha-grande revela ${FORMA[i] ?? 'g-4'}`}>
-                  <div className="fondo" style={{ background: AMBIENTE[c.babosa] ?? AMBIENTE_NEUTRO }} />
+                  {mejor?.foto_portada_url && (
+                    <img className="foto" src={mejor.foto_portada_url} alt=""
+                         loading="lazy" decoding="async" />
+                  )}
+                  {/* Con foto el ambiente es un tinte suave encima; sin foto es
+                      el fondo entero, como era antes de que hubiera imágenes. */}
+                  <div className={`fondo${mejor?.foto_portada_url ? ' tinte' : ''}`}
+                       style={{ background: AMBIENTE[c.babosa] ?? AMBIENTE_NEUTRO }} />
+                  {/* La sombra no es decoración: es lo que deja legibles el
+                      título y el conteo sobre una foto que no controlamos. */}
+                  {mejor?.foto_portada_url && <div className="sombra" />}
                   <span className="marca">{c.total} {lugares(c.total, idioma)}</span>
                   <div className="contenido">
                     <h3>{c.nombre}</h3>

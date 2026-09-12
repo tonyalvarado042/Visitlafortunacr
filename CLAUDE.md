@@ -163,7 +163,7 @@ Monteverde puede tener otra paleta sin tocar una línea.
 | Agentes | 5 por destino (concierge, planificador, seguimiento, analista, redactor). **NINGUNO HA RESPONDIDO NUNCA.** `dst_agente_ejecucion` tiene 2 filas y las dos son errores 400 del cron de seguimiento. Ver "El agente todavía no ha contestado nunca" |
 | Automatizaciones | 10 de arranque, encendidas |
 | Panel `/admin` | Completo, con moderación de reseñas en `/admin/resenas`; el primer administrador entra con la invitación de `aalvarado@gmail.com` |
-| Sitio | Next.js 15, compila, lee de la base, chat concierge en todas las páginas |
+| Sitio | Next.js 15, compila, lee de la base, chat concierge en todas las páginas. El mosaico de la portada ya sale con fotos reales, prestadas del mejor negocio de cada categoría |
 
 ---
 
@@ -1131,40 +1131,52 @@ hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
    internet** —qué guía es bueno para aves, quién abre los domingos, qué pasó
    de verdad en 1968 contado por alguien de aquí—. Eso es el encargo del
    experto real, y ahora está escrito en vez de supuesto.
-11. **Imágenes representativas en el mosaico de "Qué hacer" de la portada.**
-   Las tarjetas de las fichas ya tienen foto desde el punto 9, pero **el
-   mosaico de la portada sigue con degradados de color**, y es lo primero que
-   ve cualquiera que entre. Hoy son cinco tarjetas —**aguas termales, vida
-   silvestre, canopy, café y chocolate, y volcán**— y cada una pinta
-   `AMBIENTE[c.babosa]`, un degradado CSS al 50% de opacidad, en
-   `app/[idioma]/page.tsx`.
+11. ~~**Imágenes representativas en el mosaico de "Qué hacer" de la portada.**~~
+   **Hecho el 12 de septiembre de 2026**, por el primer camino: **la foto se la
+   presta el mejor negocio de la categoría**, el mismo del que ya salía el
+   resumen. Cero migraciones, cero imágenes nuevas.
 
-   **Ojo: esas cinco no están escritas en el código.** El mosaico es
-   `conContenido` filtrado por sección, **ordenado por `c.total` y cortado en
-   5**, así que **cambian solas** en cuanto se agreguen negocios: hoy volcán
-   entra con 2, y cataratas, canyoning y tours de aventura están empatados
-   detrás. Atar cinco imágenes a cinco nombres se rompe el día que alguien
-   cargue un negocio más.
+   Hoy las cinco tarjetas son **vida silvestre** (Sloths Territory, 6 lugares),
+   **aguas termales** (Tabacón, 5), **volcán** (Arenal 1968, 2), **canopy**
+   (Sky Adventures, 2) y **rafting** (Wave Expeditions, 2). Las cinco fotos
+   responden 200 image/webp.
 
-   Dos caminos, y **el primero es el que yo haría**:
+   **Pero esas cinco no están escritas en el código y van a cambiar solas.** El
+   mosaico es `conContenido` filtrado por sección, **ordenado por `c.total` y
+   cortado en 5**: volcán, canopy y rafting entran con 2, y canyoning, café y
+   chocolate están empatados detrás. Justo por eso no se ató una imagen a cada
+   nombre — se resolvió por dato, así que funciona para cualquier categoría que
+   suba al mosaico, incluidas las de Monteverde el día que exista.
 
-   - **Prestarle la foto al negocio mejor valorado de esa categoría.** La
-     portada **ya hace exactamente eso con el texto**: `mejorDe(c)` busca el
-     negocio mejor calificado de la categoría y la tarjeta usa su `resumen`.
-     Desde la migración 22 ese mismo objeto trae `foto_portada_url`, así que
-     es usar lo que ya está en la mano: **cero migraciones, cero imágenes
-     nuevas, y funciona para cualquier categoría que suba al mosaico**,
-     incluidas las de Monteverde el día que exista.
-   - **Una imagen propia por categoría y destino.** Más control editorial, pero
-     **no va en `dst_categoria`**, que es el catálogo global: la foto de volcán
-     de La Fortuna no sirve para Monteverde. Va en `dst_destino_categoria`, que
-     es la tabla por destino, con una columna nueva — o sea **migración 23** y
-     SQL Editor.
+   **El orden de desempate importa y no es el obvio.** `mejorDe(c)` ya no ordena
+   solo por calificación: primero pesa **tener foto propia** (200 puntos), luego
+   foto genérica (100) y de último la nota. Al revés, una categoría cuyo mejor
+   valorado no tuviera imagen se vería peor que sus vecinas por premiar una nota
+   que hoy casi nadie tiene — no hay reseñas todavía. Texto y foto salen del
+   **mismo** negocio a propósito: la tarjeta se lee como un lugar, no como un
+   collage.
 
-   En los dos casos el degradado **no se tira**: se queda de respaldo para
-   cuando una categoría no tenga foto, y de velo encima para que el título y el
-   conteo sigan legibles. El `.fondo` ya está posicionado en `inset: 0` con su
-   zoom al pasar el mouse, así que la pieza de CSS está hecha.
+   **El degradado no se tiró, cambió de trabajo.** Con foto, `AMBIENTE[c.babosa]`
+   pasa a `.fondo.tinte` —`mix-blend-mode: soft-light` al 50%— y le da a la
+   tarjeta el color de su categoría sin tapar la imagen. Sin foto sigue siendo
+   el fondo entero, exactamente como era antes. El zoom al pasar el mouse se
+   mudó del degradado a la foto (`.ficha-grande:hover .foto`), porque escalar un
+   degradado no se nota y escalar la foto sí.
+
+   **Lo que sostiene la legibilidad es `.sombra`**, no el tinte: un degradado
+   fijo negro que sube desde abajo, donde viven el título y el resumen. No es
+   decoración — las fotos no las controlamos nosotros, y sin eso el titular
+   blanco cae sobre lo que sea que traiga la imagen. Solo se pinta cuando hay
+   foto.
+
+   Hoy **las 11 categorías de `que_hacer` y `tours` tienen el 100% de sus
+   negocios con foto**, así que ninguna tarjeta cae al respaldo. Eso es
+   consecuencia del punto 9 (se archivó lo que no tenía foto): si algún día se
+   reactiva un negocio sin imagen, el mosaico sigue funcionando solo.
+
+   Queda pendiente **mirarlo en pantalla**: se verificó el HTML servido y que
+   las cinco imágenes responden, pero no cómo se ve el recorte `object-fit:
+   cover` de cada foto en la tarjeta alta (g-6) contra las bajas (g-4).
 
 **La regla 4 quedó resuelta, no pospuesta.** El punto 7 se hizo por la API de
 Google, que sí licencia el texto, con autor, enlace y vencimiento de 30 días.
