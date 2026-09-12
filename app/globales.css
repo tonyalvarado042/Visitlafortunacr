@@ -99,12 +99,18 @@ img { max-width: 100%; display: block; }
 .menu-plegado .lista a:hover { background: #202020; color: var(--naranja); }
 
 /* Tocar fuera cierra el desplegable. El pseudo-elemento pertenece al summary,
-   así que el clic alterna el details. Ni sticky ni fixed crean bloque
-   contenedor, de modo que la capa cubre toda la pantalla aunque la barra
-   flote sobre el hero. */
+   así que el clic alterna el details.
+
+   OJO con `inset: 0`, que es lo que había y no funcionaba: `.barra` lleva
+   `backdrop-filter`, y backdrop-filter SÍ crea bloque contenedor para los
+   descendientes `fixed` (sticky y fixed no lo crean, que era la suposición del
+   comentario anterior). Así que la capa no cubría la pantalla: cubría la barra,
+   y tocar fuera dejaba de cerrar en cuanto la barra se pegaba al hacer scroll.
+   Anclada arriba y estirada hacia abajo cubre igual con el bloque contenedor
+   puesto o sin él, que es lo que cambia entre `.sobre-hero` y `.pegada`. */
 .menu-plegado[open] summary::before,
 .selector-idioma[open] summary::before {
-  content: ''; position: fixed; inset: 0; z-index: 65;
+  content: ''; position: fixed; top: 0; left: 0; right: 0; height: 300vh; z-index: 65;
 }
 
 .boton {
@@ -743,7 +749,6 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
   .logo svg { width: 28px; height: 28px; }
   .acciones .boton.armar { padding: 9px 11px; font-size: 11.5px; }
   .selector-idioma summary { padding: 7px 9px; font-size: 11px; }
-  .selector-idioma .lista { min-width: 132px; }
 
   .buscador .campo { padding: 13px 14px; font-size: 13.5px; }
   .buscador .campo svg { width: 17px; height: 17px; }
@@ -751,6 +756,30 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
 
   /* El chat no debe taparle el buscador a nadie. */
   .concierge-boton { right: 14px; bottom: 14px; padding: 11px 15px; font-size: 12px; }
+
+  /* La barra no puede desbordar, y desbordaba: .logo y .acciones tenían LOS DOS
+     `flex-shrink: 0` y el texto del logo `nowrap`, así que a 390px la suma daba
+     ~410px. Lo que se salía de la pantalla no era solo el logo: .acciones se
+     iba con él, y el desplegable de idiomas —anclado a su botón— nacía ya
+     fuera. Ahora cede el logo, que es lo que se puede recortar sin perder nada:
+     el isotipo VLF se queda siempre. */
+  .logo { flex-shrink: 1; min-width: 0; overflow: hidden; }
+  .logo .texto { overflow: hidden; text-overflow: ellipsis; }
+  .acciones { min-width: 0; }
+
+  /* Y por si acaso, el desplegable deja de colgar del botón y cuelga de la
+     BARRA, que siempre ocupa el ancho de la pantalla. Con `position: static` en
+     el <details>, el ancestro posicionado más cercano pasa a ser `.barra`, así
+     que `right: 14px` es el borde de la pantalla y no el del botón: no hay
+     forma de que se salga, desborde lo que desborde. */
+  .selector-idioma, .menu-plegado { position: static; }
+  .selector-idioma .lista, .menu-plegado .lista {
+    top: calc(100% + 6px); right: 14px; left: auto;
+    min-width: 190px; max-width: calc(100vw - 28px);
+  }
+  /* Más aire para el dedo: 44px de alto por opción es lo mínimo cómodo. */
+  .selector-idioma .lista a { padding: 12px 14px; font-size: 15px; }
+  .menu-plegado .lista a { padding: 13px 14px; font-size: 13px; }
   /* En telefono el panel es la pantalla: un recuadro flotante con margenes
      desperdicia el poco ancho que hay, y el teclado se come la mitad. */
   .concierge { inset: 0; width: auto; height: auto; border-radius: 0; border: 0; }
