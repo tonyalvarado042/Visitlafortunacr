@@ -40,6 +40,11 @@ img { max-width: 100%; display: block; }
   border-bottom: 1px solid var(--borde);
 }
 .logo { display: flex; align-items: center; gap: 11px; flex-shrink: 0; }
+/* El emblema manda su tamaño desde aquí, no desde el componente: sea imagen o
+   dibujo, los dos miden lo mismo y encogen juntos en el teléfono. 40 y no 32
+   porque el emblema oficial trae riscos finos y la sigla adentro — a 32 se
+   empastan. */
+.logo img, .logo svg { height: 40px; width: auto; display: block; flex-shrink: 0; }
 .logo .texto { font-weight: 800; font-size: 17px; letter-spacing: -.02em; white-space: nowrap; }
 .logo .texto i { font-style: normal; color: var(--naranja); }
 .menu { display: flex; gap: 26px; font-size: 12.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
@@ -746,7 +751,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
 @media (max-width: 560px) {
   .barra { padding: 10px 14px; }
   .logo .texto { font-size: 14px; }
-  .logo svg { width: 28px; height: 28px; }
+  .logo img, .logo svg { height: 34px; }
   .acciones .boton.armar { padding: 9px 11px; font-size: 11.5px; }
   .selector-idioma summary { padding: 7px 9px; font-size: 11px; }
 

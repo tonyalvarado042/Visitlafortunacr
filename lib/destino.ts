@@ -26,6 +26,9 @@ export type Destino = {
   color_gris: string;
   tipografia: string;
   logo_url: string | null;
+  /* El ícono de la pestaña. La columna existía desde el principio; el tipo
+     se la había saltado, así que el sitio no podía ni verla. */
+  favicon_url: string | null;
   video_portada_url: string | null;
   imagen_portada_url: string | null;
   whatsapp: string | null;

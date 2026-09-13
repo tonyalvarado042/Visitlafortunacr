@@ -18,6 +18,11 @@ export async function generateMetadata({
       alternates: {
         languages: Object.fromEntries(destino.idiomas.map((i) => [i, `/${i}`])),
       },
+      /* El ícono de la pestaña sale del destino, igual que el logo de la
+         barra. Si no tiene uno propio manda el app/icon.png del repo, que
+         además cubre lo que vive fuera de /[idioma] —el panel, los errores—
+         y así ninguna pestaña se queda con el globito genérico. */
+      ...(destino.favicon_url ? { icons: { icon: destino.favicon_url } } : {}),
       openGraph: {
         siteName: destino.marca_nombre,
         locale: idioma,
