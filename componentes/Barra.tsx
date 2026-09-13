@@ -40,7 +40,15 @@ export function Barra({
   return (
     <header className={sobreHero ? 'barra sobre-hero' : 'barra'} id="barra">
       <Link className="logo" href={`/${idioma}`}>
-        <LogoVLF tamano={32} sigla={destino.marca_sigla ?? 'VLF'} />
+        {/* El emblema oficial del destino, de dst_destino.logo_url. Un destino
+            que todavía no subió el suyo cae al dibujado, que no necesita
+            archivo — así ninguno se queda sin marca en la barra.
+            El tamaño lo manda el CSS y no el atributo: width/height van solo
+            para que el navegador reserve el espacio y la barra no salte. */}
+        {destino.logo_url
+          ? <img src={destino.logo_url} width={40} height={40}
+                 alt={destino.marca_nombre} />
+          : <LogoVLF tamano={40} sigla={destino.marca_sigla ?? 'VLF'} />}
         <span className="texto">{base}<i>{cola}</i></span>
       </Link>
 
