@@ -253,6 +253,46 @@ nube no, y por eso los deja escritos aquí con los valores exactos.
 
 Antes de empezar en la máquina: `git pull` de la rama, que aquí está lo último.
 
+### Encender el perezoso interactivo (y cómo apagarlo)
+
+**Todavía NO se enciende: el efecto no quedó bien.** Se probó el 15 de
+septiembre de 2026 y la cabeza no sigue al puntero como debe — el diagnóstico y
+el plan están en la Fase MVP, punto 2, "Por qué no quedó bien". Esto de abajo
+es el procedimiento **para cuando esté resuelto**; mientras tanto se prueba en
+local con `VIDEO_PORTADA` en `.env.local`, sin tocar la base.
+
+Cuando llegue el día: **el campo NO se toca antes de desplegar.**
+`dst_destino.video_portada_url` la lee también producción, así que cambiarla
+antes dejaría el hero apuntando a un archivo que en Vercel todavía no existe.
+**Primero se despliega, después se cambia el campo.**
+
+1. Publicar la rama y esperar el despliegue de Vercel.
+2. Comprobar que el archivo ya está arriba:
+   `https://visit-la-fortuna.vercel.app/video/la-fortuna-perezoso.mp4` tiene que
+   responder 200 (y lo mismo `/video/perezoso-poses.webp`).
+3. `/admin/ajustes` → Marca → *Video de portada*:
+   `/video/la-fortuna-perezoso.mp4`. Guardar.
+4. Abrir la portada **con mouse** y mover el puntero: la cabeza tiene que
+   girar hacia él y la cascada **no** puede detenerse.
+
+**Para volver atrás**, en orden de lo más barato a lo más completo:
+
+| Qué revertir | Cómo |
+|---|---|
+| Solo el video | Ese mismo campo, de vuelta a `/video/visitlafortunaloop1080p.mp4`. Sin desplegar |
+| Solo el seguimiento del mouse | Borrar la entrada de `datos/hero/perezoso.json`: sin ella la capa no se monta y queda el video nuevo corriendo normal |
+| Todo | `git revert` del commit |
+
+El video viejo **no se borró**: los dos archivos conviven en `public/video/` y
+manda el campo de la base.
+
+**Lo que sigue sin decidir, y es de Tony**: el clip es **generado por IA** y la
+escena **no existe** — junta el Arenal, una cascada, un tucán y un perezoso en
+un encuadre imposible. El video de hoy es metraje real. Este archivo es duro
+con no mentir sobre lo que se muestra (por eso existe `es_generica`), aunque esa
+regla está escrita para fotos de negocios y esto es decoración de portada. Se
+decide antes de publicarlo, no después.
+
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
 **Estado verificado por DNS el 11 de septiembre de 2026:**
@@ -711,6 +751,133 @@ hacer el 5, saltar al 8, y volver al 6 y 7 con contenido real encima.
    de 2026): el video se ve.
    Pendientes menores: el archivo va a 2,4 Mbps y una versión a 720p pesaría la
    mitad; y falta mirar en movimiento si el bucle corta bien a los 14,5 s.
+
+   ### El perezoso que sigue al puntero (15 de septiembre de 2026)
+
+   **Lo pidió Anthony. Está construido, se probó en local el 15 de septiembre
+   de 2026 y NO quedó bien: sigue pendiente.** El diagnóstico exacto y qué hay
+   que hacer están abajo, en "Por qué no quedó bien". El sitio desplegado no se
+   enteró de nada: `video_portada_url` sigue apuntando al video viejo y esto
+   vive en la rama `cambio_video`, sin commitear.
+
+   **Para volver a verlo en local** (no hace falta tocar la base):
+   `.env.local` con `VIDEO_PORTADA=/video/la-fortuna-perezoso.mp4` y
+   `npm run dev`. Esa variable la lee `app/[idioma]/page.tsx` y existe justo
+   para esto: probar un video de portada antes de cambiar la columna, que la
+   lee también producción. Sin la variable, todo sigue igual que siempre.
+
+   El clip nuevo (`public/video/Test_video.MP4`, que llega **generado por IA**
+   — lo dice su propio metadato `AIGC`: MiniMax) es una escena de volcán,
+   cascada, tucán, mariposa morfo y un perezoso en el árbol. La idea era que el
+   perezoso girara la cabeza siguiendo el mouse **sin congelar el resto**.
+
+   **Por qué se puede hacer sin rotoscopia, que es lo que hay que entender
+   antes de tocarlo**: se midieron los 192 cuadros y salieron dos cosas. La
+   **cámara no se mueve** (alineación del primer cuadro contra el último: 0 px)
+   y **la cabeza ya gira sola** por muchas orientaciones. Entonces un recorte
+   de la cabeza de cualquier cuadro **calza pixel a pixel** sobre cualquier
+   otro: fuera de la cabeza la imagen es casi idéntica. Se comprobó componiendo
+   la cabeza de un cuadro sobre el fondo de otro y **la costura no se ve ni
+   ampliada**.
+   Así que **el mouse no inventa el giro: ELIGE** entre las poses que el clip
+   ya tiene. Son dos capas: abajo el video corriendo (de ahí la cascada, la
+   mariposa y el tucán, que nunca se detienen) y encima una elipse difuminada
+   con la pose pedida.
+
+   **Las direcciones de cada pose están etiquetadas A MANO**, mirando una hoja
+   de contacto numerada (`--hoja`). Se intentó deducirlas por imagen y quedó
+   demasiado ruidoso para fiarse de hacia dónde mira una cabeza.
+
+   ### Por qué no quedó bien, y qué hacer mañana
+
+   **Lo que funciona y no hay que volver a tocar**: el compuesto. La costura no
+   se ve, la cabeza cae donde tiene que caer, el fondo sigue vivo y el peso
+   bajó. Esa era la parte difícil y está resuelta.
+
+   **Lo que falla es el RECORRIDO entre poses**, que es lo que reportó
+   Sebastián al probarlo: la cabeza «da vueltas raras y pasa por poses que no
+   venían al caso». La causa está en el código y es un error de diseño mío,
+   concreto:
+
+   Las poses están guardadas **en el orden del clip**, y para ir de la actual a
+   la pedida el código avanza **de a una por ese orden** (por el lado corto del
+   anillo). Eso se apoyaba en que «las intermedias son el giro real de la
+   cabeza» — y es cierto entre vecinas, pero **falso para el camino completo**:
+   dos poses seguidas en el tiempo no son vecinas en dirección. Para ir de
+   «mira a la derecha» a «mira arriba» el recorrido pasa por «mira abajo»,
+   porque así fue como el perezoso movió la cabeza en esos 8 segundos. El
+   resultado se lee como un animal haciendo lo suyo, no como uno siguiéndote.
+
+   **En una línea: confundí vecindad en el TIEMPO con vecindad en la
+   DIRECCIÓN.**
+
+   Qué probar mañana, de lo más barato a lo más caro:
+
+   1. **Caminar por dirección, no por tiempo.** En cada paso, moverse a la pose
+      que más ACERCA la dirección actual a la pedida, en vez de a la siguiente
+      del clip. Así toda pose intermedia es un avance hacia el cursor. Es un
+      cambio dentro de `paso()` en `Hero.tsx` y no toca los assets.
+   2. **Disolver en vez de cortar.** Si el salto directo a la pose más cercana
+      se nota, dos capas encimadas con un desvanecido corto lo tapan, y
+      entonces ni hace falta recorrido.
+   3. **Quedarse con un tramo del clip.** Usar solo una barrida continua de la
+      cabeza en vez de las 36 poses: menos cobertura, pero monótona y sin
+      sorpresas.
+   4. **Generar otro clip a propósito**, que es lo que de verdad lo resuelve
+      (ver abajo).
+
+   **Lo que hay que revisar aunque no sea la falla principal**: las 36
+   etiquetas de dirección las puse a ojo y rápido. Si al arreglar el recorrido
+   la cabeza sigue apuntando torcido, el siguiente sospechoso son ellas.
+
+   **Y el límite que no se arregla programando**: el clip es material
+   encontrado, no filmado para esto. El perezoso está contra el borde izquierdo
+   y **casi nunca mira hacia allá**, así que ese lado de la pantalla tiene poco
+   con qué responder; y buena parte de lo que hace es **ladear** la cabeza más
+   que girarla. Se puede disimular, no inventar.
+   **Lo que lo resolvería de raíz es un clip hecho para esto**: cámara fija,
+   perezoso centrado, la cabeza barriendo despacio de izquierda a derecha y de
+   arriba a abajo, 8-10 segundos. Con eso, toda la cadena de scripts y el
+   componente sirven igual — cambian el archivo y las etiquetas, nada más.
+   El clip actual salió de MiniMax, así que pedir otro es barato.
+
+   **El arco no es simétrico y eso es del clip, no un error**: el perezoso está
+   contra el borde izquierdo y casi no mira hacia allá. Por eso el manifiesto
+   trae `rango`, y el cursor se lleva a ese arco en vez de a 360°. Si algún día
+   se genera otro clip, eso es lo que hay que volver a medir.
+
+   La cadena, reanudable y repetible en otro destino:
+   ```
+   node scripts/preparar-perezoso.mjs --hoja      (hoja de contacto para etiquetar)
+   ...etiquetar las poses en datos/hero/perezoso.json...
+   node scripts/preparar-perezoso.mjs --aplicar   (video de fondo + hoja de sprites)
+   ```
+   `.perezoso/` es directorio de trabajo y se puede borrar entero; lo único que
+   no se regenera solo es **el etiquetado de `datos/hero/perezoso.json`**.
+
+   **Pesa menos que lo que hay hoy**: fondo 1,8 MB (el original traía 6,7 y el
+   video actual pesa 4,1) más 950 KB de sprites — **2,75 MB contra 4,1**. La
+   hoja no baja aunque se castigue la calidad: es pelaje, pura textura. En
+   táctil ni se descarga.
+
+   **Dos detalles del código que no son obvios**:
+   - El acercamiento del scroll se mudó del `<video>` a `.caja-video`, que los
+     envuelve a los dos. Si se devuelve al video, **la cabeza se despega** al
+     bajar. Y ese transform incluye el `translate(-50%,-50%)` del centrado:
+     escribirlo sin él descoloca la caja entera.
+   - `.caja-video` replica `object-fit: cover` con CSS (`max(100%, 100vh*16/9)`).
+     Existe para que la cabeza se ubique en **porcentajes del cuadro** y caiga
+     sobre el perezoso en cualquier pantalla, sin calcular nada en JS.
+
+   **El apagado es dato, no código**: la capa está llaveada por la URL del
+   video en `datos/hero/perezoso.json`. Si el destino apunta a otro video, no
+   hay entrada y no se monta nada. Volver al video viejo es un campo.
+
+   **Lo que falta y no se puede hacer desde una sesión sin `.env.local`**: esta
+   copia del repo no lo tiene, así que el servidor no levanta contra la base y
+   **nadie ha visto esto en pantalla todavía**. Lo comprobado es el compuesto
+   simulado con los mismos números del manifiesto y la misma elipse del CSS,
+   `tsc` y `build`. Falta lo de siempre: abrirlo y mover el mouse.
 3. ~~**Buscador del hero funcional.**~~ **Hecho el 11 de septiembre de 2026.**
    El campo es un `<input>` dentro de un formulario GET nativo: cero
    JavaScript, la búsqueda queda en la URL (`/es?q=termales`) y por eso se

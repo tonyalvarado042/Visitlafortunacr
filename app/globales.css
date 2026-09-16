@@ -488,10 +488,40 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40p
    .velo, que va encima. */
 .video-escena {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; will-change: transform;
+  object-fit: cover;
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 80%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 0%, #000 80%, transparent 100%);
 }
+
+/* La caja mide EXACTAMENTE lo que el video ocupa al recortarse para cubrir la
+   pantalla — es `object-fit: cover` hecho a mano. Sirve para que la cabeza del
+   perezoso se posicione en porcentajes del cuadro y caiga sobre él en
+   cualquier pantalla, sin calcular nada en JS.
+   El acercamiento del scroll se escribe AQUÍ (incluido el `translate(-50%,-50%)`
+   del centrado, que si no se pisa), y así el video y la cabeza se acercan
+   juntos en vez de despegarse. */
+.caja-video {
+  position: absolute; top: 50%; left: 50%;
+  width: max(100%, calc(100vh * 16 / 9));
+  height: max(100%, calc(100vw * 9 / 16));
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+/* La cabeza del perezoso, con la pose que pidió el mouse. Geometría y rejilla
+   salen del manifiesto por estilo en línea: aquí solo va lo que no cambia.
+   La elipse difuminada es lo que hace invisible la costura contra el video de
+   abajo — sin ella se vería el recuadro. */
+.perezoso {
+  position: absolute;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity .6s ease;
+  will-change: background-position;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 78%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, #000 78%, transparent 100%);
+}
+.perezoso.puesta { opacity: 1; }
 
 /* Sobre imagen real el titular necesita más fondo que sobre el volcán
    dibujado, que ya era oscuro: el cielo del video es claro y el texto blanco

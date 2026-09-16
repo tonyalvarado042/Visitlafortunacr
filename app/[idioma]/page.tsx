@@ -118,7 +118,11 @@ export default async function Portada({ params, searchParams }: {
         lema={destino.lema}
         colorAcento={destino.color_acento}
         colorVerde={destino.color_naturaleza}
-        videoUrl={destino.video_portada_url}
+        /* El video lo manda el destino. `VIDEO_PORTADA` existe solo para
+           probar uno nuevo en local ANTES de cambiar la base: esa columna la
+           lee también producción, así que apuntarla para ver cómo queda
+           rompería el hero desplegado. Sin la variable, nada cambia. */
+        videoUrl={process.env.VIDEO_PORTADA?.trim() || destino.video_portada_url}
       />
 
       {/* ---- Qué hacer ---- */}
