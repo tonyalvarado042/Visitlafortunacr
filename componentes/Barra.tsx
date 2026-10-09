@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { LogoVLF } from './Marca';
+import { MenuPerfil } from './MenuPerfil';
 import { NOMBRE_PROPIO, t, type Idioma } from '@/lib/idiomas';
+import { pareceHaberSesion } from '@/lib/sesion-ligera';
 import type { Destino, Categoria } from '@/lib/destino';
 
 const SECCIONES = ['que_hacer', 'tours', 'donde_dormir', 'comer_beber', 'explorar', 'transporte'] as const;
 
-export function Barra({
+export async function Barra({
   destino, idioma, categorias, rutaActual, sobreHero = false,
 }: {
   destino: Destino;
@@ -20,6 +22,11 @@ export function Barra({
   const conContenido = new Set(categorias.filter((c) => c.total > 0).map((c) => c.seccion));
   const primeraDe = (seccion: string) =>
     categorias.find((c) => c.seccion === seccion && c.total > 0)?.babosa;
+
+  /* Si hay sesión se mira por la cookie y no contra Supabase: la barra se
+     pinta en TODAS las páginas y validar el token aquí le agregaría una
+     llamada de red a cada carga del sitio. Ver lib/sesion-ligera.ts. */
+  const conSesion = await pareceHaberSesion();
 
   const nombre = destino.marca_nombre.replace(/\s+/g, '');
   const corte = nombre.toLowerCase().lastIndexOf('cr');
@@ -90,6 +97,8 @@ export function Barra({
         </details>
 
         <Link className="boton armar" href={`/${idioma}#plan`}>{t('armar_viaje', idioma)}</Link>
+
+        {conSesion && <MenuPerfil idioma={idioma} />}
 
         {/* Por debajo de 1120px el menú de arriba no cabe y se apaga. Sin esto,
             tablet y teléfono se quedaban sin navegación. Mismo <details> que
