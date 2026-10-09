@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { sesion } from '@/lib/supabase-sesion';
+import { escribirClaveNueva, pedirEnlaceDeClave } from '@/lib/recuperacion';
 
 export type EstadoComercio = { ok?: string | null; error?: string | null };
 
@@ -30,6 +31,26 @@ export async function entrarComercio(_previo: EstadoComercio, datos: FormData): 
   const db = await sesion();
   const { error } = await db.auth.signInWithPassword({ email, password: clave });
   if (error) return { error: 'Correo o contraseña incorrectos.' };
+  redirect('/negocio');
+}
+
+/** "Olvidé mi contraseña": mismo mecanismo que usa el equipo. */
+export async function olvideMiClaveComercio(
+  _previo: EstadoComercio, datos: FormData
+): Promise<EstadoComercio> {
+  const r = await pedirEnlaceDeClave(texto(datos, 'email').toLowerCase(), '/negocio');
+  return { error: r.error ?? null, ok: r.mensaje ?? null };
+}
+
+/** Guardar la contraseña nueva después de volver por el enlace del correo. */
+export async function guardarNuevaClaveComercio(
+  _previo: EstadoComercio, datos: FormData
+): Promise<EstadoComercio> {
+  const r = await escribirClaveNueva(
+    String(datos.get('clave') ?? ''),
+    String(datos.get('repetida') ?? ''),
+  );
+  if (r.error) return { error: r.error };
   redirect('/negocio');
 }
 

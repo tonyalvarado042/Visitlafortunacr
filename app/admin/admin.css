@@ -131,6 +131,13 @@ table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .ingreso .aviso.mal { background: #3A1414; color: #FFB4B4; }
 .ingreso .aviso.ok { background: #14301A; color: #B7F0C1; }
 .ingreso .boton { width: 100%; justify-content: center; padding: 12px; }
+/* Enlace disfrazado de boton: lo que no es la accion principal de la caja
+   ("olvide mi contrasena", "volver") no debe competir con el boton. */
+.ingreso .enlace-flojo { background: none; border: 0; padding: 2px 0; color: #8B8B87;
+  font-family: inherit; font-size: 13px; text-align: center; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px; }
+.ingreso .enlace-flojo:hover { color: #fff; }
+.ingreso .gris { color: #8B8B87; }
 
 .detalle-lista { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; font-size: 13.5px; }
 .detalle-lista dt { color: #8B8B87; font-weight: 600; }
