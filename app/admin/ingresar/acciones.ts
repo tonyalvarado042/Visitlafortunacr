@@ -1,17 +1,10 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { sesion } from '@/lib/supabase-sesion';
+import { origen, pedirEnlaceDeClave } from '@/lib/recuperacion';
 
 export type EstadoIngreso = { error?: string | null; mensaje?: string | null };
-
-async function origen(): Promise<string> {
-  const h = await headers();
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000';
-  const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
-  return `${proto}://${host}`;
-}
 
 function destinoSeguro(valor: FormDataEntryValue | null): string {
   const texto = String(valor ?? '');
@@ -45,6 +38,11 @@ export async function registrarse(_previo: EstadoIngreso, datos: FormData): Prom
   if (error) return { error: error.message };
   if (data.session) redirect('/admin');
   return { mensaje: 'Te mandamos un correo para confirmar la cuenta. Después de confirmar, entrá con tu contraseña.' };
+}
+
+/** "Olvidé mi contraseña": el mecanismo vive en lib/recuperacion. */
+export async function olvideMiClave(_previo: EstadoIngreso, datos: FormData): Promise<EstadoIngreso> {
+  return pedirEnlaceDeClave(String(datos.get('email') ?? '').trim().toLowerCase(), '/admin');
 }
 
 export async function enlaceMagico(_previo: EstadoIngreso, datos: FormData): Promise<EstadoIngreso> {
