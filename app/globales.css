@@ -353,6 +353,9 @@ section { padding: 84px 0; }
 footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40px; }
 .pie-caja { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
 .pie-caja .legal { font-size: 12.5px; color: #5E5C58; }
+.pie-caja .credito { font-size: 12.5px; color: #5E5C58; }
+.pie-caja .credito a { color: var(--humo); font-weight: 700; transition: color .18s; }
+.pie-caja .credito a:hover { color: var(--naranja); }
 
 /* La barra no puede encoger: .menu a lleva white-space: nowrap, y el logo y
    las acciones flex-shrink: 0. Así que sus dos cortes no son de estética,
