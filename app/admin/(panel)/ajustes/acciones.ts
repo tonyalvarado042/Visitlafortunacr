@@ -31,6 +31,13 @@ export async function editarDestino(datos: FormData) {
     logo_url: texto(datos, 'logo_url') || null,
     video_portada_url: texto(datos, 'video_portada_url') || null,
     imagen_portada_url: texto(datos, 'imagen_portada_url') || null,
+    pie_credito_texto: texto(datos, 'pie_credito_texto') || null,
+    /* Solo http y https. Este enlace lo ve TODO el público en cada página, así
+       que un javascript: aquí sería un agujero abierto de par en par. Lo que no
+       pase el filtro se guarda vacío y el pie muestra el texto sin enlace. */
+    pie_credito_url: /^https?:\/\/\S+$/i.test(texto(datos, 'pie_credito_url'))
+      ? texto(datos, 'pie_credito_url')
+      : null,
     esta_activo: texto(datos, 'esta_activo') === '1',
   }).eq('id', destino.id);
   if (error) console.error('editarDestino:', error.message);

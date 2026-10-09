@@ -65,6 +65,8 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label>Logo (URL)</label><input name="logo_url" defaultValue={d.logo_url ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>Video de portada (URL)</label><input name="video_portada_url" defaultValue={d.video_portada_url ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>Imagen de portada (URL)</label><input name="imagen_portada_url" defaultValue={d.imagen_portada_url ?? ''} disabled={!esAdmin} /></div>
+                <div className="campo"><label>Pie: crédito</label><input name="pie_credito_texto" defaultValue={d.pie_credito_texto ?? ''} placeholder="Desarrollado por LIDERAX10.COM" disabled={!esAdmin} /><span className="gris" style={{ fontSize: 11.5 }}>Vacío: no se muestra nada en el pie.</span></div>
+                <div className="campo"><label>Pie: enlace del crédito</label><input type="url" name="pie_credito_url" defaultValue={d.pie_credito_url ?? ''} placeholder="https://liderax10.com" disabled={!esAdmin} /><span className="gris" style={{ fontSize: 11.5 }}>Solo http o https. Vacío: el crédito se ve sin enlace.</span></div>
               </div>
               {esAdmin && <div className="pie-formulario"><BotonAccion>Guardar destino</BotonAccion></div>}
             </div>

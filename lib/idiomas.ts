@@ -228,6 +228,12 @@ export const T: Record<string, Diccionario> = {
   sumar_quien_atiende: { es: '¿Con quién hablamos?', en: 'Who do we talk to?', pt: 'Who do we talk to?', fr: 'Who do we talk to?', de: 'Who do we talk to?' },
   sumar_revision:      { es: 'Tu ficha la revisa el equipo antes de publicarla. Te avisamos cuando esté en línea.', en: 'The team reviews your listing before publishing it. We will let you know when it is live.', pt: 'The team reviews your listing before publishing it.', fr: 'The team reviews your listing before publishing it.', de: 'The team reviews your listing before publishing it.' },
   sumar_enviar:        { es: 'Sumar mi negocio', en: 'Add my business', pt: 'Add my business', fr: 'Add my business', de: 'Add my business' },
+
+  /* ---- El menú de perfil, para quien tiene sesión ---- */
+  perfil_mi_cuenta:    { es: 'Mi cuenta', en: 'My account', pt: 'Minha conta', fr: 'Mon compte', de: 'Mein Konto' },
+  perfil_mis_negocios: { es: 'Mis negocios', en: 'My businesses', pt: 'Meus negócios', fr: 'Mes établissements', de: 'Meine Betriebe' },
+  perfil_sumar_otro:   { es: 'Sumar otro negocio', en: 'Add another business', pt: 'Adicionar outro negócio', fr: 'Ajouter un établissement', de: 'Weiteren Betrieb eintragen' },
+  perfil_salir:        { es: 'Salir', en: 'Sign out', pt: 'Sair', fr: 'Se déconnecter', de: 'Abmelden' },
 };
 
 export function t(clave: string, idioma: Idioma): string {

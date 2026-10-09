@@ -1,7 +1,8 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
-import { LogoVLF } from '@/componentes/Marca';
-import { salir } from './acciones';
+import { destinoActual, categoriasDe } from '@/lib/destino';
+import { esIdioma, type Idioma } from '@/lib/idiomas';
+import { Barra } from '@/componentes/Barra';
+import { Pie } from '@/componentes/Pie';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,26 +14,38 @@ export const metadata: Metadata = {
 
 /*
  * El panel del COMERCIANTE. Vive en /negocio y no en /admin a propósito: el
- * dueño de un hotel no tiene por qué poder ni asomarse a los leads, los
- * viajeros o los reportes del equipo. Separar la ruta es lo que garantiza que
- * un descuido de mañana no lo meta donde no va.
+ * dueño de un hotel no tiene por qué poder asomarse a los leads, los viajeros
+ * o los reportes del equipo.
+ *
+ * Pero usa LA MISMA barra y el MISMO pie que el resto del sitio. Antes tenía
+ * una barra propia, con el logo dibujado y sin menú, y el dueño quedaba
+ * encerrado en su ficha sin poder navegar el directorio como cualquier otro.
+ *
+ * El destino se resuelve por el Host igual que en el sitio público: a /negocio
+ * se llega por visitlafortunacr.com, así que la barra puede mostrar el emblema
+ * y los colores que correspondan — y el día que entre otro destino, los suyos.
  */
-export default function LayoutComercio({ children }: { children: React.ReactNode }) {
+export default async function LayoutComercio({ children }: { children: React.ReactNode }) {
+  const destino = await destinoActual();
+  const idioma: Idioma = esIdioma(destino.idioma_principal) ? destino.idioma_principal : 'es';
+  const categorias = await categoriasDe(destino, idioma);
+
+  /* La paleta del destino, igual que en /[idioma]/layout.tsx. Sin esto el
+     panel se pintaría con los colores de respaldo del CSS en vez de los
+     suyos. */
+  const paleta = {
+    '--negro': destino.color_tinta,
+    '--naranja': destino.color_acento,
+    '--verde': destino.color_naturaleza,
+    '--gris': destino.color_gris,
+    '--fuente': `'${destino.tipografia}', -apple-system, 'Helvetica Neue', Arial, sans-serif`,
+  } as React.CSSProperties;
+
   return (
-    <div className="comercio">
-      <header className="comercio-barra">
-        {/* El emblema dibujado y no el de La Fortuna: este panel es de la
-            plataforma, y un comerciante puede tener negocios en más de un
-            destino. Poner el logo de uno solo sería mentir. */}
-        <Link className="logo" href="/negocio">
-          <LogoVLF tamano={34} />
-          <span className="texto">Mi negocio</span>
-        </Link>
-        <form action={salir}>
-          <button type="submit" className="comercio-salir">Salir</button>
-        </form>
-      </header>
+    <div style={paleta} className="comercio">
+      <Barra destino={destino} idioma={idioma} categorias={categorias} rutaActual="" />
       <main className="comercio-cuerpo">{children}</main>
+      <Pie destino={destino} />
     </div>
   );
 }
