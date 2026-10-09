@@ -56,6 +56,15 @@ async function sesionDelPanel(peticion: NextRequest, base: string, ingreso: stri
 
   // getUser valida el token con Supabase; getSession solo leería la cookie.
   const { data: { user } } = await supabase.auth.getUser();
+  /* La vuelta del enlace mágico y del correo de confirmación pasa por
+     <base>/auth/callback SIN sesión todavía: el código está justo por
+     canjearse. Si el portero la trata como una página más, la rebota a
+     ingresar y el callback NUNCA llega a ejecutarse — que es exactamente lo
+     que hacía que el enlace mágico "no hiciera nada" y te devolviera a la
+     pantalla de entrar sin decir por qué. */
+  const enRetorno = pathname.startsWith(`${base}/auth/`);
+  if (enRetorno) return respuesta;
+
   const enIngreso = pathname.startsWith(ingreso);
 
   if (!user && !enIngreso) {

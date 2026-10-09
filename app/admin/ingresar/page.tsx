@@ -13,7 +13,16 @@ export default async function PaginaIngreso({ searchParams }: { searchParams: Pr
         </div>
         <h1>Entrar</h1>
         <p className="sub">Solo el equipo invitado. Si te invitaron, creá tu cuenta con ese mismo correo.</p>
-        {error === 'enlace' && <div className="aviso mal">El enlace ya no sirve. Pedí uno nuevo.</div>}
+        {/* El enlace mágico va con PKCE: el navegador que lo ABRE tiene que ser
+            el mismo que lo PIDIÓ, porque la mitad de la llave quedó en una
+            cookie suya. Abrirlo desde el correo del teléfono habiéndolo pedido
+            en la computadora falla, y sin decirlo nadie entiende por qué. */}
+        {error === 'enlace' && (
+          <div className="aviso mal">
+            Ese enlace no sirvió. Pedí uno nuevo — y abrilo <strong>en el mismo
+            navegador donde lo pediste</strong>, que es lo que suele fallar.
+          </div>
+        )}
         <FormularioIngreso volver={volver ?? '/admin'} />
       </div>
     </div>
