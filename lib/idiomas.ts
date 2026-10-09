@@ -187,6 +187,47 @@ export const T: Record<string, Diccionario> = {
   familia:           { es: 'Familia', en: 'Family', pt: 'Família', fr: 'Famille', de: 'Familie' },
   amigos:            { es: 'Amigos', en: 'Friends', pt: 'Amigos', fr: 'Amis', de: 'Freunde' },
   solo:              { es: 'Solo', en: 'Solo', pt: 'Sozinho', fr: 'Seul', de: 'Allein' },
+
+  /* ---- Sumar mi negocio (el dueño carga su propia ficha) ----
+     ⚠️ pt, fr y de todavía repiten el inglés: son ~28 frases y traducirlas a
+     máquina para ponerlas en un sitio en línea se nota. Quedan pendientes de
+     traducción de verdad; mientras tanto, inglés es mejor que español para
+     quien no habla ninguno de los dos. */
+  sumar_titulo:        { es: 'Sumá tu negocio a {destino}', en: 'Add your business to {destino}', pt: 'Add your business to {destino}', fr: 'Add your business to {destino}', de: 'Add your business to {destino}' },
+  sumar_bajada:        { es: 'Tu ficha es gratis. Cargala vos, corregí tus datos cuando cambien y respondé las reseñas de quien te visita.', en: 'Your listing is free. Fill it in yourself, keep your details current and reply to the reviews your visitors leave.', pt: 'Your listing is free. Fill it in yourself, keep your details current and reply to the reviews your visitors leave.', fr: 'Your listing is free. Fill it in yourself, keep your details current and reply to the reviews your visitors leave.', de: 'Your listing is free. Fill it in yourself, keep your details current and reply to the reviews your visitors leave.' },
+  sumar_promesa_1:     { es: 'Gratis, sin plazo y sin tarjeta.', en: 'Free, no deadline, no card.', pt: 'Free, no deadline, no card.', fr: 'Free, no deadline, no card.', de: 'Free, no deadline, no card.' },
+  sumar_promesa_2:     { es: 'Lo que escribís lo cambiás vos cuando querrás.', en: 'What you write, you change whenever you want.', pt: 'What you write, you change whenever you want.', fr: 'What you write, you change whenever you want.', de: 'What you write, you change whenever you want.' },
+  sumar_promesa_3:     { es: 'Tu ficha se ve en los cinco idiomas del sitio.', en: 'Your listing shows in all five languages of the site.', pt: 'Your listing shows in all five languages of the site.', fr: 'Your listing shows in all five languages of the site.', de: 'Your listing shows in all five languages of the site.' },
+  sumar_ya_tenes:      { es: 'Ya tenés {n} negocio(s) cargado(s).', en: 'You already have {n} business(es).', pt: 'You already have {n} business(es).', fr: 'You already have {n} business(es).', de: 'You already have {n} business(es).' },
+  sumar_ir_al_panel:   { es: 'Ir a mis negocios', en: 'Go to my businesses', pt: 'Go to my businesses', fr: 'Go to my businesses', de: 'Go to my businesses' },
+  sumar_paso_cuenta:   { es: 'Tu cuenta', en: 'Your account', pt: 'Your account', fr: 'Your account', de: 'Your account' },
+  sumar_paso_negocio:  { es: 'Tu negocio', en: 'Your business', pt: 'Your business', fr: 'Your business', de: 'Your business' },
+  sumar_crear_cuenta:  { es: 'Crear cuenta', en: 'Create account', pt: 'Create account', fr: 'Create account', de: 'Create account' },
+  sumar_ya_tengo:      { es: 'Ya tengo cuenta', en: 'I already have one', pt: 'I already have one', fr: 'I already have one', de: 'I already have one' },
+  sumar_entrar:        { es: 'Entrar', en: 'Sign in', pt: 'Sign in', fr: 'Sign in', de: 'Sign in' },
+  sumar_tu_nombre:     { es: 'Tu nombre', en: 'Your name', pt: 'Your name', fr: 'Your name', de: 'Your name' },
+  sumar_tu_correo:     { es: 'Tu correo', en: 'Your email', pt: 'Your email', fr: 'Your email', de: 'Your email' },
+  sumar_tu_clave:      { es: 'Tu contraseña', en: 'Your password', pt: 'Your password', fr: 'Your password', de: 'Your password' },
+  sumar_tu_telefono:   { es: 'Tu teléfono', en: 'Your phone', pt: 'Your phone', fr: 'Your phone', de: 'Your phone' },
+  sumar_clave_minimo:  { es: 'Mínimo 8 caracteres.', en: 'At least 8 characters.', pt: 'At least 8 characters.', fr: 'At least 8 characters.', de: 'At least 8 characters.' },
+  sumar_enviando:      { es: 'Enviando…', en: 'Sending…', pt: 'Sending…', fr: 'Sending…', de: 'Sending…' },
+  sumar_entraste_como: { es: 'Entraste como', en: 'Signed in as', pt: 'Signed in as', fr: 'Signed in as', de: 'Signed in as' },
+  sumar_ya_existe:     { es: 'Ojo: ya hay fichas parecidas en el directorio', en: 'Heads up: there are similar listings already', pt: 'Heads up: there are similar listings already', fr: 'Heads up: there are similar listings already', de: 'Heads up: there are similar listings already' },
+  sumar_ya_existe_que_hacer: { es: 'Si alguna de esas es tuya, escribinos en vez de cargarla de nuevo — todavía no se pueden reclamar fichas existentes desde acá. Si el tuyo es otro negocio distinto, seguí.', en: 'If one of those is yours, write to us instead of adding it again — claiming an existing listing is not available here yet. If yours is a different business, go ahead.', pt: 'If one of those is yours, write to us instead of adding it again. If yours is a different business, go ahead.', fr: 'If one of those is yours, write to us instead of adding it again. If yours is a different business, go ahead.', de: 'If one of those is yours, write to us instead of adding it again. If yours is a different business, go ahead.' },
+  sumar_es_distinto:   { es: 'El mío es distinto, seguir', en: 'Mine is different, continue', pt: 'Mine is different, continue', fr: 'Mine is different, continue', de: 'Mine is different, continue' },
+  sumar_nombre_negocio:{ es: 'Nombre del negocio', en: 'Business name', pt: 'Business name', fr: 'Business name', de: 'Business name' },
+  sumar_categoria:     { es: 'Categoría', en: 'Category', pt: 'Category', fr: 'Category', de: 'Category' },
+  sumar_elegi:         { es: 'Elegí una', en: 'Pick one', pt: 'Pick one', fr: 'Pick one', de: 'Pick one' },
+  sumar_categoria_fija:{ es: 'Después solo la puede cambiar el equipo, para que el directorio no se desordene.', en: 'Only the team can change it later, so the directory stays tidy.', pt: 'Only the team can change it later.', fr: 'Only the team can change it later.', de: 'Only the team can change it later.' },
+  sumar_resumen:       { es: 'Resumen', en: 'Summary', pt: 'Summary', fr: 'Summary', de: 'Summary' },
+  sumar_resumen_ayuda: { es: 'Una línea. Es lo que se lee en las listas del directorio.', en: 'One line. It is what shows in the directory lists.', pt: 'One line. It is what shows in the directory lists.', fr: 'One line. It is what shows in the directory lists.', de: 'One line. It is what shows in the directory lists.' },
+  sumar_telefono:      { es: 'Teléfono', en: 'Phone', pt: 'Phone', fr: 'Phone', de: 'Phone' },
+  sumar_correo_negocio:{ es: 'Correo del negocio', en: 'Business email', pt: 'Business email', fr: 'Business email', de: 'Business email' },
+  sumar_sitio:         { es: 'Sitio web', en: 'Website', pt: 'Website', fr: 'Website', de: 'Website' },
+  sumar_direccion:     { es: 'Dirección', en: 'Address', pt: 'Address', fr: 'Address', de: 'Address' },
+  sumar_quien_atiende: { es: '¿Con quién hablamos?', en: 'Who do we talk to?', pt: 'Who do we talk to?', fr: 'Who do we talk to?', de: 'Who do we talk to?' },
+  sumar_revision:      { es: 'Tu ficha la revisa el equipo antes de publicarla. Te avisamos cuando esté en línea.', en: 'The team reviews your listing before publishing it. We will let you know when it is live.', pt: 'The team reviews your listing before publishing it.', fr: 'The team reviews your listing before publishing it.', de: 'The team reviews your listing before publishing it.' },
+  sumar_enviar:        { es: 'Sumar mi negocio', en: 'Add my business', pt: 'Add my business', fr: 'Add my business', de: 'Add my business' },
 };
 
 export function t(clave: string, idioma: Idioma): string {

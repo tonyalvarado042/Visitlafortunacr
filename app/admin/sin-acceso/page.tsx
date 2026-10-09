@@ -28,6 +28,16 @@ export default async function SinAcceso() {
           <Link className="boton secundario" href="/admin">Recargar</Link>
           <form action={salir}><button className="boton" type="submit">Salir</button></form>
         </div>
+
+        {/* Un dueño de negocio no tiene fila en dst_usuario y cae acá sin
+            entender por qué. Su panel es otro: /negocio. Sin este renglón se
+            queda mirando un "no tenés acceso" que no le corresponde. */}
+        {!desactivada && (
+          <p className="sub" style={{ marginTop: 22, paddingTop: 18, borderTop: '1px solid #E4E4E7' }}>
+            ¿Sos el dueño de un negocio del directorio?{' '}
+            <Link href="/negocio" style={{ fontWeight: 700 }}>Tu panel es este otro</Link>.
+          </p>
+        )}
       </div>
     </div>
   );

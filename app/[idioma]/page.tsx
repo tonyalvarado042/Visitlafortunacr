@@ -274,7 +274,9 @@ export default async function Portada({ params, searchParams }: {
         <span className="rotulo">{t('para_negocios', idioma)}</span>
         <h2 style={{ maxWidth: '14ch', margin: '0 auto' }}>{t('tu_negocio', idioma)}</h2>
         <p>{t('negocio_explica', idioma)}</p>
-        <Link className="boton" href={`/${idioma}#plan`} style={{ padding: '16px 34px', fontSize: 14 }}>
+        {/* Iba a /#plan, que es el planificador de viaje DEL TURISTA: un dueño
+            de hotel le daba clic y caía en "armá tu itinerario". */}
+        <Link className="boton" href={`/${idioma}/sumar-negocio`} style={{ padding: '16px 34px', fontSize: 14 }}>
           {t('sumar_negocio', idioma)}
         </Link>
       </section>
