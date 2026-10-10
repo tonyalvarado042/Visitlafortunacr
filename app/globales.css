@@ -1259,6 +1259,67 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .premium-precio-grande strong { font-size: 42px; }
 }
 
+
+/* ---- El pie con todas las categorias ----
+   Google descuenta los enlaces de pie, pero evita que una categoria quede
+   huerfana: cada una recibe un enlace desde todo el sitio. */
+.pie-mapa { max-width: 1240px; margin: 0 auto; padding: 0 40px 38px; }
+.pie-columnas { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 32px 28px; padding-bottom: 32px; }
+.pie-columna h2 { font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--blanco); margin: 0 0 14px; }
+.pie-columna ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.pie-columna a { font-size: 13.5px; color: #9A9892; transition: color .16s; display: inline-flex; align-items: baseline; gap: 6px; }
+.pie-columna a:hover { color: var(--naranja); }
+.pie-columna a span { font-size: 11px; color: #5E5C58; font-variant-numeric: tabular-nums; }
+
+.pie-idiomas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding-top: 26px; border-top: 1px solid var(--borde); }
+.pie-idiomas > span { font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: #5E5C58; }
+.pie-idiomas ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 18px; flex-wrap: wrap; }
+.pie-idiomas a { font-size: 13px; color: #9A9892; }
+.pie-idiomas a:hover { color: var(--blanco); }
+.pie-idiomas a.on { color: var(--blanco); font-weight: 700; }
+
+/* ---- El blog ---- */
+.blog-cuerpo { padding: 56px 40px 80px; }
+.blog-cabecera { max-width: 56ch; margin-bottom: 40px; }
+.blog-cabecera h1 { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.06; letter-spacing: -.02em; margin: 10px 0 12px; }
+.blog-cabecera p { font-size: 15.5px; line-height: 1.6; color: #C2C0BC; margin: 0; }
+
+.blog-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 26px; }
+.blog-tarjeta { border: 1px solid var(--borde); border-radius: 6px; overflow: hidden; background: var(--carbon); transition: border-color .2s; }
+.blog-tarjeta:hover { border-color: #3A3A3A; }
+.blog-foto { aspect-ratio: 16 / 9; background: #101010; }
+.blog-foto img { width: 100%; height: 100%; object-fit: cover; }
+.blog-tarjeta-cuerpo { padding: 20px 22px 24px; display: grid; gap: 10px; }
+.blog-tipo { font-size: 10.5px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--naranja); }
+.blog-tarjeta-cuerpo h2 { font-size: 20px; line-height: 1.25; letter-spacing: -.01em; margin: 0; text-transform: none; }
+.blog-tarjeta-cuerpo p { font-size: 14px; line-height: 1.55; color: #9A9892; margin: 0; }
+.blog-tarjeta-cuerpo time { font-size: 12px; color: #5E5C58; }
+
+.blog-articulo { padding: 36px 0 80px; }
+.blog-articulo-cabecera { max-width: 46rem; margin: 22px 0 28px; display: grid; gap: 12px; }
+.blog-articulo-cabecera h1 { font-size: clamp(30px, 4.6vw, 48px); line-height: 1.08; letter-spacing: -.025em; margin: 0; }
+.blog-entradilla { font-size: 18px; line-height: 1.6; color: #C2C0BC; margin: 0; }
+.blog-fecha { font-size: 13px; color: #6E6C68; }
+.blog-foto-grande { max-width: 46rem; border-radius: 8px; overflow: hidden; margin-bottom: 34px; }
+.blog-foto-grande img { width: 100%; display: block; }
+/* Una columna de texto angosta: a mas de 75 caracteres por linea el ojo
+   pierde el renglon al volver. */
+.blog-prosa { max-width: 46rem; }
+.blog-prosa h2 { font-size: 28px; margin: 44px 0 14px; }
+.blog-prosa h3 { font-size: 19px; }
+
+.blog-otras { max-width: 46rem; margin-top: 56px; padding-top: 30px; border-top: 1px solid var(--borde); }
+.blog-otras h2 { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--humo); margin: 0 0 16px; }
+.blog-otras ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.blog-otras a { font-size: 17px; font-weight: 700; line-height: 1.35; }
+.blog-otras a:hover { color: var(--naranja); }
+
+@media (max-width: 560px) {
+  .pie-mapa { padding: 0 16px 30px; }
+  .blog-cuerpo { padding: 36px 16px 60px; }
+  .blog-articulo { padding: 24px 0 60px; }
+}
+
 /* ---- Menú de perfil: mismo patrón que el selector de idioma ---- */
 .menu-perfil { position: relative; }
 .menu-perfil summary {

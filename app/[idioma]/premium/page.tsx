@@ -4,6 +4,7 @@ import { destinoActual, categoriasDe, cuposPremium, negocioPorBabosa, fotosDe } 
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
+import { alternativas, mismasRutas } from '@/lib/seo';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { FormularioPremium } from './FormularioPremium';
 
@@ -17,7 +18,9 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
     const destino = await destinoActual();
     return {
       title: `${t('premium_pagina_titulo', idioma)} · ${destino.nombre}`,
+     
       description: destino.premium_gancho ?? t('premium_pagina_bajada', idioma),
+      alternates: alternativas(idioma, mismasRutas(destino, '/premium')),
     };
   } catch {
     return {};
@@ -135,7 +138,7 @@ export default async function Premium({ params }: { params: Parametros }) {
         )}
       </main>
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

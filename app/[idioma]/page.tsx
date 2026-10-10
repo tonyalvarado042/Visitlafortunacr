@@ -66,7 +66,7 @@ export default async function Portada({ params, searchParams }: {
           consulta={consulta}
           categoriaActiva={cat ?? ''}
         />
-        <Pie destino={destino} />
+        <Pie destino={destino} categorias={categorias} idioma={idioma} />
       </>
     );
   }
@@ -281,7 +281,7 @@ export default async function Portada({ params, searchParams }: {
         </Link>
       </section>
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

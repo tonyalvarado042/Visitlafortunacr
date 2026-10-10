@@ -6,6 +6,7 @@ import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
+import { alternativas, rutasDeCategoria } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
     return {
       title: `${cat.nombre} · ${destino.nombre}`,
       description: `${cat.total} ${lugares(cat.total, idioma)} · ${cat.nombre} · ${destino.nombre}, ${destino.pais_nombre}`,
+      alternates: alternativas(idioma, await rutasDeCategoria(destino.id, cat.categoria_id)),
     };
   } catch {
     return {};
@@ -89,7 +91,7 @@ export default async function Listado({ params }: { params: Parametros }) {
         </div>
       </section>
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

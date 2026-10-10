@@ -151,7 +151,7 @@ export default async function FichaExperiencia({ params }: { params: Parametros 
         </div>
       </main>
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

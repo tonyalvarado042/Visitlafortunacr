@@ -115,7 +115,7 @@ export default async function PaginaPlan({ params }: { params: Parametros }) {
           <BotonReservarPlan texto={t('plan_reservar', idioma)} mensaje={`${plan.titulo} · https://${destino.dominio}${url}`} />
         </div>
       </main>
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

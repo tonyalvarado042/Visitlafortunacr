@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { destinoActual } from '@/lib/destino';
-import { esIdioma } from '@/lib/idiomas';
+import { esIdioma, type Idioma } from '@/lib/idiomas';
+import { alternativas, mismasRutas } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { Concierge } from '@/componentes/Concierge';
 
@@ -15,9 +16,10 @@ export async function generateMetadata({
     return {
       title: { default: destino.marca_nombre, template: `%s · ${destino.marca_nombre}` },
       description: destino.lema ?? undefined,
-      alternates: {
-        languages: Object.fromEntries(destino.idiomas.map((i) => [i, `/${i}`])),
-      },
+      /* metadataBase convierte las rutas relativas de abajo en direcciones
+         completas. Sin el, hreflang sale con "/en" y Google lo ignora. */
+      metadataBase: new URL(`https://${destino.dominio}`),
+      alternates: alternativas(idioma as Idioma, mismasRutas(destino, '')),
       /* El ícono de la pestaña sale del destino, igual que el logo de la
          barra. Si no tiene uno propio manda el app/icon.png del repo, que
          además cubre lo que vive fuera de /[idioma] —el panel, los errores—

@@ -49,6 +49,7 @@ export async function Barra({
     ...(hayExperiencias
       ? [{ clave: 'experiencias', href: `/${idioma}/experiencias`, texto: t('experiencias', idioma) }]
       : []),
+    { clave: 'blog', href: `/${idioma}/blog`, texto: t('blog', idioma) },
     { clave: 'plan', href: `/${idioma}#plan`, texto: t('planifica', idioma) },
   ];
 

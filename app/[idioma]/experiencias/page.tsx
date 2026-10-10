@@ -5,6 +5,7 @@ import { experienciasDe } from '@/lib/experiencias';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
+import { alternativas, mismasRutas } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,9 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
     const destino = await destinoActual();
     return {
       title: `${t('exp_titulo', idioma)} · ${destino.nombre}`,
+     
       description: t('exp_bajada', idioma),
+      alternates: alternativas(idioma, mismasRutas(destino, '/experiencias')),
     };
   } catch {
     return {};
@@ -86,7 +89,7 @@ export default async function Experiencias({ params }: { params: Parametros }) {
         )}
       </main>
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

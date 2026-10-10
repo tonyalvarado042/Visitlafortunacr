@@ -13,6 +13,7 @@ import { GaleriaNegocio } from '@/componentes/GaleriaNegocio';
 import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
 import { taparContacto } from '@/lib/contacto-tapado';
+import { alternativas, rutasDeNegocio } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
     return {
       title: n.nombre,
       description: n.resumen ?? undefined,
-      alternates: { canonical: `/${idioma}/${n.categoria_babosa}/${n.babosa}` },
+      alternates: alternativas(idioma, await rutasDeNegocio(n.id)),
     };
   } catch {
     return {};
@@ -363,7 +364,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
         </div>
       </div>
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

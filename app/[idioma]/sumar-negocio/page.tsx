@@ -85,7 +85,7 @@ export default async function SumarNegocio({ params }: { params: Parametros }) {
 
       <OfertaPremium destino={destino} cupos={cupos} idioma={idioma} compacta />
 
-      <Pie destino={destino} />
+      <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
   );
 }

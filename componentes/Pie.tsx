@@ -1,6 +1,33 @@
-import type { Destino } from '@/lib/destino';
+import Link from 'next/link';
+import type { Destino, Categoria } from '@/lib/destino';
+import { t, NOMBRE_PROPIO, type Idioma } from '@/lib/idiomas';
 
-export function Pie({ destino }: { destino: Destino }) {
+/*
+ * El pie.
+ *
+ * Lleva TODAS las categorías con contenido, agrupadas por sección. Para qué
+ * sirve, siendo honestos: Google descuenta los enlaces de pie —están en
+ * todas las páginas, así que no dicen nada sobre ESTA página— pero asegura
+ * que ninguna categoría quede huérfana. Cada una recibe un enlace desde todo
+ * el sitio y entra al índice. No mueve posiciones por sí solo; evita que
+ * páginas enteras no existan para el buscador, que es peor.
+ *
+ * Los enlaces van en el IDIOMA DE LA PÁGINA, con la dirección de ese idioma:
+ * en inglés la categoría es "hotels", no "hoteles". Mezclarlos le dice al
+ * buscador que el sitio no sabe en qué idioma está cada página.
+ */
+
+const SECCIONES = ['que_hacer', 'tours', 'donde_dormir', 'comer_beber', 'explorar', 'transporte'] as const;
+
+export function Pie({
+  destino, categorias, idioma,
+}: {
+  destino: Destino;
+  /* Opcionales: hay páginas (el panel del comerciante) que no las cargan y
+     no tiene sentido pedirlas solo para pintar el pie. */
+  categorias?: Categoria[];
+  idioma?: Idioma;
+}) {
   const lugar = [destino.nombre_largo ?? destino.nombre, destino.region, destino.pais_nombre]
     .filter(Boolean)
     .join(', ');
@@ -15,10 +42,61 @@ export function Pie({ destino }: { destino: Destino }) {
   const url = destino.pie_credito_url?.trim();
   const urlSegura = url && /^https?:\/\//i.test(url) ? url : null;
 
+  const conContenido = (categorias ?? []).filter((c) => c.total > 0);
+  const hayMapa = conContenido.length > 0 && idioma;
+
   return (
     <footer>
-      {/* El crédito va PRIMERO (a la izquierda) a propósito: la burbuja del
-          concierge flota fija abajo a la derecha y le caía encima. */}
+      {hayMapa && (
+        <div className="pie-mapa">
+          <div className="pie-columnas">
+            {SECCIONES.map((seccion) => {
+              const suyas = conContenido.filter((c) => c.seccion === seccion);
+              if (suyas.length === 0) return null;
+              return (
+                <div key={seccion} className="pie-columna">
+                  <h2>{t(seccion === 'comer_beber' ? 'comer' : seccion, idioma)}</h2>
+                  <ul>
+                    {suyas.map((c) => (
+                      <li key={c.categoria_id}>
+                        <Link href={`/${idioma}/${c.babosa}`}>
+                          {c.nombre} <span>{c.total}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+
+            <div className="pie-columna">
+              <h2>{destino.marca_nombre}</h2>
+              <ul>
+                <li><Link href={`/${idioma}/blog`}>{t('blog', idioma)}</Link></li>
+                <li><Link href={`/${idioma}/experiencias`}>{t('experiencias', idioma)}</Link></li>
+                <li><Link href={`/${idioma}/sumar-negocio`}>{t('sumar_boton', idioma)}</Link></li>
+                <li><Link href={`/${idioma}/premium`}>{t('premium_sello', idioma)}</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Las otras versiones del sitio. No es solo cortesía: le da al
+              buscador un camino para llegar a cada idioma. */}
+          <div className="pie-idiomas">
+            <span>{t('menu_idioma', idioma)}</span>
+            <ul>
+              {destino.idiomas.map((i) => (
+                <li key={i}>
+                  <Link href={`/${i}`} hrefLang={i} className={i === idioma ? 'on' : ''}>
+                    {NOMBRE_PROPIO[i]}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div className="pie-caja">
         {credito && (
           <div className="credito">
