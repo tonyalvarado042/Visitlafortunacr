@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 export default async function PaginaNegocio({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { destino, db } = await contextoPanel('negocios');
+  const conPlaces = await hayClaveDePlaces();
 
   const { data: n } = await db.from('dst_negocio').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n) notFound();
@@ -102,7 +103,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
             </div>
 
             <div className="tarjeta">
-              <h2>Opiniones de afuera <small>{hayClaveDePlaces() ? 'Google conectado' : 'falta GOOGLE_PLACES_API_KEY'}</small></h2>
+              <h2>Opiniones de afuera <small>{conPlaces ? 'Google conectado' : 'falta la llave de Google Places'}</small></h2>
               {!externas?.length ? <Vacio texto="Nada traído todavía." /> : externas.map((x) => {
                 const cuantos = (x.extractos as unknown as { count: number }[] | null)?.[0]?.count ?? 0;
                 return (

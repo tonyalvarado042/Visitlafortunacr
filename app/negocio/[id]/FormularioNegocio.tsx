@@ -42,7 +42,7 @@ export function FormularioNegocio({ negocio }: { negocio: MiNegocio }) {
         <label>
           <span>Teléfono</span>
           <input name="telefono" type="tel" inputMode="tel" placeholder="+506…"
-                 defaultValue={negocio.telefono ?? ''} />
+                 defaultValue={negocio.telefono ?? ''} required />
         </label>
         <label>
           <span>WhatsApp</span>

@@ -21,16 +21,21 @@ import 'server-only';
  * solo se puede mostrar la nota y el enlace cargados a mano.
  */
 
+import { secreto } from '@/lib/secretos';
+
 const BASE = 'https://places.googleapis.com/v1';
 
-export function hayClaveDePlaces(): boolean {
-  const clave = process.env.GOOGLE_PLACES_API_KEY?.trim();
-  return !!clave && clave.length >= 20 && !clave.includes('...');
+/* La llave sale de la boveda (se ingresa en Ajustes -> Llaves) y, si no esta
+   ahi, del entorno. Rotarla no deberia obligar a redesplegar el sitio. */
+const NOMBRE_LLAVE = 'GOOGLE_PLACES_API_KEY';
+
+export async function hayClaveDePlaces(): Promise<boolean> {
+  return Boolean(await secreto(NOMBRE_LLAVE));
 }
 
-function clave(): string {
-  const valor = process.env.GOOGLE_PLACES_API_KEY?.trim();
-  if (!valor) throw new Error('Falta GOOGLE_PLACES_API_KEY en el entorno.');
+async function clave(): Promise<string> {
+  const valor = await secreto(NOMBRE_LLAVE);
+  if (!valor) throw new Error(`Falta ${NOMBRE_LLAVE}. Ingresala en Ajustes -> Llaves.`);
   return valor;
 }
 
@@ -79,11 +84,12 @@ type RespuestaLugar = {
 };
 
 async function pedir<T>(url: string, campos: string, init?: RequestInit): Promise<T> {
+  const llave = await clave();
   const respuesta = await fetch(url, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      'X-Goog-Api-Key': clave(),
+      'X-Goog-Api-Key': llave,
       'X-Goog-FieldMask': campos,
       ...(init?.headers ?? {}),
     },

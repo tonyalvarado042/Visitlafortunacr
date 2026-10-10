@@ -97,6 +97,13 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
   if (!nombre) return { error: 'El negocio necesita un nombre.' };
   if (!/^[0-9a-f-]{36}$/i.test(categoriaId)) return { error: 'Elegí a qué categoría pertenece.' };
 
+  /* El telefono es obligatorio. Una ficha sin telefono no se puede contactar,
+     y el muro del contacto no tiene nada que destapar: el visitante deja sus
+     datos a cambio de nada. Se exige ACA y no solo en el HTML, porque el
+     "required" del navegador se salta. */
+  const tel = telefono(texto(datos, 'telefono'));
+  if (!tel) return { error: 'Falta el teléfono. Es lo primero que busca quien quiere ir.' };
+
   const destino = await destinoActual();
 
   // Parecidos: se compara sin tildes ni mayúsculas, y basta con que uno
@@ -127,7 +134,7 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
     p_categoria_id: categoriaId,
     p_nombre: nombre,
     p_resumen: texto(datos, 'resumen') || null,
-    p_telefono: telefono(texto(datos, 'telefono')),
+    p_telefono: tel,
     p_whatsapp: telefono(texto(datos, 'telefono_whatsapp')),
     p_email: texto(datos, 'email').toLowerCase() || null,
     p_sitio_web: texto(datos, 'sitio_web') || null,

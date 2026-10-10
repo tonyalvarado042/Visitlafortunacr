@@ -180,8 +180,9 @@ function PasoNegocio({
 
         <div className="forma-fila">
           <label>
-            <span>{t('sumar_telefono', idioma)}</span>
-            <input name="telefono" type="tel" inputMode="tel" placeholder="+506…" />
+            <span>{t('sumar_telefono', idioma)} *</span>
+            <input name="telefono" type="tel" inputMode="tel" placeholder="+506…" required />
+            <small>{t('sumar_telefono_porque', idioma)}</small>
           </label>
           <label>
             <span>WhatsApp</span>

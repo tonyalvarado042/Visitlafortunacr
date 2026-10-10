@@ -124,7 +124,12 @@ table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .ingreso h1 { margin: 0 0 6px; font-size: 22px; }
 .ingreso p.sub { color: #8B8B87; margin: 0 0 22px; font-size: 13.5px; }
 .ingreso .campo label { color: #C9C7C2; }
-.ingreso .campo input { background: #0F0F0F; border-color: #2A2A2A; color: #fff; }
+/* Misma regla que en el sitio: el campo tiene que verse como un campo. */
+.ingreso .campo input { background: #1E1E1E; border: 1px solid #3A3A3A; color: #fff; padding: 12px; }
+.ingreso .campo input::placeholder { color: #7A7874; }
+.ingreso .campo input:hover { border-color: #4E4E4E; background: #222222; }
+.ingreso .campo input:focus { outline: 2px solid var(--naranja); outline-offset: 1px; border-color: var(--naranja); }
+.ingreso .campo label { color: #C2C0BC; }
 .ingreso .pestanas { display: flex; gap: 6px; margin-bottom: 18px; }
 .ingreso .pestanas button { flex: 1; background: none; border: 1px solid #2A2A2A; color: #8B8B87; padding: 8px; border-radius: 8px; font-family: inherit; font-weight: 600; cursor: pointer; }
 .ingreso .pestanas button.activa { background: #fff; color: #0B0B0B; border-color: #fff; }

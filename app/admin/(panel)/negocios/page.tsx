@@ -13,6 +13,7 @@ const VER: Record<string, string> = { pendiente: '#9CA3AF', parcial: '#F59E0B', 
 export default async function PaginaNegocios({ searchParams }: { searchParams: Promise<{ q?: string; estado?: string; seccion?: string }> }) {
   const f = await searchParams;
   const { destino, db } = await contextoPanel('negocios');
+  const conPlaces = await hayClaveDePlaces();
 
   let consulta = db
     .from('dst_negocio')
@@ -35,7 +36,7 @@ export default async function PaginaNegocios({ searchParams }: { searchParams: P
   return (
     <>
       <Cabecera titulo="Negocios" sub={`${data?.length ?? 0} en ${destino.nombre}`}>
-        {hayClaveDePlaces() ? (
+        {conPlaces ? (
           <form action={traerOpinionesDeTodos}>
             <input type="hidden" name="limite" value="25" />
             <BotonAccion clase="boton secundario" confirmar="Trae de Google la nota y las reseñas de hasta 25 negocios que no tengan o estén por vencer. Cada uno es una llamada facturada. ¿Seguir?">
