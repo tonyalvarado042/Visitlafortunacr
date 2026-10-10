@@ -350,7 +350,9 @@ section { padding: 84px 0; }
 .modal .gracias p { margin: 0; color: #D6D4D0; font-size: 15px; max-width: 38ch; }
 @media (max-width: 560px) { .modal .par { grid-template-columns: 1fr; } }
 
-footer { border-top: 1px solid var(--borde); padding: 32px 40px; margin-top: 40px; }
+/* El relleno de abajo no es capricho: la burbuja del concierge flota fija
+   en esa esquina y, sin aire, se come la última línea del pie. */
+footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top: 40px; }
 .pie-caja { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
 .pie-caja .legal { font-size: 12.5px; color: #5E5C58; }
 .pie-caja .credito { font-size: 12.5px; color: #5E5C58; }

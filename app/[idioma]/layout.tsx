@@ -59,7 +59,10 @@ export default async function LayoutIdioma({
   return (
     <div style={paleta}>
       {children}
-      <Concierge idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio} />
+      {/* Se apaga desde Ajustes. Ni se monta: apagado no deja ni el botón. */}
+      {destino.chat_activo && (
+        <Concierge idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio} />
+      )}
     </div>
   );
 }

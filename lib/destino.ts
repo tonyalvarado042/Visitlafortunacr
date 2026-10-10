@@ -36,6 +36,9 @@ export type Destino = {
      código: este lo hizo LIDERAX10, el próximo lo puede hacer otro. */
   pie_credito_texto: string | null;
   pie_credito_url: string | null;
+  /* Si la burbuja del concierge sale en el sitio. Por destino: uno puede
+     querer chat y el de al lado no. */
+  chat_activo: boolean;
 };
 
 /**

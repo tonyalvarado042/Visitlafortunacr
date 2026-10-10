@@ -38,6 +38,7 @@ export async function editarDestino(datos: FormData) {
     pie_credito_url: /^https?:\/\/\S+$/i.test(texto(datos, 'pie_credito_url'))
       ? texto(datos, 'pie_credito_url')
       : null,
+    chat_activo: texto(datos, 'chat_activo') === '1',
     esta_activo: texto(datos, 'esta_activo') === '1',
   }).eq('id', destino.id);
   if (error) console.error('editarDestino:', error.message);

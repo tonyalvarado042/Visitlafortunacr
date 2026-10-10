@@ -17,10 +17,14 @@ export const maxDuration = 120;
 const IDENTIFICADOR = /^[a-zA-Z0-9_-]{8,64}$/;
 const IDIOMAS = ['es', 'en', 'pt', 'fr', 'de'];
 
-async function destinoDe(peticion: NextRequest): Promise<{ id: string } | null> {
+/* Trae también chat_activo: apagar la burbuja desde Ajustes tiene que apagar
+   el chat de verdad. Si solo se dejara de pintar el botón, este endpoint
+   seguiría contestando a cualquiera que lo llame a mano, y "apagado" sería
+   mentira. */
+async function destinoDe(peticion: NextRequest): Promise<{ id: string; chat_activo: boolean } | null> {
   const dominio = dominioDeHost(peticion.headers.get('host'));
-  const { data } = await servicio().from('dst_destino').select('id').eq('dominio', dominio).eq('esta_activo', true).maybeSingle();
-  return data ? { id: data.id as string } : null;
+  const { data } = await servicio().from('dst_destino').select('id, chat_activo').eq('dominio', dominio).eq('esta_activo', true).maybeSingle();
+  return data ? { id: data.id as string, chat_activo: data.chat_activo !== false } : null;
 }
 
 export async function POST(peticion: NextRequest) {
@@ -46,6 +50,9 @@ export async function POST(peticion: NextRequest) {
 
   const destino = await destinoDe(peticion);
   if (!destino) return NextResponse.json({ error: 'Destino no encontrado.' }, { status: 404 });
+  if (!destino.chat_activo) {
+    return NextResponse.json({ error: 'El chat no está disponible por ahora.' }, { status: 503 });
+  }
 
   const db = servicio();
 

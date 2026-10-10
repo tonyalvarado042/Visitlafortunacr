@@ -17,8 +17,9 @@ export function Pie({ destino }: { destino: Destino }) {
 
   return (
     <footer>
+      {/* El crédito va PRIMERO (a la izquierda) a propósito: la burbuja del
+          concierge flota fija abajo a la derecha y le caía encima. */}
       <div className="pie-caja">
-        <div className="legal">© {new Date().getFullYear()} {destino.dominio} · {lugar}</div>
         {credito && (
           <div className="credito">
             {urlSegura
@@ -26,6 +27,7 @@ export function Pie({ destino }: { destino: Destino }) {
               : credito}
           </div>
         )}
+        <div className="legal">© {new Date().getFullYear()} {destino.dominio} · {lugar}</div>
       </div>
     </footer>
   );
