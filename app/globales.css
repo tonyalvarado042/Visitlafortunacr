@@ -920,6 +920,33 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .comercio-forma { margin-top: 8px; }
 
 .comercio-bloque { margin-top: 48px; padding-top: 30px; border-top: 1px solid var(--borde); }
+
+/* ---- Galeria de fotos del duenno ---- */
+.galeria-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; margin: 22px 0 18px; }
+.galeria-fotos .foto { position: relative; margin: 0; border: 1px solid var(--borde); border-radius: 5px; overflow: hidden; background: #111; }
+.galeria-fotos .foto.portada { border-color: var(--naranja); }
+.galeria-fotos .foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.galeria-fotos .marca-portada {
+  position: absolute; top: 8px; left: 8px; background: var(--naranja); color: var(--negro);
+  font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 100px;
+}
+.galeria-fotos figcaption { display: flex; gap: 14px; align-items: center; padding: 9px 11px; background: #141414; }
+.galeria-fotos figcaption form { display: contents; }
+.galeria-fotos figcaption .enlace-flojo { font-size: 12px; }
+.enlace-flojo.peligro { color: #E2795A; }
+.enlace-flojo.peligro:hover { color: #FF8F6B; }
+
+/* El selector de archivos de fabrica es feo pero funciona en todo lado, y uno
+   armado a mano se rompe en los navegadores de telefono. Se le da estilo al
+   boton y se lo deja en paz. */
+.campo-fotos { display: block; width: 100%; max-width: 420px; font-family: inherit; font-size: 13px; color: var(--humo); }
+.campo-fotos::file-selector-button {
+  margin-right: 12px; padding: 10px 18px; border: 1px solid var(--borde); border-radius: 3px;
+  background: #1C1C1C; color: var(--blanco); font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.campo-fotos::file-selector-button:hover { border-color: var(--naranja); color: var(--naranja); }
+.campo-fotos:disabled { opacity: .5; }
 .comercio-bloque h2 { font-size: 23px; text-transform: none; }
 .comercio-resena { padding: 18px 0; border-bottom: 1px solid var(--borde); }
 .comercio-resena header { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; font-size: 13px; color: var(--humo); }

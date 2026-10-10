@@ -101,3 +101,17 @@ export const ESTADO_FICHA: Record<string, { texto: string; detalle: string; colo
   publicado: { texto: 'Publicada',  detalle: 'Ya aparece en el directorio.',                      color: '#66BB2E' },
   archivado: { texto: 'Archivada',  detalle: 'No aparece en el directorio. Escribinos si es un error.', color: '#B42318' },
 };
+
+export type MiFoto = { id: string; url: string; es_portada: boolean };
+
+/** Las fotos propias de un negocio mío. Las genéricas no entran: no son suyas. */
+export async function fotosDeMiNegocio(negocioId: string): Promise<MiFoto[]> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('mis_fotos', { p_negocio_id: negocioId });
+  if (error) {
+    console.error('mis_fotos:', error.message);
+    return [];
+  }
+  return (data ?? []) as MiFoto[];
+}
+

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { miNegocio, resenasDeMiNegocio, ESTADO_FICHA } from '@/lib/comercio';
+import { fotosDeMiNegocio, miNegocio, resenasDeMiNegocio, ESTADO_FICHA } from '@/lib/comercio';
 import { FormularioNegocio } from './FormularioNegocio';
+import { Fotos } from './Fotos';
 import { Resenas } from './Resenas';
 
 export const dynamic = 'force-dynamic';
@@ -20,9 +21,10 @@ export default async function EditarMiNegocio({
   const negocio = await miNegocio(id);
   if (!negocio) notFound();
 
-  const resenas = negocio.estado_publicacion === 'publicado'
-    ? await resenasDeMiNegocio(id)
-    : [];
+  const [resenas, fotos] = await Promise.all([
+    negocio.estado_publicacion === 'publicado' ? resenasDeMiNegocio(id) : Promise.resolve([]),
+    fotosDeMiNegocio(id),
+  ]);
 
   const estado = ESTADO_FICHA[negocio.estado_publicacion] ?? ESTADO_FICHA.borrador;
   const urlPublica = `/${negocio.idioma_principal}/${negocio.categoria_babosa}/${negocio.babosa}`;
@@ -36,8 +38,9 @@ export default async function EditarMiNegocio({
           <strong>¡Listo! Tu negocio quedó cargado.</strong>
           <p>
             Ahora lo revisa el equipo antes de publicarlo en el directorio.
-            Mientras tanto podés seguir completando la ficha — todo lo que
-            agregues se guarda.
+            Mientras tanto <strong>sumale fotos</strong> aquí abajo: una ficha
+            con fotos se mira mucho más que una sin. Todo lo que agregues se
+            guarda.
           </p>
         </div>
       )}
@@ -59,6 +62,13 @@ export default async function EditarMiNegocio({
       </div>
 
       <FormularioNegocio negocio={negocio} />
+
+      <Fotos
+        negocioId={negocio.id}
+        destinoBabosa={negocio.destino_babosa}
+        negocioBabosa={negocio.babosa}
+        fotos={fotos}
+      />
 
       {negocio.estado_publicacion === 'publicado' && (
         <Resenas negocioId={negocio.id} resenas={resenas} />

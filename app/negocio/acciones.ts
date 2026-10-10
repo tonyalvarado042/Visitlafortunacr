@@ -114,3 +114,62 @@ export async function responderResena(_previo: EstadoComercio, datos: FormData):
   revalidatePath(`/negocio/${negocioId}`);
   return { ok: 'Respuesta publicada.' };
 }
+
+/* ---- Fotos ----------------------------------------------------------- */
+/*
+ * El archivo YA está en Storage: lo subió el navegador con la sesión del
+ * dueño, porque por acá no cabe (1 MB el server action, 4.5 MB Vercel). Estas
+ * acciones solo anotan, marcan y borran.
+ *
+ * Todo pasa por funciones de la base. El dueño no escribe dst_negocio_foto:
+ * si pudiera, se marcaría es_generica, se inventaría un crédito o apuntaría
+ * la url a cualquier lado. En las funciones eso no son parámetros.
+ */
+
+export async function anotarMiFoto(negocioId: string, url: string, texto?: string): Promise<EstadoComercio> {
+  if (!esUuid(negocioId)) return { error: 'Falta el negocio.' };
+
+  const db = await sesion();
+  const { error } = await db.rpc('agregar_mi_foto', {
+    p_negocio_id: negocioId,
+    p_url: url,
+    p_texto: texto?.trim() || null,
+  });
+  if (error) {
+    console.error('agregar_mi_foto:', error.message);
+    return { error: error.message };
+  }
+  revalidatePath(`/negocio/${negocioId}`);
+  return { ok: 'Foto agregada.' };
+}
+
+export async function ponerMiPortada(datos: FormData): Promise<void> {
+  const negocioId = texto(datos, 'negocio_id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(negocioId) || !esUuid(fotoId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('marcar_mi_portada', { p_negocio_id: negocioId, p_foto_id: fotoId });
+  if (error) console.error('marcar_mi_portada:', error.message);
+  revalidatePath(`/negocio/${negocioId}`);
+}
+
+export async function quitarMiFoto(datos: FormData): Promise<void> {
+  const negocioId = texto(datos, 'negocio_id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(negocioId) || !esUuid(fotoId)) return;
+
+  const db = await sesion();
+  /* La función devuelve la ruta en Storage justamente para esto: si solo se
+     borrara la fila, el archivo quedaría huérfano y el bucket engorda solo. */
+  const { data: ruta, error } = await db.rpc('borrar_mi_foto', {
+    p_negocio_id: negocioId, p_foto_id: fotoId,
+  });
+  if (error) { console.error('borrar_mi_foto:', error.message); return; }
+
+  if (typeof ruta === 'string' && ruta) {
+    const { error: eArchivo } = await db.storage.from('negocios').remove([ruta]);
+    if (eArchivo) console.error('borrar archivo:', eArchivo.message);
+  }
+  revalidatePath(`/negocio/${negocioId}`);
+}
