@@ -22,7 +22,10 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
   const verificado = negocio.estado_verificacion === 'verificado' || negocio.estado_verificacion === 'reclamado';
 
   return (
-    <article className="tarjeta">
+    /* El destacado se nota desde la reticula: borde naranja y cintillo sobre
+       la foto. Es lo que se compra con el plan premium; si se viera igual que
+       los demas, no habria que pagarlo. */
+    <article className={negocio.es_destacado ? 'tarjeta tarjeta-destacada' : 'tarjeta'}>
       <Link href={`/${idioma}/${negocio.categoria_babosa}/${negocio.babosa}`}>
         <div className="imagen" style={{ background: `linear-gradient(150deg, ${color}1F, #0B0B0B 72%)` }}>
           {negocio.foto_portada_url && (
@@ -38,12 +41,21 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
           {negocio.logo_url
             ? <img src={negocio.logo_url} alt="" style={{ maxHeight: 110, width: 'auto', position: 'relative' }} />
             : !negocio.foto_portada_url && <span className="inicial" style={{ color }}>{negocio.nombre.charAt(0)}</span>}
+
+          {negocio.es_destacado && (
+            <span className="cintillo">{t('destacado_cintillo', idioma)}</span>
+          )}
+          {negocio.video_url && (
+            <span className="destacado-video" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg>
+              {t('ver_video', idioma)}
+            </span>
+          )}
         </div>
       </Link>
 
       <div className="cuerpo">
         <div className="meta">
-          {negocio.es_destacado && <span className="sello-pagado">{t('destacado', idioma)}</span>}
           <span className="etiqueta-cat">{negocio.categoria_nombre}</span>
           {verificado
             ? <span className="sello"><IconoVerificado />{t('verificado', idioma)}</span>

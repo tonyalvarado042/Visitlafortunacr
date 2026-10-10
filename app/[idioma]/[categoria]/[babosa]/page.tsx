@@ -76,6 +76,12 @@ export default async function Ficha({ params }: { params: Parametros }) {
      poner el muro y la llave al lado. */
   const tapar = destino.contacto_bloqueado !== false;
 
+  /* La foto de la cabecera sale de la galeria: la portada si la hay, si no la
+     primera. Sin foto no se pinta el hero — una cabecera a sangre con un
+     degradado vacio se ve peor que la version normal. */
+  const esDestacado = negocio.es_destacado === true;
+  const fotoHero = fotos.find((f) => f.es_portada)?.url ?? fotos[0]?.url ?? null;
+
   // Solo las reseñas propias entran en el marcado. Presentar las notas de
   // Google como nuestras sería engañar al buscador.
   const marcado = {
@@ -109,9 +115,21 @@ export default async function Ficha({ params }: { params: Parametros }) {
         </div>
       </div>
 
-      <section style={{ paddingTop: 26, paddingBottom: 34 }}>
-        <div className="caja">
-          <div className="meta" style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+      {/* El destacado estrena cabecera: la foto a sangre detras del titulo, la
+          misma que usan las experiencias. Es la diferencia que se ve de una y
+          lo que hace que el plan se note sin explicarlo. */}
+      <section className={esDestacado ? 'ficha-hero' : undefined}
+               style={esDestacado ? undefined : { paddingTop: 26, paddingBottom: 34 }}>
+        {esDestacado && fotoHero && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={fotoHero} alt="" className="ficha-hero-foto" />
+            <div className="ficha-hero-velo" aria-hidden="true" />
+          </>
+        )}
+        <div className={esDestacado ? 'caja ficha-hero-texto' : 'caja'}>
+          <div className="meta" style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
+            {esDestacado && <span className="cintillo cintillo-suelto">{t('destacado_cintillo', idioma)}</span>}
             <span className="etiqueta-cat">{negocio.categoria_nombre}</span>
             {verificado
               ? <span className="sello"><IconoVerificado />{t('verificado', idioma)}</span>

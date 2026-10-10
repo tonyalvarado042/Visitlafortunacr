@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { destinoActual, categoriasDe, negociosDe, type Negocio, type Categoria } from '@/lib/destino';
+import { destinoActual, categoriasDe, negociosDe, destacadosDe, type Negocio, type Categoria } from '@/lib/destino';
 import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -8,6 +8,7 @@ import { Resultados } from '@/componentes/Resultados';
 import { CampoBusqueda } from '@/componentes/CampoBusqueda';
 import { buscarNegocios } from '@/lib/buscar';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
+import { FilaDestacados } from '@/componentes/FilaDestacados';
 import { Planificador } from '@/componentes/Planificador';
 
 export const dynamic = 'force-dynamic';
@@ -39,9 +40,10 @@ export default async function Portada({ params, searchParams }: {
   const { idioma } = await params;
   const { q, cat, ver } = await searchParams;
   const destino = await destinoActual();
-  const [categorias, negocios] = await Promise.all([
+  const [categorias, negocios, destacados] = await Promise.all([
     categoriasDe(destino, idioma),
     negociosDe(destino, idioma),
+    destacadosDe(destino, idioma, 10),
   ]);
 
   /* El buscador vive en el hero y los resultados salen aquí mismo: cuando hay
@@ -122,6 +124,10 @@ export default async function Portada({ params, searchParams }: {
       />
 
       {/* ---- Qué hacer ---- */}
+      {/* Los destacados, arriba del todo: es el primer lugar de la portada
+          despues del hero y es lo que se vende con el plan premium. */}
+      <FilaDestacados destacados={destacados} idioma={idioma} />
+
       <section className="zona">
         <div className="caja">
           <div className="cabecera-seccion revela">

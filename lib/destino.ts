@@ -138,6 +138,9 @@ export type Negocio = {
      de fondo y nunca la presenta como una imagen del lugar. */
   foto_portada_url: string | null;
   foto_portada_generica: boolean | null;
+  /* Lo devuelve negocios_publicados desde la migracion del premium: la
+     tarjeta puede marcar cual tiene video sin pedir la ficha entera. */
+  video_url: string | null;
 };
 
 /** Los negocios publicados del destino, ya resueltos al idioma pedido. */
@@ -326,5 +329,37 @@ export async function cuposPremium(destino: Destino): Promise<CuposPremium> {
   }
   const fila = ((data ?? []) as CuposPremium[])[0];
   return fila ?? { cupos: destino.premium_cupos, tomados: 0, quedan: destino.premium_cupos ?? 0 };
+}
+
+export type Destacado = {
+  id: string;
+  nombre: string;
+  babosa: string;
+  categoria_babosa: string;
+  categoria_nombre: string;
+  resumen: string | null;
+  foto_portada_url: string | null;
+  membresia: string;
+  video_url: string | null;
+  total_resenas: number;
+};
+
+/**
+ * Los destacados para la fila de la portada.
+ *
+ * Es lo que se compra con el plan premium y tiene que notarse: si "destacado"
+ * no se ve distinto en ninguna pantalla, el plan no vende.
+ */
+export async function destacadosDe(destino: Destino, idioma: Idioma, limite = 10): Promise<Destacado[]> {
+  const { data, error } = await supabase.rpc('negocios_destacados', {
+    p_dominio: destino.dominio,
+    p_idioma: idioma,
+    p_limite: limite,
+  });
+  if (error) {
+    console.error('negocios_destacados:', error.message);
+    return [];
+  }
+  return (data ?? []) as Destacado[];
 }
 
