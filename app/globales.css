@@ -1130,6 +1130,48 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .exp-ficha { padding: 26px 0 60px; }
 }
 
+
+/* ---- Contacto tapado: la ficha se ve, el telefono no ----
+   El numero entero NO esta en la pagina: lo que se pinta borroso es una
+   pista ("+506 2479 ****"). El desenfoque es decoracion, no seguridad. */
+.contacto-tapado { margin-bottom: 4px; }
+.contacto-tapado .linea-contacto { cursor: default; }
+.dato.borroso {
+  color: var(--humo);
+  filter: blur(3.5px);
+  -webkit-user-select: none; user-select: none;
+  letter-spacing: .04em;
+}
+
+.boton-destapar {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; margin-top: 12px; padding: 13px; border: 0; border-radius: 4px;
+  background: var(--naranja); color: var(--negro);
+  font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+  transition: transform .14s, box-shadow .18s;
+}
+.boton-destapar:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,106,0,.3); }
+
+.forma-destapar { margin-top: 16px; gap: 12px; }
+.forma-destapar label > span { font-size: 11.5px; }
+.forma-destapar .boton { justify-self: stretch; text-align: center; }
+.destapar-por-que {
+  margin: 0; font-size: 12.5px; line-height: 1.55; color: #C2C0BC;
+  padding: 11px 13px; background: rgba(255,106,0,.07);
+  border: 1px solid rgba(255,106,0,.26); border-radius: 4px;
+}
+.destapar-letra-chica { font-size: 11px; line-height: 1.5; color: #6E6C68; }
+
+/* Cuantas personas pidieron los datos: en el panel del dueno. */
+.pedidos-caja {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  margin-top: 26px; padding: 18px 20px;
+  background: var(--carbon); border: 1px solid var(--borde);
+  border-left: 3px solid var(--verde); border-radius: 5px;
+}
+.pedidos-caja strong { font-size: 30px; font-weight: 800; letter-spacing: -.02em; }
+.pedidos-caja span { font-size: 13.5px; color: var(--humo); }
+
 /* ---- Menú de perfil: mismo patrón que el selector de idioma ---- */
 .menu-perfil { position: relative; }
 .menu-perfil summary {

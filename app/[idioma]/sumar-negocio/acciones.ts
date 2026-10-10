@@ -14,6 +14,10 @@ export type EstadoNegocio = {
   error?: string | null;
   /** Fichas parecidas encontradas: hay que preguntar antes de crear otra. */
   parecidos?: { nombre: string; babosa: string; categoria: string }[];
+  /* Cuando se creo, en vez de redirigir se devuelve el negocio: el formulario
+     sigue al paso de las fotos sin salir de la pagina. Redirigiendo, la gente
+     daba por terminado el tramite y la ficha se quedaba sin una sola foto. */
+  creado?: { id: string; babosa: string; destinoBabosa: string } | null;
 };
 
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -140,6 +144,15 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
 
   const negocioId = data as string;
 
+  /* La babosa la arma la base (puede agregarle un sufijo si ya existia), asi
+     que se lee de vuelta: las fotos se suben a una carpeta con ESE nombre. */
+  const { data: creado } = await db
+    .from('dst_negocio')
+    .select('babosa')
+    .eq('id', negocioId)
+    .maybeSingle();
+  const babosaNueva = (creado?.babosa as string | undefined) ?? '';
+
   /* El correo de confirmación. Va DESPUÉS de responder (after) y envuelto en
      try: que Resend esté caído o falte la llave no puede impedir que alguien
      registre su negocio. Si no sale, queda en el registro del servidor. */
@@ -160,7 +173,9 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
     });
   }
 
-  redirect(`/negocio/${negocioId}?nuevo=1`);
+  return {
+    creado: { id: negocioId, babosa: babosaNueva, destinoBabosa: destino.babosa },
+  };
 }
 
 /**

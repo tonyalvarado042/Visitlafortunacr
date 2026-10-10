@@ -1,7 +1,9 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import Link from 'next/link';
 import { t, type Idioma } from '@/lib/idiomas';
+import { Fotos } from '@/app/negocio/[id]/Fotos';
 import { crearCuenta, entrar, olvideMiClaveSumar, sumarNegocio, type EstadoCuenta, type EstadoNegocio } from './acciones';
 
 const NADA_CUENTA: EstadoCuenta = {};
@@ -35,9 +37,12 @@ function PasoCuenta({ idioma }: { idioma: Idioma }) {
 
   return (
     <div className="tarjeta-forma">
+      {/* Los tres pasos se anuncian desde el principio: si las fotos aparecen
+          de sorpresa al final, se sienten un extra y se saltan. */}
       <div className="pasos-forma">
         <span className="paso-activo">1. {t('sumar_paso_cuenta', idioma)}</span>
         <span>2. {t('sumar_paso_negocio', idioma)}</span>
+        <span>3. {t('sumar_paso_fotos', idioma)}</span>
       </div>
 
       <div className="pestanas">
@@ -109,6 +114,13 @@ function PasoNegocio({
 }) {
   const [estado, accion, pendiente] = useActionState(sumarNegocio, NADA_NEGOCIO);
 
+  /* Las fotos van ACA y no en una pantalla aparte despues. Redirigiendo al
+     panel, la gente daba el tramite por terminado y la ficha se quedaba sin
+     una sola foto — que es justo lo que hace que nadie la mire. */
+  if (estado.creado) {
+    return <PasoFotos idioma={idioma} creado={estado.creado} />;
+  }
+
   /* Cuando la base devuelve parecidos, el formulario no se vacía: se le
      muestran arriba y se le pide que confirme. El campo oculto "confirmado"
      es lo que deja pasar el segundo intento. */
@@ -119,6 +131,7 @@ function PasoNegocio({
       <div className="pasos-forma">
         <span>1. {t('sumar_paso_cuenta', idioma)} ✓</span>
         <span className="paso-activo">2. {t('sumar_paso_negocio', idioma)}</span>
+        <span>3. {t('sumar_paso_fotos', idioma)}</span>
       </div>
 
       {correoCuenta && <p className="forma-nota">{t('sumar_entraste_como', idioma)} <strong>{correoCuenta}</strong></p>}
@@ -215,6 +228,46 @@ function PasoNegocio({
             : hayParecidos ? t('sumar_es_distinto', idioma) : t('sumar_enviar', idioma)}
         </button>
       </form>
+    </div>
+  );
+}
+
+/* ---- Paso 3: las fotos, antes de soltarlo ---------------------------- */
+
+function PasoFotos({
+  idioma, creado,
+}: {
+  idioma: Idioma;
+  creado: { id: string; babosa: string; destinoBabosa: string };
+}) {
+  return (
+    <div className="tarjeta-forma">
+      <div className="pasos-forma">
+        <span>1. {t('sumar_paso_cuenta', idioma)} ✓</span>
+        <span>2. {t('sumar_paso_negocio', idioma)} ✓</span>
+        <span className="paso-activo">3. {t('sumar_paso_fotos', idioma)}</span>
+      </div>
+
+      <div className="aviso-logro">
+        <strong>{t('sumar_listo_titulo', idioma)}</strong>
+        <p>{t('sumar_listo_fotos', idioma)}</p>
+      </div>
+
+      <Fotos
+        negocioId={creado.id}
+        destinoBabosa={creado.destinoBabosa}
+        negocioBabosa={creado.babosa}
+        fotos={[]}
+      />
+
+      <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginTop: 26 }}>
+        <Link className="boton" href={`/negocio/${creado.id}`}>
+          {t('sumar_listo_panel', idioma)}
+        </Link>
+        <Link className="enlace-flojo" href={`/negocio/${creado.id}`}>
+          {t('sumar_fotos_despues', idioma)}
+        </Link>
+      </div>
     </div>
   );
 }

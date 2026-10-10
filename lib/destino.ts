@@ -39,6 +39,10 @@ export type Destino = {
   /* Si la burbuja del concierge sale en el sitio. Por destino: uno puede
      querer chat y el de al lado no. */
   chat_activo: boolean;
+  /* Si el telefono y el sitio de las fichas salen tapados hasta que el
+     visitante deja sus datos. En true el directorio genera leads; en false
+     es una guia telefonica. */
+  contacto_bloqueado: boolean;
 };
 
 /**

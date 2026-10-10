@@ -51,6 +51,23 @@ function urlSegura(url: string): string | null {
   return /^https?:\/\/[^\s"'<>]+$/i.test(url) ? url : null;
 }
 
+/**
+ * Una ruta del sitio, convertida en dirección completa.
+ *
+ * En el sitio, "/marca/emblema.png" funciona. En un correo NO: se abre en
+ * Gmail, no en visitlafortunacr.com, así que una ruta relativa no apunta a
+ * ninguna parte y la imagen sale rota. Por eso el logo del destino —que se
+ * guarda como ruta— hay que completarlo con el dominio antes de meterlo.
+ */
+function direccionCompleta(ruta: string | null, dominio: string): string | null {
+  if (!ruta) return null;
+  const limpia = ruta.trim();
+  if (!limpia) return null;
+  if (/^https?:\/\//i.test(limpia)) return urlSegura(limpia);
+  if (limpia.startsWith('/')) return `https://${dominio}${limpia}`;
+  return null;
+}
+
 export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
   const { destino, idioma, titulo, parrafos, boton, datos, nota } = pieza;
 
@@ -61,8 +78,9 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
   const dominio = escapar(destino.dominio);
   const url = boton ? urlSegura(boton.url) : null;
 
-  const logo = destino.logo_url && urlSegura(destino.logo_url)
-    ? `<img src="${destino.logo_url}" width="44" height="44" alt="${marca}" style="display:block;border:0;border-radius:50%;">`
+  const urlLogo = direccionCompleta(destino.logo_url, destino.dominio);
+  const logo = urlLogo
+    ? `<img src="${urlLogo}" width="44" height="44" alt="${marca}" style="display:block;border:0;border-radius:50%;">`
     : `<span style="display:inline-block;width:44px;height:44px;border-radius:50%;background:${acento};"></span>`;
 
   const filasDatos = (datos ?? []).map((d) => `

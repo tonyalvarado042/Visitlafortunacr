@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { fotosDeMiNegocio, miNegocio, resenasDeMiNegocio, ESTADO_FICHA } from '@/lib/comercio';
+import { fotosDeMiNegocio, miNegocio, pedidosDeMiNegocio, resenasDeMiNegocio, ESTADO_FICHA } from '@/lib/comercio';
 import { FormularioNegocio } from './FormularioNegocio';
 import { Fotos } from './Fotos';
 import { Resenas } from './Resenas';
@@ -21,9 +21,10 @@ export default async function EditarMiNegocio({
   const negocio = await miNegocio(id);
   if (!negocio) notFound();
 
-  const [resenas, fotos] = await Promise.all([
+  const [resenas, fotos, pedidos] = await Promise.all([
     negocio.estado_publicacion === 'publicado' ? resenasDeMiNegocio(id) : Promise.resolve([]),
     fotosDeMiNegocio(id),
+    pedidosDeMiNegocio(id),
   ]);
 
   const estado = ESTADO_FICHA[negocio.estado_publicacion] ?? ESTADO_FICHA.borrador;
@@ -60,6 +61,17 @@ export default async function EditarMiNegocio({
           )}
         </div>
       </div>
+
+      {/* Lo primero que quiere saber un dueño: si esto le sirve. */}
+      {pedidos.cuantos > 0 && (
+        <div className="pedidos-caja">
+          <strong>{pedidos.cuantos}</strong>
+          <span>
+            {pedidos.cuantos === 1 ? 'persona pidió tus datos' : 'personas pidieron tus datos'} en los últimos 30 días.
+            {' '}Cada una te llegó por correo apenas lo hizo.
+          </span>
+        </div>
+      )}
 
       <FormularioNegocio negocio={negocio} />
 

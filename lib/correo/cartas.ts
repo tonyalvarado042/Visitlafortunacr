@@ -162,3 +162,90 @@ export async function correoConsultaRecibida(opciones: {
     nota: d(EXP_NOTA, idioma),
   });
 }
+
+/* ---- Alguien pidio los datos de un negocio ---- */
+/*
+ * Este correo va al NEGOCIO, no al visitante. Es la mitad que hace que el
+ * muro valga la pena: el dueno se entera de que alguien pregunto por el, con
+ * nombre y forma de contestarle. Sin esto, tapar el telefono solo molesta.
+ */
+
+const PID_ASUNTO: Texto = {
+  es: 'Alguien pidio tus datos en el directorio',
+  en: 'Someone asked for your contact details',
+  pt: 'Alguém pediu os seus dados',
+  fr: 'Quelqu’un a demandé vos coordonnées',
+  de: 'Jemand hat nach deinen Kontaktdaten gefragt',
+};
+const PID_TITULO: Texto = {
+  es: 'Alguien pregunto por vos',
+  en: 'Someone asked about you',
+  pt: 'Alguém perguntou por você',
+  fr: 'Quelqu’un s’est renseigné sur vous',
+  de: 'Jemand hat nach dir gefragt',
+};
+const PID_P1: Texto = {
+  es: 'Una persona acaba de desbloquear tus datos de contacto en el directorio. Aca abajo estan los suyos: escribile vos primero.',
+  en: 'Someone just unlocked your contact details in the directory. Theirs are below: write to them first.',
+  pt: 'Alguém acabou de desbloquear os seus dados no diretório. Os dados dessa pessoa estão abaixo: escreva primeiro.',
+  fr: 'Quelqu’un vient de débloquer vos coordonnées dans l’annuaire. Voici les siennes : écrivez-lui en premier.',
+  de: 'Jemand hat gerade deine Kontaktdaten im Verzeichnis freigeschaltet. Hier sind seine: schreib du zuerst.',
+};
+const PID_P2: Texto = {
+  es: 'Quien contesta rapido cierra. En turismo la primera respuesta se lleva la reserva casi siempre.',
+  en: 'Whoever answers first usually gets the booking. In tourism, speed closes.',
+  pt: 'Quem responde primeiro costuma fechar. No turismo, a rapidez fecha a reserva.',
+  fr: 'Celui qui répond en premier emporte presque toujours la réservation.',
+  de: 'Wer zuerst antwortet, bekommt meist die Buchung. Im Tourismus entscheidet die Geschwindigkeit.',
+};
+const PID_ROT_QUIEN: Texto = { es: 'Quien pregunto', en: 'Who asked', pt: 'Quem perguntou', fr: 'Qui a demandé', de: 'Wer gefragt hat' };
+const PID_ROT_CORREO: Texto = { es: 'Su correo', en: 'Their email', pt: 'E-mail', fr: 'Son e-mail', de: 'E-Mail' };
+const PID_ROT_WA: Texto = { es: 'Su WhatsApp', en: 'Their WhatsApp', pt: 'WhatsApp', fr: 'Son WhatsApp', de: 'WhatsApp' };
+const PID_ROT_NEG: Texto = { es: 'Tu ficha', en: 'Your listing', pt: 'Sua ficha', fr: 'Votre fiche', de: 'Dein Eintrag' };
+const PID_BOTON: Texto = {
+  es: 'Ver mi ficha', en: 'See my listing', pt: 'Ver minha ficha',
+  fr: 'Voir ma fiche', de: 'Eintrag ansehen',
+};
+const PID_NOTA: Texto = {
+  es: 'Te llega este aviso porque tu negocio esta en el directorio. Si no queres recibirlos, respondé este correo.',
+  en: 'You get this because your business is in the directory. If you would rather not, reply to this email.',
+  pt: 'Você recebe isto porque seu negócio está no diretório. Se preferir não receber, responda este e-mail.',
+  fr: 'Vous recevez ceci car votre établissement est dans l’annuaire. Si vous préférez ne plus les recevoir, répondez à cet e-mail.',
+  de: 'Du bekommst das, weil dein Betrieb im Verzeichnis steht. Wenn du das nicht möchtest, antworte auf diese E-Mail.',
+};
+const PID_SIN_NOMBRE: Texto = {
+  es: 'No dejo nombre', en: 'Left no name', pt: 'Não deixou nome',
+  fr: 'N’a pas laissé de nom', de: 'Hat keinen Namen hinterlassen',
+};
+
+export async function correoPidieronTusDatos(opciones: {
+  destino: Destino;
+  idioma: Idioma;
+  para: string;
+  nombreNegocio: string;
+  quien: string | null;
+  correoDeQuien: string | null;
+  whatsappDeQuien: string | null;
+}): Promise<Envio> {
+  const { destino, idioma, para, nombreNegocio, quien, correoDeQuien, whatsappDeQuien } = opciones;
+  return enviarCorreo({
+    destino,
+    idioma,
+    para,
+    asunto: `${d(PID_ASUNTO, idioma)} — ${nombreNegocio}`,
+    motivo: 'pidieron_tus_datos',
+    titulo: d(PID_TITULO, idioma),
+    parrafos: [d(PID_P1, idioma), d(PID_P2, idioma)],
+    datos: [
+      { rotulo: d(PID_ROT_NEG, idioma), valor: nombreNegocio },
+      { rotulo: d(PID_ROT_QUIEN, idioma), valor: quien ?? d(PID_SIN_NOMBRE, idioma) },
+      ...(correoDeQuien ? [{ rotulo: d(PID_ROT_CORREO, idioma), valor: correoDeQuien }] : []),
+      ...(whatsappDeQuien ? [{ rotulo: d(PID_ROT_WA, idioma), valor: whatsappDeQuien }] : []),
+    ],
+    boton: { texto: d(PID_BOTON, idioma), url: `https://${destino.dominio}/negocio` },
+    nota: d(PID_NOTA, idioma),
+    /* Que el negocio le pueda responder directo a la persona con "Responder". */
+    responder_a: correoDeQuien ?? undefined,
+  });
+}
+

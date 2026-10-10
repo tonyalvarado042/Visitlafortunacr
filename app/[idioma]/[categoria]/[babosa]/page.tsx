@@ -10,6 +10,8 @@ import { IconoVerificado } from '@/componentes/Marca';
 import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
 import { GaleriaNegocio } from '@/componentes/GaleriaNegocio';
+import { ContactoTapado } from './ContactoTapado';
+import { taparContacto } from '@/lib/contacto-tapado';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +69,11 @@ export default async function Ficha({ params }: { params: Parametros }) {
     ? `https://www.google.com/maps/search/?api=1&query=${negocio.latitud},${negocio.longitud}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${negocio.nombre} ${destino.nombre}`)}`;
 
+  /* Si el destino tapa el contacto, lo tapa de verdad: ni en el HTML ni en el
+     marcado. Dejar el telefono en el JSON-LD mientras la pantalla lo tapa es
+     poner el muro y la llave al lado. */
+  const tapar = destino.contacto_bloqueado !== false;
+
   // Solo las reseñas propias entran en el marcado. Presentar las notas de
   // Google como nuestras sería engañar al buscador.
   const marcado = {
@@ -74,8 +81,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
     '@type': 'LocalBusiness',
     name: negocio.nombre,
     description: negocio.descripcion ?? undefined,
-    telephone: negocio.telefono ?? undefined,
-    url: negocio.sitio_web ?? undefined,
+    telephone: tapar ? undefined : (negocio.telefono ?? undefined),
+    url: tapar ? undefined : (negocio.sitio_web ?? undefined),
     address: { '@type': 'PostalAddress', streetAddress: negocio.direccion ?? undefined,
                addressLocality: destino.nombre, addressCountry: destino.pais_nombre },
     ...(negocio.total_resenas > 0 && negocio.promedio_calificacion
@@ -261,37 +268,53 @@ export default async function Ficha({ params }: { params: Parametros }) {
             <div className="bloque">
               <div className="titulo">{t('contacto', idioma)}</div>
 
-              {negocio.telefono && (
-                <a className="linea-contacto" href={`tel:${negocio.telefono}`}>
-                  <span className="dato">{negocio.telefono}</span>
-                  <span className="que">{t('llamar', idioma)}</span>
-                </a>
-              )}
-              {negocio.telefono_whatsapp && (
-                <a className="linea-contacto" target="_blank" rel="noopener noreferrer"
-                   href={`https://wa.me/${negocio.telefono_whatsapp.replace(/\D/g, '')}`}>
-                  <span className="dato">{negocio.telefono_whatsapp}</span>
-                  <span className="que">WhatsApp</span>
-                </a>
-              )}
-              {negocio.sitio_web && (
-                <a className="linea-contacto" href={negocio.sitio_web} target="_blank" rel="noopener noreferrer">
-                  <span className="dato" style={{ wordBreak: 'break-all' }}>
-                    {negocio.sitio_web.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                  </span>
-                  <span className="que">{t('sitio_web', idioma)}</span>
-                </a>
-              )}
-              {negocio.email && (
-                <a className="linea-contacto" href={`mailto:${negocio.email}`}>
-                  <span className="dato" style={{ wordBreak: 'break-all', fontSize: 14 }}>{negocio.email}</span>
-                </a>
-              )}
+              {/* El contacto va TAPADO hasta que la persona deja sus datos, como
+                  hace encuentra24. Lo que baja al navegador es solo la pista:
+                  el numero entero llega despues, por la accion. Si viniera en
+                  el HTML con una nube encima, se leeria con ver-codigo. */}
+              {tapar ? (
+                <ContactoTapado
+                  negocioId={negocio.id}
+                  idioma={idioma}
+                  tapado={taparContacto(negocio)}
+                  comoLlegar={mapa}
+                  textoComoLlegar={t('como_llegar', idioma)}
+                />
+              ) : (
+                <>
+                  {negocio.telefono && (
+                    <a className="linea-contacto" href={`tel:${negocio.telefono}`}>
+                      <span className="dato">{negocio.telefono}</span>
+                      <span className="que">{t('llamar', idioma)}</span>
+                    </a>
+                  )}
+                  {negocio.telefono_whatsapp && (
+                    <a className="linea-contacto" target="_blank" rel="noopener noreferrer"
+                       href={`https://wa.me/${negocio.telefono_whatsapp.replace(/\D/g, '')}`}>
+                      <span className="dato">{negocio.telefono_whatsapp}</span>
+                      <span className="que">WhatsApp</span>
+                    </a>
+                  )}
+                  {negocio.sitio_web && (
+                    <a className="linea-contacto" href={negocio.sitio_web} target="_blank" rel="noopener noreferrer">
+                      <span className="dato" style={{ wordBreak: 'break-all' }}>
+                        {negocio.sitio_web.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                      </span>
+                      <span className="que">{t('sitio_web', idioma)}</span>
+                    </a>
+                  )}
+                  {negocio.email && (
+                    <a className="linea-contacto" href={`mailto:${negocio.email}`}>
+                      <span className="dato" style={{ wordBreak: 'break-all', fontSize: 14 }}>{negocio.email}</span>
+                    </a>
+                  )}
 
-              <a className="boton" href={mapa} target="_blank" rel="noopener noreferrer"
-                 style={{ display: 'block', marginTop: 18, padding: 13 }}>
-                {t('como_llegar', idioma)}
-              </a>
+                  <a className="boton" href={mapa} target="_blank" rel="noopener noreferrer"
+                     style={{ display: 'block', marginTop: 18, padding: 13 }}>
+                    {t('como_llegar', idioma)}
+                  </a>
+                </>
+              )}
             </div>
 
             {horario.length > 0 && (

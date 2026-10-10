@@ -115,3 +115,15 @@ export async function fotosDeMiNegocio(negocioId: string): Promise<MiFoto[]> {
   return (data ?? []) as MiFoto[];
 }
 
+/** Cuánta gente pidió los datos de este negocio. La prueba de que el directorio sirve. */
+export async function pedidosDeMiNegocio(negocioId: string, dias = 30): Promise<{ cuantos: number; ultimo: string | null }> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('pedidos_de_mi_negocio', { p_negocio_id: negocioId, p_dias: dias });
+  if (error) {
+    console.error('pedidos_de_mi_negocio:', error.message);
+    return { cuantos: 0, ultimo: null };
+  }
+  const fila = ((data ?? []) as { cuantos: number; ultimo: string | null }[])[0];
+  return { cuantos: Number(fila?.cuantos ?? 0), ultimo: fila?.ultimo ?? null };
+}
+
