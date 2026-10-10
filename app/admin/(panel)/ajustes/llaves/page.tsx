@@ -5,6 +5,7 @@ import { Cabecera, Etiqueta } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { FormularioLlave } from './FormularioLlave';
 import { olvidarLlave } from './acciones';
+import { BotonPrueba } from './BotonPrueba';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,6 +120,11 @@ export default async function PaginaLlaves() {
         </div>
 
         <div>
+          <div className="tarjeta">
+            <h2>Probar el correo</h2>
+            <BotonPrueba correo={usuario.email ?? ''} />
+          </div>
+
           <div className="tarjeta">
             <h2>Entran, no salen</h2>
             <p className="gris" style={{ fontSize: 13, lineHeight: 1.6 }}>
