@@ -15,7 +15,7 @@ export default async function EditarExperiencia({
 
   const { data } = await db
     .from('dst_itinerario')
-    .select('id, titulo, babosa, subtitulo, resumen, cuerpo_html, dias, noches, personas, precio_desde_usd, imagen_url, zonas, incluye, no_incluye, orden, es_publico')
+    .select('id, titulo, babosa, subtitulo, resumen, cuerpo_html, dia_a_dia_html, atracciones_html, dias, noches, personas, precio_desde_usd, imagen_url, zonas, incluye, no_incluye, ideal_para, orden, es_publico')
     .eq('id', id)
     .eq('destino_id', destino.id)
     .eq('generado_por', 'equipo')
@@ -42,12 +42,15 @@ export default async function EditarExperiencia({
               subtitulo: data.subtitulo,
               resumen: data.resumen,
               cuerpo_html: data.cuerpo_html,
+              dia_a_dia_html: data.dia_a_dia_html,
+              atracciones_html: data.atracciones_html,
               dias: data.dias,
               noches: data.noches,
               personas: data.personas,
               precio_desde_usd: data.precio_desde_usd === null ? null : Number(data.precio_desde_usd),
               imagen_url: data.imagen_url,
               zonas: data.zonas ?? [],
+              ideal_para: data.ideal_para ?? [],
               incluye: data.incluye ?? [],
               no_incluye: data.no_incluye ?? [],
               orden: data.orden ?? 0,

@@ -272,6 +272,22 @@ export const T: Record<string, Diccionario> = {
   exp_gracias:         { es: '¡Listo! Te escribimos dentro de 24 horas con fechas y precio firme.', en: 'Done. We write back within 24 hours with dates and a firm price.', pt: 'Pronto! Respondemos em até 24 horas com datas e preço firme.', fr: 'C’est fait ! Nous répondons sous 24 heures avec les dates et le prix ferme.', de: 'Fertig! Wir melden uns innerhalb von 24 Stunden mit Terminen und festem Preis.' },
   exp_falta_contacto:  { es: 'Dejanos un correo o un WhatsApp, si no no te podemos contestar.', en: 'Leave an email or a WhatsApp, otherwise we cannot reply.', pt: 'Deixe um e-mail ou WhatsApp, senão não podemos responder.', fr: 'Laissez un e-mail ou un WhatsApp, sinon nous ne pouvons pas répondre.', de: 'Hinterlass eine E-Mail oder WhatsApp, sonst können wir nicht antworten.' },
   exp_fallo:           { es: 'No se pudo mandar. Probá de nuevo.', en: 'Could not send. Try again.', pt: 'Não foi possível enviar. Tente de novo.', fr: 'Envoi impossible. Réessayez.', de: 'Konnte nicht gesendet werden. Versuch es erneut.' },
+  /* Las tres pestanas y la cabecera grande. */
+  exp_tab_general:     { es: 'La experiencia', en: 'Overview', pt: 'A experiência', fr: 'L’expérience', de: 'Überblick' },
+  exp_tab_dias:        { es: 'Día a día', en: 'Day by day', pt: 'Dia a dia', fr: 'Jour par jour', de: 'Tag für Tag' },
+  exp_tab_lugares:     { es: 'Qué van a ver', en: 'What you will see', pt: 'O que vão ver', fr: 'Ce que vous verrez', de: 'Was ihr seht' },
+  exp_hero_donde:      { es: 'Dónde', en: 'Where', pt: 'Onde', fr: 'Où', de: 'Wo' },
+  exp_hero_cuanto:     { es: 'Cuánto dura', en: 'How long', pt: 'Duração', fr: 'Durée', de: 'Dauer' },
+  exp_hero_desde:      { es: 'Desde', en: 'From', pt: 'A partir de', fr: 'À partir de', de: 'Ab' },
+  exp_ideal_para:      { es: 'Ideal para', en: 'Ideal for', pt: 'Ideal para', fr: 'Idéal pour', de: 'Ideal für' },
+
+  /* Por que reservar con nosotros. Van al lado del formulario. */
+  exp_conf_1:          { es: 'Gente de acá', en: 'People who live here', pt: 'Gente daqui', fr: 'Des gens d’ici', de: 'Leute von hier' },
+  exp_conf_1_det:      { es: 'El viaje lo arma quien conoce los caminos, no un buscador.', en: 'The trip is put together by people who know the roads, not a search engine.', pt: 'A viagem é montada por quem conhece os caminhos, não por um buscador.', fr: 'Le voyage est composé par des gens qui connaissent les routes, pas par un moteur de recherche.', de: 'Die Reise stellen Leute zusammen, die die Wege kennen, keine Suchmaschine.' },
+  exp_conf_2:          { es: 'Sin pagar por adelantado', en: 'No upfront payment', pt: 'Sem pagar adiantado', fr: 'Sans payer d’avance', de: 'Keine Vorauszahlung' },
+  exp_conf_2_det:      { es: 'Primero confirmamos que hay campo. Después se habla de plata.', en: 'First we confirm there is space. Money comes after that.', pt: 'Primeiro confirmamos que há vaga. Depois se fala de dinheiro.', fr: 'D’abord nous confirmons qu’il y a de la place. L’argent vient après.', de: 'Zuerst bestätigen wir, dass Platz ist. Über Geld reden wir danach.' },
+  exp_conf_3:          { es: 'Un asesor, no un robot', en: 'An advisor, not a bot', pt: 'Um consultor, não um robô', fr: 'Un conseiller, pas un robot', de: 'Ein Berater, kein Bot' },
+  exp_conf_3_det:      { es: 'La misma persona te acompaña por WhatsApp durante todo el viaje.', en: 'The same person stays with you on WhatsApp for the whole trip.', pt: 'A mesma pessoa acompanha você pelo WhatsApp durante toda a viagem.', fr: 'La même personne vous suit sur WhatsApp pendant tout le voyage.', de: 'Dieselbe Person begleitet dich während der ganzen Reise per WhatsApp.' },
   exp_precio_nota:     { es: 'Precio por persona en ocupación doble, con impuestos. Cambia según la temporada y cuántos van. No incluye vuelo internacional.', en: 'Price per person, double occupancy, taxes included. It changes with the season and group size. International airfare not included.', pt: 'Preço por pessoa em ocupação dupla, com impostos. Muda conforme a temporada e o número de pessoas. Não inclui voo internacional.', fr: 'Prix par personne en occupation double, taxes comprises. Il varie selon la saison et le nombre de voyageurs. Vol international non inclus.', de: 'Preis pro Person im Doppelzimmer, inkl. Steuern. Ändert sich je nach Saison und Gruppengröße. Ohne internationalen Flug.' },
 };
 

@@ -12,12 +12,15 @@ export type ExperienciaEditable = {
   subtitulo: string | null;
   resumen: string | null;
   cuerpo_html: string | null;
+  dia_a_dia_html: string | null;
+  atracciones_html: string | null;
   dias: number | null;
   noches: number | null;
   personas: number | null;
   precio_desde_usd: number | null;
   imagen_url: string | null;
   zonas: string[];
+  ideal_para: string[];
   incluye: string[];
   no_incluye: string[];
   orden: number;
@@ -81,6 +84,13 @@ export function FormularioExperiencia({ exp }: { exp: ExperienciaEditable }) {
       </div>
 
       <div className="campo">
+        <label htmlFor="ideal_para">Ideal para</label>
+        <input id="ideal_para" name="ideal_para" type="text" defaultValue={exp.ideal_para.join(', ')}
+               placeholder="Parejas, Familias, Primera vez en Costa Rica" />
+        <small>Separado por coma. Son las pastillas de la cabecera: lo primero que mira quien está decidiendo.</small>
+      </div>
+
+      <div className="campo">
         <label htmlFor="imagen_url">Foto de portada</label>
         <input id="imagen_url" name="imagen_url" type="url" defaultValue={exp.imagen_url ?? ''}
                placeholder="https://…" />
@@ -93,18 +103,34 @@ export function FormularioExperiencia({ exp }: { exp: ExperienciaEditable }) {
       </div>
 
       <div className="campo">
-        <label htmlFor="cuerpo_html">El viaje, en HTML</label>
-        <textarea id="cuerpo_html" name="cuerpo_html" rows={26} spellCheck={false}
-                  defaultValue={exp.cuerpo_html ?? PLANTILLA}
-                  style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12.5, lineHeight: 1.6 }} />
+        <label htmlFor="cuerpo_html">Pestaña 1 · La experiencia</label>
+        <textarea id="cuerpo_html" name="cuerpo_html" rows={18} spellCheck={false}
+                  defaultValue={exp.cuerpo_html ?? PLANTILLA_GENERAL} style={CODIGO} />
         <small>
-          Todo el viaje va acá: día a día, dónde duermen, qué incluye y qué no.
-          Sirven <code>&lt;h2&gt;</code>, <code>&lt;h3&gt;</code>, <code>&lt;p&gt;</code>,
-          <code>&lt;ul&gt;</code>/<code>&lt;li&gt;</code>, <code>&lt;strong&gt;</code>,
-          <code>&lt;em&gt;</code>, <code>&lt;a&gt;</code>, <code>&lt;img&gt;</code>,
-          <code>&lt;blockquote&gt;</code> y <code>&lt;table&gt;</code>. Poné
-          <code> class=&quot;entrada&quot;</code> en el primer párrafo para que salga grande.
-          El sitio le quita <code>&lt;script&gt;</code> y los <code>on…</code> antes de pintarlo.
+          Lo que convence: de qué se trata, dónde duermen, qué incluye y qué no.
+          Poné <code>class=&quot;entrada&quot;</code> en el primer párrafo para que salga grande.
+        </small>
+      </div>
+
+      <div className="campo">
+        <label htmlFor="dia_a_dia_html">Pestaña 2 · Día a día</label>
+        <textarea id="dia_a_dia_html" name="dia_a_dia_html" rows={16} spellCheck={false}
+                  defaultValue={exp.dia_a_dia_html ?? PLANTILLA_DIAS} style={CODIGO} />
+        <small>
+          Escribilo como <code>&lt;ol class=&quot;dias&quot;&gt;</code> con un <code>&lt;li&gt;</code> por día:
+          el sitio le pone solo el número en círculo naranja y la línea de tiempo.
+          Un <code>&lt;p class=&quot;porque&quot;&gt;</code> sale como nota al margen.
+        </small>
+      </div>
+
+      <div className="campo">
+        <label htmlFor="atracciones_html">Pestaña 3 · Qué van a ver</label>
+        <textarea id="atracciones_html" name="atracciones_html" rows={16} spellCheck={false}
+                  defaultValue={exp.atracciones_html ?? PLANTILLA_LUGARES} style={CODIGO} />
+        <small>
+          Un <code>&lt;div class=&quot;galeria&quot;&gt;</code> con un <code>&lt;figure&gt;</code> por lugar
+          se pinta como rejilla de fotos. Las fotos pueden salir del directorio:
+          abrí la ficha del negocio y copiá la dirección de la imagen.
         </small>
       </div>
 
@@ -141,12 +167,16 @@ export function FormularioExperiencia({ exp }: { exp: ExperienciaEditable }) {
   );
 }
 
-const PLANTILLA = `<p class="entrada">De qué se trata el viaje, en dos o tres líneas.</p>
+const CODIGO: React.CSSProperties = {
+  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+  fontSize: 12.5,
+  lineHeight: 1.6,
+};
 
-<h2>Día a día</h2>
+const PLANTILLA_GENERAL = `<p class="entrada">De qué se trata el viaje, en dos o tres líneas.</p>
 
-<h3>Día 1 · Llegada</h3>
-<p>Qué pasa ese día.</p>
+<h2>Por qué este viaje</h2>
+<p>Lo que lo hace distinto.</p>
 
 <h2>Dónde duermen</h2>
 
@@ -163,3 +193,28 @@ const PLANTILLA = `<p class="entrada">De qué se trata el viaje, en dos o tres l
   <li>Vuelo internacional</li>
   <li>Seguro de viaje</li>
 </ul>`;
+
+const PLANTILLA_DIAS = `<ol class="dias">
+  <li>
+    <h3>Llegada</h3>
+    <p>Qué pasa ese día.</p>
+    <p class="porque">Por qué lo armamos así.</p>
+  </li>
+  <li>
+    <h3>Segundo día</h3>
+    <p><strong>Mañana.</strong> …</p>
+    <p><strong>Tarde.</strong> …</p>
+  </li>
+</ol>`;
+
+const PLANTILLA_LUGARES = `<p class="entrada">Esto es lo que van a ver.</p>
+
+<div class="galeria">
+  <figure>
+    <img src="https://…" alt="" loading="lazy">
+    <figcaption>
+      <strong>El lugar</strong>
+      <span>Qué tiene de especial, en una o dos líneas.</span>
+    </figcaption>
+  </figure>
+</div>`;

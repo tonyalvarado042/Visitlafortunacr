@@ -32,8 +32,13 @@ export type ExperienciaCompleta = Experiencia & {
   /* El cuerpo entero en HTML, escrito por quien arma el viaje. Cada viaje se
      cuenta distinto y una estructura fija de columnas termina estorbando. */
   cuerpo_html: string | null;
+  /* Las otras dos pestanas. Van aparte y no todo junto porque son dos
+     lecturas distintas: una convence, la otra se consulta. */
+  dia_a_dia_html: string | null;
+  atracciones_html: string | null;
   incluye: string[];
   no_incluye: string[];
+  ideal_para: string[];
 };
 
 export type DiaDeExperiencia = {
