@@ -1,10 +1,10 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 import { sesion } from '@/lib/supabase-sesion';
 import { destinoActual, negociosDe } from '@/lib/destino';
 import type { Idioma } from '@/lib/idiomas';
+import { origen, pedirEnlaceDeClave } from '@/lib/recuperacion';
 
 export type EstadoCuenta = { error?: string | null; mensaje?: string | null };
 export type EstadoNegocio = {
@@ -14,13 +14,6 @@ export type EstadoNegocio = {
 };
 
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
-
-async function origen(): Promise<string> {
-  const h = await headers();
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000';
-  const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https');
-  return `${proto}://${host}`;
-}
 
 /** Un teléfono como lo pide la base: solo dígitos y con el + adelante. */
 function telefono(valor: string): string | null {
@@ -51,7 +44,9 @@ export async function crearCuenta(_previo: EstadoCuenta, datos: FormData): Promi
   const { data, error } = await db.auth.signUp({
     email,
     password: clave,
-    options: { data: { nombre }, emailRedirectTo: `${await origen()}/admin/auth/callback` },
+    /* Al área del COMERCIANTE, no al panel del equipo: quien suma su
+         negocio no es del equipo y en /admin lo rebota sin explicación. */
+    options: { data: { nombre }, emailRedirectTo: `${await origen()}/negocio/auth/callback` },
   });
 
   if (error) {
@@ -141,4 +136,18 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
   }
 
   redirect(`/negocio/${data as string}?nuevo=1`);
+}
+
+/**
+ * "Olvidé mi contraseña" desde la pantalla pública de sumar negocio.
+ *
+ * Es la tercera pantalla de entrar del sitio, y también necesita salida:
+ * quien ya tiene cuenta y no se acuerda de la clave queda trabado acá mismo.
+ * El enlace vuelve por /negocio, que es el área que le toca.
+ */
+export async function olvideMiClaveSumar(
+  _previo: EstadoCuenta, datos: FormData
+): Promise<EstadoCuenta> {
+  const r = await pedirEnlaceDeClave(texto(datos, 'email').toLowerCase(), '/negocio');
+  return { error: r.error ?? null, mensaje: r.mensaje ?? null };
 }

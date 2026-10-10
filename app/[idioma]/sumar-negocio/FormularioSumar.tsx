@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
-import { crearCuenta, entrar, sumarNegocio, type EstadoCuenta, type EstadoNegocio } from './acciones';
+import { crearCuenta, entrar, olvideMiClaveSumar, sumarNegocio, type EstadoCuenta, type EstadoNegocio } from './acciones';
 
 const NADA_CUENTA: EstadoCuenta = {};
 const NADA_NEGOCIO: EstadoNegocio = {};
@@ -23,11 +23,15 @@ export function FormularioSumar({
 
 function PasoCuenta({ idioma }: { idioma: Idioma }) {
   const [esNuevo, setEsNuevo] = useState(true);
+  /* "olvidé" es un paso DENTRO de "ya tengo cuenta", no una tercera pestaña:
+     uno se da cuenta de que no se acuerda justo cuando va a escribirla. */
+  const [olvidado, setOlvidado] = useState(false);
   const [estadoNuevo, accionNueva, pendienteNuevo] = useActionState(crearCuenta, NADA_CUENTA);
   const [estadoEntrar, accionEntrar, pendienteEntrar] = useActionState(entrar, NADA_CUENTA);
+  const [estadoOlvide, accionOlvide, pendienteOlvide] = useActionState(olvideMiClaveSumar, NADA_CUENTA);
 
-  const estado = esNuevo ? estadoNuevo : estadoEntrar;
-  const pendiente = esNuevo ? pendienteNuevo : pendienteEntrar;
+  const estado = olvidado ? estadoOlvide : esNuevo ? estadoNuevo : estadoEntrar;
+  const pendiente = olvidado ? pendienteOlvide : esNuevo ? pendienteNuevo : pendienteEntrar;
 
   return (
     <div className="tarjeta-forma">
@@ -37,16 +41,20 @@ function PasoCuenta({ idioma }: { idioma: Idioma }) {
       </div>
 
       <div className="pestanas">
-        <button type="button" className={esNuevo ? 'on' : ''} onClick={() => setEsNuevo(true)}>
+        <button type="button" className={esNuevo && !olvidado ? 'on' : ''}
+                onClick={() => { setEsNuevo(true); setOlvidado(false); }}>
           {t('sumar_crear_cuenta', idioma)}
         </button>
-        <button type="button" className={!esNuevo ? 'on' : ''} onClick={() => setEsNuevo(false)}>
+        <button type="button" className={!esNuevo || olvidado ? 'on' : ''}
+                onClick={() => { setEsNuevo(false); setOlvidado(false); }}>
           {t('sumar_ya_tengo', idioma)}
         </button>
       </div>
 
-      <form action={esNuevo ? accionNueva : accionEntrar} className="forma">
-        {esNuevo && (
+      <form action={olvidado ? accionOlvide : esNuevo ? accionNueva : accionEntrar} className="forma">
+        {olvidado && <p className="forma-nota">{t('sumar_olvide_ayuda', idioma)}</p>}
+
+        {esNuevo && !olvidado && (
           <label>
             <span>{t('sumar_tu_nombre', idioma)}</span>
             <input name="nombre" type="text" autoComplete="name" required />
@@ -56,20 +64,35 @@ function PasoCuenta({ idioma }: { idioma: Idioma }) {
           <span>{t('sumar_tu_correo', idioma)}</span>
           <input name="email" type="email" autoComplete="email" required />
         </label>
-        <label>
-          <span>{t('sumar_tu_clave', idioma)}</span>
-          <input name="clave" type="password" minLength={8}
-                 autoComplete={esNuevo ? 'new-password' : 'current-password'} required />
-          {esNuevo && <small>{t('sumar_clave_minimo', idioma)}</small>}
-        </label>
+        {!olvidado && (
+          <label>
+            <span>{t('sumar_tu_clave', idioma)}</span>
+            <input name="clave" type="password" minLength={8}
+                   autoComplete={esNuevo ? 'new-password' : 'current-password'} required />
+            {esNuevo && <small>{t('sumar_clave_minimo', idioma)}</small>}
+          </label>
+        )}
 
         {estado.error && <p className="forma-error">{estado.error}</p>}
         {estado.mensaje && <p className="forma-ok">{estado.mensaje}</p>}
 
         <button type="submit" className="boton" disabled={pendiente}>
           {pendiente ? t('sumar_enviando', idioma)
+            : olvidado ? t('sumar_mandar_enlace', idioma)
             : esNuevo ? t('sumar_crear_cuenta', idioma) : t('sumar_entrar', idioma)}
         </button>
+
+        {/* Solo cuando ya tiene cuenta: al crear una no hay nada que olvidar. */}
+        {!esNuevo && !olvidado && (
+          <button type="button" className="enlace-flojo" onClick={() => setOlvidado(true)}>
+            {t('sumar_olvide', idioma)}
+          </button>
+        )}
+        {olvidado && (
+          <button type="button" className="enlace-flojo" onClick={() => setOlvidado(false)}>
+            ← {t('sumar_volver_entrar', idioma)}
+          </button>
+        )}
       </form>
     </div>
   );
