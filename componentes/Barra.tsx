@@ -4,6 +4,7 @@ import { MenuPerfil } from './MenuPerfil';
 import { NOMBRE_PROPIO, t, type Idioma } from '@/lib/idiomas';
 import { pareceHaberSesion } from '@/lib/sesion-ligera';
 import type { Destino, Categoria } from '@/lib/destino';
+import { experienciasDe } from '@/lib/experiencias';
 
 const SECCIONES = ['que_hacer', 'tours', 'donde_dormir', 'comer_beber', 'explorar', 'transporte'] as const;
 
@@ -28,6 +29,10 @@ export async function Barra({
      llamada de red a cada carga del sitio. Ver lib/sesion-ligera.ts. */
   const conSesion = await pareceHaberSesion();
 
+  /* Experiencias entra al menu solo si hay alguna publicada, igual que las
+     secciones: un menu con un enlace a una pagina vacia se ve descuidado. */
+  const hayExperiencias = (await experienciasDe(destino, idioma)).length > 0;
+
   const nombre = destino.marca_nombre.replace(/\s+/g, '');
   const corte = nombre.toLowerCase().lastIndexOf('cr');
   const base = corte > 0 ? nombre.slice(0, corte) : nombre;
@@ -41,6 +46,9 @@ export async function Barra({
       href: `/${idioma}/${primeraDe(seccion)}`,
       texto: t(seccion === 'comer_beber' ? 'comer' : seccion, idioma),
     })),
+    ...(hayExperiencias
+      ? [{ clave: 'experiencias', href: `/${idioma}/experiencias`, texto: t('experiencias', idioma) }]
+      : []),
     { clave: 'plan', href: `/${idioma}#plan`, texto: t('planifica', idioma) },
   ];
 

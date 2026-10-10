@@ -971,6 +971,80 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .comercio-estado-caja { justify-items: flex-start; text-align: left; }
 }
 
+
+/* ---- Experiencias armadas: el viaje de varios dias que se consulta ---- */
+.exp-cuerpo { padding: 56px 40px 80px; }
+.exp-cabecera { max-width: 56ch; margin-bottom: 38px; }
+.exp-antetitulo { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--humo); }
+.exp-cabecera h1 { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.06; letter-spacing: -.02em; margin: 10px 0 12px; }
+.exp-cabecera p { font-size: 15.5px; line-height: 1.6; color: #C2C0BC; margin: 0; }
+.exp-vacio { color: var(--humo); font-size: 15px; }
+
+.exp-rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 24px; }
+.exp-tarjeta { border: 1px solid var(--borde); border-radius: 6px; overflow: hidden; background: var(--carbon); display: flex; flex-direction: column; transition: border-color .2s; }
+.exp-tarjeta:hover { border-color: #3A3A3A; }
+.exp-tarjeta-foto { position: relative; aspect-ratio: 16 / 10; background: #101010; }
+.exp-tarjeta-foto img { width: 100%; height: 100%; object-fit: cover; }
+.exp-sin-foto { display: block; width: 100%; height: 100%; background: linear-gradient(145deg, #1C1C1C, #101010); }
+.exp-zonas { position: absolute; left: 12px; bottom: 12px; background: rgba(11,11,11,.82); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 1px solid #2E2E2E; border-radius: 100px; padding: 5px 12px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; }
+.exp-tarjeta-cuerpo { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 9px; flex-grow: 1; }
+.exp-tarjeta-cuerpo h2 { font-size: 20px; line-height: 1.2; letter-spacing: -.01em; margin: 0; }
+.exp-subtitulo { font-size: 14px; line-height: 1.5; color: #C2C0BC; margin: 0; }
+.exp-dato { font-size: 12.5px; color: var(--humo); margin: 0; }
+.exp-tarjeta-pie { margin-top: auto; padding-top: 14px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.exp-precio { display: grid; line-height: 1.25; }
+.exp-precio small { font-size: 11px; color: var(--humo); }
+.exp-precio strong { font-size: 25px; font-weight: 800; letter-spacing: -.02em; }
+.exp-tarjeta-pie .boton { padding: 11px 20px; font-size: 13px; border-radius: 3px; }
+
+.exp-ficha { padding: 40px 0 80px; }
+.exp-ficha-cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 32px; flex-wrap: wrap; margin: 22px 0 34px; padding-bottom: 28px; border-bottom: 1px solid var(--borde); }
+.exp-ficha-cabecera h1 { font-size: clamp(30px, 4.4vw, 46px); line-height: 1.06; letter-spacing: -.02em; margin: 10px 0 10px; }
+.exp-ficha-subtitulo { font-size: 17px; line-height: 1.5; color: #C2C0BC; margin: 0 0 10px; max-width: 46ch; }
+.exp-ficha-precio { display: grid; justify-items: flex-end; line-height: 1.3; text-align: right; }
+.exp-ficha-precio small { font-size: 12px; color: var(--humo); }
+.exp-ficha-precio strong { font-size: 38px; font-weight: 800; letter-spacing: -.03em; }
+
+.exp-ficha-reja { display: flex; gap: 48px; align-items: flex-start; flex-wrap: wrap; }
+.exp-prosa { flex: 999 1 460px; min-width: 0; }
+.exp-columna { flex: 1 1 330px; display: grid; gap: 14px; position: sticky; top: 92px; }
+.exp-caja-consulta { background: var(--carbon); border: 1px solid var(--borde); border-radius: 6px; padding: 24px; }
+.exp-caja-consulta h2 { font-size: 19px; margin: 0 0 16px; text-transform: none; letter-spacing: -.01em; }
+.exp-letra-chica { font-size: 11.5px; line-height: 1.55; color: #6E6C68; margin: 0; }
+
+/* El cuerpo lo escribe el equipo en HTML, asi que los estilos van por etiqueta
+   y no por clase: quien lo escribe no deberia tener que acordarse de clases. */
+.exp-prosa > :first-child { margin-top: 0; }
+.exp-prosa h2 { font-size: 26px; letter-spacing: -.02em; margin: 44px 0 14px; text-transform: none; }
+.exp-prosa h3 { font-size: 17px; margin: 28px 0 8px; color: var(--naranja); text-transform: none; letter-spacing: 0; }
+.exp-prosa p { font-size: 15.5px; line-height: 1.72; color: #C2C0BC; margin: 0 0 14px; }
+.exp-prosa p.entrada { font-size: 18px; line-height: 1.62; color: var(--blanco); }
+.exp-prosa em { color: var(--humo); font-style: italic; }
+.exp-prosa ul, .exp-prosa ol { margin: 0 0 16px; padding-left: 20px; }
+.exp-prosa li { font-size: 15.5px; line-height: 1.7; color: #C2C0BC; margin-bottom: 5px; }
+.exp-prosa a { color: var(--naranja); text-decoration: underline; text-underline-offset: 3px; }
+.exp-prosa img { border-radius: 5px; margin: 10px 0 18px; }
+.exp-prosa blockquote { margin: 18px 0; padding: 2px 0 2px 18px; border-left: 3px solid var(--naranja); }
+.exp-prosa table { width: 100%; border-collapse: collapse; margin: 0 0 18px; font-size: 14.5px; }
+.exp-prosa th, .exp-prosa td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--borde); }
+.exp-prosa th { color: var(--humo); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+
+.exp-forma { gap: 14px; }
+.exp-aviso { font-size: 12.5px; line-height: 1.55; color: var(--humo); margin: 0; padding: 11px 13px; background: rgba(255,106,0,.07); border: 1px solid rgba(255,106,0,.26); border-radius: 4px; }
+.exp-forma .boton { justify-self: stretch; text-align: center; }
+.exp-gracias { display: grid; justify-items: center; gap: 12px; text-align: center; padding: 14px 4px; color: var(--verde); }
+.exp-gracias p { margin: 0; font-size: 14.5px; line-height: 1.6; color: #C2C0BC; }
+
+@media (max-width: 900px) {
+  .exp-columna { position: static; }
+  .exp-ficha-cabecera { flex-direction: column; }
+  .exp-ficha-precio { justify-items: flex-start; text-align: left; }
+}
+@media (max-width: 560px) {
+  .exp-cuerpo { padding: 36px 16px 60px; }
+  .exp-ficha { padding: 26px 0 60px; }
+}
+
 /* ---- Menú de perfil: mismo patrón que el selector de idioma ---- */
 .menu-perfil { position: relative; }
 .menu-perfil summary {

@@ -238,6 +238,41 @@ export const T: Record<string, Diccionario> = {
   perfil_mis_negocios: { es: 'Mis negocios', en: 'My businesses', pt: 'Meus negócios', fr: 'Mes établissements', de: 'Meine Betriebe' },
   perfil_sumar_otro:   { es: 'Sumar otro negocio', en: 'Add another business', pt: 'Adicionar outro negócio', fr: 'Ajouter un établissement', de: 'Weiteren Betrieb eintragen' },
   perfil_salir:        { es: 'Salir', en: 'Sign out', pt: 'Sair', fr: 'Se déconnecter', de: 'Abmelden' },
+
+  /* Experiencias armadas: el paquete de varios dias que se consulta, no se compra. */
+  experiencias:        { es: 'Experiencias', en: 'Experiences', pt: 'Experiências', fr: 'Expériences', de: 'Reisen' },
+  exp_titulo:          { es: 'Viajes ya armados', en: 'Trips we have already put together', pt: 'Viagens já montadas', fr: 'Des voyages déjà composés', de: 'Fertig geplante Reisen' },
+  exp_bajada:          { es: 'Hoteles, tours y traslados ya escogidos por gente de acá. Consultás sin compromiso y un asesor te escribe.', en: 'Hotels, tours and transfers chosen by people who live here. Ask with no commitment and an advisor writes back.', pt: 'Hotéis, passeios e transfers escolhidos por quem mora aqui. Consulte sem compromisso e um consultor responde.', fr: 'Hôtels, excursions et transferts choisis par des gens d’ici. Demandez sans engagement, un conseiller vous répond.', de: 'Hotels, Touren und Transfers, ausgewählt von Leuten von hier. Unverbindlich anfragen, ein Berater meldet sich.' },
+  exp_desde:           { es: 'Desde', en: 'From', pt: 'A partir de', fr: 'À partir de', de: 'Ab' },
+  exp_por_persona:     { es: 'por persona', en: 'per person', pt: 'por pessoa', fr: 'par personne', de: 'pro Person' },
+  exp_dias:            { es: 'días', en: 'days', pt: 'dias', fr: 'jours', de: 'Tage' },
+  exp_noches:          { es: 'noches', en: 'nights', pt: 'noites', fr: 'nuits', de: 'Nächte' },
+  exp_ver:             { es: 'Ver el viaje', en: 'See the trip', pt: 'Ver a viagem', fr: 'Voir le voyage', de: 'Reise ansehen' },
+  exp_dia_a_dia:       { es: 'Día a día', en: 'Day by day', pt: 'Dia a dia', fr: 'Jour par jour', de: 'Tag für Tag' },
+  exp_dia:             { es: 'Día', en: 'Day', pt: 'Dia', fr: 'Jour', de: 'Tag' },
+  exp_incluye:         { es: 'Qué incluye', en: 'What is included', pt: 'O que inclui', fr: 'Ce qui est inclus', de: 'Inbegriffen' },
+  exp_no_incluye:      { es: 'Qué no incluye', en: 'What is not included', pt: 'O que não inclui', fr: 'Ce qui n’est pas inclus', de: 'Nicht inbegriffen' },
+  exp_consejos:        { es: 'De gente de acá', en: 'From people who live here', pt: 'De quem mora aqui', fr: 'De la part des gens d’ici', de: 'Von Leuten von hier' },
+  exp_manana:          { es: 'Mañana', en: 'Morning', pt: 'Manhã', fr: 'Matin', de: 'Vormittag' },
+  exp_tarde:           { es: 'Tarde', en: 'Afternoon', pt: 'Tarde', fr: 'Après-midi', de: 'Nachmittag' },
+  exp_noche:           { es: 'Noche', en: 'Night', pt: 'Noite', fr: 'Nuit', de: 'Abend' },
+  exp_nada:            { es: 'Todavía no hay viajes armados. Escribinos y te armamos uno.', en: 'No trips put together yet. Write to us and we will build you one.', pt: 'Ainda não há viagens montadas. Escreva e montamos uma para você.', fr: 'Pas encore de voyages composés. Écrivez-nous et nous en créons un.', de: 'Noch keine fertigen Reisen. Schreib uns, wir stellen eine zusammen.' },
+
+  /* La consulta. El texto importa: deja claro que NO es una compra. */
+  exp_consultar:       { es: 'Consultar este viaje', en: 'Ask about this trip', pt: 'Consultar esta viagem', fr: 'Demander ce voyage', de: 'Reise anfragen' },
+  exp_sin_compromiso:  { es: 'Esto no es una compra ni reserva nada: es una consulta. Un asesor revisa fechas y disponibilidad real y te escribe con el precio firme.', en: 'This is not a purchase and books nothing: it is an enquiry. An advisor checks real dates and availability and writes back with a firm price.', pt: 'Isto não é uma compra nem reserva nada: é uma consulta. Um consultor verifica datas e disponibilidade real e responde com o preço firme.', fr: 'Ceci n’est ni un achat ni une réservation: c’est une demande. Un conseiller vérifie les dates et la disponibilité réelle et vous écrit avec le prix ferme.', de: 'Das ist kein Kauf und bucht nichts: es ist eine Anfrage. Ein Berater prüft Termine und echte Verfügbarkeit und meldet sich mit dem festen Preis.' },
+  exp_cuando:          { es: '¿Para cuándo?', en: 'For when?', pt: 'Para quando?', fr: 'Pour quand ?', de: 'Für wann?' },
+  exp_cuantos:         { es: '¿Cuántos van?', en: 'How many of you?', pt: 'Quantos vão?', fr: 'Combien êtes-vous ?', de: 'Wie viele seid ihr?' },
+  exp_tu_nombre:       { es: 'Tu nombre', en: 'Your name', pt: 'Seu nome', fr: 'Votre nom', de: 'Dein Name' },
+  exp_tu_correo:       { es: 'Tu correo', en: 'Your email', pt: 'Seu e-mail', fr: 'Votre e-mail', de: 'Deine E-Mail' },
+  exp_tu_whatsapp:     { es: 'WhatsApp (opcional)', en: 'WhatsApp (optional)', pt: 'WhatsApp (opcional)', fr: 'WhatsApp (facultatif)', de: 'WhatsApp (optional)' },
+  exp_tu_mensaje:      { es: '¿Algo que debamos saber?', en: 'Anything we should know?', pt: 'Algo que devamos saber?', fr: 'Quelque chose à savoir ?', de: 'Sollen wir etwas wissen?' },
+  exp_enviar:          { es: 'Que me escriba un asesor', en: 'Have an advisor write to me', pt: 'Quero que um consultor me escreva', fr: 'Qu’un conseiller m’écrive', de: 'Berater soll mir schreiben' },
+  exp_enviando:        { es: 'Mandando…', en: 'Sending…', pt: 'Enviando…', fr: 'Envoi…', de: 'Senden…' },
+  exp_gracias:         { es: '¡Listo! Te escribimos dentro de 24 horas con fechas y precio firme.', en: 'Done. We write back within 24 hours with dates and a firm price.', pt: 'Pronto! Respondemos em até 24 horas com datas e preço firme.', fr: 'C’est fait ! Nous répondons sous 24 heures avec les dates et le prix ferme.', de: 'Fertig! Wir melden uns innerhalb von 24 Stunden mit Terminen und festem Preis.' },
+  exp_falta_contacto:  { es: 'Dejanos un correo o un WhatsApp, si no no te podemos contestar.', en: 'Leave an email or a WhatsApp, otherwise we cannot reply.', pt: 'Deixe um e-mail ou WhatsApp, senão não podemos responder.', fr: 'Laissez un e-mail ou un WhatsApp, sinon nous ne pouvons pas répondre.', de: 'Hinterlass eine E-Mail oder WhatsApp, sonst können wir nicht antworten.' },
+  exp_fallo:           { es: 'No se pudo mandar. Probá de nuevo.', en: 'Could not send. Try again.', pt: 'Não foi possível enviar. Tente de novo.', fr: 'Envoi impossible. Réessayez.', de: 'Konnte nicht gesendet werden. Versuch es erneut.' },
+  exp_precio_nota:     { es: 'Precio por persona en ocupación doble, con impuestos. Cambia según la temporada y cuántos van. No incluye vuelo internacional.', en: 'Price per person, double occupancy, taxes included. It changes with the season and group size. International airfare not included.', pt: 'Preço por pessoa em ocupação dupla, com impostos. Muda conforme a temporada e o número de pessoas. Não inclui voo internacional.', fr: 'Prix par personne en occupation double, taxes comprises. Il varie selon la saison et le nombre de voyageurs. Vol international non inclus.', de: 'Preis pro Person im Doppelzimmer, inkl. Steuern. Ändert sich je nach Saison und Gruppengröße. Ohne internationalen Flug.' },
 };
 
 export function t(clave: string, idioma: Idioma): string {
