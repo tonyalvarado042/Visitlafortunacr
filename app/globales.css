@@ -1031,11 +1031,32 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .exp-ideal ul { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; }
 .exp-ideal li { font-size: 12.5px; font-weight: 600; border: 1px solid #2E2E2E; border-radius: 100px; padding: 6px 14px; color: #D8D6D2; }
 
-/* ---- Pestanas ---- */
-.exp-solapas { display: flex; gap: 4px; border-bottom: 1px solid var(--borde); margin-bottom: 30px; overflow-x: auto; }
-.exp-solapas button { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 13px 20px; font-family: inherit; font-size: 13.5px; font-weight: 700; letter-spacing: .02em; color: var(--humo); cursor: pointer; white-space: nowrap; transition: color .18s, border-color .18s; }
-.exp-solapas button:hover { color: var(--blanco); }
-.exp-solapas button.activa { color: var(--blanco); border-bottom-color: var(--naranja); }
+/* ---- Pestanas ----
+   Cada una con su propio borde y su propio fondo, no texto subrayado. La
+   version subrayada no se leia como algo que se puede tocar: la gente la
+   miraba como titulos. */
+.exp-solapas {
+  display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;
+}
+.exp-solapas button {
+  min-height: 48px; padding: 13px 26px;
+  background: #1A1A1A; border: 1px solid #343434; border-radius: 100px;
+  font-family: inherit; font-size: 14.5px; font-weight: 700; letter-spacing: .01em;
+  color: #D8D6D2; cursor: pointer; white-space: nowrap;
+  transition: background .18s, color .18s, border-color .18s, transform .14s;
+}
+.exp-solapas button:hover { background: #262626; border-color: #4A4A4A; color: var(--blanco); transform: translateY(-1px); }
+.exp-solapas button.activa,
+.exp-solapas button.activa:hover {
+  background: var(--naranja); border-color: var(--naranja); color: #0B0B0B;
+  box-shadow: 0 5px 18px rgba(255,106,0,.32); transform: none;
+}
+.exp-solapas button:focus-visible { outline: 2px solid var(--blanco); outline-offset: 3px; }
+
+@media (max-width: 560px) {
+  .exp-solapas { gap: 8px; }
+  .exp-solapas button { flex: 1 1 auto; font-size: 13.5px; padding: 12px 16px; }
+}
 
 /* ---- La caja de consulta ---- */
 .exp-caja-consulta { background: var(--carbon); border: 1px solid var(--borde); border-radius: 8px; padding: 24px; }
