@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
@@ -80,7 +81,23 @@ export default async function PaginaAjustes() {
               <table className="tabla"><tbody>{VARIABLES.map((v) => (
                 <tr key={v.nombre}><td><code style={{ fontSize: 12 }}>{v.nombre}</code><div className="gris">{v.para}</div></td><td>{presente(v.nombre) ? <Etiqueta color="#66BB2E">puesta</Etiqueta> : <Etiqueta color="#B42318">falta</Etiqueta>}</td></tr>
               ))}</tbody></table>
-              <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>Se ponen en Vercel → Settings → Environment Variables, y se vuelve a desplegar.</p>
+              <p className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>
+                Solo <code style={{ fontSize: 11.5 }}>SUPABASE_SECRET_KEY</code> tiene que vivir en Vercel:
+                es la que abre la base, así que no puede guardarse dentro de lo que ella misma abre.
+                Las demás van en Llaves, acá al lado.
+              </p>
+            </div>
+
+            <div className="tarjeta">
+              <h2>Llaves <small>se ingresan, no se consultan</small></h2>
+              <p className="gris" style={{ fontSize: 13, lineHeight: 1.6 }}>
+                Resend, Anthropic, Google Places y la clave del cron. Quedan cifradas
+                en la bóveda y el panel <strong>no las puede leer</strong> — ni vos.
+                Cambiarlas no obliga a redesplegar.
+              </p>
+              <Link className="boton" href="/admin/ajustes/llaves" style={{ marginTop: 12 }}>
+                Administrar llaves
+              </Link>
             </div>
           </div>
         </div>

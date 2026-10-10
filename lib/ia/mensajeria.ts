@@ -1,6 +1,7 @@
 import 'server-only';
 import nodemailer from 'nodemailer';
 import { servicio } from '@/lib/supabase-servidor';
+import { secreto } from '@/lib/secretos';
 
 /*
  * Por dónde sale cada mensaje. La configuración del canal vive en dst_canal
@@ -32,10 +33,17 @@ const VARIABLE_POR_DEFECTO: Record<Canal, string | null> = {
 /* Por SMTP el secreto es la contraseña del servidor, no una clave de API. */
 const VARIABLE_SMTP = 'SMTP_CLAVE';
 
-function secretoDe(config: ConfigCanal): string | null {
+/* Primero la bóveda del panel, y si no, el entorno. Es la misma función que
+   usa el correo nuevo: así una sola llave de Resend sirve para todo y rotarla
+   desde Ajustes arregla los dos caminos a la vez. */
+async function secretoDe(config: ConfigCanal): Promise<string | null> {
   const nombre = config.variable_secreto
     ?? (config.proveedor === 'smtp' ? VARIABLE_SMTP : VARIABLE_POR_DEFECTO[config.tipo]);
   if (!nombre) return null;
+
+  const deLaBoveda = await secreto(nombre);
+  if (deLaBoveda) return deLaBoveda;
+
   const valor = process.env[nombre]?.trim();
   // Una contraseña de SMTP puede ser corta; una clave de API, no.
   const minimo = config.proveedor === 'smtp' ? 4 : 10;
@@ -57,10 +65,10 @@ export async function canalListo(destinoId: string, tipo: Canal): Promise<(Confi
   const config = canales.find((c) => c.tipo === tipo && (tipo === 'web' || c.proveedor !== 'manual'));
   if (!config) return null;
   if (tipo === 'web') return { ...config, secreto: '' };
-  const secreto = secretoDe(config);
-  if (!secreto) return null;
+  const llave = await secretoDe(config);
+  if (!llave) return null;
   if (tipo === 'whatsapp' && !(config.identificador ?? process.env.WHATSAPP_PHONE_NUMBER_ID)) return null;
-  return { ...config, secreto };
+  return { ...config, secreto: llave };
 }
 
 type Resultado = { ok: boolean; id_externo?: string; error?: string };

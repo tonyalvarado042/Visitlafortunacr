@@ -4,6 +4,10 @@ import { dominioDeHost } from '@/lib/dominio';
 import { hayClaveDeServicio } from '@/lib/supabase-servidor';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
 import { generarItinerarioParaSolicitud } from '@/lib/ia/planificador';
+import { destinoActual } from '@/lib/destino';
+import { experienciaPorBabosa } from '@/lib/experiencias';
+import { correoConsultaRecibida } from '@/lib/correo/cartas';
+import { esIdioma } from '@/lib/idiomas';
 
 /**
  * La única puerta por la que el sitio escribe. No hace INSERT: llama a
@@ -75,6 +79,41 @@ export async function POST(peticion: NextRequest) {
         await generarItinerarioParaSolicitud(solicitudId, 'web');
       } catch (fallo) {
         console.error('No se pudo generar el itinerario:', fallo);
+      }
+    });
+  }
+
+  /* La confirmacion a quien escribio. Regla de la casa: todo registro lleva su
+     correo, con la marca y en el idioma que tenia elegido. Va despues de
+     responder y envuelto en try: si el correo falla, la solicitud ya quedo
+     guardada y el lead igual aparece en el panel. */
+  const idiomaCarta = typeof cuerpo.idioma === 'string' && esIdioma(cuerpo.idioma) ? cuerpo.idioma : 'es';
+  const origen = typeof cuerpo.origen === 'string' ? cuerpo.origen : '';
+  if (email) {
+    after(async () => {
+      try {
+        const destino = await destinoActual();
+        /* El origen viene como "experiencia:la-babosa" desde la ficha. Si no
+           es de una experiencia no se manda nada todavia: cada tipo de
+           solicitud merece su propio correo, no uno generico mal puesto. */
+        const babosa = origen.startsWith('experiencia:') ? origen.slice('experiencia:'.length) : null;
+        if (!babosa) return;
+
+        const exp = await experienciaPorBabosa(destino, babosa, idiomaCarta);
+        if (!exp) return;
+
+        const envio = await correoConsultaRecibida({
+          destino,
+          idioma: idiomaCarta,
+          para: email,
+          tituloViaje: exp.titulo,
+          babosa: exp.babosa,
+          fecha: typeof cuerpo.llega_el === 'string' ? cuerpo.llega_el : null,
+          personas: typeof cuerpo.personas === 'number' ? cuerpo.personas : null,
+        });
+        if (!envio.ok) console.error('correo de consulta no salio:', envio.error);
+      } catch (fallo) {
+        console.error('correo de consulta:', fallo instanceof Error ? fallo.message : fallo);
       }
     });
   }

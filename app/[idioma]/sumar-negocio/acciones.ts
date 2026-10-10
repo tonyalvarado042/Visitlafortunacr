@@ -5,6 +5,9 @@ import { sesion } from '@/lib/supabase-sesion';
 import { destinoActual, negociosDe } from '@/lib/destino';
 import type { Idioma } from '@/lib/idiomas';
 import { origen, pedirEnlaceDeClave } from '@/lib/recuperacion';
+import { correoNegocioRecibido } from '@/lib/correo/cartas';
+import { categoriasDe } from '@/lib/destino';
+import { after } from 'next/server';
 
 export type EstadoCuenta = { error?: string | null; mensaje?: string | null };
 export type EstadoNegocio = {
@@ -135,7 +138,29 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
     return { error: 'No se pudo guardar el negocio. Probá de nuevo.' };
   }
 
-  redirect(`/negocio/${data as string}?nuevo=1`);
+  const negocioId = data as string;
+
+  /* El correo de confirmación. Va DESPUÉS de responder (after) y envuelto en
+     try: que Resend esté caído o falte la llave no puede impedir que alguien
+     registre su negocio. Si no sale, queda en el registro del servidor. */
+  const correo = texto(datos, 'email').toLowerCase() || user.email || null;
+  if (correo) {
+    const categoria = (await categoriasDe(destino, idioma))
+      .find((c) => c.categoria_id === categoriaId)?.nombre ?? null;
+    after(async () => {
+      try {
+        const envio = await correoNegocioRecibido({
+          destino, idioma, para: correo, negocioId,
+          nombreNegocio: nombre, categoria,
+        });
+        if (!envio.ok) console.error('correo de negocio no salió:', envio.error);
+      } catch (fallo) {
+        console.error('correo de negocio:', fallo instanceof Error ? fallo.message : fallo);
+      }
+    });
+  }
+
+  redirect(`/negocio/${negocioId}?nuevo=1`);
 }
 
 /**

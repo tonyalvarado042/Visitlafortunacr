@@ -1,0 +1,27 @@
+-- =========================================================================
+-- 28 · La bóveda de llaves: se ingresan desde el panel, no se consultan
+--
+-- Hasta ahora toda llave de API vivía en una variable de entorno de Vercel.
+-- Dos problemas: cambiar una obliga a redesplegar, y Tony tenía que entrar a
+-- Vercel para rotar algo que es suyo.
+--
+-- Ahora viven cifradas en vault.secrets (la bóveda de Supabase). El panel las
+-- ESCRIBE y no las puede leer: valor_de_secreto está concedida únicamente a
+-- service_role. Desde el navegador no hay forma de sacarlas, ni siendo
+-- administrador — que es exactamente lo que Tony pidió: "ocultas y que no se
+-- puedan copiar, solo ingresar".
+--
+-- La única que NO puede vivir acá es SUPABASE_SECRET_KEY: es la llave que
+-- abre la base, así que no se puede guardar dentro de lo que ella misma abre.
+--
+-- Verificado: como 'authenticated' quedan bloqueadas las TRES puertas —
+-- la función del valor, la tabla y el esquema vault— y solo service_role lee.
+-- El SQL exacto de esta migración se aplicó con el MCP de Supabase.
+-- =========================================================================
+
+-- Ver el archivo de la migración aplicada para el cuerpo completo:
+--   destinos.dst_secreto            (índice: nombre, vault_id, pista)
+--   destinos.guardar_secreto()      solo admin; escribe en la bóveda
+--   destinos.estado_de_secretos()   solo admin; devuelve la pista, nunca el valor
+--   destinos.olvidar_secreto()      solo admin
+--   destinos.valor_de_secreto()     SOLO service_role
