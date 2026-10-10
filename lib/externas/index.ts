@@ -145,7 +145,7 @@ const COLUMNAS =
 
 /** Un negocio, ahora. Es lo que dispara el botón de la ficha en el panel. */
 export async function refrescarExternasDeNegocio(negocioId: string): Promise<ResultadoNegocio> {
-  if (!hayClaveDePlaces()) {
+  if (!(await hayClaveDePlaces())) {
     return { negocio_id: negocioId, nombre: '', ok: false, motivo: 'Falta GOOGLE_PLACES_API_KEY en el entorno.' };
   }
   const { data, error } = await servicio().from('dst_negocio').select(COLUMNAS).eq('id', negocioId).maybeSingle();
@@ -175,7 +175,7 @@ export async function refrescarExternasPendientes(opciones?: {
   dias_de_margen?: number;
 }): Promise<{ intentados: number; ok: number; fallos: number; detalle: ResultadoNegocio[] }> {
   const vacio = { intentados: 0, ok: 0, fallos: 0, detalle: [] as ResultadoNegocio[] };
-  if (!hayClaveDePlaces()) return vacio;
+  if (!(await hayClaveDePlaces())) return vacio;
 
   const db = servicio();
   const limite = Math.min(Math.max(opciones?.limite ?? 25, 1), 200);
