@@ -10,6 +10,7 @@ import { IconoVerificado } from '@/componentes/Marca';
 import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
 import { GaleriaNegocio } from '@/componentes/GaleriaNegocio';
+import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
 import { taparContacto } from '@/lib/contacto-tapado';
 
@@ -119,6 +120,9 @@ export default async function Ficha({ params }: { params: Parametros }) {
           {negocio.direccion && (
             <p style={{ color: 'var(--humo)', marginTop: 14 }}>{negocio.direccion}</p>
           )}
+          {/* Arriba del todo para el que entro justamente a ver el video; el
+              video en si vive mas abajo, despues de las fotos. */}
+          {negocio.video_url && <BotonVerVideo idioma={idioma} />}
         </div>
       </section>
 
@@ -126,6 +130,15 @@ export default async function Ficha({ params }: { params: Parametros }) {
         <div className="ficha-cuerpo">
           <div>
             <GaleriaNegocio fotos={fotos} idioma={idioma} />
+
+            {negocio.video_url && (
+              <VideoNegocio
+                url={negocio.video_url}
+                portada={negocio.video_portada_url}
+                nombre={negocio.nombre}
+                idioma={idioma}
+              />
+            )}
 
             {negocio.descripcion && (
               <>

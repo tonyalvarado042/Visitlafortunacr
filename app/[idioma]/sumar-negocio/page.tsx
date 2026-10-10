@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe } from '@/lib/destino';
+import { destinoActual, categoriasDe, cuposPremium } from '@/lib/destino';
 import { sesion } from '@/lib/supabase-sesion';
 import { misNegocios } from '@/lib/comercio';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { FormularioSumar } from './FormularioSumar';
+import { OfertaPremium } from '@/componentes/OfertaPremium';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,10 @@ export async function generateMetadata({ params }: { params: Parametros }): Prom
 export default async function SumarNegocio({ params }: { params: Parametros }) {
   const { idioma } = await params;
   const destino = await destinoActual();
-  const categorias = await categoriasDe(destino, idioma);
+  const [categorias, cupos] = await Promise.all([
+    categoriasDe(destino, idioma),
+    cuposPremium(destino),
+  ]);
 
   /* Quién está mirando decide qué se muestra: sin cuenta, el paso de la
      cuenta; con cuenta, el formulario del negocio. Se resuelve en el servidor
@@ -74,6 +78,12 @@ export default async function SumarNegocio({ params }: { params: Parametros }) {
           />
         </div>
       </section>
+
+      {/* La oferta va DESPUES del formulario. Ofrecerle el plan pago a alguien
+          que todavia no subio su ficha gratis es pedirle plata a un
+          desconocido. */}
+
+      <OfertaPremium destino={destino} cupos={cupos} idioma={idioma} compacta />
 
       <Pie destino={destino} />
     </>

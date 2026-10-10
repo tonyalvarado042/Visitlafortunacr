@@ -53,6 +53,14 @@ const NEG_BOTON: Texto = {
 };
 const NEG_ROT_NEGOCIO: Texto = { es: 'Negocio', en: 'Business', pt: 'Negócio', fr: 'Établissement', de: 'Betrieb' };
 const NEG_ROT_CAT: Texto = { es: 'Categoría', en: 'Category', pt: 'Categoria', fr: 'Catégorie', de: 'Kategorie' };
+const NEG_PREMIUM: Texto = {
+  es: 'Y una cosa más, por si te sirve: le hacemos un video a tu negocio, te armamos las historias para redes y te damos un mes de ficha destacada. Hay cupos a precio de lanzamiento.',
+  en: 'One more thing, in case it helps: we film a video of your business, put together stories for your social media, and give you a month as a featured listing. There are launch-price spots.',
+  pt: 'Mais uma coisa: filmamos um vídeo do seu negócio, montamos as histórias para as suas redes e damos um mês de ficha destacada. Há vagas a preço de lançamento.',
+  fr: 'Encore une chose : nous filmons une vidéo de votre établissement, préparons vos stories et vous offrons un mois en vedette. Des places au prix de lancement sont disponibles.',
+  de: 'Noch etwas: Wir drehen ein Video von deinem Betrieb, machen Stories für deine Kanäle und geben dir einen Monat als hervorgehobener Eintrag. Es gibt Plätze zum Startpreis.',
+};
+
 const NEG_NOTA: Texto = {
   es: 'Si algo no cuadra, respondé este correo y lo arreglamos.',
   en: 'If something looks off, reply to this email and we will fix it.',
@@ -70,6 +78,12 @@ export async function correoNegocioRecibido(opciones: {
   categoria?: string | null;
 }): Promise<Envio> {
   const { destino, idioma, para, negocioId, nombreNegocio, categoria } = opciones;
+
+  /* El premium se menciona al final y en una sola línea. Este correo es
+     para confirmarle que lo recibimos; si lo primero que lee es una oferta,
+     el mensaje deja de ser una confirmación y pasa a ser publicidad. */
+  const ofrecer = destino.premium_activo && Boolean(destino.premium_precio_usd);
+
   return enviarCorreo({
     destino,
     idioma,
@@ -77,7 +91,9 @@ export async function correoNegocioRecibido(opciones: {
     asunto: `${d(NEG_ASUNTO, idioma)}: ${nombreNegocio}`,
     motivo: 'negocio_recibido',
     titulo: d(NEG_TITULO, idioma),
-    parrafos: [d(NEG_P1, idioma), d(NEG_P2, idioma)],
+    parrafos: ofrecer
+      ? [d(NEG_P1, idioma), d(NEG_P2, idioma), d(NEG_PREMIUM, idioma)]
+      : [d(NEG_P1, idioma), d(NEG_P2, idioma)],
     datos: [
       { rotulo: d(NEG_ROT_NEGOCIO, idioma), valor: nombreNegocio },
       ...(categoria ? [{ rotulo: d(NEG_ROT_CAT, idioma), valor: categoria }] : []),

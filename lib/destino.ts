@@ -43,6 +43,16 @@ export type Destino = {
      visitante deja sus datos. En true el directorio genera leads; en false
      es una guia telefonica. */
   contacto_bloqueado: boolean;
+  /* La oferta premium: video + historias + mes destacado. El precio cambia,
+     asi que vive en la fila y se edita desde Ajustes, no en el codigo. */
+  premium_activo: boolean;
+  premium_titulo: string | null;
+  premium_gancho: string | null;
+  premium_precio_usd: number | null;
+  premium_precio_antes: number | null;
+  premium_incluye: string[];
+  premium_cupos: number | null;
+  premium_ejemplo_babosa: string | null;
 };
 
 /**
@@ -147,7 +157,13 @@ export const SIMBOLO_PRECIO: Record<string, string> = {
   lujo: '$$$$',
 };
 
-export type FichaNegocio = Negocio & { como_llegar: string | null };
+export type FichaNegocio = Negocio & {
+  como_llegar: string | null;
+  /* El video de la ficha: lo que se vende en el plan premium. Puede ser un
+     archivo del bucket o un enlace de YouTube/Vimeo; la ficha decide. */
+  video_url: string | null;
+  video_portada_url: string | null;
+};
 
 /** Un negocio por su babosa en cualquier idioma. Devuelve null si no existe. */
 export async function negocioPorBabosa(
@@ -292,3 +308,23 @@ export async function notasExternasDe(negocioId: string): Promise<NotaExterna[]>
     extractos: (fila.extractos ?? []) as ExtractoExterno[],
   })) as NotaExterna[];
 }
+
+export type CuposPremium = { cupos: number | null; tomados: number; quedan: number };
+
+/**
+ * Cuántos cupos quedan al precio de lanzamiento.
+ *
+ * El número sale de contar los negocios que ya no son gratis, no de un texto
+ * que alguien se olvida de bajar. Una escasez inventada se nota, y cuesta
+ * más confianza de la que gana.
+ */
+export async function cuposPremium(destino: Destino): Promise<CuposPremium> {
+  const { data, error } = await supabase.rpc('cupos_premium', { p_dominio: destino.dominio });
+  if (error) {
+    console.error('cupos_premium:', error.message);
+    return { cupos: destino.premium_cupos, tomados: 0, quedan: destino.premium_cupos ?? 0 };
+  }
+  const fila = ((data ?? []) as CuposPremium[])[0];
+  return fila ?? { cupos: destino.premium_cupos, tomados: 0, quedan: destino.premium_cupos ?? 0 };
+}
+

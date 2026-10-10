@@ -39,6 +39,18 @@ export async function editarDestino(datos: FormData) {
       ? texto(datos, 'pie_credito_url')
       : null,
     chat_activo: texto(datos, 'chat_activo') === '1',
+    contacto_bloqueado: texto(datos, 'contacto_bloqueado') === '1',
+    /* La oferta premium. El precio cambia seguido y es suyo: se edita aca y
+       no en el codigo, para no desplegar por bajar $100. */
+    premium_activo: texto(datos, 'premium_activo') === '1',
+    premium_titulo: texto(datos, 'premium_titulo') || null,
+    premium_gancho: texto(datos, 'premium_gancho') || null,
+    premium_precio_usd: numero(datos, 'premium_precio_usd'),
+    premium_precio_antes: numero(datos, 'premium_precio_antes'),
+    premium_cupos: numero(datos, 'premium_cupos'),
+    premium_ejemplo_babosa: texto(datos, 'premium_ejemplo_babosa') || null,
+    premium_incluye: texto(datos, 'premium_incluye')
+      .split('\n').map((l) => l.trim()).filter(Boolean),
     esta_activo: texto(datos, 'esta_activo') === '1',
   }).eq('id', destino.id);
   if (error) console.error('editarDestino:', error.message);

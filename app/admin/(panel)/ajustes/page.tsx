@@ -54,6 +54,9 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label>Correo de contacto</label><input type="email" name="email_contacto" defaultValue={d.email_contacto ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>Comisión por defecto %</label><input type="number" step="0.5" name="comision_por_defecto" defaultValue={d.comision_por_defecto ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label><input type="checkbox" name="esta_activo" value="1" defaultChecked={d.esta_activo} disabled={!esAdmin} /> Sitio encendido (se sirve al público)</label></div>
+                <div className="campo"><label><input type="checkbox" name="contacto_bloqueado" value="1" defaultChecked={d.contacto_bloqueado} disabled={!esAdmin} /> Tapar el teléfono hasta que dejen sus datos</label>
+                  <small>Como encuentra24: la ficha se ve, el contacto no. Apagado, el directorio deja de generar leads.</small>
+                </div>
                 <div className="campo"><label><input type="checkbox" name="chat_activo" value="1" defaultChecked={d.chat_activo} disabled={!esAdmin} /> Burbuja de chat en el sitio</label>
                   <small>Apagada, la burbuja no se pinta y el chat deja de atender. Lo que ya estaba conversado no se borra.</small>
                 </div>
@@ -102,6 +105,28 @@ export default async function PaginaAjustes() {
           </div>
         </div>
       </form>
+
+      <div className="tarjeta">
+        <h2>Oferta premium <small>video + historias + mes destacado</small></h2>
+        <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+          Se muestra en <code style={{ fontSize: 11.5 }}>/premium</code>, al pie de
+          Sumá tu negocio y en el correo de bienvenida. Los cupos que quedan se
+          <strong> cuentan</strong> (negocios que ya no son gratis): una escasez
+          inventada se nota y cuesta más confianza de la que gana.
+        </p>
+
+        <form action={editarDestino} className="campos">
+          <div className="campo"><label><input type="checkbox" name="premium_activo" value="1" defaultChecked={d.premium_activo} disabled={!esAdmin} /> Mostrar la oferta</label></div>
+          <div className="campo"><label htmlFor="pt">Título</label><input id="pt" name="premium_titulo" defaultValue={d.premium_titulo ?? ''} disabled={!esAdmin} /></div>
+          <div className="campo" style={{ gridColumn: '1 / -1' }}><label htmlFor="pg">Gancho</label><textarea id="pg" name="premium_gancho" rows={2} defaultValue={d.premium_gancho ?? ''} disabled={!esAdmin} /></div>
+          <div className="campo"><label htmlFor="pp">Precio hoy (USD)</label><input id="pp" name="premium_precio_usd" type="number" min={0} step="1" defaultValue={d.premium_precio_usd ?? ''} disabled={!esAdmin} /></div>
+          <div className="campo"><label htmlFor="pa">Precio normal (tachado)</label><input id="pa" name="premium_precio_antes" type="number" min={0} step="1" defaultValue={d.premium_precio_antes ?? ''} disabled={!esAdmin} /><small>Si es mayor que el de hoy, sale tachado al lado.</small></div>
+          <div className="campo"><label htmlFor="pc">Cupos a ese precio</label><input id="pc" name="premium_cupos" type="number" min={0} max={999} defaultValue={d.premium_cupos ?? ''} disabled={!esAdmin} /><small>Al llenarse, el sitio deja de hablar de lanzamiento y muestra el precio normal.</small></div>
+          <div className="campo"><label htmlFor="pe">Ficha de ejemplo</label><input id="pe" name="premium_ejemplo_babosa" defaultValue={d.premium_ejemplo_babosa ?? ''} placeholder="outback" disabled={!esAdmin} /><small>La babosa del negocio que ya tiene video. Se muestra en /premium.</small></div>
+          <div className="campo" style={{ gridColumn: '1 / -1' }}><label htmlFor="pi">Qué incluye <small>uno por línea</small></label><textarea id="pi" name="premium_incluye" rows={5} defaultValue={(d.premium_incluye ?? []).join('\n')} disabled={!esAdmin} /></div>
+          {esAdmin && <BotonAccion>Guardar la oferta</BotonAccion>}
+        </form>
+      </div>
 
       <div className="tarjeta desliza">
         <h2>Canales <small>por dónde habla este destino</small></h2>
