@@ -24,6 +24,8 @@ type Carta = {
   idioma: Idioma;
   para: string;
   asunto: string;
+  /** Qué lo disparó, para la bitácora: negocio_recibido, consulta_recibida… */
+  motivo?: string;
   titulo: string;
   parrafos: string[];
   boton?: Boton;
@@ -58,6 +60,26 @@ async function remitenteDe(destino: Destino): Promise<{ de: string } | { error: 
   return { de: `"${nombre.replace(/"/g, '')}" <${correo}>` };
 }
 
+/* La bitácora no puede tumbar el envío: si falla anotar, se anota el fallo de
+   anotar y se sigue. */
+async function anotar(
+  carta: Carta, estado: 'enviado' | 'fallido', id?: string, error?: string,
+): Promise<void> {
+  try {
+    await servicio().from('dst_correo').insert({
+      destino_id: carta.destino.id,
+      para: carta.para,
+      asunto: carta.asunto,
+      motivo: carta.motivo ?? null,
+      estado,
+      id_externo: id ?? null,
+      error: error ?? null,
+    });
+  } catch (fallo) {
+    console.error('bitácora de correo:', fallo instanceof Error ? fallo.message : fallo);
+  }
+}
+
 export async function enviarCorreo(carta: Carta): Promise<Envio> {
   if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(carta.para)) {
     return { ok: false, error: 'Dirección de correo inválida.' };
@@ -65,11 +87,16 @@ export async function enviarCorreo(carta: Carta): Promise<Envio> {
 
   const llave = await secreto(LLAVE);
   if (!llave) {
-    return { ok: false, error: `Falta ${LLAVE}. Ingresala en Ajustes → Llaves.` };
+    const error = `Falta ${LLAVE}. Ingresala en Ajustes → Llaves.`;
+    await anotar(carta, 'fallido', undefined, error);
+    return { ok: false, error };
   }
 
   const remitente = await remitenteDe(carta.destino);
-  if ('error' in remitente) return { ok: false, error: remitente.error };
+  if ('error' in remitente) {
+    await anotar(carta, 'fallido', undefined, remitente.error);
+    return { ok: false, error: remitente.error };
+  }
 
   const { html, texto } = armarCorreo({
     destino: carta.destino,
@@ -97,15 +124,19 @@ export async function enviarCorreo(carta: Carta): Promise<Envio> {
 
     const cuerpo = (await respuesta.json().catch(() => ({}))) as { id?: string; message?: string };
     if (!respuesta.ok) {
-      /* El motivo al registro, nunca al visitante: Resend contesta cosas como
-         "domain not verified" que no le dicen nada a quien se registró. */
-      console.error('Resend:', respuesta.status, cuerpo.message);
-      return { ok: false, error: cuerpo.message ?? `HTTP ${respuesta.status}` };
+      /* El motivo a la bitácora, nunca al visitante: Resend contesta cosas
+         como "domain not verified" que no le dicen nada a quien se registró. */
+      const error = cuerpo.message ?? `HTTP ${respuesta.status}`;
+      console.error('Resend:', respuesta.status, error);
+      await anotar(carta, 'fallido', undefined, error);
+      return { ok: false, error };
     }
+    await anotar(carta, 'enviado', cuerpo.id);
     return { ok: true, id: cuerpo.id };
   } catch (fallo) {
     const error = fallo instanceof Error ? fallo.message : String(fallo);
     console.error('Resend:', error);
+    await anotar(carta, 'fallido', undefined, error);
     return { ok: false, error };
   }
 }

@@ -111,6 +111,7 @@ export async function mandarCorreoDePrueba(_previo: EstadoLlave, _datos: FormDat
     idioma: (destino.idioma_principal ?? 'es') as 'es',
     para: usuario.email,
     asunto: `Prueba de correo · ${destino.marca_nombre}`,
+    motivo: 'prueba',
     titulo: 'Si estás leyendo esto, el correo funciona',
     parrafos: [
       `Esta prueba salió del panel de ${destino.marca_nombre} y pasó por todo el camino de verdad: la llave de Resend guardada en la bóveda, el remitente del canal de correo y la plantilla con la marca.`,

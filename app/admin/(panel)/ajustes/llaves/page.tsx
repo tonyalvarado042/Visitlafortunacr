@@ -61,8 +61,15 @@ export default async function PaginaLlaves() {
     );
   }
 
-  const { data } = await db.rpc('estado_de_secretos');
+  const [{ data }, { data: correos }] = await Promise.all([
+    db.rpc('estado_de_secretos'),
+    db.rpc('ultimos_correos', { p_cuantos: 12 }),
+  ]);
   const puestas = new Map((((data ?? []) as Estado[])).map((s) => [s.nombre, s]));
+  const bitacora = (correos ?? []) as {
+    para: string; asunto: string; motivo: string | null;
+    estado: string; error: string | null; creado_en: string;
+  }[];
 
   return (
     <>
@@ -123,6 +130,38 @@ export default async function PaginaLlaves() {
           <div className="tarjeta">
             <h2>Probar el correo</h2>
             <BotonPrueba correo={usuario.email ?? ''} />
+          </div>
+
+          <div className="tarjeta desliza">
+            <h2>Últimos correos <small>si salió o por qué no</small></h2>
+            {!bitacora.length ? (
+              <p className="gris" style={{ fontSize: 13 }}>
+                Todavía no salió ninguno. Mandá la prueba de arriba.
+              </p>
+            ) : (
+              <table className="tabla">
+                <tbody>
+                  {bitacora.map((c, i) => (
+                    <tr key={`${c.creado_en}-${i}`}>
+                      <td>
+                        <div className="fuerte" style={{ fontSize: 13 }}>{c.para}</div>
+                        <div className="gris" style={{ fontSize: 11.5 }}>
+                          {c.motivo ?? c.asunto} · {relativo(c.creado_en)}
+                        </div>
+                        {c.error && (
+                          <div style={{ fontSize: 11.5, color: '#B42318', marginTop: 3 }}>{c.error}</div>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: 'top' }}>
+                        <Etiqueta color={c.estado === 'enviado' ? '#66BB2E' : '#B42318'}>
+                          {c.estado}
+                        </Etiqueta>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           <div className="tarjeta">

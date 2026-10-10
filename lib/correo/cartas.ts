@@ -75,6 +75,7 @@ export async function correoNegocioRecibido(opciones: {
     idioma,
     para,
     asunto: `${d(NEG_ASUNTO, idioma)}: ${nombreNegocio}`,
+    motivo: 'negocio_recibido',
     titulo: d(NEG_TITULO, idioma),
     parrafos: [d(NEG_P1, idioma), d(NEG_P2, idioma)],
     datos: [
@@ -146,6 +147,7 @@ export async function correoConsultaRecibida(opciones: {
     idioma,
     para,
     asunto: `${d(EXP_ASUNTO, idioma)}: ${tituloViaje}`,
+    motivo: 'consulta_recibida',
     titulo: d(EXP_TITULO, idioma),
     parrafos: [d(EXP_P1, idioma), d(EXP_P2, idioma)],
     datos: [

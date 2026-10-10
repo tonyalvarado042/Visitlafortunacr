@@ -191,6 +191,7 @@ export async function POST(peticion: NextRequest) {
     idioma,
     para,
     asunto: ASUNTOS[tipo][idioma] ?? ASUNTOS[tipo].es,
+    motivo: `cuenta:${tipo}`,
     titulo: ASUNTOS[tipo][idioma] ?? ASUNTOS[tipo].es,
     parrafos: [CUERPOS[tipo][idioma] ?? CUERPOS[tipo].es],
     boton: { texto: BOTONES[idioma] ?? BOTONES.es, url },
