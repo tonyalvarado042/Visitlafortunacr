@@ -77,6 +77,14 @@ table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .campo { min-width: 0; }
 .campo.ancho { grid-column: 1 / -1; }
 .campo label { display: block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 5px; }
+/* Campos de una fila de tabla: la tarifa se edita en linea, sin abrir nada. */
+.tabla .mini {
+  width: 100%; border: 1px solid #D8D8D3; border-radius: 6px;
+  padding: 6px 8px; font-family: inherit; font-size: 12.5px;
+  background: #fff; color: #0B0B0B;
+}
+.tabla .mini:focus { outline: 2px solid var(--naranja); outline-offset: 1px; border-color: transparent; }
+
 .campo input, .campo select, .campo textarea { width: 100%; border: 1px solid #D8D8D3; border-radius: 8px; padding: 9px 11px; font-family: inherit; font-size: 13.5px; background: #fff; color: #0B0B0B; }
 .campo textarea { min-height: 110px; resize: vertical; line-height: 1.5; }
 .campo input:focus, .campo select:focus, .campo textarea:focus { outline: 2px solid var(--naranja); outline-offset: 1px; border-color: transparent; }

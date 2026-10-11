@@ -7,13 +7,14 @@ import type { Rol } from '@/lib/supabase-sesion';
  */
 export type Seccion =
   | 'tablero' | 'leads' | 'conversaciones' | 'viajeros' | 'reservas' | 'tareas'
-  | 'negocios' | 'tours' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'cadenas' | 'reportes' | 'equipo' | 'ajustes';
+  | 'negocios' | 'tours' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'cadenas' | 'operadores' | 'reportes' | 'equipo' | 'ajustes';
 
 export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: string }[] = [
   { seccion: 'tablero',        ruta: '/admin',                nombre: 'Tablero',        grupo: '' },
   { seccion: 'leads',          ruta: '/admin/leads',          nombre: 'Leads',          grupo: 'Ventas' },
   { seccion: 'conversaciones', ruta: '/admin/conversaciones', nombre: 'Conversaciones', grupo: 'Ventas' },
   { seccion: 'viajeros',       ruta: '/admin/viajeros',       nombre: 'Viajeros',       grupo: 'Ventas' },
+  { seccion: 'operadores',     ruta: '/admin/operadores',     nombre: 'Operadores',     grupo: 'Ventas' },
   { seccion: 'reservas',       ruta: '/admin/reservas',       nombre: 'Reservas',       grupo: 'Ventas' },
   { seccion: 'tareas',         ruta: '/admin/tareas',         nombre: 'Tareas',         grupo: 'Ventas' },
   { seccion: 'negocios',       ruta: '/admin/negocios',       nombre: 'Negocios',       grupo: 'Contenido' },

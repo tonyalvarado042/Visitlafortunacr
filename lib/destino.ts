@@ -32,6 +32,9 @@ export type Destino = {
   video_portada_url: string | null;
   imagen_portada_url: string | null;
   whatsapp: string | null;
+  /* El buzon del equipo. Es a donde llegan los avisos de solicitudes de
+     reserva: sin esto, una solicitud entra y nadie se entera. */
+  email_contacto: string | null;
   /* El crédito de quien hizo el sitio, en el pie. Por destino y no fijo en el
      código: este lo hizo LIDERAX10, el próximo lo puede hacer otro. */
   pie_credito_texto: string | null;

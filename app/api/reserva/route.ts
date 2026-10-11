@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { dominioDeHost } from '@/lib/dominio';
 import { esIdioma, t, type Idioma } from '@/lib/idiomas';
+import { destinoActual } from '@/lib/destino';
+import { servicio, hayClaveDeServicio } from '@/lib/supabase-servidor';
+import { correoReservaPedida, correoReservaAlEquipo } from '@/lib/correo/cartas';
 
 /**
  * Pedir una reserva. Hermana de /api/resena, /api/solicitud y /api/sorteo.
@@ -78,6 +81,58 @@ export async function POST(peticion: NextRequest) {
   }
 
   const fila = ((data ?? []) as { ok: boolean; codigo: string; accion: string }[])[0];
+
+  /* Los dos correos van DESPUES de responder: el visitante ya vio su codigo
+     y no tiene por que esperar a Resend. Y si el correo falla, la reserva
+     sigue existiendo — que es lo que importa.
+
+     El del equipo no es un adorno: es la unica razon por la que alguien va a
+     mirar el panel. Una solicitud que nadie ve es peor que no tener boton. */
+  if (fila?.codigo && hayClaveDeServicio()) {
+    after(async () => {
+      try {
+        const destino = await destinoActual();
+        const { data: r } = await servicio()
+          .from('dst_reserva')
+          .select('id, codigo, para_el, adultos, ninos, total_usd, nombre_titular, email_titular, whatsapp_titular, notas, producto:dst_producto(nombre), operador:dst_negocio(nombre)')
+          .eq('codigo', fila.codigo).maybeSingle();
+        if (!r) return;
+
+        const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
+        const prod = uno(r.producto as { nombre: string } | { nombre: string }[] | null)?.nombre ?? '';
+        const oper = uno(r.operador as { nombre: string } | { nombre: string }[] | null)?.nombre ?? '';
+        const total = r.total_usd == null ? null : Number(r.total_usd);
+
+        await correoReservaPedida({
+          destino, idioma, para: r.email_titular as string,
+          codigo: r.codigo as string, producto: prod, operador: oper,
+          paraEl: r.para_el as string,
+          personas: Number(r.adultos ?? 0) + Number(r.ninos ?? 0),
+          totalUsd: total,
+        });
+
+        /* Al equipo solo si hay a quien escribirle. Sin correo de contacto
+           no se inventa un destinatario. */
+        const equipo = destino.email_contacto?.trim();
+        if (equipo) {
+          await correoReservaAlEquipo({
+            destino, para: equipo,
+            codigo: r.codigo as string, producto: prod, operador: oper,
+            paraEl: r.para_el as string,
+            adultos: Number(r.adultos ?? 0), ninos: Number(r.ninos ?? 0),
+            totalUsd: total,
+            nombre: r.nombre_titular as string, email: r.email_titular as string,
+            whatsapp: (r.whatsapp_titular as string | null) ?? null,
+            notas: (r.notas as string | null) ?? null,
+            reservaId: r.id as string,
+          });
+        }
+      } catch (error) {
+        console.error('correos de reserva:', error instanceof Error ? error.message : error);
+      }
+    });
+  }
+
   return NextResponse.json(
     { ok: true, codigo: fila?.codigo, accion: fila?.accion },
     { status: 201 },

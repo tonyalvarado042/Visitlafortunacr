@@ -265,3 +265,138 @@ export async function correoPidieronTusDatos(opciones: {
   });
 }
 
+/* ---- Alguien pidio una reserva ----
+   Dos correos y NO uno: el del viajero le dice que lo recibimos (sin
+   prometer que esta reservado, porque no lo esta), y el del equipo es la
+   unica razon por la que alguien va a mirar el panel. Una solicitud que
+   nadie ve es peor que no tener el boton. */
+
+const RES_ASUNTO: Texto = {
+  es: 'Recibimos tu solicitud',
+  en: 'We got your request',
+  pt: 'Recebemos sua solicitacao',
+  fr: 'Nous avons recu votre demande',
+  de: 'Wir haben deine Anfrage',
+};
+const RES_TITULO: Texto = {
+  es: 'Recibimos tu solicitud',
+  en: 'We got your request',
+  pt: 'Recebemos sua solicitacao',
+  fr: 'Nous avons recu votre demande',
+  de: 'Wir haben deine Anfrage',
+};
+/* Dice exactamente lo que pasa: NO esta reservado y NO se cobro. Prometer
+   una confirmacion que todavia depende del operador es la forma mas rapida
+   de que alguien llegue y no haya campo. */
+const RES_P1: Texto = {
+  es: 'Todavía no está reservado ni se cobró nada. Vamos a consultar la disponibilidad con el operador y te escribimos apenas tengamos respuesta.',
+  en: 'Nothing is booked and nothing has been charged yet. We will check availability with the operator and write back as soon as we hear.',
+  pt: 'Ainda não está reservado nem foi cobrado nada. Vamos consultar a disponibilidade com o operador e escrevemos assim que tivermos resposta.',
+  fr: "Rien n'est encore réservé ni débité. Nous allons vérifier les disponibilités auprès de l'opérateur et vous répondrons dès que possible.",
+  de: 'Es ist noch nichts gebucht und nichts abgebucht. Wir fragen die Verfügbarkeit beim Anbieter an und melden uns, sobald wir Bescheid wissen.',
+};
+const RES_P2: Texto = {
+  es: 'Si algo cambia en tus planes, respondé este correo y lo ajustamos.',
+  en: 'If your plans change, just reply to this email and we will adjust it.',
+  pt: 'Se algo mudar nos seus planos, responda este e-mail e ajustamos.',
+  fr: 'Si vos plans changent, répondez à cet e-mail et nous ajusterons.',
+  de: 'Wenn sich deine Pläne ändern, antworte einfach auf diese E-Mail.',
+};
+const RES_ROT_CODIGO: Texto = { es: 'Código', en: 'Code', pt: 'Código', fr: 'Code', de: 'Code' };
+const RES_ROT_QUE: Texto = { es: 'Qué', en: 'What', pt: 'O quê', fr: 'Quoi', de: 'Was' };
+const RES_ROT_CUANDO: Texto = { es: 'Cuándo', en: 'When', pt: 'Quando', fr: 'Quand', de: 'Wann' };
+const RES_ROT_GENTE: Texto = { es: 'Personas', en: 'People', pt: 'Pessoas', fr: 'Personnes', de: 'Personen' };
+const RES_ROT_TOTAL: Texto = { es: 'Total estimado', en: 'Estimated total', pt: 'Total estimado', fr: 'Total estimé', de: 'Geschätzte Summe' };
+const RES_NOTA: Texto = {
+  es: 'El operador del servicio es quien presta la actividad. Nosotros gestionamos la reserva.',
+  en: 'The operator provides the activity itself. We handle the booking.',
+  pt: 'O operador presta a atividade. Nós cuidamos da reserva.',
+  fr: "L'opérateur assure l'activité. Nous gérons la réservation.",
+  de: 'Der Anbieter führt die Aktivität durch. Wir kümmern uns um die Buchung.',
+};
+
+export async function correoReservaPedida(opciones: {
+  destino: Destino;
+  idioma: Idioma;
+  para: string;
+  codigo: string;
+  producto: string;
+  operador: string;
+  paraEl: string;
+  personas: number;
+  totalUsd: number | null;
+}): Promise<Envio> {
+  const { destino, idioma, para, codigo, producto, operador, paraEl, personas, totalUsd } = opciones;
+  return enviarCorreo({
+    destino,
+    idioma,
+    para,
+    asunto: `${d(RES_ASUNTO, idioma)} · ${codigo}`,
+    motivo: 'reserva_pedida',
+    titulo: d(RES_TITULO, idioma),
+    parrafos: [d(RES_P1, idioma), d(RES_P2, idioma)],
+    datos: [
+      { rotulo: d(RES_ROT_CODIGO, idioma), valor: codigo },
+      { rotulo: d(RES_ROT_QUE, idioma), valor: `${producto} — ${operador}` },
+      { rotulo: d(RES_ROT_CUANDO, idioma), valor: paraEl },
+      { rotulo: d(RES_ROT_GENTE, idioma), valor: String(personas) },
+      /* El total solo si de verdad hay uno. Un "$0" aqui se lee como gratis. */
+      ...(totalUsd != null ? [{ rotulo: d(RES_ROT_TOTAL, idioma), valor: `$${totalUsd}` }] : []),
+    ],
+    nota: d(RES_NOTA, idioma),
+  });
+}
+
+/** Al equipo. En español siempre: lo lee quien opera, no el viajero. */
+export async function correoReservaAlEquipo(opciones: {
+  destino: Destino;
+  para: string;
+  codigo: string;
+  producto: string;
+  operador: string;
+  paraEl: string;
+  adultos: number;
+  ninos: number;
+  totalUsd: number | null;
+  nombre: string;
+  email: string;
+  whatsapp: string | null;
+  notas: string | null;
+  reservaId: string;
+}): Promise<Envio> {
+  const o = opciones;
+  const gente = [
+    `${o.adultos} adulto${o.adultos === 1 ? '' : 's'}`,
+    ...(o.ninos > 0 ? [`${o.ninos} niño${o.ninos === 1 ? '' : 's'}`] : []),
+  ].join(' + ');
+
+  return enviarCorreo({
+    destino: o.destino,
+    idioma: 'es',
+    para: o.para,
+    asunto: `Solicitud de reserva ${o.codigo} · ${o.operador}`,
+    motivo: 'reserva_al_equipo',
+    titulo: 'Entró una solicitud de reserva',
+    parrafos: [
+      `Hay que consultarle la disponibilidad a ${o.operador} y volver al panel a confirmar o rechazar.`,
+      'Confirmar pide la referencia que dé el operador: sin eso no hay prueba de que el cupo exista.',
+    ],
+    datos: [
+      { rotulo: 'Código', valor: o.codigo },
+      { rotulo: 'Producto', valor: o.producto },
+      { rotulo: 'Operador', valor: o.operador },
+      { rotulo: 'Fecha', valor: o.paraEl },
+      { rotulo: 'Personas', valor: gente },
+      { rotulo: 'Total', valor: o.totalUsd != null ? `$${o.totalUsd}` : 'sin cotizar' },
+      { rotulo: 'Quién', valor: `${o.nombre} · ${o.email}${o.whatsapp ? ` · ${o.whatsapp}` : ''}` },
+      ...(o.notas ? [{ rotulo: 'Nota', valor: o.notas }] : []),
+    ],
+    boton: {
+      texto: 'Abrir la reserva',
+      url: `https://${o.destino.dominio}/admin/reservas/${o.reservaId}`,
+    },
+    /* Para que al dar "responder" se le conteste al viajero y no al buzon
+       del sitio: nueve de cada diez veces lo que sigue es escribirle. */
+    responder_a: o.email,
+  });
+}
