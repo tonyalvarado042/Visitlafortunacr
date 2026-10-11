@@ -172,7 +172,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
             {negocio.descripcion && (
               <>
                 <h2 style={{ fontSize: 24, marginBottom: 14 }}>{t('sobre', idioma)} {negocio.nombre}</h2>
-                <p style={{ fontSize: 17, lineHeight: 1.65, color: '#D6D4D0' }}>{negocio.descripcion}</p>
+                <p style={{ fontSize: 17, lineHeight: 1.65, color: 'var(--txt-0)' }}>{negocio.descripcion}</p>
               </>
             )}
             {negocio.como_llegar && (

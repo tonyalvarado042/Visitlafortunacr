@@ -137,8 +137,8 @@ export function Planificador({ idioma }: { idioma: Idioma }) {
         {enviando ? '…' : t('ver_itinerario', idioma)}
       </button>
 
-      {error && <p style={{ color: '#E2795A', fontSize: 13, margin: '10px 0 0', textAlign: 'center' }}>{error}</p>}
-      <p style={{ fontSize: 11.5, color: '#6E6C68', margin: '12px 0 0', textAlign: 'center' }}>
+      {error && <p style={{ color: 'var(--peligro-2)', fontSize: 13, margin: '10px 0 0', textAlign: 'center' }}>{error}</p>}
+      <p style={{ fontSize: 11.5, color: 'var(--txt-4)', margin: '12px 0 0', textAlign: 'center' }}>
         {t('sin_costo', idioma)}
       </p>
     </form>
@@ -146,8 +146,8 @@ export function Planificador({ idioma }: { idioma: Idioma }) {
 }
 
 const campo: React.CSSProperties = {
-  width: '100%', background: '#151515', border: '1px solid #262626', borderRadius: 3,
-  padding: '12px 14px', fontSize: 14.5, fontWeight: 600, color: '#FFFFFF',
+  width: '100%', background: 'var(--sup-2)', border: '1px solid var(--borde-2)', borderRadius: 3,
+  padding: '12px 14px', fontSize: 14.5, fontWeight: 600, color: 'var(--blanco)',
   fontFamily: 'inherit', colorScheme: 'dark',
 };
 
@@ -158,6 +158,6 @@ const chip = (activo: boolean): React.CSSProperties => ({
   cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s',
   background: activo ? 'var(--verde)' : 'transparent',
   borderWidth: 1, borderStyle: 'solid',
-  borderColor: activo ? 'var(--verde)' : '#2C2C2C',
-  color: activo ? '#0B0B0B' : '#B5B3AF',
+  borderColor: activo ? 'var(--verde)' : 'var(--borde-2)',
+  color: activo ? 'var(--negro)' : 'var(--txt-2)',
 });

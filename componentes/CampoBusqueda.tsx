@@ -11,7 +11,7 @@ export function CampoBusqueda({ idioma, consulta = '' }: { idioma: Idioma; consu
   return (
     <form className="buscador" action={`/${idioma}`} method="get">
       <div className="campo">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8B8B87"
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
         </svg>

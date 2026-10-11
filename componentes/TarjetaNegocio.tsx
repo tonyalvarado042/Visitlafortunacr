@@ -27,7 +27,7 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
        los demas, no habria que pagarlo. */
     <article className={negocio.es_destacado ? 'tarjeta tarjeta-destacada' : 'tarjeta'}>
       <Link href={`/${idioma}/${negocio.categoria_babosa}/${negocio.babosa}`}>
-        <div className="imagen" style={{ background: `linear-gradient(150deg, ${color}1F, #0B0B0B 72%)` }}>
+        <div className="imagen" style={{ background: `linear-gradient(150deg, ${color}1F, var(--negro) 72%)` }}>
           {negocio.foto_portada_url && (
             <img className="foto" src={negocio.foto_portada_url} alt=""
                  loading="lazy" decoding="async" />
@@ -36,7 +36,7 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
               ritmo. Suave a propósito: la foto tiene que verse. */}
           {negocio.foto_portada_url && (
             <span className={`velo-foto${negocio.foto_portada_generica ? ' generica' : ''}`}
-                  style={{ background: `linear-gradient(160deg, ${color}, #0B0B0B 85%)` }} />
+                  style={{ background: `linear-gradient(160deg, ${color}, var(--negro) 85%)` }} />
           )}
           {negocio.logo_url
             ? <img src={negocio.logo_url} alt="" style={{ maxHeight: 110, width: 'auto', position: 'relative' }} />

@@ -54,16 +54,27 @@ export default async function LayoutIdioma({
   /* El aviso de la rifa vive aca y no en la portada: el que entra por una
      ficha o por el blog cuenta igual, y son la mayoria. Si no hay sorteo
      encendido, `sorteoDe` vuelve null y no se monta nada. */
-  const vistaPrevia = (await headers()).get('x-vista') === '1';
+  const cabeceras = await headers();
+  const vistaPrevia = cabeceras.get('x-vista') === '1';
   const sorteo = await sorteoDe(destino, vistaPrevia, idioma);
 
-  // La marca del destino entra como variables CSS. Es lo que permite que otro
-  // destino tenga otra paleta sin tocar una línea de estilos.
+  /* La marca del destino entra como variables CSS. Es lo que permite que otro
+     destino tenga otra paleta sin tocar una línea de estilos.
+
+     ⚠️ `color_tinta` y `color_gris` solo entran con el tema OSCURO. Un estilo
+     en línea le gana a `:root[data-tema="claro"]`, así que inyectarlos aquí
+     deshacía el tema claro de este div para abajo: el `body` quedaba blanco
+     —está fuera— pero cada `section.zona` volvía a pintarse de negro. Se veía
+     como "la portada sigue negra" y no había forma de deducirlo leyendo el
+     CSS, porque el CSS estaba bien.
+
+     Los acentos sí entran siempre: el naranja y el verde son los mismos en los
+     dos temas. */
+  const oscuro = (cabeceras.get('x-tema') ?? destino.tema ?? 'claro') === 'oscuro';
   const paleta = {
-    '--negro': destino.color_tinta,
+    ...(oscuro ? { '--negro': destino.color_tinta, '--gris': destino.color_gris } : {}),
     '--naranja': destino.color_acento,
     '--verde': destino.color_naturaleza,
-    '--gris': destino.color_gris,
     '--fuente': `'${destino.tipografia}', -apple-system, 'Helvetica Neue', Arial, sans-serif`,
   } as React.CSSProperties;
 

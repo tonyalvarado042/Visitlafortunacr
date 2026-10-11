@@ -198,7 +198,7 @@ export default async function Portada({ params, searchParams }: {
                   {destino.nombre},<br />
                   {t('en_60', idioma)}
                 </h2>
-                <p style={{ fontSize: 16.5, color: '#C2C0BC', maxWidth: '44ch', marginTop: 18 }}>
+                <p style={{ fontSize: 16.5, color: 'var(--txt-1)', maxWidth: '44ch', marginTop: 18 }}>
                   {t('plan_explica', idioma)}
                 </p>
                 <div className="pasos">

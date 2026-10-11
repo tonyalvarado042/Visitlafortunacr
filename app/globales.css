@@ -81,12 +81,12 @@
   --sup-4: #E9E6DF;
   --sup-aviso-2: #FBF0DA;
   --sup-aviso: #FDF6EC;
-  --txt-0: #2A2721;
-  --txt-1: #413D37;
-  --txt-2: #5A564F;
-  --txt-3: #6F6B63;
-  --txt-4: #8A867E;
-  --txt-5: #9B978F;
+  --txt-0: #13120E;
+  --txt-1: #1F1D18;
+  --txt-2: #33302A;
+  --txt-3: #514D46;
+  --txt-4: #6F6B63;
+  --txt-5: #8A857D;
 }
 
 /* Lo que va ENCIMA de una foto no cambia con el tema.
@@ -171,7 +171,11 @@ img { max-width: 100%; display: block; }
 .barra {
   position: sticky; top: 0; z-index: 60;
   display: flex; align-items: center; justify-content: space-between;
-  gap: 24px; padding: 14px 40px;
+  /* 9 y no 14: la barra mide lo mismo que siempre (72px), pero con el
+     tema claro es una franja negra sobre blanco y pesa el doble a la
+     vista. Se adelgaza con el relleno y NO con el emblema: a menos de
+     40px los riscos finos del volcan se empastan. */
+  gap: 24px; padding: 9px 40px;
   background: rgba(var(--rgb-fondo), .92); backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--borde);
 }
@@ -1261,7 +1265,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* Escritorio angosto y tablet apaisada: se recortan los márgenes. */
 @media (max-width: 1240px) {
   .caja { padding: 0 32px; }
-  .barra { padding: 14px 32px; gap: 18px; }
+  .barra { padding: 9px 32px; gap: 18px; }
   .menu { gap: 18px; font-size: 12px; }
   .ficha-cuerpo { gap: 32px; }
 }
@@ -1286,7 +1290,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   /* Sitio para la barra fija de reservar, que si no tapa el final del pie. */
   .ficha-cuerpo { padding-bottom: 96px; }
   .caja { padding: 0 28px; }
-  .barra { padding: 12px 28px; }
+  .barra { padding: 8px 28px; }
   section { padding: 64px 0; }
 }
 @media (prefers-reduced-motion: reduce) {
