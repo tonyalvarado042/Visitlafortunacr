@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Destacado } from '@/lib/destino';
 import { t, type Idioma } from '@/lib/idiomas';
+import { PistaDestacados } from './PistaDestacados';
 
 /*
  * La fila de destacados de la portada.
@@ -9,13 +10,19 @@ import { t, type Idioma } from '@/lib/idiomas';
  * "destacado" no se ve distinto en ninguna pantalla, el plan no se vende
  * solo.
  *
- * Se desliza en lugar de envolverse. Una rejilla de diez tarjetas se come la
- * portada entera y deja de ser un destaque; una fila que se arrastra ocupa un
- * alto fijo y se entiende que hay más a la derecha.
+ * Anda sola, despacio, y se detiene apenas alguien se le acerca. Quién la
+ * mueve y por qué está en PistaDestacados.tsx.
  *
- * Sin JavaScript: es scroll del navegador con ajuste por tarjeta. Funciona
- * con el dedo, con la rueda y con el teclado, que es más de lo que suele dar
- * un carrusel hecho a mano.
+ * La lista se pinta DOS VECES, y eso es a propósito: es lo que deja que el
+ * bucle no dé el salto feo al llegar al final. La copia va `aria-hidden` y
+ * sin paso de teclado —quien navega con tabulador recorre diez tarjetas, no
+ * veinte— pero SÍ se puede hacer clic en ella: la mitad del tiempo la
+ * tarjeta que se ve es la copia, y una tarjeta premium que no abre al
+ * tocarla sería peor que no tener carrusel.
+ *
+ * Para buscadores no cambia nada: las tarjetas ya estaban en el HTML del
+ * servidor y ahí siguen. Lo único que se mueve es la posición del scroll,
+ * que ningún rastreador mira.
  */
 export function FilaDestacados({
   destacados, idioma,
@@ -24,6 +31,38 @@ export function FilaDestacados({
   idioma: Idioma;
 }) {
   if (destacados.length === 0) return null;
+
+  const tarjetas = (copia: boolean) => (
+    <ul {...(copia ? { 'aria-hidden': true } : {})}>
+      {destacados.map((n) => (
+        <li key={`${copia ? 'c' : 'o'}-${n.id}`}>
+          <Link href={`/${idioma}/${n.categoria_babosa}/${n.babosa}`} className="destacado"
+                tabIndex={copia ? -1 : undefined}>
+            <div className="destacado-foto">
+              {n.foto_portada_url
+                /* eslint-disable-next-line @next/next/no-img-element */
+                ? <img src={n.foto_portada_url} alt="" loading="lazy" />
+                : <span className="exp-sin-foto" aria-hidden="true" />}
+              <span className="cintillo">{t('destacado_cintillo', idioma)}</span>
+              {n.video_url && (
+                <span className="destacado-video" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5.5v13l11-6.5z" />
+                  </svg>
+                  {t('ver_video', idioma)}
+                </span>
+              )}
+            </div>
+            <div className="destacado-cuerpo">
+              <span className="destacado-cat">{n.categoria_nombre}</span>
+              <h3>{n.nombre}</h3>
+              {n.resumen && <p>{n.resumen}</p>}
+            </div>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <section className="destacados">
@@ -35,36 +74,10 @@ export function FilaDestacados({
         <p>{t('destacados_bajada', idioma)}</p>
       </div>
 
-      <div className="destacados-pista">
-        <ul>
-          {destacados.map((n) => (
-            <li key={n.id}>
-              <Link href={`/${idioma}/${n.categoria_babosa}/${n.babosa}`} className="destacado">
-                <div className="destacado-foto">
-                  {n.foto_portada_url
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    ? <img src={n.foto_portada_url} alt="" loading="lazy" />
-                    : <span className="exp-sin-foto" aria-hidden="true" />}
-                  <span className="cintillo">{t('destacado_cintillo', idioma)}</span>
-                  {n.video_url && (
-                    <span className="destacado-video" aria-hidden="true">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5.5v13l11-6.5z" />
-                      </svg>
-                      {t('ver_video', idioma)}
-                    </span>
-                  )}
-                </div>
-                <div className="destacado-cuerpo">
-                  <span className="destacado-cat">{n.categoria_nombre}</span>
-                  <h3>{n.nombre}</h3>
-                  {n.resumen && <p>{n.resumen}</p>}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <PistaDestacados>
+        {tarjetas(false)}
+        {tarjetas(true)}
+      </PistaDestacados>
     </section>
   );
 }

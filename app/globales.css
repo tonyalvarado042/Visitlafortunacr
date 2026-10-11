@@ -1521,11 +1521,29 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .destacados-rotulo p { margin: 0; font-size: 14.5px; color: var(--humo); max-width: 40ch; }
 
 /* Se desliza en vez de envolverse: una rejilla de diez tarjetas se come la
-   portada entera y deja de ser un destaque. */
-.destacados-pista { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 8px; }
+   portada entera y deja de ser un destaque. Y anda sola — quién la mueve y
+   por qué está en componentes/PistaDestacados.tsx.
+
+   Va DENTRO de la misma columna de 1240 que el resto del sitio. A sangre
+   arrancaba 133px a la izquierda del título que la encabeza: se leía como si
+   la fila se hubiera salido de la página, no como si siguiera.
+
+   NO lleva scroll-snap: el ajuste por tarjeta le pelea a la animación, que
+   mueve el scroll píxel a píxel, y la dejaría saltando de tarjeta en tarjeta.
+
+   La máscara desvanece los dos bordes sobre el mismo relleno de la columna.
+   Eso es lo que convierte una tarjeta cortada al medio —que parece un
+   error— en una tarjeta que se está yendo, que es lo que es. */
+.destacados-pista {
+  max-width: 1240px; margin: 0 auto; padding: 0 40px 8px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+}
 .destacados-pista::-webkit-scrollbar { display: none; }
-.destacados-pista ul { display: flex; gap: 18px; list-style: none; margin: 0; padding: 0 40px; }
-.destacados-pista li { flex: 0 0 300px; scroll-snap-align: start; }
+.destacados-tren { display: flex; gap: 18px; }
+.destacados-pista ul { display: flex; gap: 18px; list-style: none; margin: 0; padding: 0; }
+.destacados-pista li { flex: 0 0 300px; }
 
 .destacado { display: block; border: 1px solid rgba(255,106,0,.35); border-radius: 7px; overflow: hidden; background: var(--carbon); transition: border-color .2s, transform .2s; }
 .destacado:hover { border-color: var(--naranja); transform: translateY(-2px); }
@@ -1549,7 +1567,13 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .blog-prosa figcaption { margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--humo); }
 
 @media (max-width: 560px) {
-  .destacados-pista ul { padding: 0 16px; }
+  .destacados-pista {
+    /* 20px y no 16: es el relleno que lleva .caja en telefono, y la fila
+       tiene que arrancar donde arranca el titulo que la encabeza. */
+    padding: 0 20px 8px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+  }
   .destacados-pista li { flex-basis: 76vw; }
   .ficha-hero { min-height: 300px; }
 }
