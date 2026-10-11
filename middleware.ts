@@ -53,6 +53,12 @@ export async function middleware(peticion: NextRequest) {
        el aviso de la rifa se monta en el layout: sin esto no habria forma de
        mirarlo antes de soltarlo a gente de verdad. */
     if (peticion.nextUrl.searchParams.get('vista') === '1') cabeceras.set('x-vista', '1');
+    /* ?tema=claro enciende el tema claro para ESTA visita y nada mas: no
+       escribe nada, no deja rastro y nadie mas lo ve. Es para mirar como
+       queda antes de decidir si se enciende para todo el mundo. Mismo
+       camino que ?vista=1, y por la misma razon: el layout raiz pinta el
+       <html> y no recibe searchParams. */
+    if (peticion.nextUrl.searchParams.get('tema') === 'claro') cabeceras.set('x-tema', 'claro');
     return NextResponse.next({ request: { headers: cabeceras } });
   }
 

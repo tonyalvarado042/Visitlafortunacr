@@ -323,14 +323,20 @@ export default async function Ficha({ params }: { params: Parametros }) {
               descripción y los plegables— y había que bajar media pantalla
               para encontrarlo. El comentario de arriba decía "va ARRIBA del
               todo" y no era cierto. Ahora sí. */}
-          <aside className="ficha-lado">
+          {/* `ficha-vende` baja el contacto debajo del horario. No es capricho:
+              cuando nosotros vendemos, lo primero que tiene que ver quien
+              quiere ir es cómo reservar, no el teléfono del negocio. Donde no
+              vendemos, el teléfono ES el servicio y va de primero. El orden se
+              cambia con CSS y no duplicando este bloque: dos copias del mismo
+              formulario se desincronizan a la segunda semana. */}
+          <aside className={`ficha-lado${reservables.length > 0 ? ' ficha-vende' : ''}`}>
             {reservables.map((p) => (
               <div className="ficha-reservar" id="reservar" key={p.producto_id}>
                 <ReservarProducto producto={p} idioma={idioma} />
               </div>
             ))}
 
-            <div className="bloque">
+            <div className="bloque bloque-contacto">
               <div className="titulo">{t('contacto', idioma)}</div>
 
               {/* El contacto va TAPADO hasta que la persona deja sus datos, como

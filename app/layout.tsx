@@ -12,11 +12,16 @@ export default async function RaizLayout({ children }: { children: React.ReactNo
   /* El idioma lo pone el middleware en la peticion: ver middleware.ts. Las
      areas sin idioma en la ruta —/admin, /negocio— caen a español, que es el
      idioma en el que estan escritas. */
-  const pedido = (await headers()).get('x-idioma') ?? '';
+  const cabeceras = await headers();
+  const pedido = cabeceras.get('x-idioma') ?? '';
   const idioma = esIdioma(pedido) ? pedido : 'es';
+  /* El tema claro, por ahora solo con ?tema=claro. Cuando se decida encender
+     para todos, esto pasa a salir del destino y el parametro queda como
+     vista previa. */
+  const tema = cabeceras.get('x-tema') === 'claro' ? 'claro' : undefined;
 
   return (
-    <html lang={idioma}>
+    <html lang={idioma} data-tema={tema}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
