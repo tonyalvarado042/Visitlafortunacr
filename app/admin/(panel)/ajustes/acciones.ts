@@ -53,6 +53,15 @@ export async function editarDestino(datos: FormData) {
       menu_destacado_tipo: vale ? tipo : 'ninguno',
       menu_destacado_babosa: vale ? babosa : null,
     };
+  } else if (grupo === 'reservas') {
+    /* El interruptor maestro del motor de reservas, y el candado de la
+       pasarela. Van en su propio grupo porque encender uno no puede
+       encender el otro por accidente: el primero muestra el modulo, el
+       segundo habilita cobrarle a una persona. */
+    campos = {
+      reservas_activas: texto(datos, 'reservas_activas') === '1',
+      pasarela_lista: texto(datos, 'pasarela_lista') === '1',
+    };
   } else if (grupo === 'destino') {
     const whatsapp = texto(datos, 'whatsapp').replace(/[\s\-().]/g, '');
     campos = {

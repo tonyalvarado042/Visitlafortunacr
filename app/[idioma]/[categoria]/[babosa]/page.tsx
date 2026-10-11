@@ -9,6 +9,8 @@ import { Pie } from '@/componentes/Pie';
 import { IconoVerificado } from '@/componentes/Marca';
 import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
+import { ReservarProducto } from '@/componentes/ReservarProducto';
+import { productosReservables } from '@/lib/reservas';
 import { GaleriaNegocio } from '@/componentes/GaleriaNegocio';
 import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
@@ -67,6 +69,11 @@ export default async function Ficha({ params }: { params: Parametros }) {
   const generales = etiquetas.filter((e) => e.grupo !== 'accesibilidad');
 
   const verificado = negocio.estado_verificacion === 'verificado' || negocio.estado_verificacion === 'reclamado';
+  /* El widget de reserva. Si el modulo del destino esta apagado, esto
+     devuelve lista vacia SIN tocar la base y la ficha queda exactamente
+     como hoy. Ver los tres interruptores en lib/reservas.ts. */
+  const reservables = await productosReservables(destino, babosa, idioma);
+
   const mapa = negocio.latitud && negocio.longitud
     ? `https://www.google.com/maps/search/?api=1&query=${negocio.latitud},${negocio.longitud}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${negocio.nombre} ${destino.nombre}`)}`;
@@ -205,6 +212,13 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 )}
               </div>
             )}
+
+            {/* Reservar va ARRIBA del todo: es la razon por la que esta
+                ficha deja de ser solo directorio. Si no hay nada que
+                vender, no se pinta nada y la ficha es la de siempre. */}
+            {reservables.map((p) => (
+              <ReservarProducto key={p.producto_id} producto={p} idioma={idioma} />
+            ))}
 
             {/* Las reseñas propias van primero y aparte: son las únicas que
                 cuentan para el promedio y para el marcado. Lo de Google y

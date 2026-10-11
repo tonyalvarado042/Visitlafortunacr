@@ -38,10 +38,38 @@ export async function cambiarEstado(datos: FormData) {
   const estado = texto(datos, 'estado');
   if (!esUuid(id) || !ESTADOS.includes(estado)) return;
   const ahora = new Date().toISOString();
+
+  /* Confirmar PIDE la referencia del operador. Es el candado del documento:
+     una reserva confirmada sin referencia es una palabra nuestra, no un cupo.
+     El dia que el visitante llegue y no haya campo, esa referencia es lo
+     unico que se puede mostrar. */
+  const ref = texto(datos, 'ref_operador');
+  if (estado === 'confirmada' && !ref) return;
+
   await db.from('dst_reserva').update({
     estado,
-    ...(estado === 'confirmada' ? { confirmada_en: ahora } : {}),
+    ...(estado === 'confirmada' ? { confirmada_en: ahora, ref_operador: ref } : {}),
     ...(estado === 'cancelada' ? { cancelada_en: ahora, motivo_cancelacion: texto(datos, 'motivo') || 'sin motivo' } : {}),
+  }).eq('id', id);
+  refrescar(id);
+}
+
+/**
+ * El operador dijo que no.
+ *
+ * Distinto de cancelar: cancelar es que la reserva existia y se deshizo;
+ * rechazar es que nunca existio. Separarlos importa para los numeros —si se
+ * mezclan, no hay forma de saber cuantas solicitudes el operador no pudo
+ * atender, que es el dato que dice si el acuerdo sirve.
+ */
+export async function rechazarReserva(datos: FormData) {
+  const { db } = await contextoPanel('reservas');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  await db.from('dst_reserva').update({
+    estado: 'cancelada',
+    rechazada_en: new Date().toISOString(),
+    motivo_rechazo: texto(datos, 'motivo') || 'El operador no confirmo el cupo.',
   }).eq('id', id);
   refrescar(id);
 }

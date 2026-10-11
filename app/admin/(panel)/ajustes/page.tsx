@@ -117,6 +117,34 @@ export default async function PaginaAjustes() {
       </form>
 
       <div className="tarjeta">
+        <h2>Motor de reservas <small>apagado, el sitio es un directorio</small></h2>
+        <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+          Este es el <strong>interruptor maestro</strong>. Apagado, nadie ve nada:
+          ni el widget en las fichas ni las rutas. Encendido, cada negocio decide
+          aparte si vende por aquí, y cada contrato decide quién cobra.
+        </p>
+        <form action={editarDestino} className="campos">
+          <input type="hidden" name="grupo" value="reservas" />
+          <div className="campo ancho"><label>
+            <input type="checkbox" name="reservas_activas" value="1"
+                   defaultChecked={d.reservas_activas} disabled={!esAdmin} />
+            {' '}<strong>Motor de reservas encendido</strong></label>
+            <small>Los negocios que no tengan «vende por aquí» siguen siendo fichas normales.</small></div>
+          <div className="campo ancho"><label>
+            <input type="checkbox" name="pasarela_lista" value="1"
+                   defaultChecked={d.pasarela_lista} disabled={!esAdmin} />
+            {' '}Pasarela de pago probada</label>
+            <small>
+              <strong>Mientras esto esté apagado no se le cobra a nadie</strong>, diga lo
+              que diga el contrato: el botón pide la reserva en vez de cobrarla.
+              Encenderlo solo cuando haya cuenta de pasarela configurada y probada
+              de punta a punta.
+            </small></div>
+          {esAdmin && <BotonAccion>Guardar las reservas</BotonAccion>}
+        </form>
+      </div>
+
+      <div className="tarjeta">
         <h2>Menú del sitio <small>qué va en la columna destacada</small></h2>
         <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
           El menú de <strong>Qué hacer</strong> abre un panel con todas las

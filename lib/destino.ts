@@ -58,6 +58,12 @@ export type Destino = {
      destacado fijo en el codigo envejece sin que nadie lo note. */
   menu_destacado_tipo: 'ninguno' | 'experiencia' | 'negocio';
   menu_destacado_babosa: string | null;
+  /* El interruptor maestro del motor de reservas. Apagado, el sitio es el
+     directorio de siempre y el modulo no existe para nadie. */
+  reservas_activas: boolean;
+  /* El candado que protege plata: sin pasarela probada no se le cobra a
+     nadie, diga lo que diga el contrato. */
+  pasarela_lista: boolean;
 };
 
 /**

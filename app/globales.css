@@ -606,6 +606,63 @@ img { max-width: 100%; display: block; }
 .baja-caja p { margin: 0; font-size: 14.5px; line-height: 1.6; color: #B8B6B2; }
 .baja-caja .boton { margin-top: 8px; border-radius: 100px; }
 
+
+/* ---- El widget de reserva de la ficha ------------------------------------
+   Va arriba del todo del cuerpo y tiene que leerse como lo unico accionable
+   de la pagina. Pero sin gritar: la ficha sigue siendo informacion, y si el
+   visitante no viene a reservar, el resto de la ficha tiene que seguir ahi. */
+.reservar {
+  border: 1px solid rgba(255,106,0,.42); border-radius: 10px;
+  background: var(--carbon); padding: 24px 22px; margin-bottom: 34px;
+}
+.reservar-cabeza {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.reservar-cabeza h2 { margin: 0; font-size: 20px; letter-spacing: -.01em; text-transform: none; }
+.reservar-que { margin: 4px 0 0; font-size: 14.5px; color: #B8B6B2; }
+
+.reservar-precio { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.reservar-precio span { font-size: 12px; color: var(--humo); }
+.reservar-precio strong { font-size: 30px; font-weight: 900; letter-spacing: -.03em; color: var(--naranja); }
+/* Sin tarifa verificada no hay cifra: dice "consultar" y se ve como texto,
+   no como precio. Un numero de oido es una promesa que no se cumple. */
+.reservar-consultar { font-size: 15px !important; font-weight: 700 !important; color: #B8B6B2 !important; }
+
+.reservar-resumen { margin: 0 0 14px; font-size: 14.5px; line-height: 1.55; color: #C2C0BC; }
+
+.reservar-incluye {
+  list-style: none; margin: 0 0 18px; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 7px 22px;
+}
+.reservar-incluye li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; line-height: 1.4; color: #D6D4D0; }
+.reservar-incluye svg { flex-shrink: 0; margin-top: 3px; color: var(--verde); }
+
+.reservar-forma { display: grid; gap: 12px; border-top: 1px solid var(--borde); padding-top: 18px; }
+.reservar-fila { display: grid; grid-template-columns: 1.3fr .7fr .7fr; gap: 12px; }
+.reservar-forma .campo { display: grid; gap: 6px; }
+.reservar-forma label { font-size: 12.5px; font-weight: 700; color: #D6D4D0; }
+.reservar-forma .opcional { margin-left: 7px; font-weight: 600; font-size: 11px; color: #6E6C68; text-transform: none; letter-spacing: 0; }
+.reservar-forma .boton { border-radius: 100px; padding: 13px 20px; font-size: 14px; }
+.reservar-letra, .reservar-presta { display: block; text-align: center; font-size: 11.5px; color: #7E7C78; }
+.reservar-presta strong { color: #B8B6B2; }
+
+.reservar-listo { display: grid; justify-items: center; gap: 9px; text-align: center; padding: 34px 22px; color: var(--verde); }
+.reservar-listo strong { font-size: 19px; color: var(--blanco); }
+.reservar-listo p { margin: 0; font-size: 14px; line-height: 1.55; color: #9A9892; max-width: 42ch; }
+.reservar-codigo { font-size: 14px; }
+.reservar-codigo code {
+  font-family: ui-monospace, monospace; font-size: 15px; font-weight: 700;
+  color: var(--naranja); background: #1C1C1C; padding: 3px 9px; border-radius: 4px;
+}
+
+@media (max-width: 560px) {
+  .reservar { padding: 20px 16px; }
+  .reservar-fila { grid-template-columns: 1fr 1fr; }
+  .reservar-fila .campo:first-child { grid-column: 1 / -1; }
+  .reservar-incluye { grid-template-columns: 1fr; }
+}
+
 .boton {
   display: inline-block; background: var(--naranja); color: var(--negro);
   font-family: var(--fuente); font-weight: 800; font-size: 13px; letter-spacing: .02em;
