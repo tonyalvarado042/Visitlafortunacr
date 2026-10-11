@@ -6,6 +6,7 @@ import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
+import { CampoBusqueda } from '@/componentes/CampoBusqueda';
 import { alternativas, rutasDeCategoria } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
@@ -63,6 +64,16 @@ export default async function Listado({ params }: { params: Parametros }) {
           <p style={{ color: 'var(--humo)', marginTop: 14 }}>
             {negocios.length} {lugares(negocios.length, idioma)} · {destino.nombre}
           </p>
+
+          {/* El buscador tambien aca, y no solo en la portada.
+              En un directorio la mayoria NO entra por el inicio: entra por
+              Google directo a una categoria. Sin esto, quien no encuentra lo
+              suyo en esta lista no tiene a donde ir — y nadie vuelve al
+              inicio a buscar, se va. Es el mismo componente de la portada:
+              un formulario GET que navega a /<idioma>?q=… */}
+          <div className="busqueda-categoria">
+            <CampoBusqueda idioma={idioma} />
+          </div>
 
           {hermanas.length > 1 && (
             <div style={{ display: 'flex', gap: 8, marginTop: 26, flexWrap: 'wrap' }}>

@@ -1131,10 +1131,14 @@ section { padding: 84px 0; }
      la pagina, asi que ahi el margen negativo no la subiria sobre la
      cabecera: la subiria encima de las resenas. */
 @media (min-width: 1001px) {
-  .ficha-con-hero .ficha-reservar { margin-top: -132px; z-index: 5; }
-  /* La columna entera pierde ese alto, si no lo pegado se pasa de largo y la
-     tarjeta termina flotando debajo del contenido. */
-  .ficha-con-hero .ficha-lado { margin-top: -132px; }
+  .ficha-con-hero .ficha-reservar { margin-top: -132px; }
+  /* La COLUMNA entera sube y la COLUMNA entera lleva el z-index. Antes solo lo
+     llevaba la tarjeta de reserva, y en un negocio sin contrato —que no tiene
+     tarjeta— el primero de la columna es el bloque de contacto: subia igual,
+     sin z-index, y la cabecera se lo comia. Mismo error que ya costo una vez:
+     z-index SOLO funciona en elementos posicionados, y aqui ni siquiera habia
+     z-index. */
+  .ficha-con-hero .ficha-lado { margin-top: -132px; position: relative; z-index: 5; }
   .ficha-con-hero .ficha-principal { position: relative; z-index: 1; }
 }
 .bloque { background: var(--carbon); border: 1px solid var(--borde); border-radius: 5px; padding: 24px; }
@@ -1389,6 +1393,13 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   max-width: 560px; text-wrap: pretty; animation: aparece 1s ease .5s both;
 }
 @keyframes aparece { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* El buscador de la pagina de categoria: mas angosto que el del hero, que
+   ocupa el ancho entero de una portada. Aca compite con el titulo y con las
+   pastillas de las categorias hermanas, asi que se contiene. */
+.busqueda-categoria { margin-top: 24px; max-width: 540px; }
+.busqueda-categoria .buscador { padding: 5px 5px 5px 16px; }
+.busqueda-categoria .buscador .boton { padding: 10px 20px; font-size: 13.5px; }
 
 .buscador {
   display: flex; align-items: stretch; margin-top: 38px; width: min(660px, 92vw);
