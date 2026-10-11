@@ -2442,3 +2442,31 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .menu-perfil[open] summary::before {
   content: ''; position: fixed; top: 0; left: 0; right: 0; height: 300vh; z-index: 65;
 }
+
+/* ---- En pantalla tactil el :hover SE PEGA -------------------------------
+   iOS lo deja puesto despues de tocar, hasta que tocas otra cosa. Una tarjeta
+   que se levanta y se enciende, y se QUEDA asi mientras el carrusel sigue
+   moviendose debajo, se lee exactamente como una tarjeta montada encima de
+   las otras. Eso era lo que se veia en el telefono: las medi y estaban todas
+   a 296px, sin solaparse ni una.
+
+   Donde no hay puntero de verdad, el hover no levanta nada. La lista sale del
+   propio archivo, no escrita a mano — 13 reglas. */
+@media (hover: none) {
+  .boton:hover,
+  .tarjeta:hover,
+  .tarjeta:hover .imagen .foto,
+  .galeria-foto:hover img, .galeria-foto:focus-visible img,
+  .volcanes-elegir button:hover,
+  .ficha-grande:hover,
+  .ficha-grande:hover .foto,
+  .ficha-grande:hover .fondo,
+  .concierge-boton:hover,
+  .exp-solapas button:hover,
+  .boton-destapar:hover,
+  .boton-ver-video:hover,
+  .destacado:hover { transform: none; }
+  /* Y el borde encendido, que es la otra mitad de "esta encima". */
+  .destacado:hover { border-color: rgba(255,106,0,.35); }
+  .tarjeta:hover, .ficha-grande:hover { border-color: var(--borde); }
+}
