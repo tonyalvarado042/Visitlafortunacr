@@ -129,79 +129,87 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               </p>
             </div>
 
-            <div className="tarjeta">
-              <h2>Fotos</h2>
-              {!fotos?.length ? <Vacio texto="Sin fotos." /> : (
-                <div className="rejilla-fotos">
-                  {fotos.map((f) => (
-                    <div key={f.id} className="foto-admin">
-                      <a href={f.url} target="_blank" rel="noreferrer">
-                        <img src={f.url} alt="" className={f.es_portada ? 'es-portada' : ''} />
-                      </a>
-                      <div className="foto-pie">
-                        {f.es_portada && <span className="marca-portada">Portada</span>}
-                        {f.es_generica && <span className="marca-generica">Genérica</span>}
-                      </div>
-                      {(f.credito || f.licencia) && (
-                        <p className="gris foto-credito">
-                          {f.credito}{f.licencia ? ` · ${f.licencia}` : ''}
-                        </p>
-                      )}
-                      <div className="acciones-fila">
-                        {!f.es_portada && !f.es_generica && (
-                          <form action={marcarPortada}>
-                            <input type="hidden" name="id" value={id} />
-                            <input type="hidden" name="foto_id" value={f.id} />
-                            <BotonAccion clase="boton tenue">Portada</BotonAccion>
-                          </form>
-                        )}
-                        <form action={borrarFoto}>
-                          <input type="hidden" name="id" value={id} />
-                          <input type="hidden" name="foto_id" value={f.id} />
-                          <BotonAccion clase="boton tenue" confirmar="Se borra la foto y su archivo. No se puede deshacer.">Borrar</BotonAccion>
-                        </form>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* El crédito y la licencia no son opcionales cuando la foto no
-                  es propia: sin los dos, el check de la migración 22 rechaza
-                  la fila. Se piden aquí y no después, que es cuando ya nadie
-                  se acuerda de dónde salió la imagen. */}
-              <form action={subirFoto} className="subir-foto">
-                <input type="hidden" name="id" value={id} />
-                <div className="campo">
-                  <label>Agregar una foto</label>
-                  <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" required />
-                </div>
-                <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={n.nombre} /></div>
-                <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra" /></div>
-                <div className="campo"><label>Licencia</label><input name="licencia" placeholder="CC BY 4.0, cedida por el negocio…" /></div>
-                <div className="campo"><label>Enlace de origen</label><input name="fuente_url" placeholder="https://…" /></div>
-                <p className="gris" style={{ fontSize: 12, margin: '6px 0 10px' }}>
-                  Si ponés enlace de origen, el autor y la licencia son obligatorios. Se
-                  redimensiona a 1600 px y se convierte a webp al subir.
-                </p>
-                <BotonAccion>Subir foto</BotonAccion>
-              </form>
-
-              {/* Y la via de a muchas: pegar las direcciones del sitio del
-                  propio negocio. Mismo camino —encoge, pasa a webp, sube y
-                  anota— pero las baja el servidor. */}
-              <TraerFotos id={id} nombre={n.nombre} />
-            </div>
-
-            {(leads?.length ?? 0) > 0 && (
-              <div className="tarjeta">
-                <h2>Leads sobre este negocio</h2>
-                {leads!.map((l) => <div key={l.id}><Link href={`/admin/leads/${l.id}`}>{l.tipo} · {l.etapa}</Link> <span className="gris">{relativo(l.creado_en)}</span></div>)}
-              </div>
-            )}
           </div>
         </div>
       </form>
+
+      {/* Fotos y leads viven FUERA del formulario grande, y no es cosmetico:
+          adentro llevaban cuatro <form> anidados —portada, borrar, subir,
+          traer—, y un formulario dentro de otro no es HTML valido. El
+          navegador descarta el de adentro, asi que esos botones no hacian
+          nada. Lo delata la base: 178 fotos y NINGUNA con autor ni origen,
+          que son los campos que solo ese formulario escribe. La regla ya
+          estaba escrita dos tarjetas mas arriba, en la de opiniones. */}
+          <div className="tarjeta">
+            <h2>Fotos</h2>
+            {!fotos?.length ? <Vacio texto="Sin fotos." /> : (
+              <div className="rejilla-fotos">
+                {fotos.map((f) => (
+                  <div key={f.id} className="foto-admin">
+                    <a href={f.url} target="_blank" rel="noreferrer">
+                      <img src={f.url} alt="" className={f.es_portada ? 'es-portada' : ''} />
+                    </a>
+                    <div className="foto-pie">
+                      {f.es_portada && <span className="marca-portada">Portada</span>}
+                      {f.es_generica && <span className="marca-generica">Genérica</span>}
+                    </div>
+                    {(f.credito || f.licencia) && (
+                      <p className="gris foto-credito">
+                        {f.credito}{f.licencia ? ` · ${f.licencia}` : ''}
+                      </p>
+                    )}
+                    <div className="acciones-fila">
+                      {!f.es_portada && !f.es_generica && (
+                        <form action={marcarPortada}>
+                          <input type="hidden" name="id" value={id} />
+                          <input type="hidden" name="foto_id" value={f.id} />
+                          <BotonAccion clase="boton tenue">Portada</BotonAccion>
+                        </form>
+                      )}
+                      <form action={borrarFoto}>
+                        <input type="hidden" name="id" value={id} />
+                        <input type="hidden" name="foto_id" value={f.id} />
+                        <BotonAccion clase="boton tenue" confirmar="Se borra la foto y su archivo. No se puede deshacer.">Borrar</BotonAccion>
+                      </form>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* El crédito y la licencia no son opcionales cuando la foto no
+                es propia: sin los dos, el check de la migración 22 rechaza
+                la fila. Se piden aquí y no después, que es cuando ya nadie
+                se acuerda de dónde salió la imagen. */}
+            <form action={subirFoto} className="subir-foto">
+              <input type="hidden" name="id" value={id} />
+              <div className="campo">
+                <label>Agregar una foto</label>
+                <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" required />
+              </div>
+              <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={n.nombre} /></div>
+              <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra" /></div>
+              <div className="campo"><label>Licencia</label><input name="licencia" placeholder="CC BY 4.0, cedida por el negocio…" /></div>
+              <div className="campo"><label>Enlace de origen</label><input name="fuente_url" placeholder="https://…" /></div>
+              <p className="gris" style={{ fontSize: 12, margin: '6px 0 10px' }}>
+                Si ponés enlace de origen, el autor y la licencia son obligatorios. Se
+                redimensiona a 1600 px y se convierte a webp al subir.
+              </p>
+              <BotonAccion>Subir foto</BotonAccion>
+            </form>
+
+            {/* Y la via de a muchas: pegar las direcciones del sitio del
+                propio negocio. Mismo camino —encoge, pasa a webp, sube y
+                anota— pero las baja el servidor. */}
+            <TraerFotos id={id} nombre={n.nombre} />
+          </div>
+
+          {(leads?.length ?? 0) > 0 && (
+            <div className="tarjeta">
+              <h2>Leads sobre este negocio</h2>
+              {leads!.map((l) => <div key={l.id}><Link href={`/admin/leads/${l.id}`}>{l.tipo} · {l.etapa}</Link> <span className="gris">{relativo(l.creado_en)}</span></div>)}
+            </div>
+          )}
 
       {otrosIdiomas.length > 0 && (
         <div className="tarjeta">
