@@ -420,7 +420,7 @@ img { max-width: 100%; display: block; }
 .plegado-pastillas { display: flex; flex-wrap: wrap; gap: 7px; }
 .plegado-pastillas a {
   display: inline-flex; align-items: baseline; gap: 5px;
-  padding: 8px 12px; border: 1px solid #333; border-radius: 100px;
+  padding: 8px 12px; border: 1px solid var(--borde-3); border-radius: 100px;
   font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none;
   color: var(--txt-0); transition: border-color .15s, color .15s, background .15s;
 }
@@ -1508,7 +1508,10 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* Planificador */
 .planificador {
   position: relative; border-radius: 6px; overflow: hidden;
-  background: linear-gradient(135deg, #111 0%, var(--negro) 55%, var(--sup-aviso) 100%);
+  /* `var(--sup-1)` y no `#111`: escrito en tres digitos, la conversion a
+     variables no lo agarro —solo miraba los de seis— y con el tema claro este
+     degradado iba de negro a blanco con el texto en negro encima. */
+  background: linear-gradient(135deg, var(--sup-1) 0%, var(--negro) 55%, var(--sup-aviso) 100%);
   border: 1px solid var(--borde-aviso); padding: 64px 56px;
 }
 .planificador::before {
@@ -1885,7 +1888,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 
 /* ---- Galeria de fotos del duenno ---- */
 .galeria-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; margin: 22px 0 18px; }
-.galeria-fotos .foto { position: relative; margin: 0; border: 1px solid var(--borde); border-radius: 5px; overflow: hidden; background: #111; }
+.galeria-fotos .foto { position: relative; margin: 0; border: 1px solid var(--borde); border-radius: 5px; overflow: hidden; background: var(--sup-1); }
 .galeria-fotos .foto.portada { border-color: var(--naranja); }
 .galeria-fotos .foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 .galeria-fotos .marca-portada {
@@ -2369,11 +2372,30 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .destacados-pista {
   max-width: 1240px; margin: 0 auto; padding: 0 40px 8px;
   overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+}
+/* El desvanecido de los bordes SOLO donde hay puntero de verdad.
+   Una mascara sobre un `overflow-x: auto` cuyo scrollLeft mueve JavaScript
+   sesenta veces por segundo es la receta del repintado a medias en iOS: la
+   capa enmascarada se queda con la foto vieja y aparecen tarjetas en
+   posiciones que ya no ocupan. Se ve como tarjetas montadas unas sobre otras,
+   y la union de las dos listas es donde mas canta.
+   No pude reproducirlo —no tengo Safari— asi que esto es la sospecha mejor
+   fundada, no una certeza. Lo que se pierde es un degradado en los bordes;
+   lo que se gana es que no haya nada que repintar mal. */
+@media (hover: hover) and (pointer: fine) {
+  .destacados-pista {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  }
 }
 .destacados-pista::-webkit-scrollbar { display: none; }
-.destacados-tren { display: flex; gap: 18px; }
+/* `width: max-content` y `flex-shrink: 0`: el tren vive dentro de un
+   `overflow-x: auto`, asi que su ancho de partida es el de la pantalla y las
+   dos listas son items flexibles que, en teoria, pueden encoger. Chrome no
+   las encoge —lo probe forzandolo— pero dejarlo al criterio de cada motor en
+   algo que ya se vio roto en iPhone no tiene sentido. Esto lo fija. */
+.destacados-tren { display: flex; gap: 18px; width: max-content; }
+.destacados-tren > ul { flex: 0 0 auto; }
 .destacados-pista ul { display: flex; gap: 18px; list-style: none; margin: 0; padding: 0; }
 .destacados-pista li { flex: 0 0 300px; }
 
@@ -2403,8 +2425,6 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
     /* 20px y no 16: es el relleno que lleva .caja en telefono, y la fila
        tiene que arrancar donde arranca el titulo que la encabeza. */
     padding: 0 20px 8px;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
   }
   .destacados-pista li { flex-basis: 76vw; }
   .ficha-hero { min-height: 300px; }
