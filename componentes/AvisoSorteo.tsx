@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { t, type Idioma } from '@/lib/idiomas';
 import { FormularioSorteo } from './FormularioSorteo';
 import { premioEnPlata } from '@/lib/sorteo-formato';
@@ -47,6 +47,12 @@ export function AvisoSorteo({
   const ruta = usePathname();
   const enLaPaginaDelSorteo = ruta === `/${idioma}/${sorteo.babosa}`;
 
+  /* `?aviso=1` lo abre de una, aunque ya lo hayas cerrado o ya hayas
+     participado. Sin esto no hay forma de volver a verlo: el aviso se
+     recuerda en el navegador justamente para no repetirse, asi que mirar
+     como quedo obligaba a borrar el almacenamiento a mano. */
+  const forzado = useSearchParams().get('aviso') === '1';
+
   const [abierto, setAbierto] = useState(false);
   const [participo, setParticipo] = useState(false);
   const cerrable = useRef(true);
@@ -60,6 +66,13 @@ export function AvisoSorteo({
   }, []);
 
   useEffect(() => {
+    if (forzado) {
+      /* Mirando: se abre ya y NO se anota nada, ni que se cerró ni que se
+         participó. Ver el aviso no puede cambiarle el estado a nadie. */
+      cerrable.current = false;
+      setAbierto(true);
+      return;
+    }
     if (enLaPaginaDelSorteo || !sorteo.aviso_activo || sorteo.cerrado_en) return;
 
     if (leer(HECHO) === sorteo.id) return;              // ya participó
@@ -88,7 +101,7 @@ export function AvisoSorteo({
       window.clearTimeout(reloj);
       document.removeEventListener('mouseout', seVa);
     };
-  }, [sorteo, enLaPaginaDelSorteo]);
+  }, [sorteo, enLaPaginaDelSorteo, forzado]);
 
   // Escape cierra, y al abrirse el foco entra al panel para que el teclado
   // no se quede navegando la página de atrás.

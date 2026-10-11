@@ -73,13 +73,37 @@ export default async function PaginaRifa() {
 
       {!rifa.esta_activo && (
         <Aviso tipo="info">
-          Está <strong>apagada</strong>: no sale el aviso ni existe la página.{' '}
-          <Link href={`https://${destino.dominio}/${destino.idioma_principal}/${rifa.babosa}?vista=1`}
-                target="_blank" rel="noopener noreferrer">
-            Ver cómo queda ↗
-          </Link>
+          Está <strong>apagada</strong>: no sale el aviso ni existe la página.
+          Con <code>?vista=1</code> igual se puede mirar.
         </Aviso>
       )}
+
+      <div className="tarjeta">
+        <h2>Ver cómo quedó <small>en cada idioma</small></h2>
+        <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+          El aviso se recuerda en tu navegador para no repetirse, así que después
+          de cerrarlo una vez no vuelve a salir. Estos enlaces lo <strong>abren
+          de una</strong>, sin tocar nada de lo que ya estaba guardado.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {(destino.idiomas ?? ['es']).map((i: string) => (
+            <Link key={i} className="boton secundario chico"
+                  href={`https://${destino.dominio}/${i}?aviso=1${rifa.esta_activo ? '' : '&vista=1'}`}
+                  target="_blank" rel="noopener noreferrer">
+              Aviso en {i.toUpperCase()} ↗
+            </Link>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+          {(destino.idiomas ?? ['es']).map((i: string) => (
+            <Link key={i} className="boton secundario chico"
+                  href={`https://${destino.dominio}/${i}/${rifa.babosa}${rifa.esta_activo ? '' : '?vista=1'}`}
+                  target="_blank" rel="noopener noreferrer">
+              Página en {i.toUpperCase()} ↗
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {pendientes.length > 0 && (
         <Aviso tipo="mal">

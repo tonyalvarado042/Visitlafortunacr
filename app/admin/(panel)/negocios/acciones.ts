@@ -96,7 +96,12 @@ export async function traducirCampo(datos: FormData) {
     await db.from('dst_traduccion').delete().eq('entidad', entidad).eq('entidad_id', entidadId).eq('campo', campo).eq('idioma', idioma);
   } else {
     await db.from('dst_traduccion').upsert(
-      { entidad, entidad_id: entidadId, campo, idioma, texto: valor, origen: 'equipo', esta_revisada: true },
+      { entidad, entidad_id: entidadId, campo, idioma, texto: valor,
+          /* 'humano' y no 'equipo': la columna solo admite humano|maquina|
+             importado. Con 'equipo' esto reventaba contra el check en CADA
+             guardado, y por eso no habia una sola traduccion hecha a mano
+             desde el panel. */
+          origen: 'humano', esta_revisada: true },
       { onConflict: 'entidad,entidad_id,campo,idioma' }
     );
   }

@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Destino } from './destino';
+import type { Idioma } from './idiomas';
 
 /*
  * El sorteo.
@@ -57,10 +58,16 @@ export type Sorteo = {
 export async function sorteoDe(
   destino: Destino,
   incluirApagado = false,
+  idioma?: Idioma,
 ): Promise<Sorteo | null> {
   const { data, error } = await supabase.rpc('sorteo_activo', {
     p_dominio: destino.dominio,
     p_incluir_apagado: incluirApagado,
+    /* Sin idioma, la rifa salia en espanol en las cinco versiones del sitio:
+       /en/rifa decia "Gana una experiencia" y las bases enteras en espanol.
+       La traduccion vive en dst_traduccion, igual que la de negocios, tours
+       y guias. */
+    p_idioma: idioma ?? null,
   });
   if (error) {
     console.error('sorteo_activo:', error.message);

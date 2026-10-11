@@ -46,7 +46,7 @@ export default async function Portada({ params, searchParams }: {
     categoriasDe(destino, idioma),
     negociosDe(destino, idioma),
     destacadosDe(destino, idioma, 10),
-    sorteoDe(destino),
+    sorteoDe(destino, false, idioma),
   ]);
 
   /* El buscador vive en el hero y los resultados salen aquí mismo: cuando hay

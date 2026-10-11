@@ -49,7 +49,7 @@ export async function Pie({
   /* La rifa en el pie es su unico enlace permanente: el aviso emergente sale
      una vez y se calla, asi que sin esto el que lo cerro no vuelve a
      encontrarla. Apagada no se pinta nada. */
-  const sorteo = await sorteoDe(destino);
+  const sorteo = await sorteoDe(destino, false, idioma);
 
   return (
     <footer>

@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { idioma } = await params;
   if (!esIdioma(idioma)) return {};
   const destino = await destinoActual();
-  const sorteo = await sorteoDe(destino);
+  const sorteo = await sorteoDe(destino, false, idioma as Idioma);
   if (!sorteo) return {};
   return {
     title: sorteo.titulo,
@@ -55,7 +55,7 @@ export default async function PaginaRifa({ params, searchParams }: Props) {
 
   const destino = await destinoActual();
   const [sorteo, categorias] = await Promise.all([
-    sorteoDe(destino, vistaPrevia),
+    sorteoDe(destino, vistaPrevia, idioma),
     categoriasDe(destino, idioma),
   ]);
   if (!sorteo) notFound();

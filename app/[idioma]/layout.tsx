@@ -55,7 +55,7 @@ export default async function LayoutIdioma({
      ficha o por el blog cuenta igual, y son la mayoria. Si no hay sorteo
      encendido, `sorteoDe` vuelve null y no se monta nada. */
   const vistaPrevia = (await headers()).get('x-vista') === '1';
-  const sorteo = await sorteoDe(destino, vistaPrevia);
+  const sorteo = await sorteoDe(destino, vistaPrevia, idioma);
 
   // La marca del destino entra como variables CSS. Es lo que permite que otro
   // destino tenga otra paleta sin tocar una línea de estilos.
