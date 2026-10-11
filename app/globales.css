@@ -854,7 +854,7 @@ img { max-width: 100%; display: block; }
 /* La fecha a lo ancho; adultos y ninos se reparten la fila de abajo. En tres
    columnas dentro de 330px el selector de fecha quedaba en 140px y Chrome le
    recorta el calendario. */
-.reservar-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.reservar-fila { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 .reservar-fila .campo:first-child { grid-column: 1 / -1; }
 .reservar-forma .campo { display: grid; gap: 6px; }
 .reservar-forma label { font-size: 12.5px; font-weight: 700; color: var(--txt-0); }
@@ -882,7 +882,7 @@ img { max-width: 100%; display: block; }
 .reservar-mas summary:hover { color: var(--naranja); }
 .reservar-mas textarea { margin-top: 7px; width: 100%; }
 
-.reservar-letra, .reservar-presta { display: block; text-align: center; font-size: 11.5px; color: var(--txt-4); }
+.reservar-letra, .reservar-presta { display: block; text-align: center; font-size: 11.5px; color: var(--txt-4); overflow-wrap: anywhere; }
 .reservar-presta strong { color: var(--txt-2); }
 
 .reservar-listo { display: grid; justify-items: center; gap: 9px; text-align: center; padding: 34px 22px; color: var(--verde); }
@@ -1106,7 +1106,14 @@ section { padding: 84px 0; }
    duplicar el JSX. El espacio sale del `gap` y no de `.bloque + .bloque`:
    ese margen mira el orden del HTML, no el que se ve, así que al reordenar
    dejaba dos tarjetas pegadas y un hueco donde no iba. */
-.ficha-lado { align-self: stretch; display: flex; flex-direction: column; gap: 16px; }
+/* `min-width: 0` en la columna y en la tarjeta, y NO es decoracion.
+   Una pista de rejilla `1fr` vale en realidad `minmax(auto, 1fr)`: su MINIMO
+   es el contenido. Si algo adentro mide mas que el contenedor —un selector de
+   fecha, una linea larga— la columna crece por encima de la caja y la tarjeta
+   se sale por la derecha. Medido: contenedor de 280px, columna de 301,4px.
+   En iOS es peor porque su selector de fecha es mas ancho que el de Chrome. */
+.ficha-lado { align-self: stretch; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ficha-reservar, .ficha-principal { min-width: 0; }
 .ficha-lado > .bloque + .bloque { margin-top: 0; }
 .ficha-lado .reservar { margin-bottom: 0; }
 /* Cuando vendemos nosotros, el contacto baja debajo del horario. */
@@ -1337,7 +1344,10 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   /* El aside deja de ser una columna estrecha y se reparte a lo ancho.
      auto-fit cubre el negocio sin precio: un solo bloque ocupa todo. */
   .ficha-cuerpo > aside {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* `min(280px, 100%)` y no `280px` pelado: en una pantalla de 320 el
+       contenedor mide 280 justos, y un minimo de 280 mas cualquier borde ya
+       no cabe — la columna se sale. */
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
     gap: 16px; align-items: start;
   }
   .ficha-cuerpo > aside .bloque + .bloque { margin-top: 0; }
@@ -1799,11 +1809,19 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
    Estaba en var(--sup-2) sobre una tarjeta var(--carbon): el mismo tono, asi que la caja
    desaparecia y quedaba el rotulo flotando. Ahora el fondo es mas claro que
    la tarjeta y el borde se ve de verdad. */
+.forma .campo { min-width: 0; }
 .forma input, .forma select, .forma textarea {
+  /* `min-width: 0` y `max-width: 100%`: sin eso un campo con ancho propio
+     —el selector de fecha de iOS lo tiene— se sale de su columna en vez de
+     encogerse. `appearance: none` le quita a iOS ese ancho intrinseco. */
+  min-width: 0; max-width: 100%;
   width: 100%; background: var(--sup-4); border: 1px solid var(--borde-4); border-radius: 4px;
   padding: 13px 14px; font-size: 15px; font-weight: 500; color: var(--blanco);
   font-family: inherit;
   transition: border-color .16s, background .16s;
+}
+.forma input[type="date"], .forma input[type="number"] {
+  -webkit-appearance: none; appearance: none;
 }
 .forma input::placeholder, .forma textarea::placeholder { color: var(--txt-4); }
 .forma input:hover, .forma select:hover, .forma textarea:hover { border-color: var(--borde-5); background: var(--sup-4); }
