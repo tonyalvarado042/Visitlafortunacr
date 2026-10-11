@@ -108,15 +108,20 @@ export function ReservarProducto({
           <p className="reservar-que">{producto.nombre}</p>
         </div>
         <div className="reservar-precio">
-          {producto.precio_publico_usd != null ? (
-            <>
-              <span>{t('reserva_desde', idioma)}</span>
-              <strong>${producto.precio_publico_usd}</strong>
-              <span>{t('reserva_por_persona', idioma)}</span>
-            </>
+          {producto.tarifas.length > 0 ? (
+            /* Todas las tarifas, no un "desde": con adulto a $47 y niño a
+               $33, un "desde $33" es cierto y engañoso a la vez. */
+            <ul className="reservar-tarifas">
+              {producto.tarifas.map((x) => (
+                <li key={x.nombre}>
+                  <span>{x.nombre}</span>
+                  <strong>${x.precio}</strong>
+                </li>
+              ))}
+            </ul>
           ) : (
-            /* Sin tarifa verificada no sale número. Ver el comentario de
-               arriba: un precio de oído es una promesa que no se cumple. */
+            /* Sin tarifa verificada no sale número. Un precio de oído es una
+               promesa que no podemos cumplir. */
             <strong className="reservar-consultar">{t('reserva_consultar', idioma)}</strong>
           )}
         </div>

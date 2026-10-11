@@ -46,8 +46,12 @@ export type ProductoReservable = {
   edad_minima: number | null;
   admite_ninos: boolean;
   horas_antelacion: number;
-  /** NULL si la tarifa no está verificada. Entonces el widget dice "consultar". */
-  precio_publico_usd: number | null;
+  /* Las tarifas VERIFICADAS, de mayor a menor. Vacío = sin precio que
+     mostrar, y el widget dice "consultar".
+
+     Van todas y no un "desde": con adulto a $47 y niño a $33, un "desde $33"
+     es cierto y engañoso a la vez — el adulto lee 33 y paga 47. */
+  tarifas: { nombre: string; precio: number }[];
   moneda: string;
   precio_verificado: boolean;
   accion: AccionReserva;
