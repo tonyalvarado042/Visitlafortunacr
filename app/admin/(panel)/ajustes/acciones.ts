@@ -10,49 +10,86 @@ const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
 const numero = (d: FormData, k: string) => { const v = texto(d, k); return v === '' ? null : Number(v); };
 const color = (d: FormData, k: string) => (/^#[0-9a-f]{6}$/i.test(texto(d, k)) ? texto(d, k).toUpperCase() : undefined);
 
+/**
+ * Guarda una parte de la fila del destino.
+ *
+ * Ajustes tiene TRES formularios que llaman a esta misma accion, y una casilla
+ * sin marcar NO viaja en el FormData: es indistinguible de un campo que ese
+ * formulario no tiene. Sin el grupo, guardar la oferta premium APAGABA el sitio
+ * — esta_activo pasaba a false por ausencia — y guardar el destino borraba el
+ * precio del premium. Cada formulario declara lo que le toca, y solo eso se
+ * escribe: el que no manda un campo no lo pisa.
+ */
 export async function editarDestino(datos: FormData) {
   const { db, destino, usuario } = await contextoPanel('ajustes');
   if (usuario.rol !== 'admin') return;
-  const whatsapp = texto(datos, 'whatsapp').replace(/[\s\-().]/g, '');
-  const { error } = await db.from('dst_destino').update({
-    nombre: texto(datos, 'nombre') || undefined,
-    nombre_largo: texto(datos, 'nombre_largo') || null,
-    region: texto(datos, 'region') || null,
-    lema: texto(datos, 'lema') || null,
-    marca_nombre: texto(datos, 'marca_nombre') || undefined,
-    marca_sigla: texto(datos, 'marca_sigla') || null,
-    whatsapp: whatsapp ? (whatsapp.startsWith('+') ? whatsapp : `+${whatsapp}`) : null,
-    email_contacto: texto(datos, 'email_contacto').toLowerCase() || null,
-    comision_por_defecto: numero(datos, 'comision_por_defecto'),
-    color_tinta: color(datos, 'color_tinta'),
-    color_acento: color(datos, 'color_acento'),
-    color_naturaleza: color(datos, 'color_naturaleza'),
-    color_gris: color(datos, 'color_gris'),
-    logo_url: texto(datos, 'logo_url') || null,
-    video_portada_url: texto(datos, 'video_portada_url') || null,
-    imagen_portada_url: texto(datos, 'imagen_portada_url') || null,
-    pie_credito_texto: texto(datos, 'pie_credito_texto') || null,
-    /* Solo http y https. Este enlace lo ve TODO el público en cada página, así
-       que un javascript: aquí sería un agujero abierto de par en par. Lo que no
-       pase el filtro se guarda vacío y el pie muestra el texto sin enlace. */
-    pie_credito_url: /^https?:\/\/\S+$/i.test(texto(datos, 'pie_credito_url'))
-      ? texto(datos, 'pie_credito_url')
-      : null,
-    chat_activo: texto(datos, 'chat_activo') === '1',
-    contacto_bloqueado: texto(datos, 'contacto_bloqueado') === '1',
+
+  const grupo = texto(datos, 'grupo');
+  let campos: Record<string, unknown>;
+
+  if (grupo === 'premium') {
     /* La oferta premium. El precio cambia seguido y es suyo: se edita aca y
        no en el codigo, para no desplegar por bajar $100. */
-    premium_activo: texto(datos, 'premium_activo') === '1',
-    premium_titulo: texto(datos, 'premium_titulo') || null,
-    premium_gancho: texto(datos, 'premium_gancho') || null,
-    premium_precio_usd: numero(datos, 'premium_precio_usd'),
-    premium_precio_antes: numero(datos, 'premium_precio_antes'),
-    premium_cupos: numero(datos, 'premium_cupos'),
-    premium_ejemplo_babosa: texto(datos, 'premium_ejemplo_babosa') || null,
-    premium_incluye: texto(datos, 'premium_incluye')
-      .split('\n').map((l) => l.trim()).filter(Boolean),
-    esta_activo: texto(datos, 'esta_activo') === '1',
-  }).eq('id', destino.id);
+    campos = {
+      premium_activo: texto(datos, 'premium_activo') === '1',
+      premium_titulo: texto(datos, 'premium_titulo') || null,
+      premium_gancho: texto(datos, 'premium_gancho') || null,
+      premium_precio_usd: numero(datos, 'premium_precio_usd'),
+      premium_precio_antes: numero(datos, 'premium_precio_antes'),
+      premium_cupos: numero(datos, 'premium_cupos'),
+      premium_ejemplo_babosa: texto(datos, 'premium_ejemplo_babosa') || null,
+      premium_incluye: texto(datos, 'premium_incluye')
+        .split('\n').map((l) => l.trim()).filter(Boolean),
+    };
+  } else if (grupo === 'menu') {
+    /* El destacado del mega menu viaja como "tipo:babosa" en UN solo campo.
+       Dos selectores separados se pueden desincronizar — tipo 'negocio' con la
+       babosa de una experiencia — y eso no da error: deja el menu sin tarjeta
+       y nadie entiende por que. Asi no hay combinacion imposible que guardar. */
+    const [tipo, ...resto] = texto(datos, 'menu_destacado').split(':');
+    const babosa = resto.join(':').toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const vale = ['experiencia', 'negocio'].includes(tipo) && babosa !== '';
+    campos = {
+      menu_destacado_tipo: vale ? tipo : 'ninguno',
+      menu_destacado_babosa: vale ? babosa : null,
+    };
+  } else if (grupo === 'destino') {
+    const whatsapp = texto(datos, 'whatsapp').replace(/[\s\-().]/g, '');
+    campos = {
+      nombre: texto(datos, 'nombre') || undefined,
+      nombre_largo: texto(datos, 'nombre_largo') || null,
+      region: texto(datos, 'region') || null,
+      lema: texto(datos, 'lema') || null,
+      marca_nombre: texto(datos, 'marca_nombre') || undefined,
+      marca_sigla: texto(datos, 'marca_sigla') || null,
+      whatsapp: whatsapp ? (whatsapp.startsWith('+') ? whatsapp : `+${whatsapp}`) : null,
+      email_contacto: texto(datos, 'email_contacto').toLowerCase() || null,
+      comision_por_defecto: numero(datos, 'comision_por_defecto'),
+      color_tinta: color(datos, 'color_tinta'),
+      color_acento: color(datos, 'color_acento'),
+      color_naturaleza: color(datos, 'color_naturaleza'),
+      color_gris: color(datos, 'color_gris'),
+      logo_url: texto(datos, 'logo_url') || null,
+      video_portada_url: texto(datos, 'video_portada_url') || null,
+      imagen_portada_url: texto(datos, 'imagen_portada_url') || null,
+      pie_credito_texto: texto(datos, 'pie_credito_texto') || null,
+      /* Solo http y https. Este enlace lo ve TODO el publico en cada pagina, asi
+         que un javascript: aqui seria un agujero abierto de par en par. Lo que no
+         pase el filtro se guarda vacio y el pie muestra el texto sin enlace. */
+      pie_credito_url: /^https?:\/\/\S+$/i.test(texto(datos, 'pie_credito_url'))
+        ? texto(datos, 'pie_credito_url')
+        : null,
+      chat_activo: texto(datos, 'chat_activo') === '1',
+      contacto_bloqueado: texto(datos, 'contacto_bloqueado') === '1',
+      esta_activo: texto(datos, 'esta_activo') === '1',
+    };
+  } else {
+    /* Un formulario sin grupo no se guarda a medias: se cae a la vista. */
+    console.error('editarDestino: formulario sin grupo');
+    return;
+  }
+
+  const { error } = await db.from('dst_destino').update(campos).eq('id', destino.id);
   if (error) console.error('editarDestino:', error.message);
   revalidatePath('/admin', 'layout');
 }

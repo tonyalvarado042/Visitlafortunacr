@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { esIdioma } from '@/lib/idiomas';
 import './globales.css';
 
 export const metadata: Metadata = {
@@ -6,9 +8,15 @@ export const metadata: Metadata = {
   description: 'Todo lo que necesitás para vivir La Fortuna.',
 };
 
-export default function RaizLayout({ children }: { children: React.ReactNode }) {
+export default async function RaizLayout({ children }: { children: React.ReactNode }) {
+  /* El idioma lo pone el middleware en la peticion: ver middleware.ts. Las
+     areas sin idioma en la ruta —/admin, /negocio— caen a español, que es el
+     idioma en el que estan escritas. */
+  const pedido = (await headers()).get('x-idioma') ?? '';
+  const idioma = esIdioma(pedido) ? pedido : 'es';
+
   return (
-    <html lang="es">
+    <html lang={idioma}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

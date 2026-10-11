@@ -51,23 +51,24 @@ img { max-width: 100%; display: block; }
 .menu a { opacity: .82; transition: opacity .2s, color .2s; white-space: nowrap; }
 .menu a:hover { opacity: 1; color: var(--naranja); }
 .acciones { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+/* La llamada a la accion de la barra va redondeada: es la unica pieza que
+   queremos que se lea como boton y no como enlace. */
+.acciones .boton.armar { border-radius: 100px; padding: 11px 19px; }
+.armar-corto { display: none; }
 
-.idiomas { display: flex; border: 1px solid #2E2E2E; border-radius: 100px; overflow: hidden; }
-.idiomas a {
-  padding: 6px 12px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
-  transition: background .2s, color .2s;
-}
-.idiomas a.on  { background: var(--blanco); color: var(--negro); }
-.idiomas a.off { color: var(--humo); }
-.idiomas a.off:hover { color: var(--blanco); background: #1C1C1C; }
-
-.selector-idioma { position: relative; display: none; }
+/* El idioma: un solo desplegable, siempre. Antes eran cinco pastillas sueltas
+   que comian 207px de barra para algo que casi nadie toca dos veces — y eran
+   la mitad de la razon por la que el menu se salia de la pantalla. */
+.selector-idioma { position: relative; display: block; }
 .selector-idioma summary {
   list-style: none; cursor: pointer; display: flex; align-items: center; gap: 5px;
   border: 1px solid #2E2E2E; border-radius: 100px; padding: 7px 11px;
   font-size: 11.5px; font-weight: 700; letter-spacing: .04em; color: var(--blanco);
-  white-space: nowrap;
+  white-space: nowrap; transition: border-color .18s, background .18s;
 }
+.selector-idioma summary:hover { border-color: #3E3E3E; background: #1A1A1A; }
+.selector-idioma[open] summary { border-color: var(--naranja); }
+.selector-idioma summary > svg:first-child { opacity: .72; }
 .selector-idioma summary::marker { content: ''; }
 .selector-idioma[open] summary svg { transform: rotate(180deg); }
 .selector-idioma summary svg { transition: transform .2s; }
@@ -97,11 +98,6 @@ img { max-width: 100%; display: block; }
   background: #151515; border: 1px solid var(--borde); border-radius: 5px;
   padding: 6px; box-shadow: 0 14px 34px rgba(0,0,0,.5);
 }
-.menu-plegado .lista a {
-  display: block; padding: 10px 12px; border-radius: 3px;
-  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-}
-.menu-plegado .lista a:hover { background: #202020; color: var(--naranja); }
 
 /* Tocar fuera cierra el desplegable. El pseudo-elemento pertenece al summary,
    así que el clic alterna el details.
@@ -113,9 +109,173 @@ img { max-width: 100%; display: block; }
    y tocar fuera dejaba de cerrar en cuanto la barra se pegaba al hacer scroll.
    Anclada arriba y estirada hacia abajo cubre igual con el bloque contenedor
    puesto o sin él, que es lo que cambia entre `.sobre-hero` y `.pegada`. */
-.menu-plegado[open] summary::before,
-.selector-idioma[open] summary::before {
+/* El > NO es cosmetico. Sin el, el selector alcanza TAMBIEN al summary del
+   acordeon de adentro (.plegado-grupo), que tambien esta [open]: ese summary se
+   pintaba un velo de 300vh encima del panel entero. Resultado: el panel no
+   rodaba y cualquier toque en una categoria plegaba "Que hacer" en vez de
+   abrir el enlace. El velo es del desplegable, no de lo que lleva dentro. */
+.menu-plegado[open] > summary::before,
+.mega[open] > summary::before,
+.selector-idioma[open] > summary::before {
   content: ''; position: fixed; top: 0; left: 0; right: 0; height: 300vh; z-index: 65;
+}
+
+
+/* ---- El mega menu de "Que hacer" ----------------------------------------
+   Las catorce categorias no caben en la barra y nunca iban a caber: cada
+   categoria nueva la empujaba un poco mas al borde. Aqui si pueden crecer, y
+   de paso se ven todas juntas con su conteo, que es mas util que una lista
+   plana donde "Canyoning" y "Hoteles" pesan igual.
+
+   Es <details>: cero JavaScript, abre con clic y con Enter, y la barra sigue
+   siendo un componente de servidor. */
+.mega { position: static; } /* el panel cuelga de .barra, no del summary */
+.mega summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  opacity: .82; transition: opacity .2s, color .2s;
+}
+.mega summary::marker { content: ''; }
+.mega summary::-webkit-details-marker { display: none; }
+.mega summary:hover { opacity: 1; color: var(--naranja); }
+.mega summary svg { transition: transform .2s; }
+.mega[open] summary { opacity: 1; color: var(--naranja); }
+.mega[open] summary svg { transform: rotate(180deg); }
+
+/* De borde a borde. left/right valen 0 y no -40px porque un absoluto se mide
+   contra la CAJA DE RELLENO de su ancestro posicionado, no contra su contenido:
+   la de .barra ya abarca la pantalla entera, y los negativos —que es lo que
+   parecia obvio— sacaban el panel 40px por cada lado. El aire con el borde lo
+   pone la .caja de adentro, que ademas lo alinea con el resto del sitio. */
+.mega-panel {
+  position: absolute; top: 100%; z-index: 70; left: 0; right: 0;
+  background: #0E0E0E;
+  border-top: 1px solid var(--borde); border-bottom: 1px solid var(--borde);
+  box-shadow: 0 28px 64px rgba(0,0,0,.62);
+  padding: 32px 0 36px;
+}
+.mega-reja { display: flex; align-items: flex-start; gap: 44px; }
+
+/* Columnas de ancho fijo y tantas como haya: grid-auto-flow hace exactamente
+   una por hijo, sin que el componente tenga que decirle cuantas son. */
+.mega-cols {
+  flex: 1; display: grid; grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 198px); gap: 0 34px; justify-content: start;
+}
+.mega-columna > div + div { margin-top: 22px; }
+/* La continuacion de una seccion larga va sin titulo, pero tiene que arrancar
+   a la misma altura que la columna de al lado: 26px es el alto del titulo. */
+.mega-columna .sigue { padding-top: 26px; }
+.mega-columna h2 {
+  margin: 0 0 12px; font-size: 11px; line-height: 14px; font-weight: 800;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--naranja);
+}
+.mega-columna ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.mega-columna li a {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 6px 9px; margin-left: -9px; border-radius: 4px;
+  font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none;
+  color: #D6D4D0; opacity: 1; transition: background .15s, color .15s;
+}
+.mega-columna li a:hover { background: #1E1E1E; color: var(--naranja); }
+.mega-columna li a span {
+  font-size: 11px; font-weight: 700; color: #5E5C58; font-variant-numeric: tabular-nums;
+}
+
+/* La columna destacada: lo que Tony decide empujar, desde Ajustes. Vive en el
+   menu y no solo en la portada porque el menu se abre en TODAS las paginas. */
+.mega-destacado {
+  flex: 0 0 292px; display: grid; gap: 9px;
+  padding: 12px; margin: -12px -12px -12px 0; border-radius: 7px;
+  border: 1px solid transparent; transition: border-color .2s, background .2s;
+}
+.mega-destacado:hover { border-color: rgba(255,106,0,.45); background: #161616; }
+.mega-foto {
+  position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden;
+  border-radius: 5px; background: #101010;
+}
+.mega-foto img { width: 100%; height: 100%; object-fit: cover; }
+.mega-destacado strong {
+  font-size: 15.5px; line-height: 1.25; letter-spacing: -.01em;
+  text-transform: none; color: var(--blanco);
+}
+.mega-bajada { font-size: 13px; line-height: 1.45; color: #9A9892; text-transform: none; letter-spacing: 0; }
+.mega-ir { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--naranja); }
+
+/* ---- El menu plegado: tablet y telefono --------------------------------
+   El panel de cuatro columnas no entra en 390px, pero las categorias siguen
+   siendo la razon por la que alguien abre el menu. Asi que "Que hacer" viene
+   abierto, y las categorias son pastillas: se tocan con el dedo y se leen de
+   un barrido, en vez de una lista de catorce renglones que hay que recorrer. */
+.menu-plegado .lista-movil {
+  width: min(392px, calc(100vw - 28px));
+  max-height: calc(100vh - 86px); overflow-y: auto;
+  padding: 10px; display: grid; gap: 4px;
+}
+.plegado-grupo { border-radius: 5px; }
+.plegado-grupo summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 11px 12px; border-radius: 4px;
+  font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--blanco); background: #1C1C1C;
+}
+.plegado-grupo summary::marker { content: ''; }
+.plegado-grupo summary::-webkit-details-marker { display: none; }
+.plegado-grupo summary svg { transition: transform .2s; flex-shrink: 0; }
+.plegado-grupo[open] summary { color: var(--naranja); }
+.plegado-grupo[open] summary svg { transform: rotate(180deg); }
+.plegado-cuerpo { padding: 12px 2px 6px; display: grid; gap: 14px; }
+.plegado-cuerpo h3 {
+  margin: 0 0 8px; font-size: 10.5px; font-weight: 800;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--naranja);
+}
+.plegado-pastillas { display: flex; flex-wrap: wrap; gap: 7px; }
+.plegado-pastillas a {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 8px 12px; border: 1px solid #333; border-radius: 100px;
+  font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none;
+  color: #D6D4D0; transition: border-color .15s, color .15s, background .15s;
+}
+.plegado-pastillas a:hover { border-color: var(--naranja); color: var(--naranja); background: #1A1A1A; }
+.plegado-pastillas a span { font-size: 10.5px; color: #5E5C58; font-variant-numeric: tabular-nums; }
+
+.menu-plegado .lista-movil .plegado-enlace {
+  display: block; padding: 12px; border-radius: 4px;
+  font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--blanco);
+}
+.menu-plegado .lista-movil .plegado-enlace:hover { background: #202020; color: var(--naranja); }
+
+.plegado-destacado {
+  display: flex; align-items: center; gap: 11px; margin-top: 6px;
+  padding: 9px; border: 1px solid rgba(255,106,0,.35); border-radius: 6px;
+  background: #161616;
+}
+.plegado-destacado:hover { border-color: var(--naranja); }
+.plegado-destacado img, .plegado-destacado > .exp-sin-foto {
+  width: 72px; height: 54px; flex-shrink: 0; object-fit: cover; border-radius: 4px;
+}
+.plegado-destacado > span { display: grid; gap: 3px; min-width: 0; }
+.plegado-destacado em {
+  font-style: normal; font-size: 9.5px; font-weight: 800;
+  letter-spacing: .13em; text-transform: uppercase; color: var(--naranja);
+}
+.plegado-destacado strong { font-size: 13.5px; line-height: 1.3; color: var(--blanco); text-transform: none; }
+
+.plegado-idiomas {
+  display: flex; gap: 7px; flex-wrap: wrap;
+  margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--borde);
+}
+.plegado-idiomas a {
+  padding: 7px 11px; border: 1px solid #2E2E2E; border-radius: 100px;
+  font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--humo);
+}
+.plegado-idiomas a.on { background: var(--blanco); color: var(--negro); border-color: var(--blanco); }
+.plegado-idiomas a:hover { color: var(--blanco); }
+.plegado-idiomas a.on:hover { color: var(--negro); }
+
+.menu-plegado .lista-movil .plegado-armar {
+  margin-top: 10px; border-radius: 100px; padding: 13px 20px; font-size: 13.5px;
 }
 
 .boton {
@@ -364,17 +524,20 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
    son el ancho a partir del cual cada pieza deja de caber. Medido con los
    siete enlaces y el texto más largo de los cinco idiomas (portugués). */
 
-/* Las cinco pastillas junto al menú completo piden ~1375px. Debajo de eso,
-   el idioma se pliega en el desplegable. */
-@media (max-width: 1400px) {
-  .idiomas { display: none; }
-  .selector-idioma { display: block; }
-}
+/* El corte, medido otra vez con la barra nueva: logo 201 + los cinco enlaces
+   504 + idioma 75 + boton 145 + perfil 36 + huecos y margenes 128 = ~1089px,
+   y en aleman y portugues unos 20px mas. 1180 deja aire de sobra.
 
-/* El menú completo pide ~1120px. Debajo, se pliega en la hamburguesa. */
-@media (max-width: 1120px) {
+   Antes el menu pedia 1605px y la hamburguesa aparecia en 1120: entre esos dos
+   numeros —justo el ancho de un portatil, justo donde trabaja Tony— el menu se
+   salia de la pantalla sin plegarse. Ese hueco es el que cierra este corte. */
+@media (max-width: 1180px) {
   .menu { display: none; }
   .menu-plegado { display: block; }
+  /* Si la hamburguesa salio, el espacio ya esta apretado: el boton acorta el
+     texto en vez de desaparecer. Es la unica llamada a la accion de la barra. */
+  .armar-largo { display: none; }
+  .armar-corto { display: inline; }
 }
 
 /* Escritorio angosto y tablet apaisada: se recortan los márgenes. */
@@ -597,7 +760,10 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .revela.visible { opacity: 1; transform: none; }
 
 /* La barra flota sobre el hero y se vuelve sólida al bajar */
-.barra.sobre-hero { position: fixed; background: transparent; backdrop-filter: none; border-bottom-color: transparent; }
+/* `left` y `right` NO son decorado: un elemento fixed sin ellos se encoge
+   hasta su contenido. En la portada la barra media ~1130px en una pantalla
+   de 1280 y el boton quedaba 150px adentro del borde. */
+.barra.sobre-hero { position: fixed; left: 0; right: 0; background: transparent; backdrop-filter: none; border-bottom-color: transparent; }
 .barra.pegada { background: rgba(11,11,11,.92); backdrop-filter: blur(14px); border-bottom-color: var(--borde); }
 
 /* Tablet vertical: el mosaico pasa a dos mitades en vez de caer a una sola
@@ -789,7 +955,6 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   }
   /* Más aire para el dedo: 44px de alto por opción es lo mínimo cómodo. */
   .selector-idioma .lista a { padding: 12px 14px; font-size: 15px; }
-  .menu-plegado .lista a { padding: 13px 14px; font-size: 13px; }
   /* En telefono el panel es la pantalla: un recuadro flotante con margenes
      desperdicia el poco ancho que hay, y el teclado se come la mitad. */
   .concierge { inset: 0; width: auto; height: auto; border-radius: 0; border: 0; }

@@ -26,9 +26,18 @@ const VARIABLES: { nombre: string; para: string }[] = [
 export default async function PaginaAjustes() {
   const { destino, db, usuario } = await contextoPanel('ajustes');
   const esAdmin = usuario.rol === 'admin';
-  const [{ data: d }, { data: canales }] = await Promise.all([
+  /* Las candidatas al destacado del menu. Se ofrecen en una lista y no en un
+     campo de texto: una babosa mal escrita no da error, simplemente deja el
+     menu sin tarjeta — y eso se descubre semanas despues. */
+  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }] = await Promise.all([
     db.from('dst_destino').select('*').eq('id', destino.id).single(),
     db.from('dst_canal').select('*').eq('destino_id', destino.id).order('tipo'),
+    db.from('dst_itinerario').select('babosa, titulo')
+      .eq('destino_id', destino.id).eq('generado_por', 'equipo').eq('es_publico', true)
+      .order('orden'),
+    db.from('dst_negocio').select('babosa, nombre, es_destacado')
+      .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
+      .order('es_destacado', { ascending: false }).order('nombre'),
   ]);
   if (!d) return <Vacio texto="Sin destino." />;
   const presente = (n: string) => !!process.env[n]?.trim() || (n === 'SUPABASE_SECRET_KEY' && !!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
@@ -39,6 +48,7 @@ export default async function PaginaAjustes() {
       {!esAdmin && <Aviso tipo="info">Solo un administrador puede cambiar los ajustes.</Aviso>}
 
       <form action={editarDestino}>
+        <input type="hidden" name="grupo" value="destino" />
         <div className="lado">
           <div>
             <div className="tarjeta">
@@ -107,6 +117,53 @@ export default async function PaginaAjustes() {
       </form>
 
       <div className="tarjeta">
+        <h2>Menú del sitio <small>qué va en la columna destacada</small></h2>
+        <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+          El menú de <strong>Qué hacer</strong> abre un panel con todas las
+          categorías y, a la derecha, una tarjeta con foto. Ese espacio se ve en{' '}
+          <strong>todas las páginas</strong> del sitio: es el lugar más visto que
+          hay para empujar algo. Si lo que elegís se despublica, la columna
+          desaparece sola — nunca queda un enlace roto en el menú.
+        </p>
+
+        <form action={editarDestino} className="campos">
+          <input type="hidden" name="grupo" value="menu" />
+          <div className="campo ancho">
+            <label htmlFor="md">Qué destacar</label>
+            <select id="md" name="menu_destacado" disabled={!esAdmin}
+                    defaultValue={d.menu_destacado_tipo === 'ninguno' || !d.menu_destacado_babosa
+                      ? 'ninguno'
+                      : `${d.menu_destacado_tipo}:${d.menu_destacado_babosa}`}>
+              <option value="ninguno">Nada — el panel va sin tarjeta</option>
+              {!!experiencias?.length && (
+                <optgroup label="Experiencias">
+                  {experiencias.map((e) => (
+                    <option key={e.babosa} value={`experiencia:${e.babosa}`}>{e.titulo}</option>
+                  ))}
+                </optgroup>
+              )}
+              {!!destacables?.length && (
+                <optgroup label="Negocios">
+                  {destacables.map((n) => (
+                    <option key={n.babosa} value={`negocio:${n.babosa}`}>
+                      {n.nombre}{n.es_destacado ? ' · destacado' : ''}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+            <small>
+              Solo salen las experiencias publicadas y los negocios publicados.
+              {d.menu_destacado_tipo !== 'ninguno' && d.menu_destacado_babosa
+                ? ` Hoy sale: ${d.menu_destacado_tipo} «${d.menu_destacado_babosa}».`
+                : ' Hoy el panel va sin tarjeta.'}
+            </small>
+          </div>
+          {esAdmin && <BotonAccion>Guardar el menú</BotonAccion>}
+        </form>
+      </div>
+
+      <div className="tarjeta">
         <h2>Oferta premium <small>video + historias + mes destacado</small></h2>
         <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
           Se muestra en <code style={{ fontSize: 11.5 }}>/premium</code>, al pie de
@@ -116,6 +173,7 @@ export default async function PaginaAjustes() {
         </p>
 
         <form action={editarDestino} className="campos">
+          <input type="hidden" name="grupo" value="premium" />
           <div className="campo"><label><input type="checkbox" name="premium_activo" value="1" defaultChecked={d.premium_activo} disabled={!esAdmin} /> Mostrar la oferta</label></div>
           <div className="campo"><label htmlFor="pt">Título</label><input id="pt" name="premium_titulo" defaultValue={d.premium_titulo ?? ''} disabled={!esAdmin} /></div>
           <div className="campo" style={{ gridColumn: '1 / -1' }}><label htmlFor="pg">Gancho</label><textarea id="pg" name="premium_gancho" rows={2} defaultValue={d.premium_gancho ?? ''} disabled={!esAdmin} /></div>

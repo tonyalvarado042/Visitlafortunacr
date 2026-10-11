@@ -53,6 +53,11 @@ export type Destino = {
   premium_incluye: string[];
   premium_cupos: number | null;
   premium_ejemplo_babosa: string | null;
+  /* Que ocupa la columna destacada del mega menu. Se elige en Ajustes
+     porque lo que vale la pena empujar cambia cada temporada, y un
+     destacado fijo en el codigo envejece sin que nadie lo note. */
+  menu_destacado_tipo: 'ninguno' | 'experiencia' | 'negocio';
+  menu_destacado_babosa: string | null;
 };
 
 /**
@@ -363,3 +368,38 @@ export async function destacadosDe(destino: Destino, idioma: Idioma, limite = 10
   return (data ?? []) as Destacado[];
 }
 
+export type DestacadoMenu = {
+  tipo: string;
+  babosa: string;
+  titulo: string;
+  bajada: string | null;
+  imagen_url: string | null;
+  ruta: string;
+};
+
+/**
+ * El destacado del mega menú, ya resuelto al idioma de la página.
+ *
+ * Lo elige Tony en Ajustes: experiencia o negocio, por babosa. Si lo
+ * apuntado no existe o se despublicó, la consulta vuelve vacía y la
+ * columna simplemente no se pinta — vale más un menú de cuatro columnas
+ * que un enlace roto en TODAS las páginas del sitio.
+ *
+ * Va en una sola consulta porque la barra se pinta en cada carga: dos
+ * viajes a Supabase por página para una tarjeta es caro.
+ */
+export async function destacadoDelMenu(
+  destino: Destino, idioma: Idioma,
+): Promise<DestacadoMenu | null> {
+  if (destino.menu_destacado_tipo === 'ninguno' || !destino.menu_destacado_babosa) return null;
+
+  const { data, error } = await supabase.rpc('destacado_del_menu', {
+    p_dominio: destino.dominio,
+    p_idioma: idioma,
+  });
+  if (error) {
+    console.error('destacado_del_menu:', error.message);
+    return null;
+  }
+  return ((data ?? []) as DestacadoMenu[])[0] ?? null;
+}

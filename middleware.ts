@@ -26,10 +26,19 @@ export async function middleware(peticion: NextRequest) {
   const area = AREAS.find((a) => pathname === a.base || pathname.startsWith(`${a.base}/`));
   if (area) return sesionDelPanel(peticion, area.base, area.ingreso);
 
-  const yaTieneIdioma = IDIOMAS.some(
+  const deLaRuta = IDIOMAS.find(
     (i) => pathname === `/${i}` || pathname.startsWith(`/${i}/`)
   );
-  if (yaTieneIdioma) return NextResponse.next();
+  if (deLaRuta) {
+    /* El idioma viaja al layout RAIZ en una cabecera de la peticion. Suena
+       rebuscado, pero no hay otra via: en el App Router solo el layout raiz
+       pinta <html>, y ese layout no recibe los parametros de la ruta. Sin
+       esto, /de y /fr se servian con lang="es" — Google lo lee como el idioma
+       de la pagina y tira abajo el hreflang que si esta bien puesto. */
+    const cabeceras = new Headers(peticion.headers);
+    cabeceras.set('x-idioma', deLaRuta);
+    return NextResponse.next({ request: { headers: cabeceras } });
+  }
 
   const idioma = idiomaPreferido(peticion.headers.get('accept-language'));
   const destino = new URL(`/${idioma}${pathname === '/' ? '' : pathname}`, peticion.url);

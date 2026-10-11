@@ -40,6 +40,10 @@ export const T: Record<string, Diccionario> = {
   buscar:            { es: 'Buscar', en: 'Search', pt: 'Buscar', fr: 'Rechercher', de: 'Suchen' },
   que_buscas:        { es: '¿Qué te gustaría vivir?', en: 'What would you like to experience?', pt: 'O que gostaria de viver?', fr: 'Que souhaitez-vous vivre ?', de: 'Was möchten Sie erleben?' },
   armar_viaje:       { es: 'Armar mi viaje', en: 'Plan my trip', pt: 'Planear a viagem', fr: 'Créer mon voyage', de: 'Reise planen' },
+  /* El mismo boton, dos largos: en portatil angosto 'Armar mi viaje' empuja
+     la barra, pero esconderlo seria esconder la unica llamada a la accion. */
+  armar_viaje_corto: { es: 'Armar viaje', en: 'Plan trip', pt: 'Planear', fr: 'Mon voyage', de: 'Planen' },
+  ver_mas:           { es: 'Ver', en: 'See it', pt: 'Ver', fr: 'Voir', de: 'Ansehen' },
   menu:              { es: 'Menú', en: 'Menu', pt: 'Menu', fr: 'Menu', de: 'Menü' },
   lugar:             { es: 'lugar', en: 'place', pt: 'lugar', fr: 'lieu', de: 'Ort' },
   resultados:        { es: 'Resultados', en: 'Results', pt: 'Resultados', fr: 'Résultats', de: 'Ergebnisse' },
