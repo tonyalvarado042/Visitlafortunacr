@@ -406,6 +406,7 @@ section { padding: 84px 0; }
 .resumen-nota { display: flex; align-items: center; gap: 16px; padding-bottom: 18px; }
 .resumen-nota .cifra-nota { font-size: 42px; font-weight: 900; letter-spacing: -.04em; line-height: 1; }
 .resumen-nota .cuantas { font-size: 13px; color: var(--humo); margin-top: 4px; }
+.resumen-nota .cifra-nota.sin-nota { color: #3A3A3A; }
 
 .calificar { border-top: 1px solid var(--borde); padding-top: 18px; }
 .calificar .pregunta { font-size: 14px; font-weight: 600; color: #D6D4D0; margin-bottom: 8px; }

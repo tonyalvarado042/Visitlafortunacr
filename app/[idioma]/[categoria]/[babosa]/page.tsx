@@ -225,7 +225,18 @@ export default async function Ficha({ params }: { params: Parametros }) {
                     </div>
                   </>
                 ) : (
-                  <p className="cuantas" style={{ margin: 0 }}>{t('escribi_primera', idioma)}</p>
+                  /* Sin resenas, el bloque mantiene LA MISMA forma: la raya en
+                     lugar de la nota y los cinco volcanes vacios. Antes caia a
+                     una linea de texto gris de 204px de alto al lado de los
+                     1086px de las citas de Google, y se leia como si las
+                     resenas propias no existieran. */
+                  <>
+                    <div className="cifra-nota sin-nota">&mdash;</div>
+                    <div>
+                      <Volcanes nota={0} tamano={20} etiqueta={t('escribi_primera', idioma)} />
+                      <div className="cuantas">{t('escribi_primera', idioma)}</div>
+                    </div>
+                  </>
                 )}
               </div>
 
