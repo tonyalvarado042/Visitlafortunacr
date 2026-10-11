@@ -86,3 +86,43 @@ export async function guardarRifa(datos: FormData) {
   revalidatePath('/admin/rifa');
   revalidatePath('/', 'layout');
 }
+
+/**
+ * Guardar una traducción del sorteo.
+ *
+ * Hermana de `traducirCampo` de negocios, pero para el sorteo, que no estaba
+ * en su lista de entidades. Sirve para cualquier campo traducible — y desde
+ * hoy `imagen_url` es uno: el cartel de la rifa en inglés no es el mismo
+ * archivo que el de español.
+ *
+ * Vacío BORRA la fila en vez de guardar una cadena vacía. Si no, un idioma
+ * "traducido a nada" taparía el del idioma principal con un hueco, que es
+ * peor que no traducirlo.
+ */
+export async function traducirSorteo(datos: FormData) {
+  const { db, destino } = await contextoPanel('rifa');
+  const campo = texto(datos, 'campo');
+  const idioma = texto(datos, 'idioma');
+  const valor = texto(datos, 'texto');
+  if (!campo || !idioma) return;
+
+  /* El sorteo del destino, no uno cualquiera: el id viene del formulario y
+     sin esta comprobación se podría traducir el sorteo de otro destino. */
+  const { data: sorteo } = await db.from('dst_sorteo')
+    .select('id').eq('id', texto(datos, 'sorteo_id')).eq('destino_id', destino.id).maybeSingle();
+  if (!sorteo) return;
+
+  if (!valor) {
+    await db.from('dst_traduccion').delete()
+      .eq('entidad', 'sorteo').eq('entidad_id', sorteo.id).eq('campo', campo).eq('idioma', idioma);
+  } else {
+    await db.from('dst_traduccion').upsert(
+      { entidad: 'sorteo', entidad_id: sorteo.id, campo, idioma, texto: valor,
+        /* 'humano' y no 'equipo': la columna solo admite humano|maquina|
+           importado, y con 'equipo' esto revienta contra el check. */
+        origen: 'humano', esta_revisada: true },
+      { onConflict: 'entidad,entidad_id,campo,idioma' },
+    );
+  }
+  revalidatePath('/admin/rifa');
+}

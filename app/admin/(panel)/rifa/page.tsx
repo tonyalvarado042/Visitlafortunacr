@@ -3,7 +3,7 @@ import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { guardarRifa } from './acciones';
+import { guardarRifa, traducirSorteo } from './acciones';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +42,14 @@ export default async function PaginaRifa() {
       </>
     );
   }
+
+  /* Las imagenes por idioma. Viven en dst_traduccion como cualquier otro
+     campo traducible del sorteo — ver sorteo_activo. */
+  const { data: trad } = await db.from('dst_traduccion')
+    .select('campo, idioma, texto')
+    .eq('entidad', 'sorteo').eq('entidad_id', rifa.id).eq('campo', 'imagen_url');
+  const imagenEn = (i: string) =>
+    (trad ?? []).find((t) => t.idioma === i)?.texto ?? null;
 
   const { data: p, count } = await db
     .from('dst_sorteo_participacion')
@@ -164,6 +172,35 @@ export default async function PaginaRifa() {
               />
               {esAdmin && <BotonAccion>Guardar el premio</BotonAccion>}
             </form>
+          </div>
+
+          {/* Una imagen por idioma. El cartel en ingles no es el mismo archivo
+              que el de espanol: la plata, las fechas y el reclamo estan
+              DENTRO de la imagen. El idioma que no tenga la suya usa la del
+              principal — un cartel en espanol se ve raro en aleman, pero un
+              hueco se ve peor. */}
+          <div className="tarjeta">
+            <h2>La imagen en cada idioma <small>el texto va dentro del cartel</small></h2>
+            <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+              Arriba está la del idioma principal ({destino.idioma_principal}), que es la que
+              se usa cuando un idioma no tiene la suya. Acá va una por cada uno de los demás.
+            </p>
+            {(destino.idiomas ?? []).filter((i: string) => i !== destino.idioma_principal).map((i: string) => (
+              <form action={traducirSorteo} key={i} className="campos" style={{ gridTemplateColumns: '1fr', marginBottom: 18 }}>
+                <input type="hidden" name="sorteo_id" value={rifa.id} />
+                <input type="hidden" name="campo" value="imagen_url" />
+                <input type="hidden" name="idioma" value={i} />
+                <CampoImagen
+                  nombre="texto"
+                  etiqueta={`Imagen en ${i.toUpperCase()}`}
+                  valor={imagenEn(i)}
+                  carpeta="rifa"
+                  desactivado={!esAdmin}
+                  ayuda="Vacío = se usa la del idioma principal."
+                />
+                {esAdmin && <BotonAccion clase="boton chico secundario">Guardar la de {i.toUpperCase()}</BotonAccion>}
+              </form>
+            ))}
           </div>
 
           <div className="tarjeta">
