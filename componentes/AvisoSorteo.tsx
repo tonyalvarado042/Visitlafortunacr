@@ -121,11 +121,18 @@ export function AvisoSorteo({
             /* eslint-disable-next-line @next/next/no-img-element */
             ? <img src={sorteo.imagen_url} alt="" />
             : <span className="exp-sin-foto" aria-hidden="true" />}
-          {premio && <span className="aviso-premio">{premio}</span>}
+          {/* La cifra sola no dice nada: "$1.000" podia ser un descuento,
+              una cuota o un precio. Arriba el rotulo que dice QUE es, abajo
+              que se gana con eso. La cifra se queda enorme, pero deja de
+              estar huerfana. */}
+          <span className="aviso-cartel">
+            <span className="aviso-gran">{t('sorteo_gran', idioma)}</span>
+            {premio && <strong>{premio}</strong>}
+            {sorteo.premio_titulo && <span className="aviso-que">{sorteo.premio_titulo}</span>}
+          </span>
         </div>
 
         <div className="aviso-cuerpo">
-          <span className="aviso-sello">{t('sorteo_sello', idioma)}</span>
           <h2 id="aviso-titulo">{sorteo.titulo}</h2>
           {sorteo.gancho && <p>{sorteo.gancho}</p>}
 

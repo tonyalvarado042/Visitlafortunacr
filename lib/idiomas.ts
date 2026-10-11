@@ -339,6 +339,8 @@ export const T: Record<string, Diccionario> = {
   destacados_bajada:    { es: 'Lugares que valen el viaje, elegidos uno por uno.', en: 'Places worth the trip, picked one by one.', pt: 'Lugares que valem a viagem, escolhidos um a um.', fr: 'Des lieux qui valent le détour, choisis un par un.', de: 'Orte, die die Reise wert sind — einzeln ausgewählt.' },
   /* La rifa. Lo que se ve en el aviso y en la pagina; lo que cambia por
      sorteo (titulo, premio, fechas, bases) sale de la base, no de aqui. */
+  sorteo_gran:          { es: 'Gran rifa', en: 'Big giveaway', pt: 'Grande sorteio', fr: 'Grand jeu-concours', de: 'Großes Gewinnspiel' },
+  sorteo_valorada:      { es: 'Ganá una experiencia de', en: 'Win an experience worth', pt: 'Ganhe uma experiência de', fr: 'Gagnez une expérience de', de: 'Gewinne ein Erlebnis im Wert von' },
   sorteo_sello:         { es: 'Sorteo', en: 'Giveaway', pt: 'Sorteio', fr: 'Jeu-concours', de: 'Gewinnspiel' },
   sorteo_nombre:        { es: 'Tu nombre', en: 'Your name', pt: 'Seu nome', fr: 'Votre nom', de: 'Dein Name' },
   sorteo_correo:        { es: 'Tu correo', en: 'Your email', pt: 'Seu e-mail', fr: 'Votre e-mail', de: 'Deine E-Mail' },

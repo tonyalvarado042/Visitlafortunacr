@@ -81,7 +81,7 @@ export default async function PaginaRifa({ params, searchParams }: Props) {
         <span className="rifa-hero-velo" aria-hidden="true" />
 
         <div className="caja rifa-hero-texto">
-          <span className="destacados-sello">{t('sorteo_sello', idioma)}</span>
+          <span className="sello-gran">{t('sorteo_gran', idioma)}</span>
           <h1>{sorteo.titulo}</h1>
           {sorteo.gancho && <p className="rifa-gancho">{sorteo.gancho}</p>}
           {premio && (

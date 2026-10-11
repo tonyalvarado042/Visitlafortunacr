@@ -37,7 +37,7 @@ export function BandaSorteo({
 
       <div className="caja banda-reja">
         <div className="banda-texto">
-          <span className="destacados-sello">{t('sorteo_sello', idioma)}</span>
+          <span className="sello-gran">{t('sorteo_gran', idioma)}</span>
           <h2>{sorteo.titulo}</h2>
 
           {premio && (
