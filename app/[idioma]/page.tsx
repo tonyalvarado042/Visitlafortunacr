@@ -9,6 +9,8 @@ import { CampoBusqueda } from '@/componentes/CampoBusqueda';
 import { buscarNegocios } from '@/lib/buscar';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
 import { FilaDestacados } from '@/componentes/FilaDestacados';
+import { BandaSorteo } from '@/componentes/BandaSorteo';
+import { sorteoDe } from '@/lib/sorteo';
 import { Planificador } from '@/componentes/Planificador';
 
 export const dynamic = 'force-dynamic';
@@ -40,10 +42,11 @@ export default async function Portada({ params, searchParams }: {
   const { idioma } = await params;
   const { q, cat, ver } = await searchParams;
   const destino = await destinoActual();
-  const [categorias, negocios, destacados] = await Promise.all([
+  const [categorias, negocios, destacados, sorteo] = await Promise.all([
     categoriasDe(destino, idioma),
     negociosDe(destino, idioma),
     destacadosDe(destino, idioma, 10),
+    sorteoDe(destino),
   ]);
 
   /* El buscador vive en el hero y los resultados salen aquí mismo: cuando hay
@@ -127,6 +130,12 @@ export default async function Portada({ params, searchParams }: {
       {/* Los destacados, arriba del todo: es el primer lugar de la portada
           despues del hero y es lo que se vende con el plan premium. */}
       <FilaDestacados destacados={destacados} idioma={idioma} />
+
+      {/* La rifa va DESPUES de los destacados a proposito: los destacados son
+          lo que se le cobra a los negocios, y si la rifa les pasa por encima,
+          el plan que se vende en $500 queda de segundo en su propia portada.
+          Una pantalla mas abajo la rifa junta casi lo mismo; el que paga no. */}
+      {sorteo && <BandaSorteo sorteo={sorteo} idioma={idioma} />}
 
       <section className="zona">
         <div className="caja">

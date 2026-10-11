@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe } from '@/lib/destino';
 import { sorteoDe } from '@/lib/sorteo';
-import { cuandoSeSortea, premioEnPlata } from '@/lib/sorteo-formato';
+import { cuandoSeSortea, premioEnPlata, marcarPendientes } from '@/lib/sorteo-formato';
 import { esIdioma, t, type Idioma } from '@/lib/idiomas';
 import { alternativas, mismasRutas } from '@/lib/seo';
 import { htmlDeConfianza } from '@/lib/html-de-confianza';
@@ -176,7 +176,7 @@ export default async function PaginaRifa({ params, searchParams }: Props) {
 
             {sorteo.bases_html && (
               <section className="rifa-bases blog-prosa" id="bases">
-                <div dangerouslySetInnerHTML={{ __html: htmlDeConfianza(sorteo.bases_html) }} />
+                <div dangerouslySetInnerHTML={{ __html: marcarPendientes(htmlDeConfianza(sorteo.bases_html)) }} />
               </section>
             )}
           </div>

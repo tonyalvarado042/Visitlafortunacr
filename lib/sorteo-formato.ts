@@ -39,3 +39,23 @@ export function cuandoSeSortea(
   }
   return texto;
 }
+
+/**
+ * Convierte los `[Falta: X]` de las bases en una linea honesta para el
+ * publico: "Por definir: X".
+ *
+ * El marcador sirve en el panel —es la lista de lo que falta y lo que
+ * dispara el aviso de "antes de encenderla"— pero en la pagina, tal cual,
+ * se lee como un error del programador.
+ *
+ * NO se esconden. Una rifa que dice en voz alta que el dia exacto todavia
+ * no esta decidido da mas confianza que una que se queda callada y despues
+ * aparece con una condicion que nadie vio.
+ */
+export function marcarPendientes(html: string): string {
+  return html.replace(
+    /<p>\s*\[Falta:\s*([\s\S]*?)\]\s*<\/p>/gi,
+    (_todo, texto: string) =>
+      `<p class="rifa-por-definir"><strong>Por definir:</strong> ${String(texto).trim()}</p>`,
+  );
+}
