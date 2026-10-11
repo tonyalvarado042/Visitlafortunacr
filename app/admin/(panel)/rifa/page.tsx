@@ -10,6 +10,7 @@ type Rifa = {
   id: string; babosa: string; esta_activo: boolean;
   titulo: string; gancho: string | null;
   premio_titulo: string | null; premio_usd: number | null;
+  premio_nota: string | null; incluye: string[];
   fecha_sorteo: string | null; cuando_texto: string | null;
   ganadores: number; en_vivo: boolean; enlace_vivo: string | null;
   imagen_url: string | null; bases_html: string | null;
@@ -57,6 +58,7 @@ export default async function PaginaRifa() {
     !rifa.bases_html || rifa.bases_html.includes('[Falta:') ? 'Las bases tienen huecos sin llenar.' : null,
     !rifa.fecha_sorteo && !rifa.cuando_texto ? 'No hay fecha ni texto de cuándo se sortea.' : null,
     !rifa.imagen_url ? 'Falta la imagen.' : null,
+    !rifa.incluye?.length ? 'No dice qué incluye el premio.' : null,
     rifa.en_vivo && !rifa.enlace_vivo ? 'Dice que es en vivo pero no hay enlace de la transmisión.' : null,
   ].filter(Boolean) as string[];
 
@@ -103,6 +105,15 @@ export default async function PaginaRifa() {
               <div className="campo"><label htmlFor="rpu">Valor (USD)</label>
                 <input id="rpu" name="premio_usd" type="number" min={0} step="1"
                        defaultValue={rifa.premio_usd ?? ''} disabled={!esAdmin} /></div>
+              <div className="campo ancho"><label htmlFor="rpn">La frase del valor</label>
+                <input id="rpn" name="premio_nota" placeholder="Valorada en más de $1.000"
+                       defaultValue={rifa.premio_nota ?? ''} disabled={!esAdmin} />
+                <small>Va debajo de la cifra grande. Sirve para decir «más de» sin
+                  comprometer un monto exacto que después haya que demostrar.</small></div>
+              <div className="campo ancho"><label htmlFor="rin">Qué incluye <small>uno por línea</small></label>
+                <textarea id="rin" name="incluye" rows={9}
+                          defaultValue={(rifa.incluye ?? []).join('\n')} disabled={!esAdmin} />
+                <small>Sale como lista en la página, y los tres primeros también en el aviso.</small></div>
               <div className="campo"><label htmlFor="rf">Día del sorteo</label>
                 <input id="rf" name="fecha_sorteo" type="date" defaultValue={rifa.fecha_sorteo ?? ''} disabled={!esAdmin} />
                 <small>Dejalo vacío mientras no esté decidido: se muestra el texto de al lado.</small></div>

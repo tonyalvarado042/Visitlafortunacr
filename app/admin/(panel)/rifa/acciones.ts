@@ -34,6 +34,10 @@ export async function guardarRifa(datos: FormData) {
       gancho: texto(datos, 'gancho') || null,
       premio_titulo: texto(datos, 'premio_titulo') || null,
       premio_usd: numero(datos, 'premio_usd'),
+      premio_nota: texto(datos, 'premio_nota') || null,
+      /* Uno por linea. Se limpian los vacios: una linea en blanco de mas
+         pintaria un renglon con un visto bueno y nada al lado. */
+      incluye: texto(datos, 'incluye').split('\n').map((l) => l.trim()).filter(Boolean),
       /* La fecha puede quedar vacía a propósito: mientras no haya día, la
          página muestra el texto ("Abril 2027") y no inventa un número. */
       fecha_sorteo: texto(datos, 'fecha_sorteo') || null,

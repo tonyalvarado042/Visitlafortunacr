@@ -129,6 +129,15 @@ export function AvisoSorteo({
           <h2 id="aviso-titulo">{sorteo.titulo}</h2>
           {sorteo.gancho && <p>{sorteo.gancho}</p>}
 
+          {/* Los tres primeros renglones nada mas: el aviso tiene que caber
+              en una pantalla de telefono con el boton adentro. El resto esta
+              a un clic en la pagina. */}
+          {sorteo.incluye.length > 0 && (
+            <ul className="aviso-incluye">
+              {sorteo.incluye.slice(0, 3).map((linea) => <li key={linea}>{linea}</li>)}
+            </ul>
+          )}
+
           <FormularioSorteo
             sorteo={sorteo} idioma={idioma} origen="aviso"
             onListo={() => {

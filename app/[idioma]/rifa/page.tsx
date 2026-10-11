@@ -87,7 +87,10 @@ export default async function PaginaRifa({ params, searchParams }: Props) {
           {premio && (
             <p className="rifa-premio">
               <strong>{premio}</strong>
-              {sorteo.premio_titulo && <span>{sorteo.premio_titulo}</span>}
+              <span>
+                {sorteo.premio_titulo}
+                {sorteo.premio_nota && <em>{sorteo.premio_nota}</em>}
+              </span>
             </p>
           )}
         </div>
@@ -124,6 +127,26 @@ export default async function PaginaRifa({ params, searchParams }: Props) {
             </div>
           )}
         </div>
+
+        {sorteo.incluye.length > 0 && (
+          /* Arriba de las bases y fuera de ellas: lo que incluye el premio es
+             el argumento, no la letra chica. Enterrado entre las condiciones
+             no lo lee nadie. */
+          <section className="rifa-incluye">
+            <h2>{t('sorteo_incluye', idioma)}</h2>
+            <ul>
+              {sorteo.incluye.map((linea) => (
+                <li key={linea}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m5 12.5 4.5 4.5L19 7" />
+                  </svg>
+                  {linea}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <div className="rifa-columnas">
           <div className="rifa-texto">

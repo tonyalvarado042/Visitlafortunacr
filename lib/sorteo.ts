@@ -18,6 +18,14 @@ export type Sorteo = {
   gancho: string | null;
   premio_titulo: string | null;
   premio_usd: number | null;
+  /* La frase del valor, aparte del numero. El titular lleva la cifra
+     redonda; esto explica sin comprometer un monto que despues haya que
+     demostrar con facturas. */
+  premio_nota: string | null;
+  /* Que incluye, renglon por renglon. Es lo que de verdad convence: "$1.000"
+     es un numero, "cuatro dias, termales y catarata" es un viaje que uno se
+     imagina. */
+  incluye: string[];
   /** El dia exacto, si ya se decidio. */
   fecha_sorteo: string | null;
   /** Lo que se muestra cuando todavia no hay dia: "Abril 2027". */

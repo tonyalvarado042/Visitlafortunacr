@@ -357,6 +357,7 @@ export const T: Record<string, Diccionario> = {
   sorteo_falta_nombre:  { es: 'Falta tu nombre.', en: 'Your name is missing.', pt: 'Falta seu nome.', fr: 'Votre nom manque.', de: 'Dein Name fehlt.' },
   sorteo_falta_aceptar: { es: 'Hay que aceptar las bases para participar.', en: 'You need to accept the terms to enter.', pt: 'Precisa aceitar as regras para participar.', fr: 'Vous devez accepter le reglement pour participer.', de: 'Du musst die Bedingungen akzeptieren.' },
   sorteo_ver_todo:      { es: 'Ver de que se trata', en: 'See what it is about', pt: 'Ver do que se trata', fr: 'Voir de quoi il s\u2019agit', de: 'Worum es geht' },
+  sorteo_incluye:       { es: 'Qué incluye', en: 'What it includes', pt: 'O que inclui', fr: 'Ce qui est compris', de: 'Was enthalten ist' },
   sorteo_cuando:        { es: 'Cuando se sortea', en: 'When we draw', pt: 'Quando e o sorteio', fr: 'Date du tirage', de: 'Wann gezogen wird' },
   sorteo_cuantos:       { es: 'Cuantos ganan', en: 'How many win', pt: 'Quantos ganham', fr: 'Combien de gagnants', de: 'Wie viele gewinnen' },
   sorteo_un_ganador:    { es: 'Un solo ganador', en: 'One single winner', pt: 'Um unico ganhador', fr: 'Un seul gagnant', de: 'Nur ein Gewinner' },
