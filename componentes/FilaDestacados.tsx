@@ -13,12 +13,20 @@ import { PistaDestacados } from './PistaDestacados';
  * Anda sola, despacio, y se detiene apenas alguien se le acerca. Quién la
  * mueve y por qué está en PistaDestacados.tsx.
  *
- * La lista se pinta DOS VECES, y eso es a propósito: es lo que deja que el
- * bucle no dé el salto feo al llegar al final. La copia va `aria-hidden` y
- * sin paso de teclado —quien navega con tabulador recorre diez tarjetas, no
- * veinte— pero SÍ se puede hacer clic en ella: la mitad del tiempo la
- * tarjeta que se ve es la copia, y una tarjeta premium que no abre al
- * tocarla sería peor que no tener carrusel.
+ * Las tarjetas se pintan DOS VECES, y eso es a propósito: es lo que deja que
+ * el bucle no dé el salto feo al llegar al final. Las copias van
+ * `aria-hidden` y sin paso de teclado —quien navega con tabulador recorre
+ * diez tarjetas, no veinte— pero SÍ se puede hacer clic en ellas: la mitad
+ * del tiempo la tarjeta que se ve es una copia, y una tarjeta premium que no
+ * abre al tocarla sería peor que no tener carrusel.
+ *
+ * Van en UNA SOLA <ul>, no en dos listas una al lado de la otra. Eran dos, y
+ * en iPhone las tarjetas se montaban unas sobre otras justo en la unión de
+ * las dos — dos listas dentro de un flex, dentro de otro flex, dentro de un
+ * `overflow-x`: tres cajas flexibles anidadas que cada motor puede medir un
+ * poco distinto, y el desacuerdo aparece exactamente ahí. Con una sola lista
+ * no hay unión: la separación entre CUALQUIER par de tarjetas sale del mismo
+ * `gap` de la misma caja. Deja de depender de a quién le toque medir.
  *
  * Para buscadores no cambia nada: las tarjetas ya estaban en el HTML del
  * servidor y ahí siguen. Lo único que se mueve es la posición del scroll,
@@ -32,10 +40,9 @@ export function FilaDestacados({
 }) {
   if (destacados.length === 0) return null;
 
-  const tarjetas = (copia: boolean) => (
-    <ul {...(copia ? { 'aria-hidden': true } : {})}>
-      {destacados.map((n) => (
-        <li key={`${copia ? 'c' : 'o'}-${n.id}`}>
+  const tarjetas = (copia: boolean) =>
+    destacados.map((n) => (
+        <li key={`${copia ? 'c' : 'o'}-${n.id}`} {...(copia ? { 'aria-hidden': true } : {})}>
           <Link href={`/${idioma}/${n.categoria_babosa}/${n.babosa}`} className="destacado"
                 tabIndex={copia ? -1 : undefined}>
             <div className="destacado-foto">
@@ -60,9 +67,7 @@ export function FilaDestacados({
             </div>
           </Link>
         </li>
-      ))}
-    </ul>
-  );
+    ));
 
   return (
     <section className="destacados">
@@ -78,6 +83,7 @@ export function FilaDestacados({
         {tarjetas(false)}
         {tarjetas(true)}
       </PistaDestacados>
+
     </section>
   );
 }

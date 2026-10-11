@@ -11,10 +11,11 @@ import { useEffect, useRef } from 'react';
  * traerlo de vuelta — es lo que se está vendiendo. Moviendo `scrollLeft` el
  * arrastre nativo sigue funcionando y la animación es solo una ayuda.
  *
- * El bucle no da saltos porque la lista viene DOS veces desde el servidor
- * (ver FilaDestacados). Al pasar la distancia entre una copia y la otra se le
- * resta esa distancia al scroll: en ese punto el píxel de salida y el de
- * llegada son idénticos, así que el ojo no ve nada.
+ * El bucle no da saltos porque las tarjetas vienen DOS veces desde el
+ * servidor, en UNA sola lista (ver FilaDestacados). Al pasar la distancia
+ * entre una tarjeta y su copia se le resta esa distancia al scroll: en ese
+ * punto el píxel de salida y el de llegada son idénticos, así que el ojo no
+ * ve nada.
  *
  * Se detiene con el puntero encima, con el foco adentro, mientras alguien la
  * arrastra, cuando no se ve en pantalla y si el sistema pide menos
@@ -36,9 +37,13 @@ export function PistaDestacados({ children }: { children: React.ReactNode }) {
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const tren = caja.firstElementChild as HTMLElement | null;
-    const listas = tren?.children;
-    if (!listas || listas.length < 2) return;
+    const lista = caja.firstElementChild as HTMLElement | null;
+    const tarjetas = lista?.children;
+    /* Hacen falta al menos dos tarjetas y su copia: con una sola no hay
+       vuelta que dar. */
+    if (!tarjetas || tarjetas.length < 2) return;
+    const mitad = tarjetas.length / 2;
+    if (!Number.isInteger(mitad) || mitad < 1) return;
 
     let cuadro = 0;
     let anterior = 0;
@@ -49,20 +54,21 @@ export function PistaDestacados({ children }: { children: React.ReactNode }) {
     let conPuntero = false;
     let aLaVista = false;
 
-    /* La vuelta se mide de una copia a la otra, NO con scrollWidth/2: el
-       hueco entre las dos listas y el relleno de la pista entran en
-       scrollWidth y dejarían la mitad corrida unos píxeles. Esa diferencia
-       se suma vuelta tras vuelta hasta que el salto se ve. */
+    /* La vuelta se mide de la primera tarjeta a su copia, NO con
+       scrollWidth/2: el relleno de la pista entra en scrollWidth y dejaría la
+       mitad corrida unos píxeles. Esa diferencia se suma vuelta tras vuelta
+       hasta que el salto se ve. */
     let vuelta = 0;
     const medir = () => {
-      vuelta = (listas[1] as HTMLElement).offsetLeft - (listas[0] as HTMLElement).offsetLeft;
+      vuelta = (tarjetas[mitad] as HTMLElement).offsetLeft
+             - (tarjetas[0] as HTMLElement).offsetLeft;
     };
     medir();
 
     /* Las fotos llegan tarde y cambian el ancho: si no se vuelve a medir,
        la vuelta se calculó con tarjetas vacías y el bucle salta. */
     const observador = new ResizeObserver(medir);
-    observador.observe(tren);
+    observador.observe(lista);
 
     const andando = () =>
       aLaVista && !conPuntero && vuelta > 0
@@ -128,7 +134,7 @@ export function PistaDestacados({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="destacados-pista" ref={pista}>
-      <div className="destacados-tren">{children}</div>
+      <ul className="destacados-tren">{children}</ul>
     </div>
   );
 }

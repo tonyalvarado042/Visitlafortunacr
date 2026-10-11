@@ -14,6 +14,13 @@
      buscador se ven a traves, asi que no les sirve un color cerrado. */
   --rgb-fondo: 11, 11, 11;
   --rgb-tinta: 255, 255, 255;
+  /* `color-scheme` manda sobre lo que pinta EL NAVEGADOR, no el CSS: el
+     texto del selector de fecha, las flechas de los campos numericos, el
+     triangulo de los <select>. Estaba escrito a mano como `dark` en los
+     campos, asi que con el tema claro iOS pintaba el `mm/dd/aaaa` en
+     BLANCO sobre una caja clara: el campo de fecha se veia vacio. Se
+     hereda, asi que aqui alcanza. */
+  color-scheme: dark;
 }
 /* Los tonos intermedios, que antes estaban escritos a mano en 180 lugares.
    Cada uno arranca con EXACTAMENTE el valor que reemplaza: el tema oscuro
@@ -63,6 +70,7 @@
   --gris: #D9D4CA;
   --rgb-fondo: 255, 255, 255;
   --rgb-tinta: 22, 21, 15;
+  color-scheme: light;
   --acento-vivo: #E25E00;
   --aviso-2: #7A6420;
   --aviso: #8A5A00;
@@ -1794,7 +1802,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .forma input, .forma select, .forma textarea {
   width: 100%; background: var(--sup-4); border: 1px solid var(--borde-4); border-radius: 4px;
   padding: 13px 14px; font-size: 15px; font-weight: 500; color: var(--blanco);
-  font-family: inherit; color-scheme: dark;
+  font-family: inherit;
   transition: border-color .16s, background .16s;
 }
 .forma input::placeholder, .forma textarea::placeholder { color: var(--txt-4); }
@@ -2394,10 +2402,15 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
    dos listas son items flexibles que, en teoria, pueden encoger. Chrome no
    las encoge —lo probe forzandolo— pero dejarlo al criterio de cada motor en
    algo que ya se vio roto en iPhone no tiene sentido. Esto lo fija. */
-.destacados-tren { display: flex; gap: 18px; width: max-content; }
-.destacados-tren > ul { flex: 0 0 auto; }
-.destacados-pista ul { display: flex; gap: 18px; list-style: none; margin: 0; padding: 0; }
-.destacados-pista li { flex: 0 0 300px; }
+/* UNA sola lista: la separacion entre cualquier par de tarjetas sale de este
+   `gap` y de ninguna otra parte. Antes eran dos listas dentro de este flex,
+   cada una con su propio flex: tres cajas flexibles anidadas, y en iPhone las
+   tarjetas se montaban justo en la union de las dos. Ya no hay union. */
+.destacados-tren {
+  display: flex; gap: 18px; width: max-content;
+  list-style: none; margin: 0; padding: 0;
+}
+.destacados-tren > li { flex: 0 0 300px; }
 
 .destacado { display: block; border: 1px solid rgba(255,106,0,.35); border-radius: 7px; overflow: hidden; background: var(--carbon); transition: border-color .2s, transform .2s; }
 .destacado:hover { border-color: var(--naranja); transform: translateY(-2px); }
@@ -2426,7 +2439,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
        tiene que arrancar donde arranca el titulo que la encabeza. */
     padding: 0 20px 8px;
   }
-  .destacados-pista li { flex-basis: 76vw; }
+  .destacados-tren > li { flex-basis: 76vw; }
   .ficha-hero { min-height: 300px; }
 }
 

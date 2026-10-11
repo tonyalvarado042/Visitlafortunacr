@@ -400,7 +400,7 @@ export const T: Record<string, Diccionario> = {
   reserva_falta_fecha:  { es: 'Falta la fecha.', en: 'The date is missing.', pt: 'Falta a data.', fr: 'La date manque.', de: 'Das Datum fehlt.' },
   reserva_falta_personas: { es: 'Falta cuántas personas van.', en: 'How many people are going?', pt: 'Falta quantas pessoas vão.', fr: 'Combien de personnes ?', de: 'Wie viele Personen?' },
   reserva_sin_cobro:    { es: 'Enviar no cuesta nada ni reserva todavía.', en: 'Sending costs nothing and books nothing yet.', pt: 'Enviar não custa nada nem reserva ainda.', fr: 'Envoyer ne coûte rien et ne réserve rien encore.', de: 'Das Senden kostet nichts und bucht noch nichts.' },
-  reserva_quien_presta: { es: 'Lo presta', en: 'Provided by', pt: 'Prestado por', fr: 'Proposé par', de: 'Anbieter' },
+  reserva_quien_presta: { es: 'Servicio ofrecido por', en: 'Service offered by', pt: 'Serviço oferecido por', fr: 'Service proposé par', de: 'Leistung angeboten von' },
   /* El formulario va en dos pasos: primero fecha y personas, después los datos
      de contacto. No es moda: la tarjeta entera medía 1034px contra una
      pantalla de 900, así que el botón de enviar quedaba SIEMPRE debajo del
