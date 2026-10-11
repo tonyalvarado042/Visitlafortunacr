@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
@@ -153,9 +154,14 @@ export default async function PaginaRifa() {
                 <input id="rev" name="enlace_vivo" placeholder="https://…"
                        defaultValue={rifa.enlace_vivo ?? ''} disabled={!esAdmin} />
                 <small>Solo http/https. Se puede poner después, cuando se sepa por dónde se transmite.</small></div>
-              <div className="campo ancho"><label htmlFor="ri">Imagen</label>
-                <input id="ri" name="imagen_url" defaultValue={rifa.imagen_url ?? ''} disabled={!esAdmin} />
-                <small>Ruta del sitio (<code>/rifa/arenal.webp</code>) o dirección completa.</small></div>
+              <CampoImagen
+                nombre="imagen_url"
+                etiqueta="Imagen del premio"
+                valor={rifa.imagen_url}
+                carpeta="rifa"
+                desactivado={!esAdmin}
+                ayuda="Elegí el archivo y se sube solo: se encoge a 1800 px y se pasa a WebP. También se puede pegar una dirección."
+              />
               {esAdmin && <BotonAccion>Guardar el premio</BotonAccion>}
             </form>
           </div>

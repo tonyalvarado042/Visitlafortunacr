@@ -145,10 +145,15 @@ export function Planificador({ idioma }: { idioma: Idioma }) {
   );
 }
 
+/* Sin `colorScheme` aqui: sale del tema, en :root, y se hereda. Escrito a
+   mano como 'dark' hacia que con el tema claro iOS pintara el mm/dd/aaaa del
+   selector de fecha en BLANCO sobre una caja clara. Y sin `minWidth`
+   tampoco: eso ahora lo pone globales.css para TODOS los campos, vengan sus
+   estilos de donde vengan. */
 const campo: React.CSSProperties = {
   width: '100%', background: 'var(--sup-2)', border: '1px solid var(--borde-2)', borderRadius: 3,
   padding: '12px 14px', fontSize: 14.5, fontWeight: 600, color: 'var(--blanco)',
-  fontFamily: 'inherit', colorScheme: 'dark',
+  fontFamily: 'inherit',
 };
 
 const fila: React.CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: 7 };

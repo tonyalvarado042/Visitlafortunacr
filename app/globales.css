@@ -221,6 +221,20 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--naranja); outli
 ::selection { background: var(--naranja); color: var(--negro); }
 img { max-width: 100%; display: block; }
 
+/* Todo campo, venga su estilo de donde venga.
+   Lo tenia solo `.forma`, y el planificador se estiliza DENTRO del componente
+   —no usa esa clase—, asi que se quedaba afuera y su caja se salia en el
+   telefono. Una regla que hay que acordarse de aplicar en cada sitio nuevo es
+   una regla que se va a olvidar; esta alcanza a todos.
+
+   `min-width: 0` porque un hijo de rejilla o de flex NO encoge por debajo de
+   su contenido si no se le dice. `appearance: none` en fecha y numero porque
+   iOS les da un ancho propio mayor que el de Chrome, y con el se salen. */
+input, select, textarea { min-width: 0; max-width: 100%; }
+input[type="date"], input[type="time"], input[type="number"], input[type="datetime-local"] {
+  -webkit-appearance: none; appearance: none;
+}
+
 .caja { max-width: 1240px; margin: 0 auto; padding: 0 40px; }
 
 /* ---- Barra ---- */
