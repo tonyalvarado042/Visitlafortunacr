@@ -14,7 +14,7 @@
  */
 export function premioEnPlata(monto: number | null | undefined, idioma: string): string | null {
   if (monto == null) return null;
-  const numero = new Intl.NumberFormat(idioma, {
+  const numero = new Intl.NumberFormat(localeSeguro(idioma), {
     minimumFractionDigits: 0,
     maximumFractionDigits: monto % 1 === 0 ? 0 : 2,
     /* 'always': en espanol, Intl no separa los miles por debajo de diez mil,
@@ -25,6 +25,32 @@ export function premioEnPlata(monto: number | null | undefined, idioma: string):
   return `$${numero}`;
 }
 
+/**
+ * Un idioma que Intl acepte, siempre.
+ *
+ * `Intl` revienta con RangeError ante cualquier cosa que no parezca un
+ * idioma: cadena vacia, con punto, con coma o con espacio. Y aca llega lo que
+ * venga en la direccion, porque `/[idioma]` casa con cualquier segmento.
+ *
+ * Eso tiraba un 500 EN LA PORTADA cada vez que un navegador o un robot pedia
+ * `/apple-touch-icon.png`: el middleware deja pasar todo lo que tenga punto,
+ * la ruta casa con `/[idioma]`, y `BandaSorteo` formateaba el premio con
+ * idioma = "apple-touch-icon.png". El layout si valida, pero en App Router la
+ * pagina y el layout se pintan EN PARALELO: la pagina reventaba antes de que
+ * el notFound() del layout llegara.
+ *
+ * Formatear no es el lugar donde se decide si una direccion existe. Eso lo
+ * hace la pagina, con un 404. Aca solo no se rompe.
+ */
+function localeSeguro(idioma: string): string {
+  try {
+    Intl.getCanonicalLocales(idioma);
+    return idioma;
+  } catch {
+    return 'es';
+  }
+}
+
 /** Cuando se sortea, en palabras: el dia exacto si lo hay, el texto si no. */
 export function cuandoSeSortea(
   fecha: string | null, texto: string | null, idioma: string,
@@ -33,7 +59,7 @@ export function cuandoSeSortea(
     /* Mediodia UTC a proposito. Una fecha suelta "2027-04-18" la toma el
        navegador como medianoche UTC, y en Costa Rica (UTC-6) eso se pinta
        como el 17: el sorteo se correria un dia entero. */
-    return new Date(`${fecha}T12:00:00Z`).toLocaleDateString(idioma, {
+    return new Date(`${fecha}T12:00:00Z`).toLocaleDateString(localeSeguro(idioma), {
       day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
     });
   }

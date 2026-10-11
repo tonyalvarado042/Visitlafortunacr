@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { destinoActual, categoriasDe, negociosDe, destacadosDe, type Negocio, type Categoria } from '@/lib/destino';
-import { t, lugares, type Idioma } from '@/lib/idiomas';
+import { t, lugares, esIdioma, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { Hero } from '@/componentes/Hero';
@@ -40,6 +41,13 @@ export default async function Portada({ params, searchParams }: {
   searchParams: Promise<{ q?: string; cat?: string; ver?: string }>;
 }) {
   const { idioma } = await params;
+  /* El layout tambien lo valida, pero en App Router la pagina y el layout se
+     pintan EN PARALELO: sin esto, `/apple-touch-icon.png` entraba hasta aca
+     con idioma = "apple-touch-icon.png" y reventaba antes de que el
+     notFound() del layout llegara. Un idioma que no existe es un 404, no un
+     500. */
+  if (!esIdioma(idioma)) notFound();
+
   const { q, cat, ver } = await searchParams;
   const destino = await destinoActual();
   const [categorias, negocios, destacados, sorteo] = await Promise.all([

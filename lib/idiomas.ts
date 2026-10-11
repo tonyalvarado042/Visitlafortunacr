@@ -395,6 +395,13 @@ export const T: Record<string, Diccionario> = {
   reserva_falta_personas: { es: 'Falta cuántas personas van.', en: 'How many people are going?', pt: 'Falta quantas pessoas vão.', fr: 'Combien de personnes ?', de: 'Wie viele Personen?' },
   reserva_sin_cobro:    { es: 'Enviar no cuesta nada ni reserva todavía.', en: 'Sending costs nothing and books nothing yet.', pt: 'Enviar não custa nada nem reserva ainda.', fr: 'Envoyer ne coûte rien et ne réserve rien encore.', de: 'Das Senden kostet nichts und bucht noch nichts.' },
   reserva_quien_presta: { es: 'Lo presta', en: 'Provided by', pt: 'Prestado por', fr: 'Proposé par', de: 'Anbieter' },
+  /* El formulario va en dos pasos: primero fecha y personas, después los datos
+     de contacto. No es moda: la tarjeta entera medía 1034px contra una
+     pantalla de 900, así que el botón de enviar quedaba SIEMPRE debajo del
+     borde mientras la tarjeta estaba pegada. Partida en dos, cada paso cabe. */
+  reserva_enviar:       { es: 'Enviar solicitud', en: 'Send request', pt: 'Enviar solicitação', fr: 'Envoyer la demande', de: 'Anfrage senden' },
+  reserva_volver:       { es: 'Cambiar la fecha', en: 'Change the date', pt: 'Mudar a data', fr: 'Changer la date', de: 'Datum ändern' },
+  reserva_personas:     { es: 'personas', en: 'people', pt: 'pessoas', fr: 'personnes', de: 'Personen' },
   ver_contacto:          { es: 'Ver los datos de contacto', en: 'Show contact details', pt: 'Ver os dados de contato', fr: 'Afficher les coordonnées', de: 'Kontaktdaten anzeigen' },
   ver_contacto_por_que:  { es: 'Dejanos cómo contactarte y te mostramos el teléfono y el sitio. Al negocio le avisamos que preguntaste, así te contesta antes.', en: 'Tell us how to reach you and we’ll show the phone and website. We let the business know you asked, so they reply sooner.', pt: 'Diga como falar com você e mostramos o telefone e o site. Avisamos o negócio que você perguntou, assim respondem antes.', fr: 'Dites-nous comment vous joindre et nous affichons le téléphone et le site. Nous prévenons l’établissement, il vous répondra plus vite.', de: 'Sag uns, wie wir dich erreichen, und wir zeigen Telefon und Website. Wir sagen dem Betrieb Bescheid, dann antwortet er schneller.' },
   ver_contacto_de_nuevo: { es: 'Ya habías pedido estos datos. Confirmanos tu correo y te los mostramos otra vez.', en: 'You asked for these before. Confirm your email and we’ll show them again.', pt: 'Você já pediu estes dados. Confirme o seu e-mail e mostramos de novo.', fr: 'Vous les aviez déjà demandés. Confirmez votre e-mail et nous les affichons à nouveau.', de: 'Du hattest das schon angefragt. Bestätige deine E-Mail, dann zeigen wir sie wieder.' },

@@ -154,7 +154,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
 
       <div className="caja">
         <div className="ficha-cuerpo">
-          <div>
+          <div className="ficha-principal">
             <GaleriaNegocio fotos={fotos} idioma={idioma} />
 
             {negocio.video_url && (
@@ -212,13 +212,6 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 )}
               </div>
             )}
-
-            {/* Reservar va ARRIBA del todo: es la razon por la que esta
-                ficha deja de ser solo directorio. Si no hay nada que
-                vender, no se pinta nada y la ficha es la de siempre. */}
-            {reservables.map((p) => (
-              <ReservarProducto key={p.producto_id} producto={p} idioma={idioma} />
-            ))}
 
             {/* Las reseñas propias van primero y aparte: son las únicas que
                 cuentan para el promedio y para el marcado. Lo de Google y
@@ -321,7 +314,19 @@ export default async function Ficha({ params }: { params: Parametros }) {
             </div>
           </div>
 
-          <aside>
+          {/* La columna de la derecha, y PEGADA: baja con la página para que
+              reservar nunca quede fuera de pantalla. Antes el widget vivía al
+              final de la columna izquierda —debajo de la galería, el video, la
+              descripción y los plegables— y había que bajar media pantalla
+              para encontrarlo. El comentario de arriba decía "va ARRIBA del
+              todo" y no era cierto. Ahora sí. */}
+          <aside className="ficha-lado">
+            {reservables.map((p) => (
+              <div className="ficha-reservar" id="reservar" key={p.producto_id}>
+                <ReservarProducto producto={p} idioma={idioma} />
+              </div>
+            ))}
+
             <div className="bloque">
               <div className="titulo">{t('contacto', idioma)}</div>
 
@@ -390,7 +395,11 @@ export default async function Ficha({ params }: { params: Parametros }) {
               </div>
             )}
 
-            {negocio.rango_precio && (
+            {/* El rango de precio se calla cuando hay tarifas de verdad: el
+                widget ya muestra $47 adulto y $33 niño justo arriba, y repetir
+                "$$ · sobre $47" en la misma columna es ruido. Sin reserva, el
+                rango sigue siendo lo único que hay. */}
+            {negocio.rango_precio && reservables.length === 0 && (
               <div className="bloque">
                 <div className="titulo">{t('precio', idioma)}</div>
                 <div style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-.03em' }}>
@@ -406,6 +415,30 @@ export default async function Ficha({ params }: { params: Parametros }) {
           </aside>
         </div>
       </div>
+
+      {/* En el teléfono la columna de la derecha cae al final, así que el
+          widget queda debajo de todo. Esta barra lo trae de vuelta: fija
+          abajo, con el precio y un enlace al formulario. Es un <a> y nada
+          más — ni una línea de JavaScript.
+
+          Dice la tarifa de adulto con su nombre, no "desde": con adulto a $47
+          y niño a $33, un "desde $33" es cierto y engañoso a la vez. Es el
+          mismo error que ya se arregló dentro del widget. */}
+      {reservables.length > 0 && (
+        <a className="barra-reservar" href="#reservar">
+          <span className="cuanto">
+            {reservables[0].tarifas.length > 0 ? (
+              <>
+                <strong>${reservables[0].tarifas[0].precio}</strong>
+                <span>{reservables[0].tarifas[0].nombre}</span>
+              </>
+            ) : (
+              <span>{t('reserva_consultar', idioma)}</span>
+            )}
+          </span>
+          <span className="boton">{t('reserva_pedir', idioma)}</span>
+        </a>
+      )}
 
       <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>

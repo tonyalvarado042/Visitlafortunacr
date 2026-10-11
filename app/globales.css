@@ -608,12 +608,15 @@ img { max-width: 100%; display: block; }
 
 
 /* ---- El widget de reserva de la ficha ------------------------------------
-   Va arriba del todo del cuerpo y tiene que leerse como lo unico accionable
-   de la pagina. Pero sin gritar: la ficha sigue siendo informacion, y si el
-   visitante no viene a reservar, el resto de la ficha tiene que seguir ahi. */
+   Vive ARRIBA de la columna derecha, pegado, y tiene que leerse como lo unico
+   accionable de la pagina. Pero sin gritar: la ficha sigue siendo informacion,
+   y si el visitante no viene a reservar, el resto tiene que seguir ahi.
+
+   Es una columna de 372px, no el ancho entero: todo lo de adentro va en una
+   sola fila por campo. Cuando vivia en la columna izquierda era al reves. */
 .reservar {
   border: 1px solid rgba(255,106,0,.42); border-radius: 10px;
-  background: var(--carbon); padding: 24px 22px; margin-bottom: 34px;
+  background: var(--carbon); padding: 22px 20px; margin-bottom: 16px;
 }
 .reservar-cabeza {
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -622,14 +625,20 @@ img { max-width: 100%; display: block; }
 .reservar-cabeza h2 { margin: 0; font-size: 20px; letter-spacing: -.01em; text-transform: none; }
 .reservar-que { margin: 4px 0 0; font-size: 14.5px; color: #B8B6B2; }
 
-.reservar-precio { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
-/* Una fila por tarifa. Con dos o mas, un "desde" engana: el adulto lee el
-   precio del nino. */
-.reservar-tarifas { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; text-align: right; }
-.reservar-tarifas li { display: flex; align-items: baseline; justify-content: flex-end; gap: 10px; }
-.reservar-tarifas span { font-size: 12.5px; color: var(--humo); }
-.reservar-tarifas strong { font-size: 22px; font-weight: 900; letter-spacing: -.02em; color: var(--naranja); min-width: 62px; }
-.reservar-tarifas li:first-child strong { font-size: 30px; }
+/* La cabeza va apilada, no titulo-izquierda / precio-derecha: en 372px el
+   precio caia solo a la segunda linea y quedaba colgando a la derecha. */
+.reservar-cabeza { display: block; }
+.reservar-precio { display: block; margin-top: 15px; }
+/* Una fila por tarifa, nombre a la izquierda y plata a la derecha. Con dos o
+   mas, un "desde" engana: el adulto lee el precio del nino. */
+.reservar-tarifas { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.reservar-tarifas li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 8px 12px; border-radius: 7px; background: #191919;
+}
+.reservar-tarifas span { font-size: 13px; color: #C2C0BC; }
+.reservar-tarifas strong { font-size: 21px; font-weight: 900; letter-spacing: -.02em; color: var(--naranja); }
+.reservar-tarifas li:first-child strong { font-size: 25px; }
 .reservar-precio span { font-size: 12px; color: var(--humo); }
 .reservar-precio strong { font-size: 30px; font-weight: 900; letter-spacing: -.03em; color: var(--naranja); }
 /* Sin tarifa verificada no hay cifra: dice "consultar" y se ve como texto,
@@ -646,11 +655,37 @@ img { max-width: 100%; display: block; }
 .reservar-incluye svg { flex-shrink: 0; margin-top: 3px; color: var(--verde); }
 
 .reservar-forma { display: grid; gap: 12px; border-top: 1px solid var(--borde); padding-top: 18px; }
-.reservar-fila { display: grid; grid-template-columns: 1.3fr .7fr .7fr; gap: 12px; }
+/* La fecha a lo ancho; adultos y ninos se reparten la fila de abajo. En tres
+   columnas dentro de 330px el selector de fecha quedaba en 140px y Chrome le
+   recorta el calendario. */
+.reservar-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.reservar-fila .campo:first-child { grid-column: 1 / -1; }
 .reservar-forma .campo { display: grid; gap: 6px; }
 .reservar-forma label { font-size: 12.5px; font-weight: 700; color: #D6D4D0; }
 .reservar-forma .opcional { margin-left: 7px; font-weight: 600; font-size: 11px; color: #6E6C68; text-transform: none; letter-spacing: 0; }
 .reservar-forma .boton { border-radius: 100px; padding: 13px 20px; font-size: 14px; }
+/* El resumen del paso 2: qué día y cuántos, con la salida para corregirlo.
+   Sin esto, en el paso 2 no hay forma de saber para qué fecha se está
+   pidiendo — y el que se equivocó se entera por correo. */
+.reservar-elegido {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; border-radius: 7px; background: #191919; font-size: 13.5px;
+}
+.reservar-elegido span { font-weight: 600; color: #D6D4D0; }
+.reservar-elegido button {
+  background: none; border: 0; padding: 0; cursor: pointer; flex-shrink: 0;
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--naranja);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+/* Las notas, plegadas: mismo patrón que los plegables de la ficha. */
+.reservar-mas summary {
+  list-style: none; cursor: pointer;
+  font-size: 12.5px; font-weight: 700; color: #D6D4D0;
+}
+.reservar-mas summary::marker, .reservar-mas summary::-webkit-details-marker { display: none; content: ''; }
+.reservar-mas summary:hover { color: var(--naranja); }
+.reservar-mas textarea { margin-top: 7px; width: 100%; }
+
 .reservar-letra, .reservar-presta { display: block; text-align: center; font-size: 11.5px; color: #7E7C78; }
 .reservar-presta strong { color: #B8B6B2; }
 
@@ -661,6 +696,31 @@ img { max-width: 100%; display: block; }
 .reservar-codigo code {
   font-family: ui-monospace, monospace; font-size: 15px; font-weight: 700;
   color: var(--naranja); background: #1C1C1C; padding: 3px 9px; border-radius: 4px;
+}
+
+/* ---- La barra de reservar del telefono -----------------------------------
+   En el telefono la columna de la derecha cae al final de la pagina, asi que
+   el widget termina debajo de las resenas. Esta barra lo trae de vuelta:
+   fija abajo, con el precio y un enlace al formulario. Solo existe donde el
+   problema existe — de 1000px para abajo, que es donde la ficha deja de
+   tener dos columnas. */
+.barra-reservar { display: none; }
+
+@media (max-width: 1000px) {
+  .barra-reservar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 11px 18px; padding-bottom: calc(11px + env(safe-area-inset-bottom));
+    background: rgba(17, 17, 17, .97); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--borde);
+  }
+  .barra-reservar .cuanto { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+  .barra-reservar .cuanto strong { font-size: 23px; font-weight: 900; letter-spacing: -.03em; color: var(--naranja); }
+  .barra-reservar .cuanto span {
+    font-size: 12.5px; color: var(--humo);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .barra-reservar .boton { border-radius: 100px; padding: 12px 20px; font-size: 14px; flex-shrink: 0; }
 }
 
 @media (max-width: 560px) {
@@ -760,6 +820,31 @@ section { padding: 84px 0; }
 /* El aside nunca pasa de 372px, pero puede ceder hasta 300 antes de que el
    texto quede estrangulado en un escritorio angosto. */
 .ficha-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 372px); gap: 40px; align-items: start; padding-bottom: 84px; }
+/* Reservar baja con la página. Sin esto desaparece en cuanto empezás a leer
+   las reseñas — y reservar es la razón por la que esta ficha existe.
+
+   Dos detalles que no son adorno, y que costaron entenderlos:
+
+   1. El que se pega es la TARJETA, no la columna entera. Pegar la columna
+      completa la vuelve un bloque de 1700px cuyo recorrido es apenas lo que
+      sobra de la fila: se despegaba a los 543px de scroll.
+   2. Por eso el aside se estira (`stretch`) contra el `align-items: start`
+      de la rejilla. Lo pegado solo puede correr dentro de su padre, así que
+      si el padre mide lo que su contenido, no corre casi nada. Estirado, la
+      tarjeta acompaña toda la columna izquierda.
+
+   `top: 85px` esquiva la barra de arriba, que es pegada y mide 69. */
+.ficha-lado { align-self: stretch; }
+.ficha-reservar { scroll-margin-top: 85px; }
+
+/* Y el pegado solo donde la tarjeta CABE. El paso 2 mide 833px: en una
+   pantalla de 768 —que es media laptop todavía— pegarla a 85px deja el botón
+   de enviar debajo del borde para siempre, sin forma de alcanzarlo. Una
+   tarjeta pegada que no se puede usar es peor que una que no se pega.
+   Debajo de 880 se comporta como siempre: baja con la página. */
+@media (min-height: 880px) {
+  .ficha-reservar { position: sticky; top: 85px; }
+}
 .bloque { background: var(--carbon); border: 1px solid var(--borde); border-radius: 5px; padding: 24px; }
 .bloque + .bloque { margin-top: 16px; }
 .bloque .titulo { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--humo); margin-bottom: 16px; }
@@ -952,6 +1037,14 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
     gap: 16px; align-items: start;
   }
   .ficha-cuerpo > aside .bloque + .bloque { margin-top: 0; }
+  /* Sin dos columnas no hay nada a lo que pegarse: el aside va en el flujo. */
+  .ficha-lado { position: static; }
+  /* El formulario de reserva no es una tarjeta mas de la reticula: ocupa la
+     fila entera. Al lado del horario quedaria en 280px de ancho y 700 de
+     alto. */
+  .ficha-reservar { grid-column: 1 / -1; }
+  /* Sitio para la barra fija de reservar, que si no tapa el final del pie. */
+  .ficha-cuerpo { padding-bottom: 96px; }
   .caja { padding: 0 28px; }
   .barra { padding: 12px 28px; }
   section { padding: 64px 0; }

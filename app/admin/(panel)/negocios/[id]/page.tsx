@@ -5,6 +5,7 @@ import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto } from '../acciones';
+import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
 
 export const dynamic = 'force-dynamic';
@@ -185,6 +186,11 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                 </p>
                 <BotonAccion>Subir foto</BotonAccion>
               </form>
+
+              {/* Y la via de a muchas: pegar las direcciones del sitio del
+                  propio negocio. Mismo camino —encoge, pasa a webp, sube y
+                  anota— pero las baja el servidor. */}
+              <TraerFotos id={id} nombre={n.nombre} />
             </div>
 
             {(leads?.length ?? 0) > 0 && (

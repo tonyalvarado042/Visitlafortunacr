@@ -179,6 +179,124 @@ export async function subirFoto(datos: FormData) {
   refrescar(id);
 }
 
+/**
+ * Traer varias fotos de golpe desde la web del propio negocio.
+ *
+ * La hermana de `subirFoto`, para cuando las fotos no están en el disco de
+ * nadie sino en el sitio del operador. Hace lo mismo —redimensiona, pasa a
+ * webp, sube y anota— pero en vez de un archivo recibe una lista de
+ * direcciones y las baja el servidor.
+ *
+ * Va con la sesión del usuario, igual que `subirFoto`: no hace falta ninguna
+ * clave de servicio. Las políticas de Storage miran el primer segmento de la
+ * ruta —la babosa del destino— y con eso deciden.
+ *
+ * A diferencia de `subirFoto`, esta DEVUELVE qué pasó con cada dirección. Con
+ * veinte fotos, una acción que se traga los errores en silencio deja a
+ * cualquiera creyendo que subieron veinte cuando subieron doce.
+ */
+export type ResultadoTraer = {
+  ok?: string;
+  error?: string;
+  detalle?: { url: string; estado: string }[];
+};
+
+/* Un lote a la vez. Veinte fotos de 3 MB son sesenta segundos largos de
+   funcion, y Vercel corta. Si hay mas, se hacen dos viajes. */
+const TOPE_LOTE = 20;
+
+export async function traerFotos(
+  _previo: ResultadoTraer,
+  datos: FormData,
+): Promise<ResultadoTraer> {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return { error: 'Falta el negocio.' };
+
+  const { data: negocio } = await db.from('dst_negocio')
+    .select('id, babosa, nombre').eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!negocio) return { error: 'Ese negocio no es de este destino.' };
+
+  const credito = texto(datos, 'credito') || null;
+  const licencia = texto(datos, 'licencia') || null;
+  const alterno = texto(datos, 'texto_alternativo') || negocio.nombre;
+
+  const direcciones = [...new Set(
+    texto(datos, 'direcciones').split(/[\s,]+/).map((x) => x.trim()).filter(Boolean),
+  )];
+  if (!direcciones.length) return { error: 'No viene ninguna dirección.' };
+  if (direcciones.length > TOPE_LOTE) {
+    return { error: `De a ${TOPE_LOTE} como mucho. Vinieron ${direcciones.length}.` };
+  }
+  /* La foto viene de otro sitio, así que SIEMPRE lleva fuente_url — y el
+     check de la base exige autor y licencia junto a ella. Se avisa acá y no
+     después, que es cuando el insert falla sin explicación. */
+  if (!credito || !licencia) {
+    return { error: 'Como vienen de otro sitio, el autor y la licencia son obligatorios.' };
+  }
+
+  const { traerImagen, nombreDeUrl } = await import('@/lib/admin/traer-imagen');
+  const sharp = (await import('sharp')).default;
+
+  const { count } = await db.from('dst_negocio_foto')
+    .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+  let orden = count ?? 0;
+
+  const detalle: { url: string; estado: string }[] = [];
+  let entraron = 0;
+
+  for (const direccion of direcciones) {
+    const bajada = await traerImagen(direccion);
+    if (!bajada.ok) { detalle.push({ url: direccion, estado: bajada.porque }); continue; }
+
+    let webp: Buffer;
+    try {
+      webp = await sharp(bajada.buffer).rotate()
+        .resize({ width: ANCHO_MAX, withoutEnlargement: true })
+        .webp({ quality: 82 }).toBuffer();
+    } catch {
+      detalle.push({ url: direccion, estado: 'No se pudo leer la imagen.' });
+      continue;
+    }
+
+    const ruta = `${destino.babosa}/${negocio.babosa}/${nombreDeUrl(direccion)}-${Date.now().toString(36)}-${orden}.webp`;
+    const { error: eSubida } = await db.storage.from(BUCKET)
+      .upload(ruta, webp, { contentType: 'image/webp' });
+    if (eSubida) { detalle.push({ url: direccion, estado: `Storage: ${eSubida.message}` }); continue; }
+
+    const { data: publica } = db.storage.from(BUCKET).getPublicUrl(ruta);
+    const { error } = await db.from('dst_negocio_foto').insert({
+      negocio_id: id,
+      url: publica.publicUrl,
+      orden,
+      /* Solo manda portada si el negocio no tenía ni una. */
+      es_portada: orden === 0,
+      es_generica: false,
+      credito, licencia, fuente_url: direccion,
+      texto_alternativo_es: alterno,
+      texto_alternativo_en: alterno,
+    });
+    if (error) {
+      /* La fila no entró, así que el archivo que acaba de subir no lo apunta
+         nadie. Se borra: un bucket con huérfanos no se limpia solo. */
+      await db.storage.from(BUCKET).remove([ruta]);
+      detalle.push({ url: direccion, estado: `Base: ${error.message}` });
+      continue;
+    }
+
+    detalle.push({ url: direccion, estado: 'ok' });
+    entraron++;
+    orden++;
+  }
+
+  refrescar(id);
+  return {
+    ok: `Entraron ${entraron} de ${direcciones.length}.`,
+    ...(entraron < direcciones.length ? { error: 'Algunas no entraron. Mirá el detalle.' } : {}),
+    detalle,
+  };
+}
+
 /** Marca una foto como la portada. El índice único parcial deja solo una. */
 export async function marcarPortada(datos: FormData) {
   const { db, destino } = await contextoPanel('negocios');
