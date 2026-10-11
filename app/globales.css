@@ -90,11 +90,15 @@
 }
 
 /* Lo que va ENCIMA de una foto no cambia con el tema.
-   El velo de las cabeceras es oscuro en los dos —texto blanco sobre una foto
-   de atardecer solo se lee asi—, de modo que ahi la tinta tiene que seguir
-   siendo blanca. En vez de repintar cada titulo, a ese pedazo del arbol se le
-   devuelven los valores oscuros: todo lo de adentro los hereda, y el titulo
-   nuevo que alguien agregue el mes que viene ya nace bien. */
+   El velo de las cabeceras y el tinte de los mosaicos son oscuros en los dos
+   —texto blanco sobre una foto de atardecer solo se lee asi—, de modo que a
+   ese pedazo del arbol se le devuelven los valores oscuros COMPLETOS. Todo lo
+   de adentro los hereda, y el titulo nuevo que alguien agregue el mes que
+   viene ya nace bien.
+
+   Esta lista NO se escribe a mano: sale de las definiciones de arriba. La
+   primera vez la escribi a mano, se quedo corta y el menu grande salio blanco
+   sobre blanco. */
 :root[data-tema="claro"] .ficha-hero-texto,
 :root[data-tema="claro"] .exp-hero-texto,
 :root[data-tema="claro"] .rifa-hero-texto,
@@ -103,15 +107,45 @@
 :root[data-tema="claro"] .titular,
 :root[data-tema="claro"] .bajar,
 :root[data-tema="claro"] .exp-zonas,
-:root[data-tema="claro"] .exp-volver {
+:root[data-tema="claro"] .exp-volver,
+:root[data-tema="claro"] .ficha-grande,
+:root[data-tema="claro"] .destacados-tarjeta,
+:root[data-tema="claro"] .exp-tarjeta {
+  --acento-vivo: #FF8124;
+  --aviso: #FFC46B;
+  --aviso-2: #D9C48A;
   --blanco: #FFFFFF;
-  --humo: #B8B6B2;
+  --borde: #242424;
+  --borde-2: #262626;
+  --borde-3: #2E2E2E;
+  --borde-4: #3A3A3A;
+  --borde-5: #4A4A4A;
+  --borde-aviso: #3A2418;
+  --borde-aviso-2: #5A4200;
+  --carbon: #141414;
+  --gris: #333333;
+  --humo: #8B8B87;
+  --naranja: #FF6A00;
+  --negro: #0B0B0B;
+  --peligro: #FF8A6B;
+  --peligro-2: #E2795A;
+  --rgb-fondo: 11, 11, 11;
+  --rgb-tinta: 255, 255, 255;
+  --sup-0: #0F0F0F;
+  --sup-1: #101010;
+  --sup-2: #151515;
+  --sup-3: #1A1A1A;
+  --sup-4: #1E1E1E;
+  --sup-aviso: #170F0A;
+  --sup-aviso-2: #211A08;
   --txt-0: #D6D4D0;
   --txt-1: #C2C0BC;
   --txt-2: #B8B6B2;
   --txt-3: #9A9892;
-  --borde: #2E2E2E;
-  color: #FFFFFF;
+  --txt-4: #6E6C68;
+  --txt-5: #5E5C58;
+  --verde: #66BB2E;
+  color: var(--blanco);
 }
 
 /* ---- La barra de arriba, oscura aunque el sitio sea claro ----
@@ -119,33 +153,47 @@
    emblema es blanco sobre negro: sobre fondo hueso se pierde el contorno del
    volcan, que es justo lo que lo hace reconocible.
 
-   Mismo truco que con los textos sobre foto: en vez de repintar cada enlace,
-   a la barra se le devuelven los valores oscuros y todo lo de adentro —el
-   menu grande, el selector de idioma, el plegado del telefono— los hereda. */
+   Mismo criterio que arriba, y la misma lista completa: adentro de la barra
+   viven el menu grande, el selector de idioma y el plegado del telefono, y
+   cada uno usa tonos distintos. */
 :root[data-tema="claro"][data-barra="oscura"] .barra {
-  --negro: #0B0B0B;
+  --acento-vivo: #FF8124;
+  --aviso: #FFC46B;
+  --aviso-2: #D9C48A;
   --blanco: #FFFFFF;
-  --carbon: #141414;
   --borde: #242424;
-  --humo: #8B8B87;
-  --rgb-fondo: 11, 11, 11;
-  --rgb-tinta: 255, 255, 255;
-  --sup-2: #151515;
-  --sup-3: #1A1A1A;
-  --sup-4: #1E1E1E;
   --borde-2: #262626;
   --borde-3: #2E2E2E;
   --borde-4: #3A3A3A;
+  --borde-5: #4A4A4A;
+  --borde-aviso: #3A2418;
+  --borde-aviso-2: #5A4200;
+  --carbon: #141414;
+  --gris: #333333;
+  --humo: #8B8B87;
+  --naranja: #FF6A00;
+  --negro: #0B0B0B;
+  --peligro: #FF8A6B;
+  --peligro-2: #E2795A;
+  --rgb-fondo: 11, 11, 11;
+  --rgb-tinta: 255, 255, 255;
+  --sup-0: #0F0F0F;
+  --sup-1: #101010;
+  --sup-2: #151515;
+  --sup-3: #1A1A1A;
+  --sup-4: #1E1E1E;
+  --sup-aviso: #170F0A;
+  --sup-aviso-2: #211A08;
   --txt-0: #D6D4D0;
   --txt-1: #C2C0BC;
   --txt-2: #B8B6B2;
   --txt-3: #9A9892;
   --txt-4: #6E6C68;
-  color: #FFFFFF;
+  --txt-5: #5E5C58;
+  --verde: #66BB2E;
+  color: var(--blanco);
 }
-/* Con la barra oscura, debajo de ella el sitio arranca claro otra vez: la
-   raya que las separa tiene que verse del lado claro. */
-:root[data-tema="claro"][data-barra="oscura"] .barra { border-bottom-color: #0B0B0B; }
+:root[data-tema="claro"][data-barra="oscura"] .barra { border-bottom-color: var(--negro); }
 
 
 * { box-sizing: border-box; }
