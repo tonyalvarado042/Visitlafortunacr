@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe } from '@/lib/destino';
-import { guiaPorBabosa, guiasDe, fechaLegible } from '@/lib/blog';
+import { guiaPorBabosa, guiasDe, fechaLegible, lateralDe, categoriasDeGuias } from '@/lib/blog';
 import { htmlDeConfianza } from '@/lib/html-de-confianza';
 import { alternativas, rutasDeGuia } from '@/lib/seo';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
+import { LateralBlog } from '@/componentes/LateralBlog';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,11 @@ export default async function Articulo({ params }: { params: Parametros }) {
   ]);
   if (!guia) notFound();
 
-  const otras = (await guiasDe(destino, idioma)).filter((g) => g.id !== guia.id).slice(0, 3);
+  /* Las guias se piden UNA vez y sirven para dos cosas: las de "seguir
+     leyendo" y las categorias de la columna. */
+  const todas = await guiasDe(destino, idioma);
+  const otras = todas.filter((g) => g.id !== guia.id).slice(0, 3);
+  const piezas = await lateralDe(destino, idioma);
   const cuerpo = htmlDeConfianza(guia.cuerpo);
 
   /* Article en datos estructurados. Es lo que deja que el artículo aparezca
@@ -100,7 +105,20 @@ export default async function Articulo({ params }: { params: Parametros }) {
             </div>
           )}
 
-          <article className="exp-prosa blog-prosa" dangerouslySetInnerHTML={{ __html: cuerpo }} />
+          {/* De aqui para abajo, dos columnas: el articulo y la columna de la
+              derecha. Arranca DESPUES de la cabecera y de la foto grande a
+              proposito — el titulo y la foto mandan a lo ancho, y meterlos en
+              una columna de 700px los achica sin ganar nada. */}
+          <div className="blog-cuerpo">
+            <article className="exp-prosa blog-prosa" dangerouslySetInnerHTML={{ __html: cuerpo }} />
+            <LateralBlog
+              idioma={idioma}
+              categorias={categoriasDeGuias(todas)}
+              piezas={piezas}
+              tituloPiezas={destino.lateral_titulo ?? null}
+              tipoActivo={guia.tipo ?? undefined}
+            />
+          </div>
 
           {otras.length > 0 && (
             <section className="blog-otras">

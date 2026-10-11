@@ -46,6 +46,8 @@ export type Destino = {
      aunque el resto sea claro. Salen de Ajustes. */
   tema: 'claro' | 'oscuro';
   barra_oscura: boolean;
+  /* El titulo del bloque de piezas de la columna del blog. */
+  lateral_titulo: string | null;
   /* Si el telefono y el sitio de las fichas salen tapados hasta que el
      visitante deja sus datos. En true el directorio genera leads; en false
      es una guia telefonica. */

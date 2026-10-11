@@ -117,6 +117,8 @@ export const T: Record<string, Diccionario> = {
   datos_de_google:   { es: 'Calificaciones y reseñas de Google, mostradas con enlace a su fuente.', en: 'Ratings and reviews from Google, shown with a link to the source.', pt: 'Notas e avaliações do Google, exibidas com link para a fonte.', fr: 'Notes et avis de Google, affichés avec un lien vers la source.', de: 'Bewertungen von Google, mit Link zur Quelle.' },
   sin_externas:      { es: 'Todavía no traemos opiniones de otras plataformas para este lugar.', en: 'We have not pulled in other platforms for this place yet.', pt: 'Ainda não trouxemos opiniões de outras plataformas para este lugar.', fr: 'Nous n’avons pas encore repris les avis d’autres plateformes pour ce lieu.', de: 'Für diesen Ort haben wir noch keine Bewertungen anderer Plattformen.' },
   lugares:           { es: 'lugares', en: 'places', pt: 'lugares', fr: 'lieux', de: 'Orte' },
+  blog_categorias:   { es: 'Temas', en: 'Topics', pt: 'Temas', fr: 'Thèmes', de: 'Themen' },
+  blog_tambien:      { es: 'También te puede servir', en: 'You might also like', pt: 'Também pode servir', fr: 'Cela peut aussi aider', de: 'Könnte dich auch interessieren' },
   fotos:             { es: 'Fotos', en: 'Photos', pt: 'Fotos', fr: 'Photos', de: 'Fotos' },
   /* Va en el pie de la foto, junto al crédito, no en un aviso aparte. Corto a
      propósito: dice lo que hay que decir sin sonar a advertencia legal. */

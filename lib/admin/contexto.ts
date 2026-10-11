@@ -15,6 +15,8 @@ export type DestinoPanel = {
   marca_nombre: string; idioma_principal: string; idiomas: string[];
   whatsapp: string | null; email_contacto: string | null; esta_activo: boolean;
   moneda_iso: string; comision_por_defecto: number | null;
+  /* El titulo del bloque de piezas de la columna del blog. */
+  lateral_titulo: string | null;
 };
 
 export const COOKIE_DESTINO = 'vlf_admin_destino';
@@ -33,7 +35,7 @@ export async function contextoPanel(seccion?: Seccion) {
   const db = await sesion();
   const { data } = await db
     .from('dst_destino')
-    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto')
+    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo')
     .order('nombre');
 
   let destinos = (data ?? []) as DestinoPanel[];

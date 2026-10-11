@@ -2258,6 +2258,49 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .blog-foto-grande img { width: 100%; display: block; }
 /* Una columna de texto angosta: a mas de 75 caracteres por linea el ojo
    pierde el renglon al volver. */
+/* ---- El articulo y su columna ------------------------------------------
+   Dos columnas desde 1000px. La columna es PEGADA: un articulo largo deja la
+   columna arriba de todo y el lector no la vuelve a ver. */
+.blog-cuerpo {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  gap: 48px; align-items: start; margin-top: 34px;
+}
+.blog-lateral { position: sticky; top: 85px; display: flex; flex-direction: column; gap: 16px; }
+.blog-lateral .bloque + .bloque { margin-top: 0; }
+
+.lateral-categorias { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.lateral-categorias a {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-top: 1px solid var(--borde);
+  font-size: 14px; font-weight: 600; text-transform: capitalize;
+}
+.lateral-categorias li:first-child a { border-top: none; padding-top: 0; }
+.lateral-categorias a:hover { color: var(--naranja); }
+.lateral-categorias a[aria-current='page'] { color: var(--naranja); }
+.lateral-categorias .cuantas { font-size: 12.5px; color: var(--humo); font-variant-numeric: tabular-nums; }
+
+.lateral-piezas { display: flex; flex-direction: column; gap: 14px; }
+.lateral-pieza { display: flex; gap: 12px; align-items: flex-start; }
+.lateral-pieza img, .lateral-sin-foto {
+  width: 68px; height: 68px; flex-shrink: 0; object-fit: cover;
+  border-radius: 5px; border: 1px solid var(--borde); background: var(--sup-3);
+}
+.lateral-texto { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.lateral-texto strong { font-size: 13.5px; line-height: 1.3; letter-spacing: -.01em; }
+/* Dos lineas y corta. Un resumen entero en 230px son nueve renglones y la
+   columna deja de ser columna. */
+.lateral-texto span {
+  font-size: 12.5px; line-height: 1.45; color: var(--humo);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.lateral-pieza:hover strong { color: var(--naranja); }
+
+@media (max-width: 1000px) {
+  /* Sin dos columnas, la columna cae debajo del articulo y deja de pegarse. */
+  .blog-cuerpo { grid-template-columns: 1fr; gap: 34px; }
+  .blog-lateral { position: static; }
+}
+
 .blog-prosa { max-width: 46rem; }
 .blog-prosa h2 { font-size: 28px; margin: 44px 0 14px; }
 .blog-prosa h3 { font-size: 19px; }

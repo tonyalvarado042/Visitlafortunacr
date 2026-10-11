@@ -83,3 +83,55 @@ export function fechaLegible(iso: string | null, idioma: Idioma): string | null 
     return null;
   }
 }
+
+/* ---- La columna de la derecha del blog --------------------------------- */
+
+export type PiezaLateral = {
+  id: string;
+  tipo: 'negocio' | 'experiencia' | 'guia' | 'enlace';
+  titulo: string | null;
+  texto: string | null;
+  url: string | null;
+  imagen_url: string | null;
+};
+
+/**
+ * Lo que va en la columna del blog: un área de widgets, como la de un CMS.
+ *
+ * Se arma una vez por destino en Admin → Blog → Columna y sale en TODOS los
+ * artículos. El título y la foto no se guardan copiados: salen de la tabla de
+ * origen al pintar, así que cuando el negocio cambia de nombre la columna
+ * cambia sola. Una copia sería una segunda verdad que envejece.
+ *
+ * Lo que apunta a algo despublicado no vuelve: pintar un título enlazado a un
+ * 404 es peor que no pintar nada.
+ */
+export async function lateralDe(destino: Destino, idioma: Idioma): Promise<PiezaLateral[]> {
+  const { data, error } = await supabase.rpc('columna_lateral', {
+    p_dominio: destino.dominio,
+    p_idioma: idioma,
+  });
+  if (error) {
+    console.error('columna_lateral:', error.message);
+    return [];
+  }
+  return (data ?? []) as PiezaLateral[];
+}
+
+/**
+ * Las categorías del blog, sacadas de lo que REALMENTE hay publicado.
+ *
+ * No hay tabla de categorías ni falta: el tipo vive en la guía. Contarlas de
+ * las publicadas evita el caso tonto de ofrecer un filtro que no devuelve
+ * nada.
+ */
+export function categoriasDeGuias(guias: ResumenGuia[]): { tipo: string; total: number }[] {
+  const cuenta = new Map<string, number>();
+  for (const g of guias) {
+    if (!g.tipo) continue;
+    cuenta.set(g.tipo, (cuenta.get(g.tipo) ?? 0) + 1);
+  }
+  return [...cuenta.entries()]
+    .map(([tipo, total]) => ({ tipo, total }))
+    .sort((a, b) => b.total - a.total || a.tipo.localeCompare(b.tipo));
+}

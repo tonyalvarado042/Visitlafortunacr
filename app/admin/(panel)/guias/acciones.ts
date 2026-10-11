@@ -78,3 +78,89 @@ export async function redactarGuiaIA(_previo: Estado, datos: FormData): Promise<
   revalidatePath('/admin/guias');
   redirect(`/admin/guias/${id}`);
 }
+
+/* ---- La columna de la derecha del blog ---------------------------------
+ *
+ * Un area de widgets: se arma una vez y sale en todos los articulos. Cada
+ * fila apunta a algo nuestro —un negocio, una experiencia, otra guia— o es un
+ * enlace escrito a mano.
+ *
+ * No se guarda copia del titulo ni de la foto: se leen al pintar, asi que
+ * cuando el negocio cambia de nombre la columna cambia sola.
+ */
+
+const TIPOS_LATERAL = ['negocio', 'experiencia', 'guia', 'enlace'] as const;
+
+export async function agregarALaColumna(datos: FormData) {
+  const { db, destino } = await contextoPanel('guias');
+  const tipo = texto(datos, 'tipo');
+  if (!(TIPOS_LATERAL as readonly string[]).includes(tipo)) return;
+
+  /* El id de la entidad va en un campo distinto por tipo, para que el check de
+     la base pueda exigir que cada tipo traiga LO SUYO. Un 'negocio' sin
+     negocio no es un error al guardar: es un hueco mudo al pintar. */
+  const fila: Record<string, unknown> = {
+    destino_id: destino.id, tipo,
+    orden: Number(texto(datos, 'orden') || 0) || 0,
+  };
+
+  if (tipo === 'enlace') {
+    const titulo = texto(datos, 'titulo');
+    const url = texto(datos, 'url');
+    /* Solo http y https. Esto lo ve todo el publico en cada articulo del
+       blog, asi que un javascript: aqui seria un agujero abierto. */
+    if (!titulo || !/^https?:\/\/\S+$/i.test(url)) return;
+    fila.titulo = titulo;
+    fila.url = url;
+    fila.texto = texto(datos, 'texto') || null;
+    fila.imagen_url = /^https?:\/\/\S+$/i.test(texto(datos, 'imagen_url'))
+      ? texto(datos, 'imagen_url') : null;
+  } else {
+    const id = texto(datos, 'entidad_id');
+    if (!esUuid(id)) return;
+    fila[tipo === 'negocio' ? 'negocio_id' : tipo === 'experiencia' ? 'experiencia_id' : 'guia_id'] = id;
+  }
+
+  const { error } = await db.from('dst_lateral').insert(fila);
+  if (error) console.error('agregarALaColumna:', error.message);
+  revalidatePath('/admin/guias');
+}
+
+export async function quitarDeLaColumna(datos: FormData) {
+  const { db, destino } = await contextoPanel('guias');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  /* El destino_id en el where no sobra aunque la politica ya filtre: es la
+     segunda cerradura, y la que sigue puesta si alguien toca la politica. */
+  const { error } = await db.from('dst_lateral').delete().eq('id', id).eq('destino_id', destino.id);
+  if (error) console.error('quitarDeLaColumna:', error.message);
+  revalidatePath('/admin/guias');
+}
+
+export async function moverEnLaColumna(datos: FormData) {
+  const { db, destino } = await contextoPanel('guias');
+  const id = texto(datos, 'id');
+  const orden = Number(texto(datos, 'orden'));
+  if (!esUuid(id) || !Number.isFinite(orden)) return;
+  await db.from('dst_lateral').update({ orden }).eq('id', id).eq('destino_id', destino.id);
+  revalidatePath('/admin/guias');
+}
+
+export async function prenderApagarEnLaColumna(datos: FormData) {
+  const { db, destino } = await contextoPanel('guias');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  await db.from('dst_lateral')
+    .update({ esta_activo: texto(datos, 'encender') === '1' })
+    .eq('id', id).eq('destino_id', destino.id);
+  revalidatePath('/admin/guias');
+}
+
+/** El titulo del bloque de piezas. Vive en el destino: es UNO. */
+export async function tituloDeLaColumna(datos: FormData) {
+  const { db, destino } = await contextoPanel('guias');
+  await db.from('dst_destino')
+    .update({ lateral_titulo: texto(datos, 'lateral_titulo') || null })
+    .eq('id', destino.id);
+  revalidatePath('/admin/guias');
+}
