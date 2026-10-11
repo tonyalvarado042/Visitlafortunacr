@@ -31,6 +31,8 @@ type Carta = {
   boton?: Boton;
   datos?: { rotulo: string; valor: string }[];
   nota?: string;
+  /** El testigo de baja. Solo los correos de cadena lo llevan. */
+  tokenBaja?: string | null;
   /** Adónde contestan si le dan "responder". */
   responder_a?: string;
 };
@@ -106,6 +108,7 @@ export async function enviarCorreo(carta: Carta): Promise<Envio> {
     boton: carta.boton,
     datos: carta.datos,
     nota: carta.nota,
+    tokenBaja: carta.tokenBaja,
   });
 
   try {

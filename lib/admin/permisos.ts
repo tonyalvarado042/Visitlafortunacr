@@ -7,7 +7,7 @@ import type { Rol } from '@/lib/supabase-sesion';
  */
 export type Seccion =
   | 'tablero' | 'leads' | 'conversaciones' | 'viajeros' | 'reservas' | 'tareas'
-  | 'negocios' | 'tours' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'reportes' | 'equipo' | 'ajustes';
+  | 'negocios' | 'tours' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'cadenas' | 'reportes' | 'equipo' | 'ajustes';
 
 export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: string }[] = [
   { seccion: 'tablero',        ruta: '/admin',                nombre: 'Tablero',        grupo: '' },
@@ -23,6 +23,7 @@ export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: stri
   { seccion: 'resenas',        ruta: '/admin/resenas',        nombre: 'Reseñas',        grupo: 'Contenido' },
   { seccion: 'rifa',           ruta: '/admin/rifa',           nombre: 'Rifa',           grupo: 'Contenido' },
   { seccion: 'ia',             ruta: '/admin/ia',             nombre: 'Inteligencia',   grupo: 'IA' },
+  { seccion: 'cadenas',        ruta: '/admin/cadenas',        nombre: 'Cadenas',        grupo: 'IA' },
   { seccion: 'reportes',       ruta: '/admin/reportes',       nombre: 'Reportes',       grupo: 'Dirección' },
   { seccion: 'equipo',         ruta: '/admin/equipo',         nombre: 'Equipo',         grupo: 'Dirección' },
   { seccion: 'ajustes',        ruta: '/admin/ajustes',        nombre: 'Ajustes',        grupo: 'Dirección' },

@@ -15,6 +15,13 @@ import { credencialesPublicas } from './lib/credenciales-publicas';
  * come: /negocio se convertía en /es/negocio, caía en la ruta de fichas de
  * negocio y daba 404 — el panel del comerciante no abría nunca.
  */
+/* Paginas que NO viven bajo /<idioma>/ y tampoco llevan sesion.
+   Hoy: la baja de los correos. El enlace sale en correos de cinco idiomas y
+   quien ya decidio irse no tiene que aterrizar en el idioma correcto para
+   poder hacerlo — asi que la pagina es una sola y sin prefijo.
+   Sin esto, el punto 1 se la come y la manda a /es/baja, que no existe. */
+const SIN_IDIOMA = ['/baja'];
+
 const AREAS = [
   { base: '/admin',   ingreso: '/admin/ingresar' },
   { base: '/negocio', ingreso: '/negocio/ingresar' },
@@ -22,6 +29,10 @@ const AREAS = [
 
 export async function middleware(peticion: NextRequest) {
   const { pathname } = peticion.nextUrl;
+
+  if (SIN_IDIOMA.some((r) => pathname === r || pathname.startsWith(`${r}/`))) {
+    return NextResponse.next();
+  }
 
   const area = AREAS.find((a) => pathname === a.base || pathname.startsWith(`${a.base}/`));
   if (area) return sesionDelPanel(peticion, area.base, area.ingreso);

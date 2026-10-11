@@ -590,6 +590,22 @@ img { max-width: 100%; display: block; }
   .banda-caja { padding: 18px 16px; }
 }
 
+
+/* ---- La pagina de baja ----
+   Vive fuera de /<idioma>/: el enlace sale en correos de cinco idiomas y
+   quien ya decidio irse no tiene que aterrizar en el idioma correcto para
+   poder hacerlo. Un clic y listo, sin «testás seguro»: poner trabas ahi no
+   retiene a nadie, hace que marquen el correo como spam — y eso se lleva por
+   delante los correos que la gente SI pidio. */
+.baja { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.baja-caja {
+  max-width: 440px; text-align: center; display: grid; gap: 14px; justify-items: center;
+  border: 1px solid var(--borde); border-radius: 10px; background: var(--carbon); padding: 40px 32px;
+}
+.baja-caja h1 { margin: 6px 0 0; font-size: 24px; line-height: 1.2; letter-spacing: -.02em; }
+.baja-caja p { margin: 0; font-size: 14.5px; line-height: 1.6; color: #B8B6B2; }
+.baja-caja .boton { margin-top: 8px; border-radius: 100px; }
+
 .boton {
   display: inline-block; background: var(--naranja); color: var(--negro);
   font-family: var(--fuente); font-weight: 800; font-size: 13px; letter-spacing: .02em;

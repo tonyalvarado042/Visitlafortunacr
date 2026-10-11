@@ -27,6 +27,19 @@ type Pieza = {
   datos?: { rotulo: string; valor: string }[];
   /** La línea chica del final, sobre por qué recibe esto. */
   nota?: string;
+  /* El testigo de baja de la persona. Lo llevan SOLO los correos de cadena:
+     uno que la persona pidió —la confirmación de la rifa, los datos de un
+     negocio— no necesita puerta de salida, pero uno que llega porque sí
+     SIEMPRE. Sin esto una cadena no es nutrición, es spam. */
+  tokenBaja?: string | null;
+};
+
+const BAJA: Record<Idioma, string> = {
+  es: 'No quiero recibir más correos',
+  en: 'Unsubscribe',
+  pt: 'Não quero receber mais e-mails',
+  fr: 'Me désabonner',
+  de: 'Keine E-Mails mehr',
 };
 
 const PIE: Record<Idioma, string> = {
@@ -69,7 +82,7 @@ function direccionCompleta(ruta: string | null, dominio: string): string | null 
 }
 
 export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
-  const { destino, idioma, titulo, parrafos, boton, datos, nota } = pieza;
+  const { destino, idioma, titulo, parrafos, boton, datos, nota, tokenBaja } = pieza;
 
   const acento = destino.color_acento || '#FF6A00';
   const tinta = '#111111';
@@ -77,6 +90,11 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
   const marca = escapar(destino.marca_nombre);
   const dominio = escapar(destino.dominio);
   const url = boton ? urlSegura(boton.url) : null;
+  /* El enlace de baja va con el testigo, no con el id de la fila: un uuid
+     suelto en una URL deja adivinar el de otra persona. */
+  const urlBaja = tokenBaja
+    ? `https://${destino.dominio}/baja?t=${encodeURIComponent(tokenBaja)}`
+    : null;
 
   const urlLogo = direccionCompleta(destino.logo_url, destino.dominio);
   const logo = urlLogo
@@ -134,6 +152,9 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
             <p style="margin:0;font:400 12px/1.6 Arial,Helvetica,sans-serif;color:#9A9892;">
               ${escapar(PIE[idioma] ?? PIE.es)} <a href="https://${dominio}" style="color:${acento};text-decoration:none;">${dominio}</a>.
             </p>
+            ${urlBaja ? `<p style="margin:10px 0 0;font:400 12px/1.6 Arial,Helvetica,sans-serif;color:#9A9892;">
+              <a href="${urlBaja}" style="color:#9A9892;text-decoration:underline;">${escapar(BAJA[idioma] ?? BAJA.es)}</a>
+            </p>` : ''}
           </td></tr></table>
         </td></tr>
 
@@ -154,6 +175,7 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
     ...(nota ? ['', nota] : []),
     '',
     `${PIE[idioma] ?? PIE.es} ${destino.dominio}.`,
+    ...(urlBaja ? [`${BAJA[idioma] ?? BAJA.es}: ${urlBaja}`] : []),
   ].join('\n');
 
   return { html, texto };

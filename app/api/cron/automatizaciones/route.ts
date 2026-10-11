@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hayClaveDeServicio } from '@/lib/supabase-servidor';
 import { correrAutomatizaciones } from '@/lib/automatizaciones';
+import { correrCadenas } from '@/lib/cadenas';
+import { servicio } from '@/lib/supabase-servidor';
 
 /*
  * Lo llama el cron de Vercel (vercel.json) cada hora con
@@ -28,7 +30,24 @@ async function correr(peticion: NextRequest) {
 
   const inicio = Date.now();
   const resumen = await correrAutomatizaciones({ limite, destino_id: destinoId });
-  return NextResponse.json({ ok: true, duracion_ms: Date.now() - inicio, ...resumen });
+
+  /* Las cadenas de nutricion van en el mismo reloj, pero aparte: son otra
+     cosa que las automatizaciones de venta. Si una revienta, la otra ya
+     corrio. */
+  const cadenas: Record<string, unknown> = {};
+  try {
+    let consulta = servicio().from('dst_destino').select('*').eq('esta_activo', true);
+    if (destinoId) consulta = consulta.eq('id', destinoId);
+    const { data: destinos } = await consulta;
+    for (const d of destinos ?? []) {
+      cadenas[(d as { babosa: string }).babosa] =
+        await correrCadenas(d as never, { limite });
+    }
+  } catch (error) {
+    cadenas.error = error instanceof Error ? error.message : String(error);
+  }
+
+  return NextResponse.json({ ok: true, duracion_ms: Date.now() - inicio, ...resumen, cadenas });
 }
 
 export const GET = correr;
