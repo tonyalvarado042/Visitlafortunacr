@@ -58,7 +58,8 @@ export async function middleware(peticion: NextRequest) {
        queda antes de decidir si se enciende para todo el mundo. Mismo
        camino que ?vista=1, y por la misma razon: el layout raiz pinta el
        <html> y no recibe searchParams. */
-    if (peticion.nextUrl.searchParams.get('tema') === 'claro') cabeceras.set('x-tema', 'claro');
+    const temaPedido = peticion.nextUrl.searchParams.get('tema');
+    if (temaPedido === 'claro' || temaPedido === 'oscuro') cabeceras.set('x-tema', temaPedido);
     return NextResponse.next({ request: { headers: cabeceras } });
   }
 

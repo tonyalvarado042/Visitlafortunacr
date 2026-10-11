@@ -89,6 +89,11 @@ export async function editarDestino(datos: FormData) {
         ? texto(datos, 'pie_credito_url')
         : null,
       chat_activo: texto(datos, 'chat_activo') === '1',
+      /* El tema pinta TODO el sitio publico. Lo que no sea uno de los dos se
+         cae a claro en vez de guardarse: la base tiene un check y rebotaria
+         sin explicacion. */
+      tema: texto(datos, 'tema') === 'oscuro' ? 'oscuro' : 'claro',
+      barra_oscura: texto(datos, 'barra_oscura') === '1',
       contacto_bloqueado: texto(datos, 'contacto_bloqueado') === '1',
       esta_activo: texto(datos, 'esta_activo') === '1',
     };

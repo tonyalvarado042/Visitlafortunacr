@@ -79,6 +79,23 @@ export default async function PaginaAjustes() {
                   <div className="campo" key={c}><label>{c.replace('color_', '')}</label><div className="acciones-fila"><input type="color" name={c} defaultValue={d[c]} disabled={!esAdmin} style={{ width: 46, height: 36, padding: 2 }} /><span className="gris">{d[c]}</span></div></div>
                 ))}
                 <div className="campo"><label>Tipografía</label><input value={d.tipografia} disabled /></div>
+                {/* El tema pinta todo el sitio publico. Para mirarlo antes de
+                    cambiarlo: ?tema=claro o ?tema=oscuro en cualquier pagina
+                    — eso no guarda nada y solo lo ve quien pone el parametro. */}
+                <div className="campo"><label>Tema del sitio</label>
+                  <select name="tema" defaultValue={d.tema ?? 'claro'} disabled={!esAdmin}>
+                    <option value="claro">Claro (fondo blanco)</option>
+                    <option value="oscuro">Oscuro (fondo negro)</option>
+                  </select>
+                  <small>
+                    Para verlo antes de cambiarlo, agregá <code>?tema=claro</code> o{' '}
+                    <code>?tema=oscuro</code> a cualquier dirección del sitio. Eso no
+                    guarda nada y nadie más lo ve.
+                  </small>
+                </div>
+                <div className="campo"><label><input type="checkbox" name="barra_oscura" value="1" defaultChecked={d.barra_oscura !== false} disabled={!esAdmin} /> Barra de arriba siempre oscura</label>
+                  <small>Con el tema claro, la barra se queda negra con letras blancas. El emblema es blanco: sobre fondo hueso se pierde el contorno del volcán.</small>
+                </div>
                 <div className="campo"><label>Logo (URL)</label><input name="logo_url" defaultValue={d.logo_url ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>Video de portada (URL)</label><input name="video_portada_url" defaultValue={d.video_portada_url ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>Imagen de portada (URL)</label><input name="imagen_portada_url" defaultValue={d.imagen_portada_url ?? ''} disabled={!esAdmin} /></div>

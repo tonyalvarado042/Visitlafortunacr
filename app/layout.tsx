@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { esIdioma } from '@/lib/idiomas';
+import { destinoActual } from '@/lib/destino';
 import './globales.css';
 
 export const metadata: Metadata = {
@@ -15,13 +16,23 @@ export default async function RaizLayout({ children }: { children: React.ReactNo
   const cabeceras = await headers();
   const pedido = cabeceras.get('x-idioma') ?? '';
   const idioma = esIdioma(pedido) ? pedido : 'es';
-  /* El tema claro, por ahora solo con ?tema=claro. Cuando se decida encender
-     para todos, esto pasa a salir del destino y el parametro queda como
-     vista previa. */
-  const tema = cabeceras.get('x-tema') === 'claro' ? 'claro' : undefined;
+  /* El tema sale del destino, y ?tema= lo pisa SOLO para esa visita — para
+     mirar como queda antes de cambiarlo de verdad. Si la base no se alcanza,
+     claro: es lo que hay configurado, y un sitio en blanco se lee igual
+     aunque el resto falle. */
+  let tema = 'claro';
+  let barraOscura = true;
+  try {
+    const destino = await destinoActual();
+    tema = destino.tema ?? 'claro';
+    barraOscura = destino.barra_oscura !== false;
+  } catch { /* se queda con lo de arriba */ }
+
+  const pisado = cabeceras.get('x-tema');
+  if (pisado === 'claro' || pisado === 'oscuro') tema = pisado;
 
   return (
-    <html lang={idioma} data-tema={tema}>
+    <html lang={idioma} data-tema={tema} data-barra={barraOscura ? 'oscura' : undefined}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
