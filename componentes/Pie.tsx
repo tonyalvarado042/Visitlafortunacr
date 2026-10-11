@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Destino, Categoria } from '@/lib/destino';
 import { t, NOMBRE_PROPIO, type Idioma } from '@/lib/idiomas';
+import { sorteoDe } from '@/lib/sorteo';
 
 /*
  * El pie.
@@ -19,7 +20,7 @@ import { t, NOMBRE_PROPIO, type Idioma } from '@/lib/idiomas';
 
 const SECCIONES = ['que_hacer', 'tours', 'donde_dormir', 'comer_beber', 'explorar', 'transporte'] as const;
 
-export function Pie({
+export async function Pie({
   destino, categorias, idioma,
 }: {
   destino: Destino;
@@ -44,6 +45,11 @@ export function Pie({
 
   const conContenido = (categorias ?? []).filter((c) => c.total > 0);
   const hayMapa = conContenido.length > 0 && idioma;
+
+  /* La rifa en el pie es su unico enlace permanente: el aviso emergente sale
+     una vez y se calla, asi que sin esto el que lo cerro no vuelve a
+     encontrarla. Apagada no se pinta nada. */
+  const sorteo = await sorteoDe(destino);
 
   return (
     <footer>
@@ -76,6 +82,13 @@ export function Pie({
                 <li><Link href={`/${idioma}/experiencias`}>{t('experiencias', idioma)}</Link></li>
                 <li><Link href={`/${idioma}/sumar-negocio`}>{t('sumar_boton', idioma)}</Link></li>
                 <li><Link href={`/${idioma}/premium`}>{t('premium_sello', idioma)}</Link></li>
+                {sorteo && !sorteo.cerrado_en && (
+                  <li>
+                    <Link href={`/${idioma}/${sorteo.babosa}`} className="pie-rifa">
+                      {t('sorteo_sello', idioma)}
+                    </Link>
+                  </li>
+                )}
               </ul>
             </div>
           </div>

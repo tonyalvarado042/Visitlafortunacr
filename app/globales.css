@@ -278,6 +278,173 @@ img { max-width: 100%; display: block; }
   margin-top: 10px; border-radius: 100px; padding: 13px 20px; font-size: 13.5px;
 }
 
+
+/* ---- La rifa: el aviso y la pagina ---------------------------------------
+   El aviso interrumpe, y eso solo se perdona si lo que ofrece vale y si
+   salirse es facil. De ahi la foto grande, el monto enorme y una X que se ve
+   de verdad. Nada de X de 10px escondida en una esquina. */
+
+.aviso-velo {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.72); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: aviso-entra .22s ease-out;
+}
+@keyframes aviso-entra { from { opacity: 0; } to { opacity: 1; } }
+
+.aviso-sorteo {
+  position: relative; width: min(880px, 100%); max-height: calc(100vh - 40px);
+  overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr;
+  background: #131313; border: 1px solid #2E2E2E; border-radius: 10px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.7);
+  animation: aviso-sube .26s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes aviso-sube { from { transform: translateY(14px); opacity: .6; } to { transform: none; opacity: 1; } }
+.aviso-sorteo:focus { outline: none; }
+
+.aviso-cerrar {
+  position: absolute; top: 12px; right: 12px; z-index: 3;
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  background: rgba(10,10,10,.6); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.22); border-radius: 50%;
+  color: var(--blanco); cursor: pointer; transition: background .16s, border-color .16s;
+}
+.aviso-cerrar:hover { background: rgba(10,10,10,.9); border-color: var(--blanco); }
+
+.aviso-foto { position: relative; overflow: hidden; border-radius: 10px 0 0 10px; background: #101010; min-height: 260px; }
+.aviso-foto img { width: 100%; height: 100%; object-fit: cover; }
+.aviso-premio {
+  position: absolute; left: 20px; bottom: 18px;
+  font-size: clamp(34px, 5vw, 50px); font-weight: 900; letter-spacing: -.04em; line-height: 1;
+  color: var(--blanco); text-shadow: 0 4px 24px rgba(0,0,0,.7);
+}
+
+.aviso-cuerpo { padding: 26px 26px 24px; display: grid; align-content: start; gap: 4px; }
+.aviso-sello { font-size: 10.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--naranja); }
+.aviso-cuerpo h2 { margin: 8px 0 0; font-size: 25px; line-height: 1.15; letter-spacing: -.02em; text-transform: none; }
+.aviso-cuerpo > p { margin: 8px 0 16px; font-size: 14.5px; line-height: 1.5; color: #B8B6B2; }
+.aviso-ver-bases { display: inline-block; margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--humo); }
+.aviso-ver-bases:hover { color: var(--naranja); }
+
+/* El formulario, el mismo en el aviso y en la pagina */
+.sorteo-forma { display: grid; gap: 12px; }
+.sorteo-forma .campo { display: grid; gap: 6px; }
+.sorteo-forma label { font-size: 12.5px; font-weight: 700; letter-spacing: .02em; color: #D6D4D0; }
+.sorteo-forma small { font-size: 11.5px; line-height: 1.45; color: #7E7C78; }
+.sorteo-forma .boton { width: 100%; border-radius: 100px; padding: 13px 20px; font-size: 14px; }
+
+/* Ojo con la especificidad: la forma lleva tambien la clase .forma, y de alli
+   vienen `.forma label { display: grid }` y `.forma label > span { uppercase }`.
+   Con una sola clase perdian estas reglas: la casilla salia ENCIMA del texto y
+   el texto en MAYUSCULAS, como un rotulo de campo. Por eso van calificadas. */
+.sorteo-forma .sorteo-acepto {
+  display: flex; align-items: flex-start; gap: 9px; margin-top: 2px; cursor: pointer;
+}
+.sorteo-forma .sorteo-acepto input {
+  width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px; accent-color: var(--naranja);
+}
+.sorteo-forma .sorteo-acepto > span {
+  font-size: 12.5px; line-height: 1.45; color: #9A9892; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+}
+.sorteo-forma .sorteo-acepto a { color: var(--naranja); text-decoration: underline; text-underline-offset: 2px; }
+.sorteo-forma label > .opcional {
+  margin-left: 7px; font-weight: 600; font-size: 11px; color: #6E6C68;
+  letter-spacing: 0; text-transform: none;
+}
+
+.sorteo-error { margin: 0; font-size: 13px; color: #FF8A7A; }
+.sorteo-letra { display: block; text-align: center; }
+
+.sorteo-listo { display: grid; justify-items: center; gap: 8px; text-align: center; padding: 22px 0 10px; color: var(--verde); }
+.sorteo-listo strong { font-size: 19px; color: var(--blanco); }
+.sorteo-listo p { margin: 0; font-size: 13.5px; line-height: 1.5; color: #9A9892; max-width: 34ch; }
+
+/* ---- La pagina de la rifa ---- */
+.sorteo-apagado {
+  margin: 0; padding: 11px 20px; text-align: center;
+  background: #3A2A00; color: #FFC46B; border-bottom: 1px solid #5A4200;
+  font-size: 13px; font-weight: 700;
+}
+
+.rifa-hero { position: relative; min-height: 460px; display: flex; align-items: flex-end; overflow: hidden; }
+.rifa-hero-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rifa-hero-velo {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(11,11,11,.3) 0%, rgba(11,11,11,.5) 45%, rgba(11,11,11,.96) 100%);
+}
+.rifa-hero-texto { position: relative; width: 100%; padding-top: 70px; padding-bottom: 40px; }
+.rifa-hero-texto h1 { margin: 10px 0 0; font-size: clamp(32px, 5.4vw, 60px); line-height: 1.03; letter-spacing: -.03em; }
+.rifa-gancho { margin: 14px 0 0; font-size: clamp(15px, 2vw, 19px); line-height: 1.5; color: #D6D4D0; max-width: 46ch; }
+.rifa-premio { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 20px 0 0; }
+.rifa-premio strong { font-size: clamp(38px, 6vw, 62px); font-weight: 900; letter-spacing: -.04em; line-height: 1; color: var(--naranja); }
+.rifa-premio span { font-size: 15px; font-weight: 600; color: #B8B6B2; }
+
+.rifa-cuerpo { padding-top: 34px; padding-bottom: 80px; }
+.rifa-datos {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px;
+  background: var(--borde); border: 1px solid var(--borde); border-radius: 8px; overflow: hidden;
+  margin-bottom: 38px;
+}
+.rifa-dato { background: var(--carbon); padding: 18px 20px; display: grid; gap: 6px; }
+.rifa-dato span { font-size: 10.5px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--humo); }
+.rifa-dato strong { font-size: 16px; line-height: 1.25; letter-spacing: -.01em; }
+
+.rifa-columnas { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 44px; align-items: start; }
+.rifa-vivo {
+  margin: 0 0 28px; padding: 15px 18px; border-left: 3px solid var(--naranja);
+  background: #161616; border-radius: 0 6px 6px 0;
+  font-size: 14.5px; line-height: 1.55; color: #D6D4D0;
+}
+.rifa-vivo a { color: var(--naranja); font-weight: 700; }
+.rifa-cerrado { margin-bottom: 30px; padding: 20px; border: 1px solid var(--borde); border-radius: 8px; background: var(--carbon); }
+.rifa-cerrado h2 { margin: 0 0 10px; font-size: 20px; }
+.rifa-cerrado p { margin: 0 0 6px; font-size: 14.5px; color: #C2C0BC; }
+
+.rifa-bases { max-width: none; }
+.rifa-bases h2 { font-size: 24px; margin: 32px 0 12px; }
+.rifa-bases h2:first-child { margin-top: 0; }
+.rifa-bases h3 { font-size: 16px; margin: 24px 0 8px; }
+
+/* La caja del formulario sigue al scroll: en una pagina larga de bases, el
+   boton de participar no puede quedarse arriba del todo. */
+.rifa-caja { position: sticky; top: 92px; }
+.rifa-caja-dentro {
+  border: 1px solid rgba(255,106,0,.4); border-radius: 10px; background: var(--carbon);
+  padding: 24px 22px;
+}
+.rifa-caja-dentro h2 { margin: 0 0 16px; font-size: 19px; letter-spacing: -.01em; text-transform: none; }
+
+@media (max-width: 900px) {
+  .rifa-columnas { grid-template-columns: 1fr; gap: 32px; }
+  /* En columna unica, el formulario va ARRIBA de las bases: nadie lee tres
+     pantallas de letra chica para despues encontrar donde apuntarse. */
+  .rifa-caja { position: static; order: -1; }
+}
+
+/* En telefono todo tiene que caber SIN rodar: el boton debajo del corte es un
+   boton que no se toca. La foto cede alto —sigue vendiendo a 2.4:1— y los
+   huecos se aprietan; el texto no se recorta, que es lo que convence. */
+@media (max-width: 760px) {
+  .aviso-sorteo { grid-template-columns: 1fr; width: min(440px, 100%); }
+  .aviso-foto { border-radius: 10px 10px 0 0; min-height: 0; aspect-ratio: 2.4 / 1; }
+  .aviso-premio { font-size: 34px; left: 16px; bottom: 10px; }
+  .aviso-cuerpo { padding: 16px 18px 18px; }
+  .aviso-cuerpo h2 { font-size: 20px; }
+  .aviso-cuerpo > p { margin: 6px 0 12px; font-size: 13.5px; }
+  .aviso-sorteo .sorteo-forma { gap: 9px; }
+  .aviso-sorteo .sorteo-forma .campo { gap: 4px; }
+  .aviso-sorteo .sorteo-forma input { padding: 10px 12px; }
+  .aviso-sorteo .sorteo-forma .boton { padding: 12px 18px; }
+  .aviso-ver-bases { margin-top: 10px; }
+}
+
+@media (max-width: 560px) {
+  .rifa-hero { min-height: 380px; }
+  .aviso-velo { padding: 12px; align-items: flex-end; }
+  .aviso-sorteo { max-height: calc(100vh - 24px); }
+}
+
 .boton {
   display: inline-block; background: var(--naranja); color: var(--negro);
   font-family: var(--fuente); font-weight: 800; font-size: 13px; letter-spacing: .02em;

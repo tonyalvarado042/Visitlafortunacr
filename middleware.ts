@@ -37,6 +37,11 @@ export async function middleware(peticion: NextRequest) {
        de la pagina y tira abajo el hreflang que si esta bien puesto. */
     const cabeceras = new Headers(peticion.headers);
     cabeceras.set('x-idioma', deLaRuta);
+    /* ?vista=1 enciende la vista previa de lo que todavia no se publico (hoy,
+       la rifa). Va por cabecera porque los LAYOUTS no reciben searchParams, y
+       el aviso de la rifa se monta en el layout: sin esto no habria forma de
+       mirarlo antes de soltarlo a gente de verdad. */
+    if (peticion.nextUrl.searchParams.get('vista') === '1') cabeceras.set('x-vista', '1');
     return NextResponse.next({ request: { headers: cabeceras } });
   }
 

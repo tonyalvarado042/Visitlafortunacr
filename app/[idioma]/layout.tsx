@@ -1,9 +1,12 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import { destinoActual } from '@/lib/destino';
 import { esIdioma, type Idioma } from '@/lib/idiomas';
 import { alternativas, mismasRutas } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { Concierge } from '@/componentes/Concierge';
+import { AvisoSorteo } from '@/componentes/AvisoSorteo';
+import { sorteoDe } from '@/lib/sorteo';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +51,12 @@ export default async function LayoutIdioma({
   const destino = await destinoActual();
   if (!destino.idiomas.includes(idioma)) notFound();
 
+  /* El aviso de la rifa vive aca y no en la portada: el que entra por una
+     ficha o por el blog cuenta igual, y son la mayoria. Si no hay sorteo
+     encendido, `sorteoDe` vuelve null y no se monta nada. */
+  const vistaPrevia = (await headers()).get('x-vista') === '1';
+  const sorteo = await sorteoDe(destino, vistaPrevia);
+
   // La marca del destino entra como variables CSS. Es lo que permite que otro
   // destino tenga otra paleta sin tocar una línea de estilos.
   const paleta = {
@@ -61,6 +70,9 @@ export default async function LayoutIdioma({
   return (
     <div style={paleta}>
       {children}
+      {/* El aviso decide solo cuando salir y cuando callarse: ver el
+          componente. Aca solo se le pasa la configuracion del panel. */}
+      {sorteo && sorteo.aviso_activo && <AvisoSorteo sorteo={sorteo} idioma={idioma} />}
       {/* Se apaga desde Ajustes. Ni se monta: apagado no deja ni el botón. */}
       {destino.chat_activo && (
         <Concierge idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio} />
