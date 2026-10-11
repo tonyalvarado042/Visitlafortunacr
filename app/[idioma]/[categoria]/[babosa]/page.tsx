@@ -153,7 +153,10 @@ export default async function Ficha({ params }: { params: Parametros }) {
       </section>
 
       <div className="caja">
-        <div className="ficha-cuerpo">
+        {/* `ficha-con-hero` solo cuando hay cabecera a sangre: es lo que deja
+            que la tarjeta de reserva se monte sobre la foto. Sin foto no hay
+            nada sobre lo que montarse. */}
+        <div className={`ficha-cuerpo${esDestacado && fotoHero ? ' ficha-con-hero' : ''}`}>
           <div className="ficha-principal">
             <GaleriaNegocio fotos={fotos} idioma={idioma} />
 

@@ -122,6 +122,10 @@ export const T: Record<string, Diccionario> = {
      propósito: dice lo que hay que decir sin sonar a advertencia legal. */
   foto_generica:     { es: 'Imagen ilustrativa', en: 'Illustrative image', pt: 'Imagem ilustrativa', fr: 'Image d’illustration', de: 'Illustrationsbild' },
   foto_de:           { es: 'Foto de', en: 'Photo by', pt: 'Foto de', fr: 'Photo de', de: 'Foto von' },
+  foto_ver:          { es: 'Ver la foto en grande', en: 'View the photo larger', pt: 'Ver a foto maior', fr: 'Voir la photo en grand', de: 'Foto größer ansehen' },
+  foto_anterior:     { es: 'Foto anterior', en: 'Previous photo', pt: 'Foto anterior', fr: 'Photo précédente', de: 'Vorheriges Foto' },
+  foto_siguiente:    { es: 'Foto siguiente', en: 'Next photo', pt: 'Próxima foto', fr: 'Photo suivante', de: 'Nächstes Foto' },
+  fotos_todas:       { es: 'Ver las {n} fotos', en: 'See all {n} photos', pt: 'Ver as {n} fotos', fr: 'Voir les {n} photos', de: 'Alle {n} Fotos ansehen' },
   volver:            { es: 'Volver', en: 'Back', pt: 'Voltar', fr: 'Retour', de: 'Zurück' },
   inicio:            { es: 'Inicio', en: 'Home', pt: 'Início', fr: 'Accueil', de: 'Start' },
   cuando_llegas:     { es: '¿Cuándo llegás?', en: 'When do you arrive?', pt: 'Quando chega?', fr: 'Quand arrivez-vous ?', de: 'Wann kommen Sie an?' },
