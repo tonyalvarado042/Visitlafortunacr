@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
+import { Traducciones } from './Traducciones';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
@@ -47,9 +48,10 @@ export default async function PaginaRifa() {
      campo traducible del sorteo — ver sorteo_activo. */
   const { data: trad } = await db.from('dst_traduccion')
     .select('campo, idioma, texto')
-    .eq('entidad', 'sorteo').eq('entidad_id', rifa.id).eq('campo', 'imagen_url');
+    .eq('entidad', 'sorteo').eq('entidad_id', rifa.id);
+  const todas = (trad ?? []) as { campo: string; idioma: string; texto: string }[];
   const imagenEn = (i: string) =>
-    (trad ?? []).find((t) => t.idioma === i)?.texto ?? null;
+    todas.find((t) => t.idioma === i && t.campo === 'imagen_url')?.texto ?? null;
 
   const { data: p, count } = await db
     .from('dst_sorteo_participacion')
@@ -172,6 +174,33 @@ export default async function PaginaRifa() {
               />
               {esAdmin && <BotonAccion>Guardar el premio</BotonAccion>}
             </form>
+          </div>
+
+          {/* Las traducciones. Faltaban, y faltar significaba que un texto
+              traducido no se podia cambiar desde NINGUN lado: la traduccion
+              tapa a la columna, asi que cambiar el español no alcanzaba. */}
+          <div className="tarjeta">
+            <h2>Los textos en cada idioma <small>la traducción tapa al original</small></h2>
+            <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+              Lo que pongas acá es lo que se ve en ese idioma, aunque cambies el
+              español. Dejá un campo vacío para que use el original.
+            </p>
+            <Traducciones
+              sorteoId={rifa.id}
+              idiomas={destino.idiomas ?? []}
+              principal={destino.idioma_principal}
+              traducciones={todas}
+              esAdmin={esAdmin}
+              base={{
+                titulo: rifa.titulo ?? '',
+                gancho: rifa.gancho ?? '',
+                premio_titulo: rifa.premio_titulo ?? '',
+                premio_nota: rifa.premio_nota ?? '',
+                cuando_texto: rifa.cuando_texto ?? '',
+                incluye: (rifa.incluye ?? []).join(' · '),
+                bases_html: rifa.bases_html ?? '',
+              }}
+            />
           </div>
 
           {/* Una imagen por idioma. El cartel en ingles no es el mismo archivo
