@@ -521,8 +521,18 @@ input[type="date"], input[type="time"], input[type="number"], input[type="dateti
 }
 .aviso-cerrar:hover { background: rgba(10,10,10,.9); border-color: var(--blanco); }
 
-.aviso-foto { position: relative; overflow: hidden; border-radius: 10px 0 0 10px; background: var(--sup-1); min-height: 260px; }
-.aviso-foto img { width: 100%; height: 100%; object-fit: cover; }
+/* CUADRADA, siempre, y sin estirarse a lo alto del formulario.
+   Era una columna que se estiraba hasta la altura del formulario —440 de
+   ancho por casi 960 de alto— y con `cover` eso le corta los lados a
+   cualquier cartel. Un cartel con el texto adentro no se puede recortar: se
+   pierde justo lo que dice.
+   `align-self: center` es lo que evita el estiron; el 1/1 es lo que hace que
+   una imagen cuadrada entre entera. */
+.aviso-foto {
+  position: relative; overflow: hidden; border-radius: 10px 0 0 10px;
+  background: var(--sup-1); aspect-ratio: 1 / 1; align-self: center; min-height: 0;
+}
+.aviso-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* El cartel sobre la foto. Antes era la cifra sola, y "$1.000" a secas
    podia ser un descuento, una cuota o un precio: el ojo no sabia que estaba
    mirando. Ahora va el rotulo arriba, la cifra enorme al medio y que se gana
@@ -665,7 +675,13 @@ input[type="date"], input[type="time"], input[type="number"], input[type="dateti
    huecos se aprietan; el texto no se recorta, que es lo que convence. */
 @media (max-width: 760px) {
   .aviso-sorteo { grid-template-columns: 1fr; width: min(440px, 100%); }
-  .aviso-foto { border-radius: 10px 10px 0 0; min-height: 0; aspect-ratio: 2.4 / 1; }
+  /* En el telefono tambien cuadrada, pero acotada: si ocupa toda la pantalla
+     el formulario queda abajo del borde y nadie lo encuentra. Se achica y
+     listo, que es lo que pidio Tony. */
+  .aviso-foto {
+    border-radius: 10px 10px 0 0; min-height: 0;
+    aspect-ratio: 1 / 1; width: min(100%, 42vh); margin: 0 auto;
+  }
   .aviso-cartel { padding: 40px 16px 14px; gap: 3px; }
   .aviso-cartel strong { font-size: 36px; }
   .aviso-que { font-size: 12.5px; }
