@@ -216,6 +216,11 @@ export default async function Ficha({ params }: { params: Parametros }) {
               </div>
             )}
 
+            {/* El álbum completo va ANTES de las calificaciones: primero se
+                ve el lugar, después lo que opinan de él. Arriba quedan las
+                tres fotos que venden. */}
+            <GaleriaAbajo fotos={fotos} idioma={idioma} />
+
             {/* Las reseñas propias van primero y aparte: son las únicas que
                 cuentan para el promedio y para el marcado. Lo de Google y
                 Booking va debajo, citado y enlazado a su fuente. */}
@@ -316,9 +321,6 @@ export default async function Ficha({ params }: { params: Parametros }) {
               )}
             </div>
 
-            {/* El album completo cierra la columna. Arriba van las tres que
-                venden; esto lo mira quien ya se interesó y bajó hasta acá. */}
-            <GaleriaAbajo fotos={fotos} idioma={idioma} />
           </div>
 
           {/* La columna de la derecha, y PEGADA: baja con la página para que
