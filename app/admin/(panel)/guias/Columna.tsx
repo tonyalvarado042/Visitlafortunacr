@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
+import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import {
   agregarALaColumna, quitarDeLaColumna, moverEnLaColumna, prenderApagarEnLaColumna,
 } from './acciones';
@@ -116,7 +117,15 @@ export function Columna({
               <div className="campo"><label htmlFor="col-tit">Título</label><input id="col-tit" name="titulo" required /></div>
               <div className="campo"><label htmlFor="col-url">Dirección</label><input id="col-url" name="url" required placeholder="https://…" /></div>
               <div className="campo"><label htmlFor="col-txt">Una línea</label><input id="col-txt" name="texto" /></div>
-              <div className="campo"><label htmlFor="col-img">Foto (URL)</label><input id="col-img" name="imagen_url" placeholder="https://…" /></div>
+              {/* Con botón de subir, no un campo de texto pelado: si pide
+                  una foto, lleva cómo ponerla. */}
+              <CampoImagen
+                nombre="imagen_url"
+                etiqueta="Foto del panel"
+                valor={null}
+                carpeta="guias"
+                ayuda="Sale a 68 px de lado. Cuadrada se ve mejor."
+              />
             </>
           )}
 

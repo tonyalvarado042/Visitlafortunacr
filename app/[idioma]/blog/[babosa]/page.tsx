@@ -94,7 +94,7 @@ export default async function Articulo({ params }: { params: Parametros }) {
               empezaba a 1058px del borde de arriba, o sea mas de una pantalla
               abajo. Una columna que hay que ir a buscar no acompana al
               articulo; para quien lee, sale "abajo". */}
-          <div className="blog-cuerpo">
+          <div className="blog-con-lateral">
             <div className="blog-principal">
               <header className="blog-articulo-cabecera">
                 {guia.tipo && <span className="blog-tipo">{guia.tipo}</span>}

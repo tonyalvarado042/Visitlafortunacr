@@ -2338,7 +2338,12 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* ---- El articulo y su columna ------------------------------------------
    Dos columnas desde 1000px. La columna es PEGADA: un articulo largo deja la
    columna arriba de todo y el lector no la vuelve a ver. */
-.blog-cuerpo {
+/* Nombre propio, y no por gusto: el indice del blog usa `.blog-cuerpo` para su
+   relleno. Mientras esta rejilla se llamaba igual, y estando declarada mas
+   abajo, le ganaba — el indice se partia en dos columnas y las tarjetas se
+   amontonaban en la pista de 320px mientras el titulo se quedaba solo en la
+   ancha. Dos cosas distintas no pueden llamarse igual. */
+.blog-con-lateral {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   gap: 48px; align-items: start; margin-top: 18px;
 }
@@ -2378,7 +2383,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 
 @media (max-width: 1000px) {
   /* Sin dos columnas, la columna cae debajo del articulo y deja de pegarse. */
-  .blog-cuerpo { grid-template-columns: 1fr; gap: 34px; }
+  .blog-con-lateral { grid-template-columns: 1fr; gap: 34px; }
   .blog-lateral { position: static; }
 }
 
