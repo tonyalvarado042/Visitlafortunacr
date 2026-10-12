@@ -450,6 +450,15 @@ const REV_BOTON: Texto = {
 const REV_ROT_NOTA: Texto = { es: 'Calificación', en: 'Rating', pt: 'Nota', fr: 'Note', de: 'Bewertung' };
 const REV_ROT_QUIEN: Texto = { es: 'Quién la escribió', en: 'Who wrote it', pt: 'Quem escreveu', fr: 'Qui l’a ecrit', de: 'Wer sie geschrieben hat' };
 const REV_ROT_QUE: Texto = { es: 'Lo que dice', en: 'What it says', pt: 'O que diz', fr: 'Ce qu’il dit', de: 'Was darin steht' };
+/* El pie propio. El genérico dice "porque escribiste a", y el dueño de un
+   hotel nunca nos escribió: tiene un negocio en el directorio. */
+const REV_PIE: Texto = {
+  es: 'Recibís este correo porque tenés un negocio publicado en',
+  en: 'You are getting this email because you have a business listed on',
+  pt: 'Você recebe este e-mail porque tem um negócio publicado em',
+  fr: 'Vous recevez cet e-mail parce que vous avez un établissement référencé sur',
+  de: 'Du bekommst diese E-Mail, weil du einen Betrieb eingetragen hast auf',
+};
 const REV_NOTA: Texto = {
   es: 'El enlace sirve una sola vez y vence en siete días. Si se vence, podés responder entrando a tu cuenta.',
   en: 'The link works once and expires in seven days. If it expires, you can reply by signing in to your account.',
@@ -489,6 +498,7 @@ export async function correoResenaNueva(opciones: {
     ],
     boton: { texto: d(REV_BOTON, idioma), url: enlace },
     nota: d(REV_NOTA, idioma),
+    pie: d(REV_PIE, idioma),
     tokenBaja,
   });
 }

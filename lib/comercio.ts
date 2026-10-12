@@ -79,11 +79,16 @@ export async function contextoComercio() {
 
   /* La preferencia de avisos vive en el comerciante, no en el negocio: quien
      recibe el correo es una persona, y con tres hoteles no quiere decidir
-     tres veces lo mismo. */
+     tres veces lo mismo.
+
+     Se busca por `id` y no por email porque el id de la fila ES el del
+     usuario de auth —asi esta armada la RLS de la tabla— y el email es un
+     dato editable: el dia que alguien cambie el suyo, filtrar por email deja
+     de encontrar la fila y el interruptor se queda mudo sin avisar. */
   const { data: yo } = await db
     .from('dst_comerciante')
     .select('avisar_resenas')
-    .eq('email', user.email ?? '')
+    .eq('id', user.id)
     .maybeSingle();
 
   return {

@@ -22,9 +22,15 @@ import { credencialesPublicas } from './lib/credenciales-publicas';
    Sin esto, el punto 1 se la come y la manda a /es/baja, que no existe. */
 const SIN_IDIOMA = ['/baja'];
 
+/* Las paginas de adentro de un area que NO llevan sesion.
+   `/negocio/responder/<token>` es la que abre el duenno desde el correo de una
+   resena: quien llega ahi no tiene cuenta abierta, y pedirle la contrasenna
+   para contestar dos lineas es perder la respuesta. Lo que autoriza no es un
+   usuario, es el token, y eso se comprueba en la base. Sin esta excepcion el
+   portero la rebota a /negocio/ingresar y el boton del correo no sirve. */
 const AREAS = [
-  { base: '/admin',   ingreso: '/admin/ingresar' },
-  { base: '/negocio', ingreso: '/negocio/ingresar' },
+  { base: '/admin',   ingreso: '/admin/ingresar', abiertas: [] as string[] },
+  { base: '/negocio', ingreso: '/negocio/ingresar', abiertas: ['/negocio/responder'] },
 ];
 
 export async function middleware(peticion: NextRequest) {
@@ -35,7 +41,12 @@ export async function middleware(peticion: NextRequest) {
   }
 
   const area = AREAS.find((a) => pathname === a.base || pathname.startsWith(`${a.base}/`));
-  if (area) return sesionDelPanel(peticion, area.base, area.ingreso);
+  if (area) {
+    if (area.abiertas.some((r) => pathname === r || pathname.startsWith(`${r}/`))) {
+      return NextResponse.next();
+    }
+    return sesionDelPanel(peticion, area.base, area.ingreso);
+  }
 
   const deLaRuta = IDIOMAS.find(
     (i) => pathname === `/${i}` || pathname.startsWith(`/${i}/`)

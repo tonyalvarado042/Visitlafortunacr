@@ -27,6 +27,11 @@ type Pieza = {
   datos?: { rotulo: string; valor: string }[];
   /** La línea chica del final, sobre por qué recibe esto. */
   nota?: string;
+  /* Por qué le llega el correo, cuando el motivo de siempre no aplica. El
+     genérico dice "porque escribiste a", que es cierto para quien mandó una
+     consulta pero no para el dueño de un hotel al que le avisan de una
+     reseña: ese nunca nos escribió. */
+  pie?: string;
   /* El testigo de baja de la persona. Lo llevan SOLO los correos de cadena:
      uno que la persona pidió —la confirmación de la rifa, los datos de un
      negocio— no necesita puerta de salida, pero uno que llega porque sí
@@ -59,6 +64,21 @@ function escapar(texto: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/*
+ * Los saltos de línea de un dato, convertidos en saltos de verdad.
+ *
+ * En HTML un "
+" es un espacio. Sin esto, una reseña con párrafos le llega
+ * al dueño como un solo bloque corrido, con el título pegado al cuerpo — que
+ * es exactamente como NO se lee algo que uno tiene que contestar.
+ *
+ * Va DESPUÉS de escapar, nunca antes: si no, el <br> que mete se escaparía
+ * también y saldría escrito.
+ */
+function conSaltos(escapado: string): string {
+  return escapado.replace(/\r?\n/g, '<br>');
+}
+
 /** Solo http y https. Un javascript: en un botón de correo no va a ninguna parte buena. */
 function urlSegura(url: string): string | null {
   return /^https?:\/\/[^\s"'<>]+$/i.test(url) ? url : null;
@@ -82,7 +102,7 @@ function direccionCompleta(ruta: string | null, dominio: string): string | null 
 }
 
 export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
-  const { destino, idioma, titulo, parrafos, boton, datos, nota, tokenBaja } = pieza;
+  const { destino, idioma, titulo, parrafos, boton, datos, nota, pie, tokenBaja } = pieza;
 
   const acento = destino.color_acento || '#FF6A00';
   const tinta = '#111111';
@@ -104,7 +124,7 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
   const filasDatos = (datos ?? []).map((d) => `
             <tr>
               <td style="padding:7px 0;font:600 13px/1.5 Arial,Helvetica,sans-serif;color:${humo};width:40%;vertical-align:top;">${escapar(d.rotulo)}</td>
-              <td style="padding:7px 0;font:400 14px/1.5 Arial,Helvetica,sans-serif;color:${tinta};vertical-align:top;">${escapar(d.valor)}</td>
+              <td style="padding:7px 0;font:400 14px/1.5 Arial,Helvetica,sans-serif;color:${tinta};vertical-align:top;">${conSaltos(escapar(d.valor))}</td>
             </tr>`).join('');
 
   const html = `<!doctype html>
@@ -150,7 +170,7 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
         <tr><td style="padding:28px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #E6E6E2;padding-top:18px;">
             <p style="margin:0;font:400 12px/1.6 Arial,Helvetica,sans-serif;color:#9A9892;">
-              ${escapar(PIE[idioma] ?? PIE.es)} <a href="https://${dominio}" style="color:${acento};text-decoration:none;">${dominio}</a>.
+              ${escapar(pie ?? PIE[idioma] ?? PIE.es)} <a href="https://${dominio}" style="color:${acento};text-decoration:none;">${dominio}</a>.
             </p>
             ${urlBaja ? `<p style="margin:10px 0 0;font:400 12px/1.6 Arial,Helvetica,sans-serif;color:#9A9892;">
               <a href="${urlBaja}" style="color:#9A9892;text-decoration:underline;">${escapar(BAJA[idioma] ?? BAJA.es)}</a>

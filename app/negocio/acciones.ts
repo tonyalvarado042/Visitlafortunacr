@@ -190,10 +190,15 @@ export async function avisarmeDeResenas(datos: FormData): Promise<void> {
   if (!user) return;
 
   const quiere = String(datos.get('avisar') ?? '') === '1';
-  const { error } = await db
+  /* Por `id`, igual que la lectura: es la llave de la RLS de la tabla. Con el
+     email, una fila cuyo correo no coincida se actualiza en cero filas y
+     Supabase NO devuelve error — el boton se apagaria sin apagar nada. */
+  const { data, error } = await db
     .from('dst_comerciante')
     .update({ avisar_resenas: quiere })
-    .eq('email', user.email ?? '');
+    .eq('id', user.id)
+    .select('id');
   if (error) console.error('avisarmeDeResenas:', error.message);
+  else if (!data?.length) console.error('avisarmeDeResenas: sin fila de comerciante para', user.id);
   revalidatePath('/negocio');
 }
