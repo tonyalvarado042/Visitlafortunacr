@@ -963,7 +963,11 @@ h3 { font-size: 19px; font-weight: 800; letter-spacing: -.015em; margin: 0; }
 .enlace-mas:hover { color: var(--naranja); }
 
 section { padding: 84px 0; }
-.migas { font-size: 13px; color: var(--humo); padding: 26px 0 0; }
+/* Relleno igual arriba y abajo: estaba en `26px 0 0`, o sea pegada a la foto
+   de la cabecera que viene justo debajo. Las migas son una franja propia
+   entre la barra y el contenido; si respira de un solo lado, se lee como
+   parte de lo de abajo. */
+.migas { font-size: 13px; color: var(--humo); padding: 20px 0; }
 .migas a:hover { color: var(--naranja); }
 .migas span { margin: 0 8px; opacity: .5; }
 
