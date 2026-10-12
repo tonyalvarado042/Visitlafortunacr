@@ -1405,7 +1405,13 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
    PORTADA — el hero que fluye con el scroll
    ========================================================================= */
 
-.pista { height: 230vh; position: relative; }
+/* 160vh y no 230: la escena ocupa 100vh, asi que todo lo que sobre es scroll
+   contra una imagen que ya dejo de cambiar — y como el velo termina casi en
+   blanco, ese tramo se lee como un hueco, no como un hero.
+   A 160 quedan 60vh de recorrido para la animacion: suficiente para que el
+   parallax se note, sin pedirle al visitante que baje una pantalla entera
+   mirando nada. */
+.pista { height: 160vh; position: relative; }
 .escena { position: sticky; top: 0; height: 100vh; overflow: hidden; }
 #cielo { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .capa { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); will-change: transform; }
@@ -1621,7 +1627,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .rejilla-hacer > *:last-child:nth-child(odd) { grid-column: span 12; }
   .planificador { padding: 44px 32px; }
   .cierre { padding: 80px 32px; }
-  .pista { height: 190vh; }
+  .pista { height: 140vh; }
 }
 
 /* ---- Concierge (chat) ---- */

@@ -112,9 +112,12 @@ export function Hero({
 
       if (titular.current) {
         titular.current.style.transform = `translateY(${-p * 130}px) scale(${1 - p * 0.1})`;
-        titular.current.style.opacity = String(Math.max(1 - p * 1.7, 0));
+        /* 1.25 y no 1.7: con 1.7 el titulo ya no estaba al 59% del recorrido,
+           y el resto se scrolleaba con la escena quieta. Ahora acompana hasta
+           el 80%, que es donde el contenido ya viene entrando. */
+        titular.current.style.opacity = String(Math.max(1 - p * 1.25, 0));
       }
-      if (bajar.current) bajar.current.style.opacity = String(Math.max(1 - p * 3.4, 0));
+      if (bajar.current) bajar.current.style.opacity = String(Math.max(1 - p * 2.6, 0));
       if (c1.current) c1.current.style.transform = `translateX(-50%) translateY(${p * 90}px) scale(${1 + p * 0.16})`;
       if (c2.current) c2.current.style.transform = `translateX(-50%) translateY(${p * 34}px) scale(${1 + p * 0.09})`;
       if (c3.current) c3.current.style.transform = `translateX(-50%) translateY(${p * 12}px) scale(${1 + p * 0.04})`;
