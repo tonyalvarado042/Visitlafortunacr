@@ -76,7 +76,22 @@ export async function contextoComercio() {
   if (!user) redirect('/negocio/ingresar');
 
   const negocios = await misNegocios();
-  return { cuenta: { id: user.id, email: user.email ?? null }, negocios, db };
+
+  /* La preferencia de avisos vive en el comerciante, no en el negocio: quien
+     recibe el correo es una persona, y con tres hoteles no quiere decidir
+     tres veces lo mismo. */
+  const { data: yo } = await db
+    .from('dst_comerciante')
+    .select('avisar_resenas')
+    .eq('email', user.email ?? '')
+    .maybeSingle();
+
+  return {
+    cuenta: { id: user.id, email: user.email ?? null },
+    negocios,
+    avisarResenas: yo?.avisar_resenas !== false,
+    db,
+  };
 }
 
 export async function miNegocio(id: string): Promise<MiNegocio | null> {

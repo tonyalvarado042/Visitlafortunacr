@@ -1,15 +1,33 @@
 import Link from 'next/link';
 import { contextoComercio, ESTADO_FICHA } from '@/lib/comercio';
+import { avisarmeDeResenas } from './acciones';
 
 export const dynamic = 'force-dynamic';
 
 export default async function MisNegocios() {
-  const { cuenta, negocios } = await contextoComercio();
+  const { cuenta, negocios, avisarResenas } = await contextoComercio();
 
   return (
     <>
       <h1>Mis negocios</h1>
       <p className="comercio-sub">Entraste como {cuenta.email}</p>
+
+      {/* El aviso de resenas. Encendido de arranque a proposito: un duenno que
+          no sabe que le escribieron no puede contestar, y una resena sin
+          respuesta es la que mas duele. */}
+      <form action={avisarmeDeResenas} className="comercio-aviso">
+        <input type="hidden" name="avisar" value={avisarResenas ? '0' : '1'} />
+        <div>
+          <strong>Avisarme por correo cuando me dejen una reseña</strong>
+          <span>
+            Te llega la reseña entera y un botón para responder sin entrar a tu cuenta.
+            {avisarResenas ? '' : ' Ahora mismo está apagado.'}
+          </span>
+        </div>
+        <button className={avisarResenas ? 'boton tenue' : 'boton'} type="submit">
+          {avisarResenas ? 'Apagar' : 'Encender'}
+        </button>
+      </form>
 
       {negocios.length === 0 ? (
         <div className="comercio-vacio">

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { destinoActual, categoriasDe } from '@/lib/destino';
 import { esIdioma, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -30,14 +31,18 @@ export default async function LayoutComercio({ children }: { children: React.Rea
   const idioma: Idioma = esIdioma(destino.idioma_principal) ? destino.idioma_principal : 'es';
   const categorias = await categoriasDe(destino, idioma);
 
-  /* La paleta del destino, igual que en /[idioma]/layout.tsx. Sin esto el
-     panel se pintaría con los colores de respaldo del CSS en vez de los
-     suyos. */
+  /* La paleta del destino, igual que en /[idioma]/layout.tsx — y con el mismo
+     cuidado: `color_tinta` y `color_gris` SOLO con el tema oscuro. Un estilo
+     en línea le gana a `:root[data-tema="claro"]`, así que inyectarlos
+     siempre dejaba el portal entero pintado de negro sobre un sitio claro.
+     Los acentos sí van siempre: son los mismos en los dos temas. */
+  const cabeceras = await headers();
+  const pisado = cabeceras.get('x-tema');
+  const oscuro = (pisado ?? destino.tema ?? 'claro') === 'oscuro';
   const paleta = {
-    '--negro': destino.color_tinta,
+    ...(oscuro ? { '--negro': destino.color_tinta, '--gris': destino.color_gris } : {}),
     '--naranja': destino.color_acento,
     '--verde': destino.color_naturaleza,
-    '--gris': destino.color_gris,
     '--fuente': `'${destino.tipografia}', -apple-system, 'Helvetica Neue', Arial, sans-serif`,
   } as React.CSSProperties;
 

@@ -173,3 +173,27 @@ export async function quitarMiFoto(datos: FormData): Promise<void> {
   }
   revalidatePath(`/negocio/${negocioId}`);
 }
+
+
+/**
+ * Encender o apagar el aviso por correo de reseñas nuevas.
+ *
+ * Es por COMERCIANTE y no por negocio: quien recibe el correo es una persona,
+ * y si tiene tres hoteles no quiere decidir tres veces lo mismo.
+ *
+ * Va con la sesión, así que las políticas deciden qué fila puede tocar: nadie
+ * apaga los avisos de otro aunque adivine el id.
+ */
+export async function avisarmeDeResenas(datos: FormData): Promise<void> {
+  const db = await sesion();
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) return;
+
+  const quiere = String(datos.get('avisar') ?? '') === '1';
+  const { error } = await db
+    .from('dst_comerciante')
+    .update({ avisar_resenas: quiere })
+    .eq('email', user.email ?? '');
+  if (error) console.error('avisarmeDeResenas:', error.message);
+  revalidatePath('/negocio');
+}

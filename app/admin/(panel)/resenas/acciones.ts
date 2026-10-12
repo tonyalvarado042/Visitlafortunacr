@@ -1,7 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
 import { contextoPanel } from '@/lib/admin/contexto';
+import { avisarResenaPublicada } from '@/lib/aviso-resena';
 
 /*
  * Moderar reseñas. Todo pasa por la sesión del usuario, así que las políticas
@@ -30,6 +32,20 @@ async function moderar(datos: FormData, cambio: Record<string, unknown>) {
 
 export async function publicarResena(datos: FormData) {
   await moderar(datos, { estado: 'publicada', motivo_rechazo: null });
+
+  /* El aviso al duenno va DESPUES de responder, y en un `after`: moderar no
+     puede quedarse esperando a Resend, y si el correo falla la resena sigue
+     publicada igual. Un aviso es un extra, no parte de la moderacion. */
+  const id = texto(datos, 'id');
+  if (esUuid(id)) {
+    after(async () => {
+      try {
+        await avisarResenaPublicada(id);
+      } catch (fallo) {
+        console.error('avisar resena:', fallo instanceof Error ? fallo.message : fallo);
+      }
+    });
+  }
 }
 
 export async function ocultarResena(datos: FormData) {

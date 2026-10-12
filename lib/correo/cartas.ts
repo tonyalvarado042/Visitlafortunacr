@@ -400,3 +400,95 @@ export async function correoReservaAlEquipo(opciones: {
     responder_a: o.email,
   });
 }
+
+/* ---- Le publicaron una reseña a un negocio ----------------------------
+ *
+ * Va al dueño, no al equipo, y lleva la reseña ENTERA: una notificación que
+ * dice "tenés una reseña nueva" obliga a entrar para saber si es buena o
+ * mala, y el que la recibe en el teléfono a las nueve de la noche no entra.
+ *
+ * El botón abre la caja de respuesta sin pedir clave, con un enlace de un
+ * solo uso que sirve para ESA reseña y nada más. Pedirle la contraseña a un
+ * dueño de hotel para contestar dos líneas es perder la respuesta.
+ */
+
+const REV_ASUNTO: Texto = {
+  es: 'Te dejaron una reseña',
+  en: 'You got a review',
+  pt: 'Deixaram uma avaliacao',
+  fr: 'Vous avez recu un avis',
+  de: 'Du hast eine Bewertung erhalten',
+};
+const REV_TITULO: Texto = {
+  es: 'Una reseña nueva en tu ficha',
+  en: 'A new review on your listing',
+  pt: 'Uma nova avaliacao na sua ficha',
+  fr: 'Un nouvel avis sur votre fiche',
+  de: 'Eine neue Bewertung auf deinem Eintrag',
+};
+const REV_P1: Texto = {
+  es: 'Esto es lo que escribieron. Podés responder desde aquí, sin entrar a tu cuenta.',
+  en: 'This is what they wrote. You can reply right here, without signing in.',
+  pt: 'Isto foi o que escreveram. Voce pode responder daqui, sem entrar na conta.',
+  fr: 'Voici ce qu’ils ont ecrit. Vous pouvez repondre d’ici, sans vous connecter.',
+  de: 'Das wurde geschrieben. Du kannst direkt hier antworten, ohne dich anzumelden.',
+};
+const REV_P2: Texto = {
+  es: 'Tu respuesta se publica debajo de la reseña, con el nombre de tu negocio. La ve cualquiera que entre a tu ficha.',
+  en: 'Your reply is published under the review, with your business name. Anyone visiting your listing can see it.',
+  pt: 'Sua resposta aparece abaixo da avaliacao, com o nome do seu negocio. Qualquer pessoa que entrar na sua ficha a ve.',
+  fr: 'Votre reponse s’affiche sous l’avis, avec le nom de votre etablissement. Toute personne qui consulte votre fiche la voit.',
+  de: 'Deine Antwort erscheint unter der Bewertung, mit dem Namen deines Betriebs. Jeder, der deinen Eintrag besucht, sieht sie.',
+};
+const REV_BOTON: Texto = {
+  es: 'Responder esta reseña',
+  en: 'Reply to this review',
+  pt: 'Responder esta avaliacao',
+  fr: 'Repondre a cet avis',
+  de: 'Auf diese Bewertung antworten',
+};
+const REV_ROT_NOTA: Texto = { es: 'Calificación', en: 'Rating', pt: 'Nota', fr: 'Note', de: 'Bewertung' };
+const REV_ROT_QUIEN: Texto = { es: 'Quién la escribió', en: 'Who wrote it', pt: 'Quem escreveu', fr: 'Qui l’a ecrit', de: 'Wer sie geschrieben hat' };
+const REV_ROT_QUE: Texto = { es: 'Lo que dice', en: 'What it says', pt: 'O que diz', fr: 'Ce qu’il dit', de: 'Was darin steht' };
+const REV_NOTA: Texto = {
+  es: 'El enlace sirve una sola vez y vence en siete días. Si se vence, podés responder entrando a tu cuenta.',
+  en: 'The link works once and expires in seven days. If it expires, you can reply by signing in to your account.',
+  pt: 'O link serve uma unica vez e vence em sete dias. Se vencer, voce pode responder entrando na sua conta.',
+  fr: 'Le lien ne fonctionne qu’une fois et expire dans sept jours. S’il expire, vous pouvez repondre en vous connectant.',
+  de: 'Der Link funktioniert einmal und lauft in sieben Tagen ab. Danach kannst du dich anmelden und antworten.',
+};
+
+export async function correoResenaNueva(opciones: {
+  destino: Destino;
+  idioma: Idioma;
+  para: string;
+  negocio: string;
+  calificacion: number;
+  titulo: string | null;
+  cuerpo: string;
+  autor: string;
+  enlace: string;
+  tokenBaja?: string | null;
+}): Promise<Envio> {
+  const { destino, idioma, para, negocio, calificacion, titulo, cuerpo, autor, enlace, tokenBaja } = opciones;
+  return enviarCorreo({
+    destino,
+    idioma,
+    para,
+    asunto: `${d(REV_ASUNTO, idioma)} · ${negocio}`,
+    motivo: 'resena_nueva',
+    titulo: d(REV_TITULO, idioma),
+    parrafos: [d(REV_P1, idioma), d(REV_P2, idioma)],
+    datos: [
+      { rotulo: d(REV_ROT_NOTA, idioma), valor: `${calificacion}/5` },
+      { rotulo: d(REV_ROT_QUIEN, idioma), valor: autor },
+      /* El cuerpo entero, no un recorte: el duenno tiene que poder decidir si
+         contesta sin abrir nada. Se corta a 1200 porque un correo no es el
+         lugar para una resena de cinco mil caracteres. */
+      { rotulo: d(REV_ROT_QUE, idioma), valor: (titulo ? `${titulo}\n\n` : '') + cuerpo.slice(0, 1200) },
+    ],
+    boton: { texto: d(REV_BOTON, idioma), url: enlace },
+    nota: d(REV_NOTA, idioma),
+    tokenBaja,
+  });
+}
