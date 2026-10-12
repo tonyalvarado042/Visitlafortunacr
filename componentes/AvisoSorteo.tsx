@@ -116,6 +116,7 @@ export function AvisoSorteo({
   if (!abierto) return null;
 
   const premio = premioEnPlata(sorteo.premio_usd, idioma);
+  const cartel = sorteo.cartel_url?.trim() || null;
 
   return (
     <div className="aviso-velo" onClick={cerrar}>
@@ -129,20 +130,30 @@ export function AvisoSorteo({
           </svg>
         </button>
 
+        {/* El CARTEL, no la foto del premio: es cuadrado y trae el texto
+            dibujado adentro, asi que va solo. El rotulo que antes se pintaba
+            encima —GRAN RIFA, la cifra, que se gana— se fue: con un cartel
+            que ya lo dice todo, era decirlo dos veces y tapar justo la parte
+            de abajo del diseno.
+
+            Si no hay cartel cargado cae a la foto del premio, y ahi SI lleva
+            el rotulo: una foto de atardecer sin una palabra no dice que hay
+            una rifa. */}
         <div className="aviso-foto">
-          {sorteo.imagen_url
+          {cartel
             /* eslint-disable-next-line @next/next/no-img-element */
-            ? <img src={sorteo.imagen_url} alt="" />
-            : <span className="exp-sin-foto" aria-hidden="true" />}
-          {/* La cifra sola no dice nada: "$1.000" podia ser un descuento,
-              una cuota o un precio. Arriba el rotulo que dice QUE es, abajo
-              que se gana con eso. La cifra se queda enorme, pero deja de
-              estar huerfana. */}
-          <span className="aviso-cartel">
-            <span className="aviso-gran">{t('sorteo_gran', idioma)}</span>
-            {premio && <strong>{premio}</strong>}
-            {sorteo.premio_titulo && <span className="aviso-que">{sorteo.premio_titulo}</span>}
-          </span>
+            ? <img src={cartel} alt="" />
+            : sorteo.imagen_url
+              /* eslint-disable-next-line @next/next/no-img-element */
+              ? <img src={sorteo.imagen_url} alt="" />
+              : <span className="exp-sin-foto" aria-hidden="true" />}
+          {!cartel && (
+            <span className="aviso-cartel">
+              <span className="aviso-gran">{t('sorteo_gran', idioma)}</span>
+              {premio && <strong>{premio}</strong>}
+              {sorteo.premio_titulo && <span className="aviso-que">{sorteo.premio_titulo}</span>}
+            </span>
+          )}
         </div>
 
         <div className="aviso-cuerpo">

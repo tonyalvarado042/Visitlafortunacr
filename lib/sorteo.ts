@@ -35,6 +35,11 @@ export type Sorteo = {
   en_vivo: boolean;
   enlace_vivo: string | null;
   imagen_url: string | null;
+  /* El CARTEL cuadrado, con el texto adentro, para el aviso emergente.
+     Distinto de `imagen_url`, que es la foto de ambiente del premio: el
+     cartel tiene version en espanol y en ingles porque la plata y las fechas
+     estan dibujadas en la imagen. */
+  cartel_url: string | null;
   bases_html: string | null;
   pide_whatsapp: boolean;
   whatsapp_obligatorio: boolean;

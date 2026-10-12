@@ -49,6 +49,13 @@ export async function guardarRifa(datos: FormData) {
         : null,
       imagen_url: texto(datos, 'imagen_url') || null,
     };
+  } else if (grupo === 'cartel') {
+    /* Su propio grupo y no 'premio', aunque viva en la misma tarjeta: el
+       formulario del cartel NO trae los demas campos del premio, y una
+       accion compartida escribe TODO lo que recibe — lo que no viene se
+       guarda vacio. Eso ya apago el sitio una vez, guardando la oferta
+       premium desde un formulario que no traia `esta_activo`. */
+    campos = { cartel_url: texto(datos, 'cartel_url') || null };
   } else if (grupo === 'bases') {
     campos = { bases_html: texto(datos, 'bases_html') || null };
   } else if (grupo === 'aviso') {

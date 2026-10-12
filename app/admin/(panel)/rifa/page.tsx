@@ -15,7 +15,7 @@ type Rifa = {
   premio_nota: string | null; incluye: string[];
   fecha_sorteo: string | null; cuando_texto: string | null;
   ganadores: number; en_vivo: boolean; enlace_vivo: string | null;
-  imagen_url: string | null; bases_html: string | null;
+  imagen_url: string | null; cartel_url: string | null; bases_html: string | null;
   pide_whatsapp: boolean; whatsapp_obligatorio: boolean;
   aviso_activo: boolean; segundos_para_abrir: number;
   al_intentar_salir: boolean; dias_para_repreguntar: number;
@@ -51,7 +51,7 @@ export default async function PaginaRifa() {
     .eq('entidad', 'sorteo').eq('entidad_id', rifa.id);
   const todas = (trad ?? []) as { campo: string; idioma: string; texto: string }[];
   const imagenEn = (i: string) =>
-    todas.find((t) => t.idioma === i && t.campo === 'imagen_url')?.texto ?? null;
+    todas.find((t) => t.idioma === i && t.campo === 'cartel_url')?.texto ?? null;
 
   const { data: p, count } = await db
     .from('dst_sorteo_participacion')
@@ -164,13 +164,16 @@ export default async function PaginaRifa() {
                 <input id="rev" name="enlace_vivo" placeholder="https://…"
                        defaultValue={rifa.enlace_vivo ?? ''} disabled={!esAdmin} />
                 <small>Solo http/https. Se puede poner después, cuando se sepa por dónde se transmite.</small></div>
+              {/* La foto del PREMIO, de ambiente. Va de fondo en la pagina de
+                  la rifa y en la banda de la portada, con el rotulo encima.
+                  Es la misma en los cinco idiomas: no lleva texto. */}
               <CampoImagen
                 nombre="imagen_url"
-                etiqueta="Imagen del premio"
+                etiqueta="Foto del premio (ambiente)"
                 valor={rifa.imagen_url}
                 carpeta="rifa"
                 desactivado={!esAdmin}
-                ayuda="Elegí el archivo y se sube solo: se encoge a 1800 px y se pasa a WebP. También se puede pegar una dirección."
+                ayuda="La foto de fondo de la página de la rifa y de la banda de la portada. Sin texto: el rótulo lo pone el sitio encima. La misma en todos los idiomas."
               />
               {esAdmin && <BotonAccion>Guardar el premio</BotonAccion>}
             </form>
@@ -203,30 +206,46 @@ export default async function PaginaRifa() {
             />
           </div>
 
-          {/* DOS imagenes y no cinco: espanol para espanol, ingles para todos
-              los demas idiomas. Lo pidio Tony asi y tiene sentido — el cartel
-              lleva el texto adentro, y mantener cinco versiones de una imagen
-              es mantener cinco veces el mismo trabajo de diseno. */}
+          {/* El CARTEL cuadrado, que es otra cosa que la foto del premio: lleva
+              la plata y las fechas DIBUJADAS adentro, asi que necesita una
+              version por idioma. Dos y no cinco: espanol para espanol, ingles
+              para todos los demas. */}
           <div className="tarjeta">
-            <h2>La imagen en inglés <small>el texto va dentro del cartel</small></h2>
+            <h2>El cartel del aviso <small>cuadrado, con el texto adentro</small></h2>
             <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
-              Son dos y nada más: la de arriba es <strong>la española</strong>, y esta es
-              <strong> la inglesa, que se usa en inglés, portugués, francés y alemán</strong>.
-              Si no ponés ninguna, todos ven la española.
+              Es el que sale en el aviso emergente, y no lleva nada encima: lo que dice,
+              lo dice el diseño. <strong>Cuadrado</strong> — si no, se recorta.
+              Son dos: el español y el inglés, que cubre inglés, portugués, francés y alemán.
+              Sin cartel, el aviso usa la foto del premio con el rótulo encima.
             </p>
+
+            <form action={guardarRifa} className="campos" style={{ gridTemplateColumns: '1fr', marginBottom: 20 }}>
+              <input type="hidden" name="grupo" value="cartel" />
+              <input type="hidden" name="id" value={rifa.id} />
+              <CampoImagen
+                nombre="cartel_url"
+                etiqueta="Cartel en español"
+                valor={rifa.cartel_url}
+                carpeta="rifa"
+                desactivado={!esAdmin}
+                ayuda="El que ven los visitantes en español."
+              />
+              {esAdmin && <BotonAccion clase="boton chico secundario">Guardar el español</BotonAccion>}
+            </form>
+
             <form action={traducirSorteo} className="campos" style={{ gridTemplateColumns: '1fr' }}>
               <input type="hidden" name="sorteo_id" value={rifa.id} />
-              <input type="hidden" name="campo" value="imagen_url" />
+              <input type="hidden" name="campo" value="cartel_url" />
               <input type="hidden" name="idioma" value="en" />
               <CampoImagen
                 nombre="texto"
-                etiqueta="Imagen en inglés"
+                etiqueta="Cartel en inglés"
                 valor={imagenEn('en')}
                 carpeta="rifa"
                 desactivado={!esAdmin}
-                ayuda="Se usa en EN, PT, FR y DE. Vacío = todos ven la española."
+                ayuda="Se usa en EN, PT, FR y DE. Vacío = todos ven el español."
               />
-              {esAdmin && <BotonAccion clase="boton chico secundario">Guardar la inglesa</BotonAccion>}
+              {esAdmin && <BotonAccion clase="boton chico secundario">Guardar el inglés</BotonAccion>}
             </form>
           </div>
 
