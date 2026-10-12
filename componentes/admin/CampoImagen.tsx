@@ -1,7 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { subirImagen, type ResultadoSubida } from '@/lib/admin/subir-imagen';
+import { useRef, useState } from 'react';
 
 /*
  * Un campo de imagen DE VERDAD: vista previa, botón de subir y la dirección.
@@ -11,17 +10,16 @@ import { subirImagen, type ResultadoSubida } from '@/lib/admin/subir-imagen';
  * archivo a otra parte, copiar la url, pegarla—. Si pide una imagen, lleva su
  * botón.
  *
- * El campo de texto NO desaparece: sigue ahí, de solo lectura mientras no se
- * toque, para poder pegar una dirección que ya exista y para ver qué se
- * guardó. Lo que se envía al formulario de afuera es siempre este input, se
- * haya llenado subiendo o pegando.
+ * Sube con un `fetch` a /api/admin/imagen y NO con una acción de servidor. La
+ * primera versión despachaba una acción desde el `onChange` de un campo que
+ * vive dentro de OTRO formulario, y React se la tragaba sin decir nada: se
+ * elegía el archivo y no pasaba absolutamente nada, ni un error. Una petición
+ * normal se ve en la pestaña de red y falla a la vista.
  *
- * Sube por su cuenta, sin enviar el formulario grande: se sube la foto, vuelve
- * la dirección, y el formulario grande se guarda cuando la persona quiera.
+ * El campo de texto NO desaparece: sigue ahí para pegar una dirección que ya
+ * exista y para ver qué se guardó. Lo que viaja al formulario de afuera es
+ * siempre ese input.
  */
-
-const vacio: ResultadoSubida = {};
-
 export function CampoImagen({
   nombre, etiqueta, valor, carpeta, ayuda, desactivado,
 }: {
@@ -32,18 +30,37 @@ export function CampoImagen({
   ayuda?: string;
   desactivado?: boolean;
 }) {
-  const [estado, subir, subiendo] = useActionState(subirImagen, vacio);
   const [url, setUrl] = useState(valor ?? '');
+  const [subiendo, setSubiendo] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const archivo = useRef<HTMLInputElement>(null);
 
-  /* Cuando vuelve del servidor con una dirección, se escribe en el campo. Es
-     lo único que el formulario de afuera va a mandar. */
-  useEffect(() => {
-    if (estado.url) {
-      setUrl(estado.url);
+  async function subir(f: File) {
+    setError(null);
+    setSubiendo(true);
+    try {
+      const datos = new FormData();
+      datos.set('carpeta', carpeta);
+      datos.set('archivo', f);
+      const r = await fetch('/api/admin/imagen', { method: 'POST', body: datos });
+      /* El cuerpo puede no ser JSON si algo se cayó antes de llegar a la
+         ruta. Sin este try, el fallo real queda tapado por un error de
+         parseo que no dice nada. */
+      let cuerpo: { url?: string; error?: string } = {};
+      try { cuerpo = await r.json(); } catch { /* se queda vacío */ }
+
+      if (!r.ok || !cuerpo.url) {
+        setError(cuerpo.error ?? `No se pudo subir (${r.status}).`);
+        return;
+      }
+      setUrl(cuerpo.url);
       if (archivo.current) archivo.current.value = '';
+    } catch {
+      setError('No se pudo alcanzar el servidor.');
+    } finally {
+      setSubiendo(false);
     }
-  }, [estado.url]);
+  }
 
   return (
     <div className="campo ancho campo-imagen">
@@ -61,16 +78,9 @@ export function CampoImagen({
                  disabled={desactivado || subiendo}
                  /* Sube apenas se elige el archivo: un segundo botón "ahora sí
                     subila" es un paso que nadie entiende para qué está. */
-                 onChange={(e) => {
-                   const f = e.currentTarget.files?.[0];
-                   if (!f) return;
-                   const datos = new FormData();
-                   datos.set('carpeta', carpeta);
-                   datos.set('archivo', f);
-                   subir(datos);
-                 }} />
+                 onChange={(e) => { const f = e.currentTarget.files?.[0]; if (f) subir(f); }} />
           {subiendo && <span className="gris" style={{ fontSize: 12.5 }}>Subiendo…</span>}
-          {estado.error && <span style={{ fontSize: 12.5, color: '#B42318' }}>{estado.error}</span>}
+          {error && <span style={{ fontSize: 12.5, color: '#B42318' }}>{error}</span>}
           {url && !subiendo && !desactivado && (
             <button type="button" className="boton chico tenue" onClick={() => setUrl('')}>
               Quitar

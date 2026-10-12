@@ -203,33 +203,31 @@ export default async function PaginaRifa() {
             />
           </div>
 
-          {/* Una imagen por idioma. El cartel en ingles no es el mismo archivo
-              que el de espanol: la plata, las fechas y el reclamo estan
-              DENTRO de la imagen. El idioma que no tenga la suya usa la del
-              principal — un cartel en espanol se ve raro en aleman, pero un
-              hueco se ve peor. */}
+          {/* DOS imagenes y no cinco: espanol para espanol, ingles para todos
+              los demas idiomas. Lo pidio Tony asi y tiene sentido — el cartel
+              lleva el texto adentro, y mantener cinco versiones de una imagen
+              es mantener cinco veces el mismo trabajo de diseno. */}
           <div className="tarjeta">
-            <h2>La imagen en cada idioma <small>el texto va dentro del cartel</small></h2>
+            <h2>La imagen en inglés <small>el texto va dentro del cartel</small></h2>
             <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
-              Arriba está la del idioma principal ({destino.idioma_principal}), que es la que
-              se usa cuando un idioma no tiene la suya. Acá va una por cada uno de los demás.
+              Son dos y nada más: la de arriba es <strong>la española</strong>, y esta es
+              <strong> la inglesa, que se usa en inglés, portugués, francés y alemán</strong>.
+              Si no ponés ninguna, todos ven la española.
             </p>
-            {(destino.idiomas ?? []).filter((i: string) => i !== destino.idioma_principal).map((i: string) => (
-              <form action={traducirSorteo} key={i} className="campos" style={{ gridTemplateColumns: '1fr', marginBottom: 18 }}>
-                <input type="hidden" name="sorteo_id" value={rifa.id} />
-                <input type="hidden" name="campo" value="imagen_url" />
-                <input type="hidden" name="idioma" value={i} />
-                <CampoImagen
-                  nombre="texto"
-                  etiqueta={`Imagen en ${i.toUpperCase()}`}
-                  valor={imagenEn(i)}
-                  carpeta="rifa"
-                  desactivado={!esAdmin}
-                  ayuda="Vacío = se usa la del idioma principal."
-                />
-                {esAdmin && <BotonAccion clase="boton chico secundario">Guardar la de {i.toUpperCase()}</BotonAccion>}
-              </form>
-            ))}
+            <form action={traducirSorteo} className="campos" style={{ gridTemplateColumns: '1fr' }}>
+              <input type="hidden" name="sorteo_id" value={rifa.id} />
+              <input type="hidden" name="campo" value="imagen_url" />
+              <input type="hidden" name="idioma" value="en" />
+              <CampoImagen
+                nombre="texto"
+                etiqueta="Imagen en inglés"
+                valor={imagenEn('en')}
+                carpeta="rifa"
+                desactivado={!esAdmin}
+                ayuda="Se usa en EN, PT, FR y DE. Vacío = todos ven la española."
+              />
+              {esAdmin && <BotonAccion clase="boton chico secundario">Guardar la inglesa</BotonAccion>}
+            </form>
           </div>
 
           <div className="tarjeta">

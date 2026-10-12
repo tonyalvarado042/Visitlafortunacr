@@ -2310,8 +2310,12 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
    columna arriba de todo y el lector no la vuelve a ver. */
 .blog-cuerpo {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
-  gap: 48px; align-items: start; margin-top: 34px;
+  gap: 48px; align-items: start; margin-top: 18px;
 }
+.blog-principal { min-width: 0; }
+/* La prosa se contiene sola para que la linea no se haga eterna; el titulo y
+   la foto usan el ancho entero de la columna. */
+.blog-principal .blog-prosa { max-width: 46rem; }
 .blog-lateral { position: sticky; top: 85px; display: flex; flex-direction: column; gap: 16px; }
 .blog-lateral .bloque + .bloque { margin-top: 0; }
 

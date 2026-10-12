@@ -87,30 +87,35 @@ export default async function Articulo({ params }: { params: Parametros }) {
         <div className="caja">
           <Link href={`/${idioma}/blog`} className="comercio-volver">← {t('blog', idioma)}</Link>
 
-          <header className="blog-articulo-cabecera">
-            {guia.tipo && <span className="blog-tipo">{guia.tipo}</span>}
-            <h1>{guia.titulo}</h1>
-            {guia.entradilla && <p className="blog-entradilla">{guia.entradilla}</p>}
-            {guia.publicado_en && (
-              <time dateTime={guia.publicado_en} className="blog-fecha">
-                {fechaLegible(guia.publicado_en, idioma)}
-              </time>
-            )}
-          </header>
-
-          {guia.imagen_url && (
-            <div className="blog-foto-grande">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={guia.imagen_url} alt="" />
-            </div>
-          )}
-
-          {/* De aqui para abajo, dos columnas: el articulo y la columna de la
-              derecha. Arranca DESPUES de la cabecera y de la foto grande a
-              proposito — el titulo y la foto mandan a lo ancho, y meterlos en
-              una columna de 700px los achica sin ganar nada. */}
+          {/* Las dos columnas arrancan ACA, no despues de la foto.
+              Las tenia empezando debajo de la cabecera y de la foto grande,
+              con el argumento de que el titulo manda a lo ancho. El argumento
+              era bonito y el resultado era malo: la columna de la derecha
+              empezaba a 1058px del borde de arriba, o sea mas de una pantalla
+              abajo. Una columna que hay que ir a buscar no acompana al
+              articulo; para quien lee, sale "abajo". */}
           <div className="blog-cuerpo">
-            <article className="exp-prosa blog-prosa" dangerouslySetInnerHTML={{ __html: cuerpo }} />
+            <div className="blog-principal">
+              <header className="blog-articulo-cabecera">
+                {guia.tipo && <span className="blog-tipo">{guia.tipo}</span>}
+                <h1>{guia.titulo}</h1>
+                {guia.entradilla && <p className="blog-entradilla">{guia.entradilla}</p>}
+                {guia.publicado_en && (
+                  <time dateTime={guia.publicado_en} className="blog-fecha">
+                    {fechaLegible(guia.publicado_en, idioma)}
+                  </time>
+                )}
+              </header>
+
+              {guia.imagen_url && (
+                <div className="blog-foto-grande">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={guia.imagen_url} alt="" />
+                </div>
+              )}
+
+              <article className="exp-prosa blog-prosa" dangerouslySetInnerHTML={{ __html: cuerpo }} />
+            </div>
             <LateralBlog
               idioma={idioma}
               categorias={categoriasDeGuias(todas)}
