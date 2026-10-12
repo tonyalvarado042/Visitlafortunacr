@@ -11,7 +11,7 @@ import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { productosReservables } from '@/lib/reservas';
-import { GaleriaNegocio } from '@/componentes/GaleriaNegocio';
+import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
 import { taparContacto } from '@/lib/contacto-tapado';
@@ -158,7 +158,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
             nada sobre lo que montarse. */}
         <div className={`ficha-cuerpo${esDestacado && fotoHero ? ' ficha-con-hero' : ''}`}>
           <div className="ficha-principal">
-            <GaleriaNegocio fotos={fotos} idioma={idioma} />
+            <FotosArriba fotos={fotos} idioma={idioma} />
 
             {negocio.video_url && (
               <VideoNegocio
@@ -315,6 +315,10 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 <p className="atribucion">{t('datos_de_google', idioma)}</p>
               )}
             </div>
+
+            {/* El album completo cierra la columna. Arriba van las tres que
+                venden; esto lo mira quien ya se interesó y bajó hasta acá. */}
+            <GaleriaAbajo fotos={fotos} idioma={idioma} />
           </div>
 
           {/* La columna de la derecha, y PEGADA: baja con la página para que
@@ -424,6 +428,11 @@ export default async function Ficha({ params }: { params: Parametros }) {
           </aside>
         </div>
       </div>
+
+      {/* Fuera de las columnas a propósito: la izquierda es un contexto de
+          apilamiento y ahí dentro el visor no puede subir sobre la tarjeta de
+          reservar. Lo explica entero GaleriaNegocio.tsx. */}
+      <VisoresFotos fotos={fotos} idioma={idioma} />
 
       {/* En el teléfono la columna de la derecha cae al final, así que el
           widget queda debajo de todo. Esta barra lo trae de vuelta: fija

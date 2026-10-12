@@ -2,10 +2,18 @@ import { t, type Idioma } from '@/lib/idiomas';
 import type { FotoNegocio } from '@/lib/destino';
 
 /*
- * La galería de la ficha. Sin una línea de JavaScript en el cliente: tres
- * fotos grandes arriba, el resto en retícula debajo, y al hacer clic la foto
- * se abre grande con `:target` — el mismo criterio con el que los plegables
- * son <details> y el menú de la barra también.
+ * La galería de la ficha, en tres piezas que viven en sitios distintos de la
+ * página. Sin una línea de JavaScript en el cliente: al hacer clic la foto se
+ * abre grande con `:target` — el mismo criterio con el que los plegables son
+ * <details> y el menú de la barra también.
+ *
+ *  - `FotosArriba`: tres fotos grandes, debajo de la cabecera.
+ *  - `GaleriaAbajo`: el resto en retícula, al FINAL de la columna. Arriba van
+ *    las tres que venden; el álbum completo lo mira quien ya se interesó, y
+ *    para eso ya bajó hasta las reseñas.
+ *  - `VisoresFotos`: las fotos abiertas a pantalla completa. Van FUERA de las
+ *    dos columnas, al final del documento, y eso no es orden sino necesidad:
+ *    ver más abajo.
  *
  * Dos cosas que parecen detalle y no lo son:
  *
@@ -32,9 +40,16 @@ function pideCredito(licencia: string | null): boolean {
     .test(licencia);
 }
 
-export function GaleriaNegocio({ fotos, idioma }: { fotos: FotoNegocio[]; idioma: Idioma }) {
-  if (!fotos.length) return null;
-
+/*
+ * Qué fotos se muestran y dónde se parten, en un solo lugar.
+ *
+ * Las tres piezas tienen que estar de acuerdo en el ORDEN, porque el enlace
+ * `#foto-3` de la retícula tiene que abrir el cuarto visor y no otro. Si cada
+ * una recalculara su lista a su manera, el día que cambie el criterio una
+ * quedaría desfasada y los enlaces abrirían la foto equivocada — un fallo que
+ * no revienta nada y que nadie nota hasta que lo nota un cliente.
+ */
+function reparto(fotos: FotoNegocio[]) {
   const reales = fotos.filter((f) => !f.es_generica);
   // Si hay fotos reales del negocio, las genéricas sobran: ya no hacen falta
   // para llenar el hueco y solo confunden.
@@ -44,10 +59,15 @@ export function GaleriaNegocio({ fotos, idioma }: { fotos: FotoNegocio[]; idioma
      en la fila grande y ninguna abajo se ve como un error, no como un
      diseño. */
   const parte = mostradas.length >= 4 ? 3 : mostradas.length;
-  const arriba = mostradas.slice(0, parte);
-  const resto = mostradas.slice(parte);
+  return { mostradas, parte, arriba: mostradas.slice(0, parte), resto: mostradas.slice(parte) };
+}
 
-  const enlace = (i: number) => `#foto-${i}`;
+const enlace = (i: number) => `#foto-${i}`;
+
+/** Las tres grandes, debajo de la cabecera. */
+export function FotosArriba({ fotos, idioma }: { fotos: FotoNegocio[]; idioma: Idioma }) {
+  const { arriba } = reparto(fotos);
+  if (!arriba.length) return null;
 
   return (
     <div className="galeria" id="fotos">
@@ -62,21 +82,57 @@ export function GaleriaNegocio({ fotos, idioma }: { fotos: FotoNegocio[]; idioma
           </a>
         ))}
       </div>
+    </div>
+  );
+}
 
-      {resto.length > 0 && (
-        <div className="galeria-reticula">
-          {resto.map((foto, i) => (
-            <a key={foto.url} href={enlace(i + parte)} className="galeria-foto"
-               aria-label={foto.texto_alternativo || t('foto_ver', idioma)}>
-              <img src={foto.url} alt={foto.texto_alternativo ?? ''} loading="lazy" decoding="async" />
-            </a>
-          ))}
-        </div>
-      )}
+/** El álbum completo, al final de la columna. */
+export function GaleriaAbajo({ fotos, idioma }: { fotos: FotoNegocio[]; idioma: Idioma }) {
+  const { resto, parte, mostradas } = reparto(fotos);
+  if (!resto.length) return null;
 
-      {/* Los visores. Van al final y escondidos: una imagen dentro de un
-          display:none no se descarga, así que las 17 no pesan nada hasta que
-          alguien abre una. */}
+  return (
+    <div className="galeria galeria-album" id="galeria">
+      <h2 className="galeria-titulo">
+        {t('fotos', idioma)} · {mostradas.length}
+      </h2>
+
+      <div className="galeria-reticula">
+        {resto.map((foto, i) => (
+          <a key={foto.url} href={enlace(i + parte)} className="galeria-foto"
+             aria-label={foto.texto_alternativo || t('foto_ver', idioma)}>
+            <img src={foto.url} alt={foto.texto_alternativo ?? ''} loading="lazy" decoding="async" />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/*
+ * Las fotos abiertas a pantalla completa.
+ *
+ * Van al final del DOCUMENTO, fuera de las dos columnas, y hay un motivo duro:
+ * la columna izquierda lleva `position: relative; z-index: 1` para montarse
+ * sobre la cabecera a sangre. Eso crea un CONTEXTO DE APILAMIENTO, y dentro de
+ * un contexto de apilamiento ningún hijo puede subir por encima de su padre —
+ * da igual que el visor diga `z-index: 200`: compite dentro del 1, no contra
+ * el 5 de la columna derecha. El resultado era que la foto grande se abría
+ * DETRÁS de la tarjeta de reservar.
+ *
+ * Subirle el z-index al visor no arregla nada; sacarlo del contexto sí. Los
+ * enlaces `#foto-N` siguen viviendo en la galería: `:target` no mira dónde
+ * está el destino, solo que el id coincida.
+ *
+ * Y escondidos: una imagen dentro de un `display: none` no se descarga, así
+ * que las diecisiete no pesan nada hasta que alguien abre una.
+ */
+export function VisoresFotos({ fotos, idioma }: { fotos: FotoNegocio[]; idioma: Idioma }) {
+  const { mostradas } = reparto(fotos);
+  if (!mostradas.length) return null;
+
+  return (
+    <>
       {mostradas.map((foto, i) => (
         <div className="visor" id={`foto-${i}`} key={`v-${foto.url}`} role="dialog" aria-modal="true">
           <a className="visor-fondo" href="#fotos" aria-label={t('cerrar', idioma)} />
@@ -93,7 +149,7 @@ export function GaleriaNegocio({ fotos, idioma }: { fotos: FotoNegocio[]; idioma
           <span className="visor-cuenta">{i + 1} / {mostradas.length}</span>
         </div>
       ))}
-    </div>
+    </>
   );
 }
 

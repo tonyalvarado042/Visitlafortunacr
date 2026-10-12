@@ -1079,8 +1079,16 @@ section { padding: 84px 0; }
   background: rgba(6, 6, 6, .95); padding: 56px 20px 68px;
 }
 .visor-fondo { position: absolute; inset: 0; }
+/* `max-height` en vh y NO en %, y eso no es manía: un porcentaje se mide
+   contra el alto del AREA de la rejilla, que aquí es automática — o sea
+   indefinida —, así que el navegador lo ignora y deja la foto a su tamaño
+   natural. Medido: una foto de 958px de alto en una ventana de 900 se salía
+   114px por abajo y quedaba cortada, con el pie de foto y el contador debajo
+   del borde. `dvh` y no `vh` para que en el teléfono descuente la barra del
+   navegador, que aparece y desaparece. Los 124px son el relleno de arriba y
+   abajo del visor. */
 .visor img {
-  position: relative; max-width: min(1280px, 94vw); max-height: 100%;
+  position: relative; max-width: min(1280px, 94vw); max-height: calc(100dvh - 124px);
   width: auto; height: auto; object-fit: contain; border-radius: 4px;
 }
 .visor-cerrar, .visor-ir {
@@ -2594,3 +2602,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .comercio-aviso div { display: grid; gap: 4px; min-width: 0; }
 .comercio-aviso strong { font-size: 14.5px; }
 .comercio-aviso span { font-size: 13px; color: var(--humo); line-height: 1.5; }
+
+/* El álbum completo, al final de la columna. Lleva aire ARRIBA y no abajo:
+   es lo último que hay, y el `padding-bottom` de la ficha ya cierra. */
+.galeria-album { margin-top: 38px; margin-bottom: 0; scroll-margin-top: 90px; }

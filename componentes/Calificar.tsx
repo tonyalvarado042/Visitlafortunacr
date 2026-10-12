@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { IconoVolcan } from './Volcanes';
 import { t, type Idioma } from '@/lib/idiomas';
@@ -31,6 +32,12 @@ export function Calificar({
   const [nota, setNota] = useState(0);
   const [sobre, setSobre] = useState(0);
   const [abierto, setAbierto] = useState(false);
+  /* `document` no existe mientras esto se pinta en el servidor, y el portal lo
+     necesita. Se enciende en el primer efecto, que solo corre en el navegador:
+     así el HTML del servidor y el del primer pintado coinciden y React no se
+     queja de hidratación. */
+  const [montado, setMontado] = useState(false);
+  useEffect(() => { setMontado(true); }, []);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listo, setListo] = useState<'publicada' | 'pendiente' | null>(null);
@@ -112,7 +119,18 @@ export function Calificar({
         ))}
       </div>
 
-      {abierto && (
+      {/* El modal se monta en el <body>, no aquí.
+
+          No es manía de orden: la columna izquierda de la ficha lleva
+          `position: relative; z-index: 1` para montarse sobre la cabecera a
+          sangre, y eso crea un CONTEXTO DE APILAMIENTO. Dentro de uno, ningún
+          hijo puede subir por encima de su padre — el `z-index: 120` del
+          fondo competía dentro del 1, no contra el 5 de la columna de
+          reservar. El formulario de reseña se abría DETRÁS de la tarjeta de
+          reservar, del horario y del contacto.
+
+          Subirle el z-index no arregla nada. Sacarlo del contexto, sí. */}
+      {abierto && montado && createPortal((
         <div className="modal-fondo" onClick={(e) => { if (e.target === e.currentTarget) setAbierto(false); }}>
           <div className="modal" role="dialog" aria-modal="true" aria-label={t('escribi_resena', idioma)} ref={dialogo}>
             <header>
@@ -196,7 +214,7 @@ export function Calificar({
             )}
           </div>
         </div>
-      )}
+      ), document.body)}
     </div>
   );
 }
