@@ -418,3 +418,38 @@ export async function destacadoDelMenu(
   }
   return ((data ?? []) as DestacadoMenu[])[0] ?? null;
 }
+
+export type TourDeNegocio = {
+  id: string;
+  babosa: string;
+  nombre: string;
+  resumen: string | null;
+  duracion_horas: number | null;
+  hora_inicio: string | null;
+  dificultad: string | null;
+  precio_adulto_usd: number;
+  recoge_en_hotel: boolean;
+  imagen_url: string | null;
+};
+
+/*
+ * Las tours que opera este negocio.
+ *
+ * Un operador tiene varias: la relación vive en `dst_tour.negocio_id`. Solo
+ * salen las publicadas, y de eso se encarga la RLS de la tabla —no un filtro
+ * de acá—, así que una tour en borrador no se escapa ni por descuido.
+ *
+ * Si falla, devuelve vacío y la ficha sigue: una tour que no carga no puede
+ * tumbar la página del negocio.
+ */
+export async function toursDe(negocioId: string): Promise<TourDeNegocio[]> {
+  const { data, error } = await supabase
+    .from('dst_tour')
+    .select('id, babosa, nombre, resumen, duracion_horas, hora_inicio, dificultad, precio_adulto_usd, recoge_en_hotel, imagen_url')
+    .eq('negocio_id', negocioId)
+    .eq('estado', 'publicado')
+    .order('es_destacado', { ascending: false })
+    .order('precio_adulto_usd');
+  if (error) return [];
+  return (data ?? []) as TourDeNegocio[];
+}

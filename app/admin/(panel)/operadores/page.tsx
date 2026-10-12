@@ -49,12 +49,13 @@ export default async function PaginaOperadores() {
   const { destino, db, usuario } = await contextoPanel('operadores');
   const esAdmin = usuario.rol === 'admin';
 
-  const [{ data: d }, { data: neg }, { data: con }] = await Promise.all([
+  const [{ data: d }, { data: neg }, { data: tur }, { data: con }] = await Promise.all([
     db.from('dst_destino').select('reservas_activas, pasarela_lista, email_contacto').eq('id', destino.id).single(),
     db.from('dst_negocio')
       .select('id, nombre, babosa, vende_por_aqui')
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
       .order('nombre'),
+    db.from('dst_tour').select('id, negocio_id, estado').eq('destino_id', destino.id),
     db.from('dst_contrato')
       .select('*, productos:dst_producto(*, tarifas:dst_tarifa(*))')
       .eq('destino_id', destino.id).order('creado_en'),
@@ -62,6 +63,14 @@ export default async function PaginaOperadores() {
 
   const negocios = (neg ?? []) as Negocio[];
   const contratos = (con ?? []) as Contrato[];
+  /* Las tours de cada operador, contadas una sola vez acá. Un operador con
+     doce tours es lo normal; lo que importa de un vistazo es cuántas están
+     PUBLICADAS, porque una en borrador no la ofrece nadie. */
+  const tours = (tur ?? []) as { id: string; negocio_id: string | null; estado: string }[];
+  const toursDe = (id: string) => {
+    const suyas = tours.filter((t) => t.negocio_id === id);
+    return { total: suyas.length, publicadas: suyas.filter((t) => t.estado === 'publicado').length };
+  };
   const porNegocio = new Map(negocios.map((n) => [n.id, n]));
   const ajustes = d as { reservas_activas: boolean; email_contacto: string | null } | null;
   const modulo = ajustes?.reservas_activas ?? false;
@@ -107,7 +116,7 @@ export default async function PaginaOperadores() {
           Apagar esto saca el widget de esa ficha al instante, sin tocar el contrato.
         </p>
         <table className="tabla">
-          <thead><tr><th>Negocio</th><th>Contratos</th><th>Vende</th></tr></thead>
+          <thead><tr><th>Negocio</th><th>Contratos</th><th>Tours</th><th>Vende</th></tr></thead>
           <tbody>
             {negocios.filter((n) => n.vende_por_aqui || contratos.some((c) => c.negocio_id === n.id))
               .map((n) => {
@@ -118,6 +127,19 @@ export default async function PaginaOperadores() {
                     <td className="gris">
                       {suyos.length === 0 ? 'ninguno'
                         : `${suyos.filter((c) => c.esta_activo).length} activo(s) de ${suyos.length}`}
+                    </td>
+                    <td>
+                      {(() => {
+                        const { total, publicadas } = toursDe(n.id);
+                        return total === 0 ? (
+                          <Link className="gris" href={`/admin/tours?operador=${n.id}`}>agregar</Link>
+                        ) : (
+                          <Link href={`/admin/tours?operador=${n.id}`}>
+                            {publicadas} publicada{publicadas === 1 ? '' : 's'}
+                            {total > publicadas && <span className="gris"> de {total}</span>}
+                          </Link>
+                        );
+                      })()}
                     </td>
                     <td>
                       <form action={cambiarOperador}>

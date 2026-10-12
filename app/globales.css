@@ -2611,3 +2611,36 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* El álbum completo, al final de la columna. Lleva aire ARRIBA y no abajo:
    es lo último que hay, y el `padding-bottom` de la ficha ya cierra. */
 .galeria-album { margin-top: 38px; margin-bottom: 0; scroll-margin-top: 90px; }
+
+/* Las tours que opera un negocio, en su ficha. Una fila por tour: foto chica,
+   nombre con sus datos y el precio a la derecha, que es lo que la gente busca
+   primero cuando compara. */
+.lista-tours { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.tour-fila {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0; border-top: 1px solid var(--borde);
+}
+.lista-tours .tour-fila:first-child { border-top: none; padding-top: 0; }
+.tour-fila > img, .tour-sin-foto {
+  width: 88px; height: 88px; flex-shrink: 0; object-fit: cover;
+  border-radius: 6px; border: 1px solid var(--borde); background: var(--sup-3);
+}
+.tour-texto { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex-grow: 1; }
+.tour-texto strong { font-size: 16px; letter-spacing: -.01em; }
+.tour-texto p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--txt-3); }
+.tour-datos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+.tour-datos span {
+  font-size: 11.5px; font-weight: 600; color: var(--humo);
+  padding: 3px 9px; border: 1px solid var(--borde); border-radius: 100px;
+}
+.tour-precio { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.tour-precio .desde { font-size: 11px; color: var(--humo); }
+.tour-precio strong { font-size: 24px; font-weight: 900; letter-spacing: -.03em; }
+.tour-precio .quien { font-size: 11px; color: var(--humo); }
+
+@media (max-width: 560px) {
+  .tour-fila { gap: 12px; }
+  .tour-fila > img, .tour-sin-foto { width: 66px; height: 66px; }
+  .tour-texto strong { font-size: 15px; }
+  .tour-precio strong { font-size: 20px; }
+}

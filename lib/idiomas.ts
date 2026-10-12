@@ -68,6 +68,9 @@ export const T: Record<string, Diccionario> = {
   contacto:          { es: 'Contacto', en: 'Contact', pt: 'Contato', fr: 'Contact', de: 'Kontakt' },
   precio:            { es: 'Rango de precio', en: 'Price range', pt: 'Faixa de preço', fr: 'Gamme de prix', de: 'Preisklasse' },
   sobre:             { es: 'Sobre', en: 'About', pt: 'Sobre', fr: 'À propos de', de: 'Über' },
+  sus_tours:         { es: 'Lo que lleva este operador', en: 'What this operator runs', pt: 'O que este operador leva', fr: 'Ce que propose cet opérateur', de: 'Was dieser Anbieter anbietet' },
+  desde:             { es: 'desde', en: 'from', pt: 'a partir de', fr: 'à partir de', de: 'ab' },
+  por_adulto:        { es: 'por adulto', en: 'per adult', pt: 'por adulto', fr: 'par adulte', de: 'pro Erwachsenem' },
   otras_plataformas: { es: 'Lo que dicen en otras plataformas', en: 'What other platforms say', pt: 'O que dizem outras plataformas', fr: "Ce que disent les autres plateformes", de: 'Was andere Plattformen sagen' },
   escribi_primera:   { es: 'Escribí la primera', en: 'Write the first one', pt: 'Escreva a primeira', fr: 'Écrivez le premier', de: 'Schreiben Sie die erste' },
 

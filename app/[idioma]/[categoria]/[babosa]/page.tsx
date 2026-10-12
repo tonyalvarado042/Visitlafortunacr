@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, SIMBOLO_PRECIO } from '@/lib/destino';
 import { nota, resenasDe } from '@/lib/resenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -43,7 +43,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
   const negocio = await negocioPorBabosa(destino, babosa, idioma);
   if (!negocio) notFound();
 
-  const [categorias, externas, propias, secciones, horario, etiquetas, fotos] = await Promise.all([
+  const [categorias, externas, propias, secciones, horario, etiquetas, fotos, tours] = await Promise.all([
     categoriasDe(destino, idioma),
     notasExternasDe(negocio.id),
     resenasDe(negocio.id),
@@ -51,6 +51,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
     horarioDe(negocio.id),
     etiquetasDe(negocio.id, idioma),
     fotosDe(negocio.id, idioma),
+    toursDe(negocio.id),
   ]);
 
   // El nombre del día sale de Intl y no del diccionario: son 7 palabras por 5
@@ -213,6 +214,42 @@ export default async function Ficha({ params }: { params: Parametros }) {
                     </div>
                   </details>
                 )}
+              </div>
+            )}
+
+            {/* Lo que este operador lleva a la gente.
+                Un operador tiene varias tours y hasta hoy no se veía ni una:
+                vivían solo para la IA y el planificador. Acá quien ya está
+                mirando la ficha ve qué más le pueden armar. */}
+            {tours.length > 0 && (
+              <div className="bloque bloque-tours" style={{ marginTop: 34 }}>
+                <div className="titulo">
+                  {t('sus_tours', idioma)} · {tours.length}
+                </div>
+                <ul className="lista-tours">
+                  {tours.map((tu) => (
+                    <li key={tu.id} className="tour-fila">
+                      {tu.imagen_url
+                        ? <img src={tu.imagen_url} alt="" loading="lazy" decoding="async" />
+                        : <span className="tour-sin-foto" aria-hidden="true" />}
+                      <div className="tour-texto">
+                        <strong>{tu.nombre}</strong>
+                        {tu.resumen && <p>{tu.resumen}</p>}
+                        <div className="tour-datos">
+                          {tu.duracion_horas != null && <span>{tu.duracion_horas} h</span>}
+                          {tu.hora_inicio && <span>sale {tu.hora_inicio.slice(0, 5)}</span>}
+                          {tu.dificultad && <span>{tu.dificultad}</span>}
+                          {tu.recoge_en_hotel && <span>recoge en el hotel</span>}
+                        </div>
+                      </div>
+                      <div className="tour-precio">
+                        <span className="desde">{t('desde', idioma)}</span>
+                        <strong>${Number(tu.precio_adulto_usd).toFixed(0)}</strong>
+                        <span className="quien">{t('por_adulto', idioma)}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
