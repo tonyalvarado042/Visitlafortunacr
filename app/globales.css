@@ -2900,3 +2900,30 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .razones-tarjetas { grid-template-columns: 1fr; }
   .razones-tarjetas img { height: 130px; }
 }
+
+/* ---- Combinalo con: la venta cruzada al final de la ficha ---- */
+.combina { margin-top: 30px; }
+.combina h2 {
+  font-size: 22px; font-weight: 800; letter-spacing: -.02em;
+  margin: 0 0 16px; text-transform: none;
+}
+.combina-tarjetas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); gap: 14px;
+}
+.combina-tarjetas a {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--borde); border-radius: 9px; overflow: hidden;
+  background: var(--carbon); transition: border-color .2s;
+}
+.combina-tarjetas a:hover { border-color: var(--borde-4); }
+.combina-tarjetas a:hover strong { color: var(--naranja); }
+.combina-tarjetas img, .combina-sin-foto {
+  width: 100%; height: 118px; object-fit: cover; background: var(--sup-3); display: block;
+}
+.combina-texto { padding: 13px 15px 16px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.combina-que {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--humo);
+}
+.combina-texto strong { font-size: 15px; letter-spacing: -.015em; line-height: 1.25; }
+.combina-motivo { font-size: 12.5px; line-height: 1.45; color: var(--txt-3); margin-top: 2px; }

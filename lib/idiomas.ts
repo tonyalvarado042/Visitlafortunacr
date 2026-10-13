@@ -68,6 +68,7 @@ export const T: Record<string, Diccionario> = {
   contacto:          { es: 'Contacto', en: 'Contact', pt: 'Contato', fr: 'Contact', de: 'Kontakt' },
   precio:            { es: 'Rango de precio', en: 'Price range', pt: 'Faixa de preço', fr: 'Gamme de prix', de: 'Preisklasse' },
   sobre:             { es: 'Sobre', en: 'About', pt: 'Sobre', fr: 'À propos de', de: 'Über' },
+  combina_titulo:    { es: 'Combinalo con', en: 'Pair it with', pt: 'Combine com', fr: 'À combiner avec', de: 'Kombiniere es mit' },
   razones_rotulo:    { es: 'Por qué esta y no otra', en: 'Why this one', pt: 'Por que esta e não outra', fr: 'Pourquoi celui-ci', de: 'Warum dieser' },
   razones_titulo:    { es: 'Razones para elegir', en: 'Reasons to choose', pt: 'Razões para escolher', fr: 'Raisons de choisir', de: 'Gründe für' },
   ver_todas:         { es: 'Ver todas', en: 'See all', pt: 'Ver todas', fr: 'Voir toutes', de: 'Alle ansehen' },

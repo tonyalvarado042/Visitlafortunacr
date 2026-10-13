@@ -4,7 +4,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon } from '../acciones';
+import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
@@ -19,13 +19,15 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   const { data: n } = await db.from('dst_negocio').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n) notFound();
 
-  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }] = await Promise.all([
+  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: otrosNegocios }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
     db.from('dst_negocio_foto').select('id, url, es_portada, orden, credito, licencia, fuente_url, es_generica').eq('negocio_id', id).order('es_generica').order('orden'),
     db.from('dst_solicitud').select('id, tipo, etapa, creado_en').eq('negocio_id', id).order('creado_en', { ascending: false }).limit(10),
     db.from('dst_negocio_razon').select('id, titulo, texto, foto_url, orden').eq('negocio_id', id).order('orden'),
+    db.from('dst_negocio_combina').select('id, motivo, otro:dst_negocio!dst_negocio_combina_combina_id_fkey(nombre)').eq('negocio_id', id).order('orden'),
+    db.from('dst_negocio').select('id, nombre').eq('destino_id', destino.id).neq('id', id).eq('estado_publicacion', 'publicado').order('nombre'),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
@@ -152,6 +154,46 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                     ayuda="Sale apaisada, como 420 × 300"
                   />
                   <button type="submit" formAction={agregarRazon} className="boton chico">Agregar razón</button>
+                </div>
+              )}
+            </div>
+
+            {/* ---- Con qué se combina ----
+                Lo elige el equipo a mano. Calcularlo por categoría
+                recomendaría al competidor de al lado. */}
+            <div className="tarjeta">
+              <h2>Combinalo con <small>{combina?.length ?? 0} de 6 · salen al final de la ficha</small></h2>
+
+              {!combina?.length ? (
+                <Vacio texto="Nadie recomendado todavía. La gente que viene a esto casi nunca viene solo a esto." />
+              ) : (
+                <ul className="combina-admin">
+                  {combina.map((c) => {
+                    const otro = uno(c.otro as never) as { nombre: string } | null;
+                    return (
+                      <li key={c.id}>
+                        <span className="combina-admin-texto">
+                          <strong>{otro?.nombre ?? '—'}</strong>
+                          {c.motivo && <span>{c.motivo}</span>}
+                        </span>
+                        <button type="submit" name="combina_fila" value={c.id} formAction={borrarCombina}
+                                className="boton chico peligro" aria-label="Quitar">×</button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              {(combina?.length ?? 0) < 6 && (
+                <div className="combina-nueva">
+                  <div className="campo"><label htmlFor="cb-neg">Negocio</label>
+                    <select id="cb-neg" name="combina_id" defaultValue="">
+                      <option value="">—</option>
+                      {otrosNegocios?.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+                    </select></div>
+                  <div className="campo"><label htmlFor="cb-mot">Por qué va junto</label>
+                    <input id="cb-mot" name="combina_motivo" maxLength={90} placeholder="Para cenar después del agua" /></div>
+                  <button type="submit" formAction={agregarCombina} className="boton chico">Agregar</button>
                 </div>
               )}
             </div>

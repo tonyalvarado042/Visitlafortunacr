@@ -231,3 +231,18 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
   padding: 14px; border: 1px dashed var(--borde-4); border-radius: 7px;
 }
 .razon-nueva .boton { align-self: flex-start; }
+
+/* Con qué se combina, en el panel del negocio. */
+.combina-admin { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.combina-admin li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 11px; background: var(--sup-1); border-radius: 6px;
+}
+.combina-admin-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex-grow: 1; }
+.combina-admin-texto strong { font-size: 13.5px; }
+.combina-admin-texto span { font-size: 12px; color: var(--humo); }
+.combina-nueva {
+  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+  padding: 14px; border: 1px dashed var(--borde-4); border-radius: 7px;
+}
+.combina-nueva .campo { flex: 1 1 190px; min-width: 0; }

@@ -480,3 +480,51 @@ export async function moverRazon(datos: FormData) {
   await db.from('dst_negocio_razon').update({ orden: i }).eq('id', lista[j].id).eq('negocio_id', id);
   refrescar(id);
 }
+
+/* ---------------------------------------------------------------------------
+ * Con qué se combina un negocio.
+ *
+ * Lo elige el equipo a mano y no se calcula por categoría: eso recomendaría al
+ * competidor de al lado, que es lo contrario de lo que el negocio espera.
+ * ------------------------------------------------------------------------ */
+
+export async function agregarCombina(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const otroId = texto(datos, 'combina_id');
+  if (!esUuid(id) || !esUuid(otroId) || id === otroId) return;
+
+  /* Los DOS tienen que ser de este destino. El de la izquierda porque es el
+     que se edita; el de la derecha porque si no, se podría enganchar la ficha
+     de otro destino desde un formulario tocado a mano. */
+  const { data: dos } = await db.from('dst_negocio')
+    .select('id').eq('destino_id', destino.id).in('id', [id, otroId]);
+  if ((dos?.length ?? 0) !== 2) return;
+
+  const { count } = await db.from('dst_negocio_combina')
+    .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+  if ((count ?? 0) >= 6) return;
+
+  const { error } = await db.from('dst_negocio_combina').insert({
+    negocio_id: id,
+    combina_id: otroId,
+    motivo: texto(datos, 'combina_motivo').slice(0, 90) || null,
+    orden: count ?? 0,
+  });
+  // 23505 es la unique: ya estaba puesto, y eso no es un error que reportar.
+  if (error && error.code !== '23505') console.error('agregarCombina:', error.message);
+  refrescar(id);
+}
+
+export async function borrarCombina(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const filaId = texto(datos, 'combina_fila');
+  if (!esUuid(id) || !esUuid(filaId)) return;
+  if (!(await negocioDelDestino(db, destino.id, id))) return;
+
+  const { error } = await db.from('dst_negocio_combina')
+    .delete().eq('id', filaId).eq('negocio_id', id);
+  if (error) console.error('borrarCombina:', error.message);
+  refrescar(id);
+}

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, combinaCon, SIMBOLO_PRECIO } from '@/lib/destino';
 import { nota, resenasDe } from '@/lib/resenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -45,7 +45,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
   const negocio = await negocioPorBabosa(destino, babosa, idioma);
   if (!negocio) notFound();
 
-  const [categorias, externas, propias, secciones, horario, etiquetas, fotos, tours, razones] = await Promise.all([
+  const [categorias, externas, propias, secciones, horario, etiquetas, fotos, tours, razones, combina] = await Promise.all([
     categoriasDe(destino, idioma),
     notasExternasDe(negocio.id),
     resenasDe(negocio.id),
@@ -55,6 +55,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
     fotosDe(negocio.id, idioma),
     toursDe(negocio.id),
     razonesDe(negocio.id),
+    combinaCon(negocio.id, idioma),
   ]);
 
   // El nombre del día sale de Intl y no del diccionario: son 7 palabras por 5
@@ -405,6 +406,30 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 {t('como_llegar', idioma)} →
               </a>
             </div>
+
+            {/* Con qué más. La gente que va a las termales casi nunca va solo
+                a las termales: va a comer, necesita transporte, hace el tour el
+                mismo día. Lo elige el equipo a mano — calcularlo por categoría
+                recomendaría al competidor de al lado. */}
+            {combina.length > 0 && (
+              <section className="combina">
+                <h2>{t('combina_titulo', idioma)}</h2>
+                <div className="combina-tarjetas">
+                  {combina.map((c) => (
+                    <Link key={c.id} href={`/${idioma}/${c.categoria_babosa ?? ''}/${c.babosa}`}>
+                      {c.foto_url
+                        ? <img src={c.foto_url} alt="" loading="lazy" decoding="async" />
+                        : <span className="combina-sin-foto" aria-hidden="true" />}
+                      <span className="combina-texto">
+                        {c.categoria_nombre && <span className="combina-que">{c.categoria_nombre}</span>}
+                        <strong>{c.nombre}</strong>
+                        {c.motivo && <span className="combina-motivo">{c.motivo}</span>}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* La atribución se queda: Google la pide cuando se citan sus
                 reseñas, y se citan arriba, en la prueba social. */}

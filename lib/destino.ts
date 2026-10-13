@@ -529,3 +529,62 @@ export async function razonesDe(negocioId: string): Promise<RazonDeNegocio[]> {
   if (error) return [];
   return ((data ?? []) as RazonDeNegocio[]).slice(0, 3);
 }
+
+export type NegocioCombina = {
+  id: string;
+  motivo: string | null;
+  nombre: string;
+  babosa: string;
+  categoria_babosa: string | null;
+  categoria_nombre: string | null;
+  foto_url: string | null;
+};
+
+/*
+ * Con qué se combina este negocio.
+ *
+ * Lo elige el equipo a mano: calcularlo por categoría recomendaría al
+ * competidor de al lado, que es justo lo contrario de lo que el negocio espera
+ * de nosotros.
+ *
+ * La RLS ya exige que LOS DOS estén publicados, así que una recomendación a una
+ * ficha archivada no llega hasta acá — nadie termina en un 404 por una
+ * sugerencia nuestra.
+ */
+export async function combinaCon(negocioId: string, idioma: Idioma): Promise<NegocioCombina[]> {
+  const { data, error } = await supabase
+    .from('dst_negocio_combina')
+    .select(`id, motivo,
+             otro:dst_negocio!dst_negocio_combina_combina_id_fkey(
+               nombre, babosa,
+               categoria:dst_categoria(babosa, nombre),
+               fotos:dst_negocio_foto(url, es_portada, orden)
+             )`)
+    .eq('negocio_id', negocioId)
+    .order('orden')
+    .limit(6);
+  if (error || !data) return [];
+
+  const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
+
+  return data.flatMap((fila) => {
+    const otro = uno(fila.otro as never) as {
+      nombre: string; babosa: string; categoria: unknown; fotos: unknown;
+    } | null;
+    if (!otro) return [];
+    const cat = uno(otro.categoria as never) as { babosa: string; nombre: string } | null;
+    const fotos = (otro.fotos ?? []) as { url: string; es_portada: boolean; orden: number }[];
+    /* La portada si la hay; si no, la primera. Una tarjeta sin foto en una
+       fila de tarjetas con foto se lee como un error de carga. */
+    const foto = fotos.find((f) => f.es_portada) ?? [...fotos].sort((a, b) => a.orden - b.orden)[0];
+    return [{
+      id: fila.id as string,
+      motivo: (fila.motivo as string | null) ?? null,
+      nombre: otro.nombre,
+      babosa: otro.babosa,
+      categoria_babosa: cat?.babosa ?? null,
+      categoria_nombre: cat?.nombre ?? null,
+      foto_url: foto?.url ?? null,
+    }];
+  });
+}
