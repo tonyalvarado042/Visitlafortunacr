@@ -117,7 +117,22 @@ export function ReservarProducto({
      entrada, que es como reserva todo el mundo. */
   const [paso, setPaso] = useState<1 | 2>(1);
 
-  const total = totalEstimado(producto.tarifas, adultos, ninos);
+  const subtotal = totalEstimado(producto.tarifas, adultos, ninos);
+  const pct = Number(producto.descuento_pct ?? 0);
+  /* El redondeo a dos decimales se hace igual que en la base, para que el
+     número que se ve y el que se cobra no se separen por un centavo. */
+  const descuento = subtotal !== null && pct > 0
+    ? Math.round(subtotal * pct) / 100
+    : 0;
+  const total = subtotal === null ? null : subtotal - descuento;
+
+  /* "$89,3" se lee como un error de programa, no como un precio. Con centavos
+     van los dos decimales; sin centavos, ninguno — "$94,00" tampoco es como se
+     escribe un precio redondo. */
+  const plata = (n: number) => n.toLocaleString(idioma, {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
 
   /* La antelación que pide el producto, convertida a la primera fecha que el
      formulario deja elegir. Así el visitante no escoge una fecha que el
@@ -259,8 +274,21 @@ export function ReservarProducto({
                     {ninos > 0 && <> · {ninos} {ninos === 1 ? t('reserva_nino_uno', idioma) : t('reserva_ninos', idioma).toLowerCase()}</>}
                   </small>
                 </span>
-                <b>${total.toLocaleString(idioma, { maximumFractionDigits: 2 })}</b>
+                <span className="reservar-cifras">
+                  {/* El precio de antes, tachado. Sin él, un descuento es una
+                      rebaja que nadie ve. */}
+                  {descuento > 0 && subtotal !== null && (
+                    <s>${plata(subtotal)}</s>
+                  )}
+                  <b>${plata(total)}</b>
+                </span>
               </div>
+            )}
+
+            {descuento > 0 && (
+              <p className="reservar-lanzamiento">
+                −{pct}% {t('reserva_lanzamiento', idioma)}
+              </p>
             )}
 
             {error && <p className="sorteo-error" role="alert">{error}</p>}
@@ -282,7 +310,7 @@ export function ReservarProducto({
                 {new Date(`${paraEl}T12:00:00`).toLocaleDateString(idioma, { day: 'numeric', month: 'long' })}
                 {' · '}
                 {adultos + ninos} {t('reserva_personas', idioma)}
-                {total !== null && <> · <b>${total.toLocaleString(idioma, { maximumFractionDigits: 2 })}</b></>}
+                {total !== null && <> · <b>${plata(total)}</b></>}
               </span>
               <button type="button" onClick={() => { setError(null); setPaso(1); }}>
                 {t('reserva_volver', idioma)}

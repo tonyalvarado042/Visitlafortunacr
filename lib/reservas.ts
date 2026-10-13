@@ -64,6 +64,10 @@ export type ProductoReservable = {
   modo_confirmacion: 'instantanea' | 'manual';
   negocio_nombre: string;
   negocio_id: string;
+  /* El descuento de lanzamiento vigente, en %. Viene de la MISMA función que
+     lo cobra: un precio tachado que no coincide con el total es una promesa
+     rota cuando la persona ya decidió. 0 = apagado. */
+  descuento_pct: number;
 };
 
 /**

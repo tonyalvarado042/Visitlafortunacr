@@ -60,6 +60,8 @@ export async function editarDestino(datos: FormData) {
        segundo habilita cobrarle a una persona. */
     campos = {
       reservas_activas: texto(datos, 'reservas_activas') === '1',
+      descuento_lanzamiento_pct: numero(datos, 'descuento_lanzamiento_pct'),
+      descuento_lanzamiento_hasta: texto(datos, 'descuento_lanzamiento_hasta') || null,
       pasarela_lista: texto(datos, 'pasarela_lista') === '1',
     };
   } else if (grupo === 'destino') {

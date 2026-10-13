@@ -39,14 +39,19 @@ export async function POST(peticion: NextRequest) {
   const idioma: Idioma = esIdioma(cadena(cuerpo.idioma)) ? (cadena(cuerpo.idioma) as Idioma) : 'es';
   const mal = (mensaje: string) => NextResponse.json({ error: mensaje }, { status: 400 });
 
+  /* Un producto O una tour, nunca las dos. La base lo vuelve a comprobar: lo
+     que llega del navegador es un dato, no una decisión. */
   const producto = cadena(cuerpo.producto_id);
+  const tour = cadena(cuerpo.tour_id);
   const paraEl = cadena(cuerpo.para_el);
   const adultos = entero(cuerpo.adultos);
   const ninos = entero(cuerpo.ninos);
   const nombre = cadena(cuerpo.nombre);
   const email = cadena(cuerpo.email).toLowerCase();
 
-  if (!UUID.test(producto)) return mal(t('reserva_error', idioma));
+  const esProducto = UUID.test(producto);
+  const esTour = UUID.test(tour);
+  if (esProducto === esTour) return mal(t('reserva_error', idioma));
   if (!FECHA.test(paraEl)) return mal(t('reserva_falta_fecha', idioma));
   if (adultos < 1 || adultos > 40) return mal(t('reserva_falta_personas', idioma));
   if (ninos < 0 || ninos > 40) return mal(t('reserva_falta_personas', idioma));
@@ -55,7 +60,9 @@ export async function POST(peticion: NextRequest) {
 
   const { data, error } = await supabase.rpc('pedir_reserva', {
     p_dominio:  dominioDeHost(peticion.headers.get('host')),
-    p_producto: producto,
+    p_producto: esProducto ? producto : null,
+    p_tour:     esTour ? tour : null,
+    p_cupon:    cadena(cuerpo.cupon).slice(0, 40) || null,
     p_para_el:  paraEl,
     p_adultos:  adultos,
     p_ninos:    ninos,
@@ -94,12 +101,18 @@ export async function POST(peticion: NextRequest) {
         const destino = await destinoActual();
         const { data: r } = await servicio()
           .from('dst_reserva')
-          .select('id, codigo, para_el, adultos, ninos, total_usd, nombre_titular, email_titular, whatsapp_titular, notas, producto:dst_producto(nombre), operador:dst_negocio(nombre)')
+          .select('id, codigo, para_el, adultos, ninos, total_usd, descuento_usd, nombre_titular, email_titular, whatsapp_titular, notas, producto:dst_producto(nombre), operador:dst_negocio(nombre), lineas:dst_reserva_linea(descripcion)')
           .eq('codigo', fila.codigo).maybeSingle();
         if (!r) return;
 
         const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
-        const prod = uno(r.producto as { nombre: string } | { nombre: string }[] | null)?.nombre ?? '';
+        /* El nombre de lo reservado. Si fue una tour no hay producto, así que
+           sale de la primera línea — a la que se le quita el " · adulto" que
+           la función le pone para distinguirla de la de niños. */
+        const lineas = (r.lineas ?? []) as { descripcion: string }[];
+        const prod = uno(r.producto as { nombre: string } | { nombre: string }[] | null)?.nombre
+          ?? lineas[0]?.descripcion?.replace(/\s·\s(adulto|nino|niño)$/i, '')
+          ?? '';
         const oper = uno(r.operador as { nombre: string } | { nombre: string }[] | null)?.nombre ?? '';
         const total = r.total_usd == null ? null : Number(r.total_usd);
 

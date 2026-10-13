@@ -153,7 +153,25 @@ export default async function PaginaAjustes() {
             <input type="checkbox" name="reservas_activas" value="1"
                    defaultChecked={d.reservas_activas} disabled={!esAdmin} />
             {' '}<strong>Motor de reservas encendido</strong></label>
-            <small>Los negocios que no tengan «vende por aquí» siguen siendo fichas normales.</small></div>
+            <small>Los negocios que no tengan «vende por aquí» siguen siendo fichas normales.</small>
+          <div className="campos" style={{ marginTop: 14 }}>
+            <div className="campo"><label>Descuento de lanzamiento %</label>
+              <input type="number" step="0.5" min="0" max="50" name="descuento_lanzamiento_pct"
+                     defaultValue={d.descuento_lanzamiento_pct ?? ''} disabled={!esAdmin} placeholder="vacío = apagado" />
+            </div>
+            <div className="campo"><label>Hasta</label>
+              <input type="date" name="descuento_lanzamiento_hasta"
+                     defaultValue={d.descuento_lanzamiento_hasta ?? ''} disabled={!esAdmin} />
+              <small>Vacío = sin fecha de corte.</small>
+            </div>
+            <div className="campo ancho">
+              <small>
+                Automático, sin código: el precio sale tachado en la ficha y el total ya viene con el
+                descuento. <strong>Sale de tu comisión, no del neto del operador</strong> — él cobra lo
+                que firmó, y por eso se puede encender sin hablar con nadie.
+              </small>
+            </div>
+          </div></div>
           <div className="campo ancho"><label>
             <input type="checkbox" name="pasarela_lista" value="1"
                    defaultChecked={d.pasarela_lista} disabled={!esAdmin} />
