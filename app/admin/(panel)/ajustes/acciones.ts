@@ -63,6 +63,12 @@ export async function editarDestino(datos: FormData) {
       descuento_lanzamiento_pct: numero(datos, 'descuento_lanzamiento_pct'),
       descuento_lanzamiento_hasta: texto(datos, 'descuento_lanzamiento_hasta') || null,
       pasarela_lista: texto(datos, 'pasarela_lista') === '1',
+      /* El tipo de cambio de las tarifas en colones. Si se deja vacío, las
+         tarifas nacionales NO se muestran: sin tipo de cambio no se inventa un
+         precio. Se guarda la fecha para saber qué tan viejo está. */
+      tipo_cambio_crc: numero(datos, 'tipo_cambio_crc'),
+      tipo_cambio_piso: numero(datos, 'tipo_cambio_piso') ?? 550,
+      tipo_cambio_en: numero(datos, 'tipo_cambio_crc') != null ? new Date().toISOString() : null,
     };
   } else if (grupo === 'destino') {
     const whatsapp = texto(datos, 'whatsapp').replace(/[\s\-().]/g, '');

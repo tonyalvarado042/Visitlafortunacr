@@ -174,6 +174,45 @@ export default async function PaginaAjustes() {
             </div>
           </div></div>
 
+          {/* ---- El tipo de cambio ----
+              Lo necesitan las tarifas de NACIONALES Y RESIDENTES, que los
+              operadores cobran en colones. Sin esto cargado, esas tarifas no
+              se muestran: un precio adivinado en una página pública es una
+              promesa que después no se puede cumplir. */}
+          <div className="campo ancho">
+            <h3 style={{ fontSize: 15, marginTop: 24, marginBottom: 2 }}>
+              Tipo de cambio <small className="gris">para las tarifas de nacionales y residentes</small>
+            </h3>
+          </div>
+          <div className="campos" style={{ marginTop: 4 }}>
+            <div className="campo"><label htmlFor="tc-crc">Colones por dólar</label>
+              <input id="tc-crc" type="number" step="0.01" min="1" name="tipo_cambio_crc"
+                     defaultValue={d.tipo_cambio_crc ?? ''} disabled={!esAdmin}
+                     placeholder="vacío = no se venden tarifas nacionales" />
+              <small>
+                El tipo de <strong>compra</strong> del BCCR.
+                {d.tipo_cambio_en
+                  ? ` Actualizado el ${new Date(d.tipo_cambio_en).toLocaleDateString('es-CR')}.`
+                  : ' Sin cargar.'}
+              </small>
+            </div>
+            <div className="campo"><label htmlFor="tc-piso">Piso del contrato</label>
+              <input id="tc-piso" type="number" step="0.01" min="1" name="tipo_cambio_piso"
+                     defaultValue={d.tipo_cambio_piso ?? 550} disabled={!esAdmin} />
+              <small>
+                Si el colón se fortalece por debajo de este número, se cobra igual a este tipo.
+                El tarifario de Paradise 2026 lo fija en <strong>550</strong>.
+              </small>
+            </div>
+            <div className="campo ancho">
+              <small>
+                <strong>Nacional quiere decir nacional o residente en Costa Rica</strong>, no «tico»:
+                un extranjero con DIMEX paga tarifa nacional y un tico que vive afuera no. Se le pide
+                la cédula al reservar y el negocio la verifica en la entrada.
+              </small>
+            </div>
+          </div>
+
           <div className="campo ancho"><label>
             <input type="checkbox" name="pasarela_lista" value="1"
                    defaultChecked={d.pasarela_lista} disabled={!esAdmin} />
