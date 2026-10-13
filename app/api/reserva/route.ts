@@ -78,7 +78,7 @@ export async function POST(peticion: NextRequest) {
        poca antelación— son útiles para quien reserva y no revelan nada. Los
        demás se tragan: un fallo de conexión no tiene por qué contarle al
        visitante cómo se llama una tabla. */
-    const suyo = /cupo|fecha|antelaci|nombre|correo|adulto|niño|nino|disponible|abiertas|venta/i
+    const suyo = /cup[oó]n|cupo|fecha|antelaci|nombre|correo|adulto|niño|nino|disponible|abiertas|venta/i
       .test(error.message);
     console.error('pedir_reserva falló:', error.message);
     return NextResponse.json(
@@ -87,7 +87,10 @@ export async function POST(peticion: NextRequest) {
     );
   }
 
-  const fila = ((data ?? []) as { ok: boolean; codigo: string; accion: string }[])[0];
+  const fila = ((data ?? []) as {
+    ok: boolean; codigo: string; accion: string;
+    total_usd: number | null; descuento_usd: number | null;
+  }[])[0];
 
   /* Los dos correos van DESPUES de responder: el visitante ya vio su codigo
      y no tiene por que esperar a Resend. Y si el correo falla, la reserva
@@ -146,8 +149,15 @@ export async function POST(peticion: NextRequest) {
     });
   }
 
+  /* El total y el descuento se devuelven para que la pantalla de "listo"
+     muestre lo que de verdad se guardó, no lo que el navegador calculó. Si
+     entró un cupón, el número de antes ya no sirve: era el de sin cupón. */
   return NextResponse.json(
-    { ok: true, codigo: fila?.codigo, accion: fila?.accion },
+    {
+      ok: true, codigo: fila?.codigo, accion: fila?.accion,
+      total_usd: fila?.total_usd == null ? null : Number(fila.total_usd),
+      descuento_usd: fila?.descuento_usd == null ? null : Number(fila.descuento_usd),
+    },
     { status: 201 },
   );
 }

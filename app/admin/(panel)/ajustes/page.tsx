@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarDestino, eliminarCanal, guardarCanal } from './acciones';
+import { editarDestino, eliminarCanal, guardarCanal, crearCupon, prenderCupon } from './acciones';
 import { LanzarDestino } from './LanzarDestino';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +29,7 @@ export default async function PaginaAjustes() {
   /* Las candidatas al destacado del menu. Se ofrecen en una lista y no en un
      campo de texto: una babosa mal escrita no da error, simplemente deja el
      menu sin tarjeta — y eso se descubre semanas despues. */
-  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }] = await Promise.all([
+  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }, { data: cupones }] = await Promise.all([
     db.from('dst_destino').select('*').eq('id', destino.id).single(),
     db.from('dst_canal').select('*').eq('destino_id', destino.id).order('tipo'),
     db.from('dst_itinerario').select('babosa, titulo')
@@ -38,6 +38,7 @@ export default async function PaginaAjustes() {
     db.from('dst_negocio').select('babosa, nombre, es_destacado')
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
       .order('es_destacado', { ascending: false }).order('nombre'),
+    db.from('dst_cupon').select('*').eq('destino_id', destino.id).order('creado_en', { ascending: false })
   ]);
   if (!d) return <Vacio texto="Sin destino." />;
   const presente = (n: string) => !!process.env[n]?.trim() || (n === 'SUPABASE_SECRET_KEY' && !!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
@@ -172,6 +173,7 @@ export default async function PaginaAjustes() {
               </small>
             </div>
           </div></div>
+
           <div className="campo ancho"><label>
             <input type="checkbox" name="pasarela_lista" value="1"
                    defaultChecked={d.pasarela_lista} disabled={!esAdmin} />
@@ -184,6 +186,73 @@ export default async function PaginaAjustes() {
             </small></div>
           {esAdmin && <BotonAccion>Guardar las reservas</BotonAccion>}
         </form>
+      </div>
+
+      {/* ---- Cupones ----
+          Lo que el descuento de lanzamiento NO es: un código. Esto sí.
+          Sirve para campañas, influencers y para recuperar a quien se fue sin
+          reservar. Se suma al de lanzamiento, nunca lo reemplaza.
+
+          Va en TARJETA APARTE y no dentro del formulario de reservas: cada
+          cupón lleva su propio <form>, y un <form> dentro de otro es HTML
+          inválido — el navegador se come el de adentro y el botón termina
+          guardando el formulario de afuera.
+
+          Apagar en vez de borrar: `dst_reserva.cupon_id` apunta acá, y borrar
+          un cupón usado dejaría reservas sin saber con qué código se vendieron. */}
+      <div className="tarjeta">
+        <h2>Cupones <small>con codigo, se suman al de lanzamiento</small></h2>
+
+        {!cupones?.length ? (
+          <Vacio texto="Sin cupones. El de lanzamiento no necesita ninguno: es automático." />
+        ) : (
+          <table className="tabla">
+            <thead><tr><th>Código</th><th>Descuento</th><th>Vigencia</th><th className="num">Usos</th><th>Estado</th></tr></thead>
+            <tbody>
+              {cupones.map((c) => (
+                <tr key={c.id}>
+                  <td className="fuerte">{c.codigo}{c.descripcion && <div className="gris" style={{ fontSize: 12 }}>{c.descripcion}</div>}</td>
+                  <td>{c.tipo_descuento === 'porcentaje' ? `${c.valor}%` : `$${c.valor}`}{c.minimo_usd ? <span className="gris"> · desde ${c.minimo_usd}</span> : null}</td>
+                  <td className="gris">{c.vale_desde ?? '—'} a {c.vale_hasta ?? 'sin corte'}</td>
+                  <td className="num">{c.usos_hechos}{c.usos_maximos ? ` / ${c.usos_maximos}` : ''}</td>
+                  <td>
+                    <form action={prenderCupon}>
+                      <input type="hidden" name="cupon_id" value={c.id} />
+                      <input type="hidden" name="prender" value={c.esta_activo ? '0' : '1'} />
+                      <Etiqueta color={c.esta_activo ? '#66BB2E' : '#9CA3AF'}>{c.esta_activo ? 'activo' : 'apagado'}</Etiqueta>
+                      {esAdmin && <BotonAccion clase={c.esta_activo ? 'boton peligro chico' : 'boton chico'}>{c.esta_activo ? 'Apagar' : 'Prender'}</BotonAccion>}
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {esAdmin && (
+          <form action={crearCupon} className="campos" style={{ marginTop: 14 }}>
+            <div className="campo"><label htmlFor="cp-cod">Código</label>
+              <input id="cp-cod" name="codigo" required maxLength={40} placeholder="LAFORTUNA10" style={{ textTransform: 'uppercase' }} /></div>
+            <div className="campo"><label htmlFor="cp-tipo">Tipo</label>
+              <select id="cp-tipo" name="tipo_descuento" defaultValue="porcentaje">
+                <option value="porcentaje">Porcentaje</option>
+                <option value="monto">Monto en USD</option>
+              </select></div>
+            <div className="campo"><label htmlFor="cp-val">Valor</label>
+              <input id="cp-val" name="valor" type="number" step="0.5" min="0" required /></div>
+            <div className="campo"><label htmlFor="cp-min">Mínimo de compra USD</label>
+              <input id="cp-min" name="minimo_usd" type="number" step="1" min="0" /></div>
+            <div className="campo"><label htmlFor="cp-d">Vale desde</label>
+              <input id="cp-d" name="vale_desde" type="date" /></div>
+            <div className="campo"><label htmlFor="cp-h">Vale hasta</label>
+              <input id="cp-h" name="vale_hasta" type="date" /></div>
+            <div className="campo"><label htmlFor="cp-u">Usos máximos</label>
+              <input id="cp-u" name="usos_maximos" type="number" step="1" min="1" placeholder="sin límite" /></div>
+            <div className="campo ancho"><label htmlFor="cp-desc">Para qué es</label>
+              <input id="cp-desc" name="descripcion" maxLength={120} placeholder="Campaña de Instagram de noviembre" /></div>
+            <div className="campo"><BotonAccion clase="boton chico">Crear cupón</BotonAccion></div>
+          </form>
+        )}
       </div>
 
       <div className="tarjeta">

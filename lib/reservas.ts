@@ -97,6 +97,32 @@ export async function productosReservables(
 }
 
 /**
+ * La misma cosa, para una tour suelta.
+ *
+ * Devuelve `null` cuando la tour no se puede vender —sin contrato, contrato
+ * apagado o vencido, operador despublicado, motor apagado— y entonces la
+ * pagina muestra el boton de "consultar con el operador" de siempre. La
+ * funcion de la base aplica exactamente los mismos filtros que para un
+ * producto: ver `tour_reservable`.
+ */
+export async function tourReservable(
+  destino: Destino, babosa: string, idioma: Idioma,
+): Promise<ProductoReservable | null> {
+  if (!destino.reservas_activas) return null;
+
+  const { data, error } = await supabase.rpc('tour_reservable', {
+    p_dominio: destino.dominio,
+    p_babosa: babosa,
+    p_idioma: idioma,
+  });
+  if (error) {
+    console.error('tour_reservable:', error.message);
+    return null;
+  }
+  return ((data ?? []) as ProductoReservable[])[0] ?? null;
+}
+
+/**
  * Cupo libre en una fecha.
  *
  * Devuelve `null` cuando el contrato es "a solicitud": no lo sabemos, y

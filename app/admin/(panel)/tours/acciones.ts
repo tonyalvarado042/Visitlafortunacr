@@ -40,6 +40,13 @@ export async function editarTour(datos: FormData) {
     nombre: texto(datos, 'nombre') || undefined,
     negocio_id: esUuid(texto(datos, 'negocio_id')) ? texto(datos, 'negocio_id') : null,
     categoria_id: esUuid(texto(datos, 'categoria_id')) ? texto(datos, 'categoria_id') : null,
+    /* El contrato es lo que vuelve vendible la tour. Si el formulario no trae
+       el campo —porque la tour todavia no tiene operador y el selector no se
+       dibujo— se deja como estaba: `undefined` no toca la columna, y un null
+       ahi le quitaria la venta a una tour por no haber mostrado un campo. */
+    contrato_id: datos.has('contrato_id')
+      ? (esUuid(texto(datos, 'contrato_id')) ? texto(datos, 'contrato_id') : null)
+      : undefined,
     resumen: texto(datos, 'resumen') || null,
     descripcion: texto(datos, 'descripcion') || null,
     incluye: texto(datos, 'incluye') || null,

@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, tourPorBabosa } from '@/lib/destino';
+import { tourReservable } from '@/lib/reservas';
+import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { textoRicoAHtml } from '@/lib/texto-rico';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -18,10 +20,13 @@ import { Pie } from '@/componentes/Pie';
  * tramo fijo le gana a uno dinámico, así que /es/tour/x nunca se confunde con
  * la ficha de un negocio.
  *
- * El botón NO dice "reservar": hoy el flujo de reserva es por producto con
- * contrato, no por tour. Manda a la ficha del operador, que es donde de verdad
- * se puede pedir. Un botón que promete lo que no hace cuesta más que no
- * tenerlo.
+ * Si la tour tiene CONTRATO ACTIVO se reserva acá mismo, con el mismo widget
+ * de las fichas. Si no lo tiene, la tour sigue existiendo como catálogo y el
+ * botón manda a la ficha del operador: un botón que promete lo que no hace
+ * cuesta más que no tenerlo.
+ *
+ * Quién decide eso es la base (`tour_reservable`), no esta página. Acá no hay
+ * ninguna regla de negocio que se pueda desincronizar.
  */
 
 export const dynamic = 'force-dynamic';
@@ -51,6 +56,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
   if (!tour) notFound();
 
   const categorias = await categoriasDe(destino, idioma);
+  const vendible = await tourReservable(destino, babosa, idioma);
   const incluye = enLineas(tour.incluye);
   const noIncluye = enLineas(tour.no_incluye);
   const cuerpo = textoRicoAHtml(tour.descripcion);
@@ -175,6 +181,9 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
 
             <aside className="ficha-lado">
               <div className="ficha-reservar">
+                {vendible ? (
+                  <ReservarProducto producto={vendible} idioma={idioma} esTour />
+                ) : (
                 <div className="reservar">
                   <div className="reservar-cabeza">
                     <div>
@@ -215,6 +224,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                     </small>
                   )}
                 </div>
+                )}
               </div>
             </aside>
           </div>

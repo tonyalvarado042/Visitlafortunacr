@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Cabecera, Etiqueta } from '@/componentes/admin/ui';
@@ -12,10 +13,17 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
   const { destino, db } = await contextoPanel('tours');
   const { data: t } = await db.from('dst_tour').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!t) notFound();
-  const [{ data: operadores }, { data: categorias }, { data: salidas }] = await Promise.all([
+  /* Solo los contratos DEL OPERADOR de esta tour. La base tiene un disparador
+     que rechaza un contrato de otro negocio, asi que ofrecer los demas seria
+     ofrecer un error: la lista se arma con los que de verdad se pueden pegar. */
+  const [{ data: operadores }, { data: categorias }, { data: salidas }, { data: contratos }] = await Promise.all([
     db.from('dst_negocio').select('id, nombre').eq('destino_id', destino.id).neq('estado_publicacion', 'archivado').order('nombre'),
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_tour_salida').select('id, sale_el, hora, cupo_total, cupo_tomado, precio_usd, esta_abierta').eq('tour_id', id).gte('sale_el', new Date().toISOString().slice(0, 10)).order('sale_el').limit(30),
+    t.negocio_id
+      ? db.from('dst_contrato').select('id, nombre, esta_activo, vigencia_hasta, comision_tipo, comision_valor')
+          .eq('destino_id', destino.id).eq('negocio_id', t.negocio_id).order('creado_en', { ascending: false })
+      : Promise.resolve({ data: [] as { id: string; nombre: string; esta_activo: boolean; vigencia_hasta: string | null; comision_tipo: string; comision_valor: number | null }[] }),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
@@ -71,6 +79,44 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo"><label>Niño USD</label><input type="number" step="0.01" name="precio_nino_usd" defaultValue={t.precio_nino_usd ?? ''} /></div>
                 <div className="campo"><label>Neto al operador USD</label><input type="number" step="0.01" name="precio_neto_usd" defaultValue={t.precio_neto_usd ?? ''} /></div>
                 <div className="campo"><label>Comisión %</label><input type="number" step="0.5" name="comision_pct" defaultValue={t.comision_pct ?? ''} /></div>
+              </div>
+
+              {/* ---- Lo que vuelve vendible una tour ----
+                  Sin contrato no hay widget de reserva en la pagina publica:
+                  `productos_reservables` solo devuelve lo que tiene contrato
+                  activo. Esto no es un dato mas del formulario, es el
+                  interruptor — y por eso lleva su propia explicacion. */}
+              <div className="campo ancho" style={{ marginTop: 16 }}>
+                <label htmlFor="tc">Contrato <small className="gris">sin esto no se puede reservar</small></label>
+                {!t.negocio_id ? (
+                  <small className="gris">
+                    Primero elegí el <strong>operador</strong> y guardá. Los contratos cuelgan
+                    del negocio, no de la tour.
+                  </small>
+                ) : !contratos?.length ? (
+                  <small className="gris">
+                    Este operador no tiene contratos.{' '}
+                    <Link href={`/admin/negocios/${t.negocio_id}`}>Crearle uno</Link> y volver.
+                  </small>
+                ) : (
+                  <>
+                    <select id="tc" name="contrato_id" defaultValue={t.contrato_id ?? ''}>
+                      <option value="">— sin contrato, no se vende —</option>
+                      {contratos.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.nombre}
+                          {c.comision_valor != null ? ` · ${c.comision_tipo === 'porcentaje' ? `${c.comision_valor}%` : `$${c.comision_valor}`}` : ''}
+                          {c.esta_activo ? '' : ' · APAGADO'}
+                        </option>
+                      ))}
+                    </select>
+                    <small className="gris">
+                      Con un contrato activo la tour muestra el botón de reservar y entra
+                      en el descuento de lanzamiento. Si el contrato está apagado o vencido,
+                      el botón desaparece solo.
+                    </small>
+                  </>
+                )}
               </div>
             </div>
             <div className="tarjeta">

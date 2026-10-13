@@ -95,10 +95,14 @@ function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): st
 }
 
 export function ReservarProducto({
-  producto, idioma,
+  producto, idioma, esTour,
 }: {
   producto: ProductoReservable;
   idioma: Idioma;
+  /* El mismo widget sirve para un producto de una ficha y para una tour con
+     su propia página. Lo único que cambia es con qué nombre viaja el id: la
+     base exige uno de los dos y rechaza los dos juntos. */
+  esTour?: boolean;
 }) {
   const [paraEl, setParaEl] = useState('');
   const [adultos, setAdultos] = useState(2);
@@ -107,9 +111,16 @@ export function ReservarProducto({
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [notas, setNotas] = useState('');
+  const [cupon, setCupon] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState<string | null>(null);
+  /* Lo que de verdad quedó guardado, dicho por el servidor. El total de acá
+     arriba es una estimación con la tarifa a la vista; si entró un cupón, el
+     único que sabe cuánto rebajó es la base. */
+  const [cobro, setCobro] = useState<{ total: number | null; descuento: number | null }>(
+    { total: null, descuento: null },
+  );
   /* Dos pasos: 1 es fecha y personas, 2 son los datos de contacto.
      Entera, la tarjeta medía 1034px contra una pantalla de 900: pegada a la
      columna, el botón de enviar quedaba siempre debajo del borde y no había
@@ -160,9 +171,12 @@ export function ReservarProducto({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          producto_id: producto.producto_id,
+          ...(esTour
+            ? { tour_id: producto.producto_id }
+            : { producto_id: producto.producto_id }),
           para_el: paraEl, adultos, ninos,
           nombre, email, whatsapp, notas, idioma,
+          cupon: cupon.trim() || null,
         }),
       });
       const datos = await r.json();
@@ -170,6 +184,7 @@ export function ReservarProducto({
         setError(datos?.error ?? t('reserva_error', idioma));
         return;
       }
+      setCobro({ total: datos.total_usd ?? null, descuento: datos.descuento_usd ?? null });
       setCodigo(datos.codigo ?? '');
     } catch {
       setError(t('reserva_error', idioma));
@@ -189,6 +204,17 @@ export function ReservarProducto({
         {codigo && (
           <p className="reservar-codigo">
             {t('reserva_codigo', idioma)}: <code>{codigo}</code>
+          </p>
+        )}
+        {/* El total que dijo la base, no el que calculó el navegador: si entró
+            un cupón son distintos, y el que vale es este. */}
+        {cobro.total !== null && (
+          <p className="reservar-listo-total">
+            <span>{t('reserva_total', idioma)}</span>
+            <strong>${plata(cobro.total)}</strong>
+            {cobro.descuento != null && cobro.descuento > 0 && (
+              <small>−${plata(cobro.descuento)} {t('reserva_ahorro', idioma)}</small>
+            )}
           </p>
         )}
         <p>{t('reserva_listo_nota', idioma)}</p>
@@ -346,6 +372,22 @@ export function ReservarProducto({
               </summary>
               <textarea id="rno" rows={2} maxLength={1000} aria-label={t('reserva_notas', idioma)}
                         value={notas} onChange={(e) => setNotas(e.target.value)} />
+            </details>
+
+            {/* El cupón, plegado y de último. Abierto le dice a los nueve de
+                cada diez que no tienen código que les falta algo, y el que sí
+                lo tiene lo va a buscar igual. El descuento de lanzamiento no
+                pasa por acá: ese es automático y ya viene en el precio. */}
+            <details className="reservar-mas">
+              <summary>
+                {t('reserva_cupon', idioma)}
+                <span className="opcional">{t('opcional', idioma)}</span>
+              </summary>
+              <input id="rcu" maxLength={40} autoComplete="off" spellCheck={false}
+                     aria-label={t('reserva_cupon', idioma)}
+                     style={{ textTransform: 'uppercase' }}
+                     value={cupon} onChange={(e) => setCupon(e.target.value.toUpperCase())} />
+              <small className="gris">{t('reserva_cupon_nota', idioma)}</small>
             </details>
 
             {error && <p className="sorteo-error" role="alert">{error}</p>}

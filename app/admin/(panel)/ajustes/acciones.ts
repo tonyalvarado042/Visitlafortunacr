@@ -170,3 +170,55 @@ export async function lanzarDestino(_previo: Estado, datos: FormData): Promise<E
   revalidatePath('/admin', 'layout');
   return { ok: `Destino creado (${String(data).slice(0, 8)}…). Nace apagado: cargá contenido, elegilo arriba a la izquierda y encendelo desde Ajustes.` };
 }
+
+/* ---------------------------------------------------------------------------
+ * Cupones.
+ *
+ * El código se guarda en MAYÚSCULAS y se compara en mayúsculas: quien lo
+ * escribe en el teléfono lo va a escribir como le salga, y un cupón que no
+ * funciona por una minúscula es una venta perdida y un correo de reclamo.
+ * ------------------------------------------------------------------------ */
+
+export async function crearCupon(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('ajustes');
+  if (usuario.rol !== 'admin') return;
+
+  const codigo = texto(datos, 'codigo').toUpperCase().replace(/\s+/g, '');
+  const valor = numero(datos, 'valor');
+  const tipo = texto(datos, 'tipo_descuento') === 'monto' ? 'monto' : 'porcentaje';
+  if (codigo.length < 3 || valor === null || valor <= 0) return;
+  if (tipo === 'porcentaje' && valor > 100) return;
+
+  const { error } = await db.from('dst_cupon').insert({
+    destino_id: destino.id,
+    codigo,
+    descripcion: texto(datos, 'descripcion') || null,
+    tipo_descuento: tipo,
+    valor,
+    minimo_usd: numero(datos, 'minimo_usd'),
+    vale_desde: texto(datos, 'vale_desde') || null,
+    vale_hasta: texto(datos, 'vale_hasta') || null,
+    usos_maximos: numero(datos, 'usos_maximos'),
+  });
+  // 23505 es la unique del código: ya existe, y eso no es un error que contar.
+  if (error && error.code !== '23505') console.error('crearCupon:', error.message);
+  revalidatePath('/admin/ajustes');
+}
+
+/*
+ * Prender o apagar. NO se borra: un cupón usado está enganchado a reservas por
+ * `dst_reserva.cupon_id`, y borrarlo dejaría esas reservas sin saber por qué
+ * cobraron de menos.
+ */
+export async function prenderCupon(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('ajustes');
+  if (usuario.rol !== 'admin') return;
+  const id = texto(datos, 'cupon_id');
+  const prender = texto(datos, 'prender') === '1';
+  if (!esUuid(id)) return;
+
+  const { error } = await db.from('dst_cupon')
+    .update({ esta_activo: prender }).eq('id', id).eq('destino_id', destino.id);
+  if (error) console.error('prenderCupon:', error.message);
+  revalidatePath('/admin/ajustes');
+}
