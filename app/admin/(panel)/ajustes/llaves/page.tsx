@@ -40,6 +40,17 @@ const LLAVES = [
     titulo: 'Clave del cron',
     paraQue: 'Protege las tareas automáticas para que nadie más las dispare.',
   },
+  {
+    nombre: 'BCCR_CORREO',
+    titulo: 'Correo de la suscripción al BCCR',
+    paraQue: 'Con el que te suscribiste en bccr.fi.cr/indicadores-economicos/servicio-web. Va junto con el token.',
+    ejemplo: 'tony@tonyalvarado.com',
+  },
+  {
+    nombre: 'BCCR_TOKEN',
+    titulo: 'Token del BCCR',
+    paraQue: 'Trae el tipo de cambio de compra todos los días. Sin esto, las tarifas de nacionales y residentes no se pueden mostrar.',
+  },
 ];
 
 type Estado = {

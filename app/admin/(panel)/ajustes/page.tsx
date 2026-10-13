@@ -190,10 +190,12 @@ export default async function PaginaAjustes() {
                      defaultValue={d.tipo_cambio_crc ?? ''} disabled={!esAdmin}
                      placeholder="vacío = no se venden tarifas nacionales" />
               <small>
-                El tipo de <strong>compra</strong> del BCCR.
+                El tipo de <strong>compra</strong> del BCCR, que es el que pide el
+                tarifario. <strong>Se actualiza solo todos los días</strong>; esto es
+                para corregirlo a mano si hace falta.
                 {d.tipo_cambio_en
-                  ? ` Actualizado el ${new Date(d.tipo_cambio_en).toLocaleDateString('es-CR')}.`
-                  : ' Sin cargar.'}
+                  ? ` Última actualización: ${new Date(d.tipo_cambio_en).toLocaleString('es-CR')}.`
+                  : ' Todavía no se ha traído ninguno.'}
               </small>
             </div>
             <div className="campo"><label htmlFor="tc-piso">Piso del contrato</label>
@@ -202,6 +204,16 @@ export default async function PaginaAjustes() {
               <small>
                 Si el colón se fortalece por debajo de este número, se cobra igual a este tipo.
                 El tarifario de Paradise 2026 lo fija en <strong>550</strong>.
+              </small>
+            </div>
+            <div className="campo ancho">
+              <small>
+                Lo trae el cron de <code>/api/cron/tipo-cambio</code> con el indicador
+                317 del BCCR. Necesita <strong>BCCR_CORREO</strong> y{' '}
+                <strong>BCCR_TOKEN</strong> en{' '}
+                <Link href="/admin/ajustes/llaves">Llaves</Link> — la suscripción es
+                gratis y se pide en bccr.fi.cr. Si el BCCR no contesta, se deja el
+                último bueno: un tipo de cambio de ayer es correcto, uno inventado no.
               </small>
             </div>
             <div className="campo ancho">
