@@ -12,6 +12,7 @@ import { Calificar } from '@/componentes/Calificar';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { productosReservables } from '@/lib/reservas';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
+import { TiraAtributos } from '@/componentes/TiraAtributos';
 import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
 import { taparContacto } from '@/lib/contacto-tapado';
@@ -159,6 +160,11 @@ export default async function Ficha({ params }: { params: Parametros }) {
             nada sobre lo que montarse. */}
         <div className={`ficha-cuerpo${esDestacado && fotoHero ? ' ficha-con-hero' : ''}`}>
           <div className="ficha-principal">
+            {/* Los hechos primero. Quien compara tres termales no lee el
+                párrafo de ninguna: busca si hay parqueo, si hay restaurante y
+                a qué hora cierra. */}
+            <TiraAtributos etiquetas={generales} horario={horario} idioma={idioma} />
+
             <FotosArriba fotos={fotos} idioma={idioma} />
 
             {negocio.video_url && (
@@ -178,12 +184,6 @@ export default async function Ficha({ params }: { params: Parametros }) {
             )}
             {negocio.como_llegar && (
               <p style={{ fontSize: 15, color: 'var(--humo)', marginTop: 18 }}>{negocio.como_llegar}</p>
-            )}
-
-            {generales.length > 0 && (
-              <div className="pastillas">
-                {generales.map((e) => <span key={e.babosa}>{e.nombre}</span>)}
-              </div>
             )}
 
             {/* Plegables con <details>, como la hamburguesa de la barra: sin

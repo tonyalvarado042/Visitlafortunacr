@@ -2749,3 +2749,40 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .tour-marcas li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; line-height: 1.5; }
 .tour-marcas svg { flex-shrink: 0; margin-top: 2px; }
 .tour-marcas.apagada li { color: var(--humo); }
+
+/* La tira de hechos de la ficha: seis cosas que se leen de un vistazo antes de
+   leer nada. Se parte sola en varias filas cuando no caben. */
+/* Rejilla de 3 y no flex: con flex, seis cosas caen 4 + 2 y la segunda fila
+   queda coja, con dos celdas estiradas al doble. Tres por fila dan dos filas
+   parejas, que es lo que hace que se lea como una tabla de hechos y no como
+   una bolsa de etiquetas. */
+.tira-atributos {
+  list-style: none; margin: 0 0 28px; padding: 0;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--carbon); border: 1px solid var(--borde); border-radius: 8px;
+}
+.tira-atributos li {
+  min-width: 0;
+  display: flex; align-items: center; gap: 11px;
+  padding: 16px 18px; color: var(--verde);
+  border-left: 1px solid var(--borde); border-top: 1px solid var(--borde);
+}
+.tira-atributos li:nth-child(3n + 1) { border-left: none; }
+.tira-atributos li:nth-child(-n + 3) { border-top: none; }
+.tira-atributos svg { flex-shrink: 0; }
+.tira-atributos span {
+  font-size: 13.5px; font-weight: 700; line-height: 1.25;
+  color: var(--txt-0); min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .tira-atributos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tira-atributos li { padding: 13px 14px; }
+  /* Con dos por fila cambian cuáles llevan raya: la de la izquierda sobra en
+     las impares, y la de arriba en las dos primeras. */
+  .tira-atributos li:nth-child(3n + 1) { border-left: 1px solid var(--borde); }
+  .tira-atributos li:nth-child(-n + 3) { border-top: 1px solid var(--borde); }
+  .tira-atributos li:nth-child(odd) { border-left: none; }
+  .tira-atributos li:nth-child(-n + 2) { border-top: none; }
+  .tira-atributos span { font-size: 12.5px; }
+}
