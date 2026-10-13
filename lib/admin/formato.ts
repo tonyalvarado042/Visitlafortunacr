@@ -62,6 +62,9 @@ export const TEMPERATURA: Record<string, { nombre: string; color: string }> = {
 export const TIPO_SOLICITUD: Record<string, string> = {
   itinerario: 'Itinerario', tour: 'Tour', hospedaje: 'Hospedaje', transporte: 'Transporte',
   consulta_general: 'Consulta', reclamo_ficha: 'Reclamo de ficha',
+  /* El que entra solo cuando alguien pide una reserva desde una ficha. Es el
+     lead más caliente que hay: ya eligió día, cuántos van y dejó el correo. */
+  reserva: 'Reserva',
 };
 
 export const ESTADO_CONVERSACION: Record<string, { nombre: string; color: string }> = {

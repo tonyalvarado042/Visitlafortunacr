@@ -15,9 +15,19 @@ export default async function PaginaLead({ params }: { params: Promise<{ id: str
   const { id } = await params;
   const { destino, db, usuario } = await contextoPanel('leads');
 
+  /*
+   * El embed del itinerario NOMBRA su relación, y sin eso esta página daba 404
+   * SIEMPRE —todas las fichas de lead, no una.
+   *
+   * Hay DOS caminos entre `dst_solicitud` e `dst_itinerario`:
+   * `dst_solicitud.itinerario_id` y `dst_itinerario.solicitud_id`. Con dos,
+   * PostgREST no adivina cuál se quiere, devuelve error en vez de datos, y acá
+   * eso llega como `data: null` — que este código interpretaba como "no
+   * existe" y mandaba al notFound. Un fallo que se disfraza de 404.
+   */
   const { data: s } = await db
     .from('dst_solicitud')
-    .select('*, viajero:dst_viajero(*), negocio:dst_negocio(nombre), tour:dst_tour(nombre), itinerario:dst_itinerario(id, titulo, babosa, idioma, dias, total_usd)')
+    .select('*, viajero:dst_viajero(*), negocio:dst_negocio(nombre), tour:dst_tour(nombre), itinerario:dst_itinerario!dst_solicitud_itinerario_id_fkey(id, titulo, babosa, idioma, dias, total_usd)')
     .eq('id', id).eq('destino_id', destino.id)
     .maybeSingle();
   if (!s) notFound();
