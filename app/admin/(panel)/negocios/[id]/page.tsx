@@ -4,7 +4,8 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto } from '../acciones';
+import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon } from '../acciones';
+import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
 
@@ -18,12 +19,13 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   const { data: n } = await db.from('dst_negocio').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n) notFound();
 
-  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }] = await Promise.all([
+  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
     db.from('dst_negocio_foto').select('id, url, es_portada, orden, credito, licencia, fuente_url, es_generica').eq('negocio_id', id).order('es_generica').order('orden'),
     db.from('dst_solicitud').select('id, tipo, etapa, creado_en').eq('negocio_id', id).order('creado_en', { ascending: false }).limit(10),
+    db.from('dst_negocio_razon').select('id, titulo, texto, foto_url, orden').eq('negocio_id', id).order('orden'),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
@@ -101,6 +103,57 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                 <dt>Babosa</dt><dd>{n.babosa}</dd>
               </dl>
               <div className="pie-formulario"><BotonAccion>Guardar todo</BotonAccion></div>
+            </div>
+
+            {/* ---- Las tres razones para elegir ----
+                Es el bloque que más convence de la ficha. No se rellena solo:
+                si nadie las escribe, no sale. Los campos viven dentro del
+                formulario grande y cada botón usa `formAction` — un formulario
+                dentro de otro no es HTML válido. */}
+            <div className="tarjeta">
+              <h2>Razones para elegir <small>{razones?.length ?? 0} de 3 · salen en la ficha</small></h2>
+
+              {!razones?.length ? (
+                <Vacio texto="Sin razones escritas, el bloque no aparece en la ficha. Escribí tres: por qué esta y no otra." />
+              ) : (
+                <ul className="razones-admin">
+                  {razones.map((r, i) => (
+                    <li key={r.id}>
+                      {r.foto_url
+                        ? <img src={r.foto_url} alt="" />
+                        : <span className="razon-sin-foto" aria-hidden="true" />}
+                      <span className="razon-admin-texto">
+                        <strong>{r.titulo}</strong>
+                        {r.texto && <span>{r.texto}</span>}
+                      </span>
+                      <span className="razon-admin-botones">
+                        <button type="submit" name="razon_mover" value={`${r.id}|-1`} formAction={moverRazon}
+                                className="boton chico secundario" disabled={i === 0} aria-label="Subir">↑</button>
+                        <button type="submit" name="razon_mover" value={`${r.id}|1`} formAction={moverRazon}
+                                className="boton chico secundario" disabled={i === razones.length - 1} aria-label="Bajar">↓</button>
+                        <button type="submit" name="razon_id" value={r.id} formAction={borrarRazon}
+                                className="boton chico peligro" aria-label="Borrar">×</button>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {(razones?.length ?? 0) < 3 && (
+                <div className="razon-nueva">
+                  <div className="campo"><label htmlFor="rz-tit">Título</label>
+                    <input id="rz-tit" name="razon_titulo" maxLength={90} placeholder="Menos gente que en las grandes" /></div>
+                  <div className="campo"><label htmlFor="rz-txt">Una o dos líneas</label>
+                    <input id="rz-txt" name="razon_texto" maxLength={240} placeholder="Las conocidas se llenan en temporada. Acá el aforo es menor." /></div>
+                  <CampoImagen
+                    nombre="razon_foto_url"
+                    etiqueta="Foto de la razón"
+                    valor={null}
+                    carpeta="razones"
+                    ayuda="Sale apaisada, como 420 × 300"
+                  />
+                  <button type="submit" formAction={agregarRazon} className="boton chico">Agregar razón</button>
+                </div>
+              )}
             </div>
 
             <div className="tarjeta">

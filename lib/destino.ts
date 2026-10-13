@@ -500,3 +500,32 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
     negocio: n ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null } : null,
   };
 }
+
+export type RazonDeNegocio = {
+  id: string;
+  titulo: string;
+  texto: string | null;
+  foto_url: string | null;
+};
+
+/*
+ * Las razones para elegir este negocio y no otro.
+ *
+ * Tres frases con foto que responden la única pregunta que importa cuando
+ * alguien compara: por qué esta. Si el negocio no tiene ninguna escrita, se
+ * devuelve vacío y el bloque no sale — mejor eso que una razón genérica, que
+ * no convence a nadie y ensucia a los negocios que sí escribieron las suyas.
+ *
+ * Se piden cuatro y se usan tres: así, si alguien cargó una de más, la ficha
+ * no se descuadra, y el límite se ve en el panel y no en la página.
+ */
+export async function razonesDe(negocioId: string): Promise<RazonDeNegocio[]> {
+  const { data, error } = await supabase
+    .from('dst_negocio_razon')
+    .select('id, titulo, texto, foto_url')
+    .eq('negocio_id', negocioId)
+    .order('orden')
+    .limit(4);
+  if (error) return [];
+  return ((data ?? []) as RazonDeNegocio[]).slice(0, 3);
+}

@@ -26,7 +26,7 @@ export function CampoImagen({
   nombre: string;
   etiqueta: string;
   valor: string | null;
-  carpeta: 'rifa' | 'marca' | 'portadas' | 'experiencias' | 'guias';
+  carpeta: 'rifa' | 'marca' | 'portadas' | 'experiencias' | 'guias' | 'razones';
   ayuda?: string;
   desactivado?: boolean;
 }) {

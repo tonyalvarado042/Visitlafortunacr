@@ -211,3 +211,23 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 .cita-cuerpo strong { font-size: 12.5px; }
 .cita-cuerpo span { font-size: 12px; color: var(--humo); line-height: 1.4; }
 .citas-admin button { flex-shrink: 0; }
+
+/* Las tres razones para elegir, en el panel del negocio. */
+.razones-admin { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.razones-admin li {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px; background: var(--sup-1); border-radius: 6px;
+}
+.razones-admin img, .razon-sin-foto {
+  width: 62px; height: 46px; flex-shrink: 0; object-fit: cover;
+  border-radius: 4px; background: var(--sup-3); border: 1px solid var(--borde);
+}
+.razon-admin-texto { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex-grow: 1; }
+.razon-admin-texto strong { font-size: 13.5px; }
+.razon-admin-texto span { font-size: 12px; color: var(--humo); line-height: 1.4; }
+.razon-admin-botones { display: flex; gap: 5px; flex-shrink: 0; }
+.razon-nueva {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 14px; border: 1px dashed var(--borde-4); border-radius: 7px;
+}
+.razon-nueva .boton { align-self: flex-start; }

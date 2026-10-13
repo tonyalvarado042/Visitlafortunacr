@@ -20,7 +20,7 @@ export const runtime = 'nodejs';
 const TOPE = 4 * 1024 * 1024;
 const ANCHO_MAX = 1800;
 const TIPOS = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
-const CARPETAS = ['rifa', 'marca', 'portadas', 'experiencias', 'guias'];
+const CARPETAS = ['rifa', 'marca', 'portadas', 'experiencias', 'guias', 'razones'];
 
 export async function POST(peticion: NextRequest) {
   /* contextoPanel redirige si no hay sesion; aqui eso seria una redireccion

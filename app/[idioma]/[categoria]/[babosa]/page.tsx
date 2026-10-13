@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, SIMBOLO_PRECIO } from '@/lib/destino';
 import { nota, resenasDe } from '@/lib/resenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -45,7 +45,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
   const negocio = await negocioPorBabosa(destino, babosa, idioma);
   if (!negocio) notFound();
 
-  const [categorias, externas, propias, secciones, horario, etiquetas, fotos, tours] = await Promise.all([
+  const [categorias, externas, propias, secciones, horario, etiquetas, fotos, tours, razones] = await Promise.all([
     categoriasDe(destino, idioma),
     notasExternasDe(negocio.id),
     resenasDe(negocio.id),
@@ -54,6 +54,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
     etiquetasDe(negocio.id, idioma),
     fotosDe(negocio.id, idioma),
     toursDe(negocio.id),
+    razonesDe(negocio.id),
   ]);
 
   // El nombre del día sale de Intl y no del diccionario: son 7 palabras por 5
@@ -185,6 +186,32 @@ export default async function Ficha({ params }: { params: Parametros }) {
             )}
             {negocio.como_llegar && (
               <p style={{ fontSize: 15, color: 'var(--humo)', marginTop: 18 }}>{negocio.como_llegar}</p>
+            )}
+
+            {/* Por qué ESTA y no otra. Es la única pregunta que importa cuando
+                alguien compara tres termales, y la descripción no la responde:
+                un párrafo no se compara. Si el negocio no tiene razones
+                escritas, el bloque no sale. */}
+            {razones.length > 0 && (
+              <section className="razones">
+                <div className="razones-cabeza">
+                  <span className="razones-rotulo">{t('razones_rotulo', idioma)}</span>
+                  <h2>{t('razones_titulo', idioma)} {negocio.nombre}</h2>
+                </div>
+                <div className="razones-tarjetas">
+                  {razones.map((r) => (
+                    <article key={r.id}>
+                      {r.foto_url && (
+                        <img src={r.foto_url} alt="" loading="lazy" decoding="async" />
+                      )}
+                      <div className="razon-texto">
+                        <h3>{r.titulo}</h3>
+                        {r.texto && <p>{r.texto}</p>}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
             )}
 
             {/* Qué incluye y qué no. Sale del producto con contrato, así que en

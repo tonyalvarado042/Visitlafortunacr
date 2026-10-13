@@ -401,3 +401,82 @@ export async function destacarExtracto(datos: FormData) {
   if (error) console.error('destacarExtracto:', error.message);
   refrescar(id);
 }
+
+/* ---------------------------------------------------------------------------
+ * Las tres razones para elegir un negocio.
+ *
+ * Son el bloque que más convence de la ficha, y el único que pide escribir
+ * contenido a mano por negocio. Por eso no se rellenan solas ni se heredan de
+ * la descripción: si nadie las escribió, el bloque no sale.
+ * ------------------------------------------------------------------------ */
+
+/** Que el negocio sea de ESTE destino. El id viene del navegador. */
+async function negocioDelDestino(db: Awaited<ReturnType<typeof contextoPanel>>['db'], destinoId: string, id: string) {
+  const { data } = await db.from('dst_negocio')
+    .select('id').eq('id', id).eq('destino_id', destinoId).maybeSingle();
+  return !!data;
+}
+
+export async function agregarRazon(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const titulo = texto(datos, 'razon_titulo');
+  if (!esUuid(id) || titulo.length < 2) return;
+  if (!(await negocioDelDestino(db, destino.id, id))) return;
+
+  /* Tres y no más: la ficha muestra tres, y dejar cargar seis para después
+     esconder tres es una trampa para quien las escribe. */
+  const { count } = await db.from('dst_negocio_razon')
+    .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+  if ((count ?? 0) >= 3) return;
+
+  const { error } = await db.from('dst_negocio_razon').insert({
+    negocio_id: id,
+    titulo: titulo.slice(0, 90),
+    texto: texto(datos, 'razon_texto').slice(0, 240) || null,
+    foto_url: texto(datos, 'razon_foto_url') || null,
+    orden: count ?? 0,
+  });
+  if (error) console.error('agregarRazon:', error.message);
+  refrescar(id);
+}
+
+export async function borrarRazon(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const razonId = texto(datos, 'razon_id');
+  if (!esUuid(id) || !esUuid(razonId)) return;
+  if (!(await negocioDelDestino(db, destino.id, id))) return;
+
+  // `negocio_id` en el where tambien: sin eso, un id de otro negocio borraria.
+  const { error } = await db.from('dst_negocio_razon')
+    .delete().eq('id', razonId).eq('negocio_id', id);
+  if (error) console.error('borrarRazon:', error.message);
+  refrescar(id);
+}
+
+export async function moverRazon(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  /* El id y el paso viajan JUNTOS en el valor del botón: un botón manda un
+     solo par nombre/valor, así que un campo `paso` suelto en el formulario
+     valdría lo mismo para subir que para bajar — y el de subir bajaría. */
+  const [razonId, pasoTexto] = texto(datos, 'razon_mover').split('|');
+  const paso = Number(pasoTexto);
+  if (!esUuid(id) || !esUuid(razonId) || (paso !== 1 && paso !== -1)) return;
+  if (!(await negocioDelDestino(db, destino.id, id))) return;
+
+  const { data: todas } = await db.from('dst_negocio_razon')
+    .select('id, orden').eq('negocio_id', id).order('orden');
+  const lista = todas ?? [];
+  const i = lista.findIndex((r) => r.id === razonId);
+  const j = i + paso;
+  if (i < 0 || j < 0 || j >= lista.length) return;
+
+  /* Se reescriben los dos órdenes y no se intercambian los ids: si dos filas
+     quedaron con el mismo `orden` —y pueden, no hay restricción que lo impida—
+     intercambiar no mueve nada y el botón parece roto. */
+  await db.from('dst_negocio_razon').update({ orden: j }).eq('id', lista[i].id).eq('negocio_id', id);
+  await db.from('dst_negocio_razon').update({ orden: i }).eq('id', lista[j].id).eq('negocio_id', id);
+  refrescar(id);
+}
