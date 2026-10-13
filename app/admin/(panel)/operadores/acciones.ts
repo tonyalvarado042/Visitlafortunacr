@@ -83,8 +83,16 @@ export async function guardarContrato(datos: FormData) {
     politica_cancelacion: texto(datos, 'politica_cancelacion') || null,
     vigencia_desde: texto(datos, 'vigencia_desde') || null,
     vigencia_hasta: texto(datos, 'vigencia_hasta') || null,
-    documento_url: /^https?:\/\/\S+$/i.test(texto(datos, 'documento_url'))
-      ? texto(datos, 'documento_url') : null,
+    /* Dos formas válidas: un enlace de afuera (Drive, Dropbox) o la RUTA de un
+       archivo del bucket privado `contratos`. Lo segundo es lo normal desde
+       que hay botón de subir; lo primero quedó para lo que ya estaba cargado
+       en otro lado. Cualquier otra cosa se descarta. */
+    documento_url: (() => {
+      const v = texto(datos, 'documento_url');
+      if (/^https?:\/\/\S+$/i.test(v)) return v;
+      if (/^[a-z0-9][a-z0-9/_.-]{3,250}$/i.test(v) && !v.includes('..')) return v;
+      return null;
+    })(),
     notas: texto(datos, 'notas') || null,
     esta_activo: esSi(datos, 'esta_activo'),
     actualizado_en: new Date().toISOString(),
@@ -182,4 +190,32 @@ export async function borrarTarifa(datos: FormData) {
   if (!esUuid(id)) return;
   await db.from('dst_tarifa').delete().eq('id', id);
   refrescar();
+}
+
+/*
+ * El contrato firmado y el tarifario viven en un bucket PRIVADO: traen IBANs y
+ * las tarifas netas negociadas. Por eso no hay url pública que guardar — lo
+ * que se guarda es la RUTA, y para mirarlo se pide una url firmada que caduca.
+ *
+ * Diez minutos alcanzan para abrirlo y no para que el enlace sirva reenviado.
+ */
+export async function verElContrato(ruta: string): Promise<{ url?: string; error?: string }> {
+  const { db, usuario } = await contextoPanel('operadores');
+  if (usuario.rol !== 'admin') return { error: 'Solo un administrador.' };
+  if (!ruta || ruta.startsWith('http')) return { error: 'Esa no es una ruta del archivero.' };
+
+  const { data, error } = await db.storage.from('contratos').createSignedUrl(ruta, 600);
+  if (error || !data) return { error: error?.message ?? 'No se pudo abrir.' };
+  return { url: data.signedUrl };
+}
+
+/** Borrar el archivo del archivero. El campo del contrato lo limpia el formulario. */
+export async function borrarElContrato(ruta: string): Promise<{ ok?: boolean; error?: string }> {
+  const { db, usuario } = await contextoPanel('operadores');
+  if (usuario.rol !== 'admin') return { error: 'Solo un administrador.' };
+  if (!ruta || ruta.startsWith('http')) return { error: 'Esa no es una ruta del archivero.' };
+
+  const { error } = await db.storage.from('contratos').remove([ruta]);
+  if (error) return { error: error.message };
+  return { ok: true };
 }

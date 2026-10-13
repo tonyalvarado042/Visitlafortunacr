@@ -5,6 +5,7 @@ import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import {
   cambiarOperador, guardarContrato, guardarProducto, guardarTarifa, borrarTarifa,
 } from './acciones';
+import { DocumentoContrato } from './DocumentoContrato';
 import { NuevoContrato, NuevoProducto } from './Nuevos';
 
 export const dynamic = 'force-dynamic';
@@ -237,9 +238,8 @@ export default async function PaginaOperadores() {
                 <textarea name="politica_cancelacion" rows={3}
                           defaultValue={c.politica_cancelacion ?? ''} disabled={!esAdmin} />
                 <small>Se le muestra a quien reserva. Si no está, no se puede cobrar.</small></div>
-              <div className="campo ancho"><label>Enlace al contrato firmado</label>
-                <input name="documento_url" placeholder="https://…"
-                       defaultValue={c.documento_url ?? ''} disabled={!esAdmin} /></div>
+              <DocumentoContrato contratoId={c.id} negocioBabosa={n?.babosa ?? 'sin-negocio'}
+                                 valor={c.documento_url} puedeEditar={esAdmin} />
               <div className="campo ancho"><label>Notas internas</label>
                 <textarea name="notas" rows={2} defaultValue={c.notas ?? ''} disabled={!esAdmin} /></div>
 

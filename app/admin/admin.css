@@ -246,3 +246,21 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
   padding: 14px; border: 1px dashed var(--borde-4); border-radius: 7px;
 }
 .combina-nueva .campo { flex: 1 1 190px; min-width: 0; }
+
+/* ---- El contrato firmado y el tarifario ----------------------------------
+   Archivo privado: se sube con botón, se abre con enlace firmado. El campo de
+   pegar una dirección quedó plegado, para lo que ya vivía en un Drive. */
+.doc-contrato {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 11px 13px; background: var(--sup-1); border-radius: 6px;
+}
+.doc-contrato.vacio { color: var(--humo); font-size: 13px; border: 1px dashed var(--borde-4); background: none; }
+.doc-contrato-nombre {
+  flex-grow: 1; min-width: 0; font-size: 13px; font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.doc-contrato-botones { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 9px; }
+.doc-contrato-botones label { cursor: pointer; margin: 0; }
+.doc-contrato-enlace summary { cursor: pointer; font-size: 12px; color: var(--humo); }
+.doc-contrato-enlace summary:hover { color: var(--naranja); }
+.doc-contrato-enlace input { margin-top: 7px; width: 100%; min-width: 260px; }
