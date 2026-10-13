@@ -106,6 +106,41 @@ export async function productosReservables(
   return (data ?? []) as ProductoReservable[];
 }
 
+/*
+ * Un COMPLEMENTO: algo que se suma a un pase, nunca se vende solo.
+ *
+ * El Wellness Upgrade de Paradise es el caso: «se puede añadir a un pase del
+ * día, no se puede ofrecer por sí solo, es solo para adultos y requiere 3h de
+ * anticipación». Esas reglas las hace cumplir la base — acá viajan para poder
+ * explicarlas antes de que la persona apriete, no para decidir nada.
+ *
+ * El precio NETO no viene: es lo que se le paga al operador.
+ */
+export type Complemento = {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  precio_usd: number;
+  solo_adultos: boolean;
+  horas_antelacion: number;
+  maximo_por_reserva: number | null;
+};
+
+export async function complementosDeNegocio(
+  destino: Destino, negocioBabosa: string,
+): Promise<Complemento[]> {
+  if (!destino.reservas_activas) return [];
+  const { data, error } = await supabase.rpc('complementos_de_negocio', {
+    p_dominio: destino.dominio,
+    p_negocio_babosa: negocioBabosa,
+  });
+  if (error) {
+    console.error('complementos_de_negocio:', error.message);
+    return [];
+  }
+  return (data ?? []) as Complemento[];
+}
+
 /**
  * La misma cosa, para una tour suelta.
  *

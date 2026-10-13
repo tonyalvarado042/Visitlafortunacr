@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
-import type { ProductoReservable } from '@/lib/reservas';
+import type { ProductoReservable, Complemento } from '@/lib/reservas';
 
 /*
  * El widget de reserva de la ficha.
@@ -109,15 +109,25 @@ function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): st
 }
 
 export function ReservarProducto({
-  producto, idioma, esTour,
+  productos, producto: unoSolo, complementos = [], idioma, esTour,
 }: {
-  producto: ProductoReservable;
+  /* Varios pases en UNA tarjeta. Antes la ficha pintaba una tarjeta entera por
+     producto: dos fechas, dos contadores y dos botones de enviar para el mismo
+     negocio, el mismo día y la misma gente. */
+  productos?: ProductoReservable[];
+  /* La página de una tour manda uno solo, que es todo lo que tiene. */
+  producto?: ProductoReservable;
+  complementos?: Complemento[];
   idioma: Idioma;
   /* El mismo widget sirve para un producto de una ficha y para una tour con
      su propia página. Lo único que cambia es con qué nombre viaja el id: la
      base exige uno de los dos y rechaza los dos juntos. */
   esTour?: boolean;
 }) {
+  const lista = productos?.length ? productos : (unoSolo ? [unoSolo] : []);
+  const [cual, setCual] = useState(0);
+  const producto = lista[Math.min(cual, lista.length - 1)];
+  const variosPases = lista.length > 1;
   const [paraEl, setParaEl] = useState('');
   const [adultos, setAdultos] = useState(2);
   const [ninos, setNinos] = useState(0);
@@ -129,6 +139,8 @@ export function ReservarProducto({
   /* Lo DECLARA la persona; el negocio lo verifica en la entrada. No hay forma
      de comprobarlo en línea, y fingir que la hay sería peor que decirlo. */
   const [residencia, setResidencia] = useState<Residencia>('todos');
+  /* El complemento es por persona adulta. 0 = no lo quiere. */
+  const [extras, setExtras] = useState(0);
   const [cedula, setCedula] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -151,7 +163,27 @@ export function ReservarProducto({
   const hayNacional = producto.tarifas.some((x) => x.residencia === 'nacional');
   const visibles = tarifasDe(producto.tarifas, residencia);
 
-  const subtotal = totalEstimado(producto.tarifas, adultos, ninos, residencia);
+  /* Solo los complementos que la reserva puede llevar hoy: uno «solo adultos»
+     no tiene sentido si no hay adultos, y ofrecerlo para después rebotarlo en
+     el servidor es hacerle perder el tiempo a la gente. */
+  const extrasPosibles = complementos.filter((c) => !c.solo_adultos || adultos > 0);
+  const extra = extrasPosibles[0] ?? null;
+  /* Tope: por persona adulta si es solo para adultos, si no por persona. */
+  const topeExtras = extra
+    ? Math.min(
+        extra.solo_adultos ? adultos : adultos + ninos,
+        extra.maximo_por_reserva ?? 99,
+      )
+    : 0;
+  const extrasPedidos = Math.min(extras, topeExtras);
+
+  const pases = totalEstimado(producto.tarifas, adultos, ninos, residencia);
+  /* El complemento se cobra en DÓLARES aunque el pase vaya en colones: así
+     está en el tarifario, bajo «complemento (nacionales y extranjeros)» con un
+     solo precio. Por eso se suma al total en dólares y no al de colones. */
+  const costoExtras = extra ? extra.precio_usd * extrasPedidos : 0;
+  const subtotal = pases === null ? null : pases + costoExtras;
+
   const pct = Number(producto.descuento_pct ?? 0);
   /* El redondeo a dos decimales se hace igual que en la base, para que el
      número que se ve y el que se cobra no se separen por un centavo. */
@@ -190,7 +222,10 @@ export function ReservarProducto({
     if (ninos > 0 && n == null) return null;
     return adultos * (a ?? 0) + ninos * (n ?? 0);
   })();
-  const totalCrc = subtotalCrc == null ? null
+  /* Con complemento el total es MIXTO —pases en colones, upgrade en dólares—
+     y no hay un número honesto en una sola moneda. Ahí manda el dólar: un
+     total en colones que no incluya el upgrade sería mentira. */
+  const totalCrc = subtotalCrc == null || extrasPedidos > 0 ? null
     : Math.round(subtotalCrc - (pct > 0 ? (subtotalCrc * pct) / 100 : 0));
 
   /* La antelación que pide el producto, convertida a la primera fecha que el
@@ -227,6 +262,8 @@ export function ReservarProducto({
           cupon: cupon.trim() || null,
           residencia,
           cedula: residencia === 'nacional' ? cedula.trim() : null,
+          complemento: extrasPedidos > 0 && extra ? extra.id : null,
+          complementos: extrasPedidos,
         }),
       });
       const datos = await r.json();
@@ -291,12 +328,42 @@ export function ReservarProducto({
       <div className="reservar-cabeza">
         <div>
           <h2>{t('reserva_titulo', idioma)}</h2>
-          <p className="reservar-que">{producto.nombre}</p>
+          {/* Con varios pases el nombre ya lo dice el selector de abajo, con
+              su precio al lado. Repetirlo arriba hace leer dos veces lo mismo
+              y empuja todo lo demás hacia abajo. */}
+          {!variosPases && <p className="reservar-que">{producto.nombre}</p>}
         </div>
         {/* Las tarifas solo en el paso 1. En el paso 2 ya eligió, el resumen
             de arriba dice qué día y cuántos, y esos 97px son la diferencia
             entre que el botón de enviar quepa en pantalla o no. */}
         <div className="reservar-precio" hidden={paso === 2}>
+          {/* ---- Qué pase ----
+              Filas y no pestañas: cada una dice el PRECIO al lado del nombre,
+              que es lo que de verdad se compara. Una pestaña con el nombre
+              solo obliga a abrir las dos para decidir. */}
+          {variosPases && (
+            <div className="reservar-pases">
+              {lista.map((p, i) => {
+                const suya = tarifasDe(p.tarifas, residencia);
+                const desde = suya.find((x) => x.es_para === 'adulto') ?? suya[0];
+                return (
+                  <button key={p.producto_id} type="button"
+                          className={i === cual ? 'activo' : undefined}
+                          aria-pressed={i === cual}
+                          onClick={() => { setCual(i); setError(null); }}>
+                    <span>
+                      <strong>{p.nombre}</strong>
+                      {p.resumen && <small>{p.resumen}</small>}
+                    </span>
+                    {desde && (
+                      <b>{desde.precio_crc != null ? colones(desde.precio_crc) : `$${desde.precio}`}</b>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* ---- ¿Nacional o residente? ----
               Dos tarifas para el mismo pase, y cuál toca depende de dónde vive
               la persona, no de dónde nació: un extranjero con DIMEX paga la
@@ -346,7 +413,7 @@ export function ReservarProducto({
         </div>
       </div>
 
-      {producto.resumen && <p className="reservar-resumen">{producto.resumen}</p>}
+      {!variosPases && producto.resumen && <p className="reservar-resumen">{producto.resumen}</p>}
 
       {producto.incluye.length > 0 && (
         <ul className="reservar-incluye">
@@ -385,6 +452,34 @@ export function ReservarProducto({
               )}
             </div>
 
+            {/* ---- El complemento ----
+                No es un tercer pase: es un añadido con reglas propias, y por
+                eso va DEBAJO de las personas y arriba del total, donde no
+                compite con la decisión principal. Sus condiciones van escritas
+                ahí mismo y no en letra chica aparte: quien marca esto tiene
+                que saber que es solo para adultos antes de llegar al final.
+                La base las vuelve a exigir — esto es para avisar, no para
+                controlar. */}
+            {extra && (
+              <label className="reservar-extra" htmlFor="rex">
+                <input id="rex" type="checkbox" checked={extrasPedidos > 0}
+                       onChange={(e) => setExtras(e.target.checked ? topeExtras : 0)} />
+                <span>
+                  <span className="reservar-extra-cabeza">
+                    <strong>{extra.nombre}</strong>
+                    <b>+${extra.precio_usd} {t('reserva_cada_uno', idioma)}</b>
+                  </span>
+                  {extra.descripcion && <small>{extra.descripcion}</small>}
+                  <small className="reservar-extra-regla">
+                    {extra.solo_adultos && t('reserva_solo_adultos', idioma)}
+                    {extra.solo_adultos && extra.horas_antelacion > 0 && ' · '}
+                    {extra.horas_antelacion > 0
+                      && `${t('reserva_con_antelacion', idioma)} ${extra.horas_antelacion} h`}
+                  </small>
+                </span>
+              </label>
+            )}
+
             {total !== null && (
               <div className="reservar-total">
                 <span>
@@ -392,6 +487,7 @@ export function ReservarProducto({
                   <small>
                     {adultos} {adultos === 1 ? t('reserva_adulto_uno', idioma) : t('reserva_adultos', idioma).toLowerCase()}
                     {ninos > 0 && <> · {ninos} {ninos === 1 ? t('reserva_nino_uno', idioma) : t('reserva_ninos', idioma).toLowerCase()}</>}
+                    {extrasPedidos > 0 && extra && <> · {extrasPedidos} {extra.nombre}</>}
                   </small>
                 </span>
                 <span className="reservar-cifras">

@@ -3069,3 +3069,37 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* El dolar al lado del colon: referencia, no el numero que se cobra. */
 .reservar-equivale { display: block; font-size: 11px; font-weight: 400; color: var(--txt-4); margin-top: 1px; }
 .reservar-aviso-cedula { display: block; margin-top: 5px; font-size: 11.5px; line-height: 1.5; color: var(--txt-4); }
+
+/* ---- Varios pases en una sola tarjeta -------------------------------------
+   Filas y no pestañas: cada una lleva el precio al lado, que es lo que se
+   compara. Una pestaña con el nombre solo obliga a abrir las dos. */
+.reservar-pases { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+.reservar-pases button {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; padding: 11px 13px; border-radius: 8px; cursor: pointer;
+  font-family: inherit; text-align: left; color: var(--blanco);
+  border: 1px solid var(--borde-3); background: var(--sup-2);
+  transition: border-color .15s, background .15s;
+}
+.reservar-pases button:hover { border-color: var(--naranja); }
+.reservar-pases button.activo { border-color: var(--naranja); background: var(--sup-3); }
+.reservar-pases button > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.reservar-pases strong { font-size: 13px; }
+.reservar-pases small { font-size: 11px; color: var(--txt-4); line-height: 1.4; }
+.reservar-pases b { font-size: 15px; white-space: nowrap; }
+
+/* El complemento: casilla, debajo de las personas y arriba del total. */
+.reservar-extra {
+  display: flex; gap: 11px; align-items: flex-start; cursor: pointer;
+  padding: 12px 13px; border: 1px solid var(--borde-3); border-radius: 8px;
+  background: var(--sup-2); margin-top: 4px;
+}
+.reservar-extra:hover { border-color: var(--naranja); }
+.reservar-extra:has(input:checked) { border-color: var(--naranja); background: var(--sup-3); }
+.reservar-extra input { margin: 2px 0 0; width: 17px; height: 17px; flex: none; accent-color: var(--naranja); }
+.reservar-extra > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.reservar-extra-cabeza { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.reservar-extra-cabeza strong { font-size: 13px; }
+.reservar-extra-cabeza b { font-size: 13px; color: var(--acento-vivo); white-space: nowrap; }
+.reservar-extra small { font-size: 11.5px; line-height: 1.5; color: var(--txt-4); }
+.reservar-extra-regla { font-weight: 700; color: var(--txt-3) !important; }

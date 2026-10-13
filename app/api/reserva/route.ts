@@ -68,6 +68,11 @@ export async function POST(peticion: NextRequest) {
        la tarifa nacional sin cédula. */
     p_residencia: cadena(cuerpo.residencia) === 'nacional' ? 'nacional' : 'todos',
     p_cedula:   cadena(cuerpo.cedula).slice(0, 20) || null,
+    /* El complemento. La base comprueba que sea de ESE negocio, que no haya
+       más que adultos y que alcance la antelación: lo que llega del navegador
+       es un pedido, no un permiso. */
+    p_complemento:  UUID.test(cadena(cuerpo.complemento)) ? cadena(cuerpo.complemento) : null,
+    p_complementos: Math.min(Math.max(entero(cuerpo.complementos), 0), 40),
     p_para_el:  paraEl,
     p_adultos:  adultos,
     p_ninos:    ninos,
@@ -83,7 +88,7 @@ export async function POST(peticion: NextRequest) {
        poca antelación— son útiles para quien reserva y no revelan nada. Los
        demás se tragan: un fallo de conexión no tiene por qué contarle al
        visitante cómo se llama una tabla. */
-    const suyo = /c[eé]dula|DIMEX|residente|nacional|cup[oó]n|cupo|fecha|antelaci|nombre|correo|adulto|niño|nino|disponible|abiertas|venta/i
+    const suyo = /complement|upgrade|adultos|anticipaci|c[eé]dula|DIMEX|residente|nacional|cup[oó]n|cupo|fecha|antelaci|nombre|correo|adulto|niño|nino|disponible|abiertas|venta/i
       .test(error.message);
     console.error('pedir_reserva falló:', error.message);
     return NextResponse.json(

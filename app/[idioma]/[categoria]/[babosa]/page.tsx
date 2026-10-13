@@ -10,7 +10,7 @@ import { IconoVerificado } from '@/componentes/Marca';
 import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
-import { productosReservables } from '@/lib/reservas';
+import { productosReservables, complementosDeNegocio } from '@/lib/reservas';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { TiraAtributos } from '@/componentes/TiraAtributos';
 import { PruebaSocial } from '@/componentes/PruebaSocial';
@@ -78,6 +78,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
      devuelve lista vacia SIN tocar la base y la ficha queda exactamente
      como hoy. Ver los tres interruptores en lib/reservas.ts. */
   const reservables = await productosReservables(destino, babosa, idioma);
+  const complementos = reservables.length ? await complementosDeNegocio(destino, babosa) : [];
 
   const mapa = negocio.latitud && negocio.longitud
     ? `https://www.google.com/maps/search/?api=1&query=${negocio.latitud},${negocio.longitud}`
@@ -452,11 +453,15 @@ export default async function Ficha({ params }: { params: Parametros }) {
               cambia con CSS y no duplicando este bloque: dos copias del mismo
               formulario se desincronizan a la segunda semana. */}
           <aside className={`ficha-lado${reservables.length > 0 ? ' ficha-vende' : ''}`}>
-            {reservables.map((p) => (
-              <div className="ficha-reservar" id="reservar" key={p.producto_id}>
-                <ReservarProducto producto={p} idioma={idioma} />
+            {/* UNA tarjeta, no una por producto. Con dos pases eran dos fechas,
+                dos contadores de personas y dos botones de enviar para el
+                mismo negocio, el mismo día y la misma gente; en el teléfono el
+                segundo quedaba a dos pantallas. El pase se elige adentro. */}
+            {reservables.length > 0 && (
+              <div className="ficha-reservar" id="reservar">
+                <ReservarProducto productos={reservables} complementos={complementos} idioma={idioma} />
               </div>
-            ))}
+            )}
 
             <div className="bloque bloque-contacto">
               <div className="titulo">{t('contacto', idioma)}</div>
