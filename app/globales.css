@@ -2644,3 +2644,16 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .tour-texto strong { font-size: 15px; }
   .tour-precio strong { font-size: 20px; }
 }
+
+/* El total de la reserva, antes de apretar. Va pegado a los campos de personas
+   porque cambia con ellos: si queda lejos, el número se mueve y nadie lo ve. */
+.reservar-total {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 13px 0; margin-top: 2px;
+  border-top: 1px solid var(--borde); border-bottom: 1px solid var(--borde);
+}
+.reservar-total span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.reservar-total strong { font-size: 14.5px; }
+.reservar-total small { font-size: 11.5px; color: var(--humo); }
+.reservar-total b { font-size: 25px; font-weight: 900; letter-spacing: -.03em; }
+.reservar-elegido b { font-weight: 800; }

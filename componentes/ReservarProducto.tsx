@@ -25,6 +25,40 @@ import type { ProductoReservable } from '@/lib/reservas';
 
 const HOY = () => new Date().toISOString().slice(0, 10);
 
+/*
+ * Lo que va a pagar, antes de apretar.
+ *
+ * Es lo primero que la gente busca y hoy no estaba: la tarjeta mostraba $47 y
+ * $33 sueltos y el visitante tenía que multiplicar de cabeza. Ver el número
+ * completo antes de comprometerse es lo que quita la fricción más grande.
+ *
+ * Devuelve `null` —y entonces no se muestra nada— cuando NO se puede afirmar
+ * el total con certeza: si vienen niños y no hay tarifa de niño ni general, el
+ * número sería una suposición, y una suposición con signo de dólares en una
+ * página pública es una promesa que después no podemos cumplir. Misma regla
+ * que ya rige el "consultar" de arriba.
+ *
+ * Ojo: esto es para MIRAR. El total que vale lo calcula el servidor con la
+ * tarifa vigente — un total que viaja desde el navegador es un total que se
+ * edita, y por eso /api/reserva nunca lo recibe.
+ */
+export function totalEstimado(
+  tarifas: ProductoReservable['tarifas'],
+  adultos: number,
+  ninos: number,
+): number | null {
+  const de = (quien: string) => tarifas.find((x) => x.es_para === quien)?.precio ?? null;
+  const general = de('general');
+  const porAdulto = de('adulto') ?? general;
+  const porNino = de('nino') ?? general;
+
+  if (adultos > 0 && porAdulto === null) return null;
+  if (ninos > 0 && porNino === null) return null;
+  if (adultos < 1) return null;
+
+  return adultos * (porAdulto ?? 0) + ninos * (porNino ?? 0);
+}
+
 function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): string {
   if (accion === 'reservar_y_pagar') return t('reserva_y_pagar', idioma);
   if (accion === 'solicitar_disponibilidad') return t('reserva_pedir_dispo', idioma);
@@ -53,6 +87,8 @@ export function ReservarProducto({
      forma de alcanzarlo. Partida, cada paso cabe y además se pide menos de
      entrada, que es como reserva todo el mundo. */
   const [paso, setPaso] = useState<1 | 2>(1);
+
+  const total = totalEstimado(producto.tarifas, adultos, ninos);
 
   /* La antelación que pide el producto, convertida a la primera fecha que el
      formulario deja elegir. Así el visitante no escoge una fecha que el
@@ -185,6 +221,19 @@ export function ReservarProducto({
               )}
             </div>
 
+            {total !== null && (
+              <div className="reservar-total">
+                <span>
+                  <strong>{t('reserva_total', idioma)}</strong>
+                  <small>
+                    {adultos} {adultos === 1 ? t('reserva_adulto_uno', idioma) : t('reserva_adultos', idioma).toLowerCase()}
+                    {ninos > 0 && <> · {ninos} {ninos === 1 ? t('reserva_nino_uno', idioma) : t('reserva_ninos', idioma).toLowerCase()}</>}
+                  </small>
+                </span>
+                <b>${total.toLocaleString(idioma, { maximumFractionDigits: 2 })}</b>
+              </div>
+            )}
+
             {error && <p className="sorteo-error" role="alert">{error}</p>}
 
             {/* type="button": este no envía nada, abre el paso 2. Si fuera
@@ -204,6 +253,7 @@ export function ReservarProducto({
                 {new Date(`${paraEl}T12:00:00`).toLocaleDateString(idioma, { day: 'numeric', month: 'long' })}
                 {' · '}
                 {adultos + ninos} {t('reserva_personas', idioma)}
+                {total !== null && <> · <b>${total.toLocaleString(idioma, { maximumFractionDigits: 2 })}</b></>}
               </span>
               <button type="button" onClick={() => { setError(null); setPaso(1); }}>
                 {t('reserva_volver', idioma)}

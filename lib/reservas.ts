@@ -50,8 +50,13 @@ export type ProductoReservable = {
      mostrar, y el widget dice "consultar".
 
      Van todas y no un "desde": con adulto a $47 y niño a $33, un "desde $33"
-     es cierto y engañoso a la vez — el adulto lee 33 y paga 47. */
-  tarifas: { nombre: string; precio: number }[];
+     es cierto y engañoso a la vez — el adulto lee 33 y paga 47.
+
+     `es_para` viaja para poder sumar el total antes de enviar. Es el nombre
+     CANÓNICO —adulto, nino, senior, general—, no el rótulo: el rótulo es texto
+     libre y traducible ("Adulto", "Adult", "Pase general"), y adivinar por ahí
+     falla en inglés sin que nadie se entere. */
+  tarifas: { nombre: string; es_para: 'adulto' | 'nino' | 'senior' | 'general'; precio: number }[];
   moneda: string;
   precio_verificado: boolean;
   accion: AccionReserva;
