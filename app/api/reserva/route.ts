@@ -63,6 +63,11 @@ export async function POST(peticion: NextRequest) {
     p_producto: esProducto ? producto : null,
     p_tour:     esTour ? tour : null,
     p_cupon:    cadena(cuerpo.cupon).slice(0, 40) || null,
+    /* Lo que la persona DECLARA sobre dónde vive. Cualquier cosa que no sea
+       'nacional' se trata como visitante: la base vuelve a validarlo y rechaza
+       la tarifa nacional sin cédula. */
+    p_residencia: cadena(cuerpo.residencia) === 'nacional' ? 'nacional' : 'todos',
+    p_cedula:   cadena(cuerpo.cedula).slice(0, 20) || null,
     p_para_el:  paraEl,
     p_adultos:  adultos,
     p_ninos:    ninos,
@@ -78,7 +83,7 @@ export async function POST(peticion: NextRequest) {
        poca antelación— son útiles para quien reserva y no revelan nada. Los
        demás se tragan: un fallo de conexión no tiene por qué contarle al
        visitante cómo se llama una tabla. */
-    const suyo = /cup[oó]n|cupo|fecha|antelaci|nombre|correo|adulto|niño|nino|disponible|abiertas|venta/i
+    const suyo = /c[eé]dula|DIMEX|residente|nacional|cup[oó]n|cupo|fecha|antelaci|nombre|correo|adulto|niño|nino|disponible|abiertas|venta/i
       .test(error.message);
     console.error('pedir_reserva falló:', error.message);
     return NextResponse.json(

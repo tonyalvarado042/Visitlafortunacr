@@ -56,7 +56,17 @@ export type ProductoReservable = {
      CANÓNICO —adulto, nino, senior, general—, no el rótulo: el rótulo es texto
      libre y traducible ("Adulto", "Adult", "Pase general"), y adivinar por ahí
      falla en inglés sin que nadie se entere. */
-  tarifas: { nombre: string; es_para: 'adulto' | 'nino' | 'senior' | 'general'; precio: number }[];
+  tarifas: {
+    nombre: string;
+    es_para: 'adulto' | 'nino' | 'senior' | 'general';
+    precio: number;
+    /* 'todos' = cualquiera. 'nacional' = solo nacionales y residentes en Costa
+       Rica, que lo declaran al reservar y lo prueban en la entrada. */
+    residencia: 'todos' | 'nacional';
+    /* El monto EN COLONES de una tarifa nacional. Es el número que la persona
+       va a pagar en la puerta; el dólar es con lo que suma el motor. */
+    precio_crc: number | null;
+  }[];
   moneda: string;
   precio_verificado: boolean;
   accion: AccionReserva;

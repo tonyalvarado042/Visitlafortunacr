@@ -3051,3 +3051,21 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   margin: -6px 0 0; font-size: 12px; font-weight: 800; letter-spacing: .02em;
   color: var(--verde-texto, #3D7A17);
 }
+
+/* ---- Extranjero o nacional/residente -------------------------------------
+   Dos tarifas para el mismo pase. Botones y no un <select>: con dos opciones,
+   un desplegable esconde la mitad de la informacion que decide la compra. */
+.reservar-residencia { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+.reservar-residencia button {
+  padding: 8px 6px; font-size: 12px; font-weight: 700; line-height: 1.25;
+  border: 1px solid var(--borde-3); border-radius: 7px;
+  background: var(--sup-2); color: var(--txt-3); cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.reservar-residencia button:hover { border-color: var(--naranja); color: var(--blanco); }
+.reservar-residencia button.activo {
+  border-color: var(--naranja); background: var(--naranja); color: var(--sobre-naranja);
+}
+/* El dolar al lado del colon: referencia, no el numero que se cobra. */
+.reservar-equivale { display: block; font-size: 11px; font-weight: 400; color: var(--txt-4); margin-top: 1px; }
+.reservar-aviso-cedula { display: block; margin-top: 5px; font-size: 11.5px; line-height: 1.5; color: var(--txt-4); }
