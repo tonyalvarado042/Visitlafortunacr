@@ -13,6 +13,7 @@ import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { productosReservables } from '@/lib/reservas';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { TiraAtributos } from '@/componentes/TiraAtributos';
+import { PruebaSocial } from '@/componentes/PruebaSocial';
 import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
 import { taparContacto } from '@/lib/contacto-tapado';
@@ -186,6 +187,47 @@ export default async function Ficha({ params }: { params: Parametros }) {
               <p style={{ fontSize: 15, color: 'var(--humo)', marginTop: 18 }}>{negocio.como_llegar}</p>
             )}
 
+            {/* Qué incluye y qué no. Sale del producto con contrato, así que en
+                un negocio donde no vendemos el bloque sencillamente no existe —
+                mejor eso que inventarle una lista. */}
+            {reservables[0] && (reservables[0].incluye.length > 0 || reservables[0].no_incluye.length > 0) && (
+              <div className="incluye-cajas">
+                {reservables[0].incluye.length > 0 && (
+                  <div className="bloque incluye-si">
+                    <div className="titulo">{t('tour_incluye', idioma)}</div>
+                    <ul className="tour-marcas">
+                      {reservables[0].incluye.map((x) => (
+                        <li key={x}>
+                          <svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true">
+                            <circle cx="10" cy="10" r="8.6" fill="var(--verde)" />
+                            <path d="M6 10.3l2.6 2.5L14 7.6" fill="none" stroke="#fff"
+                                  strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          {x}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {reservables[0].no_incluye.length > 0 && (
+                  <div className="bloque">
+                    <div className="titulo">{t('tour_no_incluye', idioma)}</div>
+                    <ul className="tour-marcas apagada">
+                      {reservables[0].no_incluye.map((x) => (
+                        <li key={x}>
+                          <svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true">
+                            <circle cx="10" cy="10" r="8.6" fill="none" stroke="var(--humo)" strokeWidth="1.7" />
+                            <path d="M7 7l6 6M13 7l-6 6" stroke="var(--humo)" strokeWidth="1.9" strokeLinecap="round" />
+                          </svg>
+                          {x}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Plegables con <details>, como la hamburguesa de la barra: sin
                 una línea de JavaScript en el cliente, y el navegador se
                 encarga del teclado y del lector de pantalla. */}
@@ -255,6 +297,10 @@ export default async function Ficha({ params }: { params: Parametros }) {
               </div>
             )}
 
+            {/* La prueba social sube: es el dato que más pesa cuando alguien
+                está decidiendo y vivía al final, en una tabla. */}
+            <PruebaSocial externas={externas} idioma={idioma} />
+
             {/* El álbum completo va ANTES de las calificaciones: primero se
                 ve el lugar, después lo que opinan de él. Arriba quedan las
                 tres fotos que venden. */}
@@ -318,47 +364,26 @@ export default async function Ficha({ params }: { params: Parametros }) {
               ))}
             </div>
 
-            <div className="bloque">
-              <div className="titulo">{t('otras_plataformas', idioma)}</div>
-              {externas.length > 0 ? externas.map((e) => (
-                <div key={e.plataforma}>
-                  <div className="fila-externa">
-                    <span className="fuente" style={{ textTransform: 'capitalize' }}>{e.plataforma}</span>
-                    <span className="nota">{e.calificacion ? nota(e.calificacion, idioma) : '—'}</span>
-                    <span className="conteo">{e.total_resenas?.toLocaleString(idioma) ?? ''}</span>
-                    <a href={e.url_fuente} target="_blank" rel="noopener noreferrer nofollow"
-                       style={{ color: 'var(--naranja)', fontWeight: 700, fontSize: 13 }}>↗</a>
-                  </div>
-
-                  {/* El texto ajeno se muestra como cita: con el nombre del
-                      autor tal cual aparece en la fuente y el enlace a la
-                      reseña original. Sin eso no es cita, es apropiación. */}
-                  {e.extractos.map((x) => (
-                    <blockquote className="extracto" key={x.url_original + x.autor_nombre}>
-                      <div className="quien">
-                        <strong>{x.autor_nombre}</strong>
-                        {x.calificacion && <span className="nota-ajena">{x.calificacion}/5</span>}
-                        <span style={{ textTransform: 'capitalize' }}>{e.plataforma}</span>
-                        {x.publicada_en && (
-                          <span>{new Date(x.publicada_en).toLocaleDateString(idioma, { year: 'numeric', month: 'long' })}</span>
-                        )}
-                      </div>
-                      <p>{x.texto}</p>
-                      <a href={x.url_original} target="_blank" rel="noopener noreferrer nofollow">
-                        {t('ver_en', idioma)} {e.plataforma} ↗
-                      </a>
-                    </blockquote>
-                  ))}
-                </div>
-              )) : (
-                <p style={{ color: 'var(--humo)', fontSize: 14, margin: 0 }}>
-                  {t('sin_externas', idioma)}
-                </p>
-              )}
-              {externas.some((e) => e.plataforma === 'google' && e.extractos.length > 0) && (
-                <p className="atribucion">{t('datos_de_google', idioma)}</p>
-              )}
+            {/* Dónde queda y cómo llegar. La dirección de Google ya estaba
+                armada arriba: con coordenadas si las hay, y con el nombre si
+                no. Un mapa incrustado cargaría un rastreador de Google en cada
+                ficha, y eso no se paga con lo que aporta. */}
+            <div className="mapa-caja">
+              <div className="mapa-texto">
+                <span className="titulo">{t('donde_queda', idioma)}</span>
+                <strong>{negocio.direccion || destino.nombre}</strong>
+                {negocio.como_llegar && <p>{negocio.como_llegar}</p>}
+              </div>
+              <a className="boton" href={mapa} target="_blank" rel="noopener noreferrer">
+                {t('como_llegar', idioma)} →
+              </a>
             </div>
+
+            {/* La atribución se queda: Google la pide cuando se citan sus
+                reseñas, y se citan arriba, en la prueba social. */}
+            {externas.some((e) => e.plataforma === 'google' && e.extractos.length > 0) && (
+              <p className="atribucion">{t('datos_de_google', idioma)}</p>
+            )}
 
           </div>
 

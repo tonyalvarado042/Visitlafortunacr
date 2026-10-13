@@ -298,6 +298,9 @@ export type ExtractoExterno = {
   texto: string;
   publicada_en: string | null;
   url_original: string;
+  /* Si sube a las tres que se muestran en la ficha. Es un ORDEN, no un filtro:
+     la nota y el conteo publicados siguen siendo los reales. */
+  destacado: boolean;
 };
 
 export type NotaExterna = {
@@ -322,7 +325,7 @@ export async function notasExternasDe(negocioId: string): Promise<NotaExterna[]>
   const { data, error } = await supabase
     .from('dst_resena_externa')
     .select(`plataforma, calificacion, total_resenas, url_fuente,
-             extractos:dst_resena_externa_extracto(autor_nombre, autor_url, autor_avatar_url, calificacion, texto, publicada_en, url_original)`)
+             extractos:dst_resena_externa_extracto(autor_nombre, autor_url, autor_avatar_url, calificacion, texto, publicada_en, url_original, destacado)`)
     .eq('negocio_id', negocioId)
     .gt('expira_en', new Date().toISOString());
   if (error) return [];

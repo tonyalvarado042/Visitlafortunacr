@@ -2786,3 +2786,86 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .tira-atributos li:nth-child(-n + 2) { border-top: none; }
   .tira-atributos span { font-size: 12.5px; }
 }
+
+/* ---- Qué incluye y qué no, en la columna de la ficha ---- */
+.incluye-cajas {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr));
+  gap: 16px; margin-top: 28px;
+}
+.incluye-si { background: var(--verde-suave, var(--carbon)); }
+
+/* ---- La prueba social, arriba y a la vista ---- */
+.prueba-social {
+  margin-top: 34px; padding: 26px; border-radius: 8px;
+  background: var(--carbon); border: 1px solid var(--borde);
+  display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 30px;
+  align-items: start;
+}
+.prueba-cabeza { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.prueba-cabeza h2 {
+  font-size: 27px; font-weight: 900; letter-spacing: -.03em; line-height: 1.08;
+  margin: 0; text-transform: none;
+}
+.prueba-cifras { display: flex; align-items: center; gap: 20px; }
+.prueba-cifras > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.prueba-raya { width: 1px; height: 46px; background: var(--borde); flex-shrink: 0; }
+.prueba-nota { font-size: 46px; font-weight: 900; letter-spacing: -.045em; line-height: 1; }
+.prueba-cuantas { font-size: 28px; font-weight: 900; letter-spacing: -.035em; line-height: 1.1; }
+.prueba-pie { font-size: 12.5px; color: var(--humo); }
+.prueba-fuente { text-transform: capitalize; }
+.prueba-enlace { font-size: 13.5px; font-weight: 700; color: var(--naranja-texto, var(--naranja)); text-decoration: underline; }
+.prueba-otras { display: flex; flex-wrap: wrap; gap: 8px; }
+.prueba-otras a {
+  display: flex; align-items: center; gap: 7px; padding: 6px 11px;
+  border: 1px solid var(--borde); border-radius: 100px; font-size: 12.5px; color: var(--txt-1);
+}
+.prueba-otras a:hover { border-color: var(--borde-4); }
+.prueba-otras strong { font-weight: 800; color: var(--txt-0); }
+
+.prueba-citas { display: grid; grid-template-columns: repeat(auto-fit, minmax(188px, 1fr)); gap: 14px; }
+.prueba-citas blockquote {
+  margin: 0; padding: 16px; border-radius: 7px;
+  background: var(--sup-0); border: 1px solid var(--borde);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cita-volcanes { display: flex; gap: 2px; }
+.prueba-citas p {
+  margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--txt-1);
+}
+.prueba-citas footer { margin-top: auto; display: flex; flex-direction: column; gap: 2px; }
+.prueba-citas footer strong { font-size: 12.5px; }
+.prueba-citas footer span { font-size: 11.5px; color: var(--humo); }
+.prueba-citas footer a { font-size: 11.5px; color: var(--humo); text-decoration: underline; margin-top: 4px; }
+.prueba-citas footer a:hover { color: var(--naranja); }
+
+@media (max-width: 860px) {
+  .prueba-social { grid-template-columns: 1fr; gap: 22px; padding: 20px; }
+  .prueba-nota { font-size: 38px; }
+}
+
+/* ---- La galería como tira ---- */
+.album-cabeza {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; margin-bottom: 14px;
+}
+.album-cabeza .galeria-titulo { margin-bottom: 0; }
+.album-ver { font-size: 13px; font-weight: 700; color: var(--naranja-texto, var(--naranja)); text-decoration: underline; }
+.galeria-tira { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.galeria-tira .galeria-foto { position: relative; aspect-ratio: 1 / 1; }
+.galeria-tira .galeria-foto img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto; }
+.album-mas {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(11, 11, 11, .66); color: #FFFFFF; font-size: 17px; font-weight: 800;
+}
+@media (max-width: 700px) { .galeria-tira { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* ---- Dónde queda ---- */
+.mapa-caja {
+  margin-top: 28px; padding: 22px 24px; border-radius: 8px;
+  background: var(--carbon); border: 1px solid var(--borde);
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+}
+.mapa-texto { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.mapa-texto .titulo { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--humo); }
+.mapa-texto strong { font-size: 17px; letter-spacing: -.015em; }
+.mapa-texto p { margin: 2px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--humo); max-width: 56ch; }

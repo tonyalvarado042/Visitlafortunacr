@@ -196,3 +196,18 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 }
 .campo-imagen-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
 .campo-imagen-acciones input[type="file"] { font-size: 12.5px; max-width: 100%; }
+
+/* Las citas de otras plataformas, para poder subir las que salen en la ficha.
+   Las tres primeras son las que se publican: se marcan para que se vea cuáles
+   son sin tener que contar. */
+.citas-admin { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+.citas-admin li {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 11px; background: var(--sup-1); border-left: 3px solid transparent;
+}
+.citas-admin li.sale { border-left-color: var(--naranja); background: var(--sup-2, var(--sup-1)); }
+.cita-nota { font-size: 12px; font-weight: 800; width: 34px; flex-shrink: 0; }
+.cita-cuerpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex-grow: 1; }
+.cita-cuerpo strong { font-size: 12.5px; }
+.cita-cuerpo span { font-size: 12px; color: var(--humo); line-height: 1.4; }
+.citas-admin button { flex-shrink: 0; }

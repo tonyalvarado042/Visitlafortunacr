@@ -8,9 +8,8 @@ import type { FotoNegocio } from '@/lib/destino';
  * <details> y el menú de la barra también.
  *
  *  - `FotosArriba`: tres fotos grandes, debajo de la cabecera.
- *  - `GaleriaAbajo`: el resto en retícula, al FINAL de la columna. Arriba van
- *    las tres que venden; el álbum completo lo mira quien ya se interesó, y
- *    para eso ya bajó hasta las reseñas.
+ *  - `GaleriaAbajo`: una tira de seis con el "+N", más abajo en la columna.
+ *    Arriba van las tres que venden; la tira dice "hay muchas más, mirá".
  *  - `VisoresFotos`: las fotos abiertas a pantalla completa. Van FUERA de las
  *    dos columnas, al final del documento, y eso no es orden sino necesidad:
  *    ver más abajo.
@@ -86,24 +85,46 @@ export function FotosArriba({ fotos, idioma }: { fotos: FotoNegocio[]; idioma: I
   );
 }
 
-/** El álbum completo, al final de la columna. */
+/*
+ * Una TIRA de seis y no un mosaico de catorce.
+ *
+ * El mosaico se come media pantalla y empuja hacia abajo todo lo que vende.
+ * Seis miniaturas dicen lo mismo —"hay muchas fotos, mirá"— en una sola fila,
+ * y la última lleva el "+N" que invita a abrirlas. Las catorce siguen ahí: el
+ * "+N" abre el visor igual que cualquiera.
+ */
+const EN_LA_TIRA = 6;
+
 export function GaleriaAbajo({ fotos, idioma }: { fotos: FotoNegocio[]; idioma: Idioma }) {
   const { resto, parte, mostradas } = reparto(fotos);
   if (!resto.length) return null;
 
+  const tira = resto.slice(0, EN_LA_TIRA);
+  const ocultas = resto.length - tira.length;
+
   return (
     <div className="galeria galeria-album" id="galeria">
-      <h2 className="galeria-titulo">
-        {t('fotos', idioma)} · {mostradas.length}
-      </h2>
+      <div className="album-cabeza">
+        <h2 className="galeria-titulo">{t('fotos', idioma)} · {mostradas.length}</h2>
+        <a href={enlace(parte)} className="album-ver">{t('ver_todas', idioma)} →</a>
+      </div>
 
-      <div className="galeria-reticula">
-        {resto.map((foto, i) => (
-          <a key={foto.url} href={enlace(i + parte)} className="galeria-foto"
-             aria-label={foto.texto_alternativo || t('foto_ver', idioma)}>
-            <img src={foto.url} alt={foto.texto_alternativo ?? ''} loading="lazy" decoding="async" />
-          </a>
-        ))}
+      <div className="galeria-tira">
+        {tira.map((foto, i) => {
+          /* El "+N" va en la última de la tira y abre LA SIGUIENTE, que es la
+             primera que no se ve: si abriera la suya, el contador mentiría
+             sobre lo que hay detrás. */
+          const ultima = ocultas > 0 && i === tira.length - 1;
+          return (
+            <a key={foto.url} href={enlace(ultima ? i + parte + 1 : i + parte)} className="galeria-foto"
+               aria-label={ultima
+                 ? `${t('ver_todas', idioma)} (${mostradas.length})`
+                 : (foto.texto_alternativo || t('foto_ver', idioma))}>
+              <img src={foto.url} alt={ultima ? '' : (foto.texto_alternativo ?? '')} loading="lazy" decoding="async" />
+              {ultima && <span className="album-mas" aria-hidden="true">+{ocultas}</span>}
+            </a>
+          );
+        })}
       </div>
     </div>
   );

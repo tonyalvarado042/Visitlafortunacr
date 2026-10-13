@@ -366,3 +366,38 @@ export async function traerOpinionesDeTodos(datos: FormData) {
   console.log(`traerOpinionesDeTodos: ${resumen.ok} ok, ${resumen.fallos} fallos`);
   refrescar();
 }
+
+/*
+ * Subir o bajar una cita de otra plataforma de las tres que salen en la ficha.
+ *
+ * Es un ORDEN, no un filtro. Lo que no sube sigue en Google, y la ficha publica
+ * el promedio real, el conteo real y el enlace a verlas todas — eso está escrito
+ * en PruebaSocial.tsx y es lo que separa destacar de esconder.
+ *
+ * Se comprueba que la cita sea de un negocio de ESTE destino antes de tocarla:
+ * el id viene del navegador y el navegador se edita.
+ */
+export async function destacarExtracto(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const extractoId = texto(datos, 'extracto_id');
+  if (!esUuid(id) || !esUuid(extractoId)) return;
+
+  const { data: fila } = await db
+    .from('dst_resena_externa_extracto')
+    .select('id, destacado, externa:dst_resena_externa(negocio_id, negocio:dst_negocio(destino_id))')
+    .eq('id', extractoId)
+    .maybeSingle();
+
+  const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
+  const externa = uno(fila?.externa as never) as { negocio_id: string; negocio: unknown } | null;
+  const negocio = externa ? uno(externa.negocio as never) as { destino_id: string } | null : null;
+  if (!fila || !externa || externa.negocio_id !== id || negocio?.destino_id !== destino.id) return;
+
+  const { error } = await db
+    .from('dst_resena_externa_extracto')
+    .update({ destacado: !fila.destacado })
+    .eq('id', extractoId);
+  if (error) console.error('destacarExtracto:', error.message);
+  refrescar(id);
+}

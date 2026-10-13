@@ -4,7 +4,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto } from '../acciones';
+import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto } from '../acciones';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
 
@@ -21,7 +21,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
-    db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(count)').eq('negocio_id', id),
+    db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
     db.from('dst_negocio_foto').select('id, url, es_portada, orden, credito, licencia, fuente_url, es_generica').eq('negocio_id', id).order('es_generica').order('orden'),
     db.from('dst_solicitud').select('id, tipo, etapa, creado_en').eq('negocio_id', id).order('creado_en', { ascending: false }).limit(10),
   ]);
@@ -106,11 +106,42 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
             <div className="tarjeta">
               <h2>Opiniones de afuera <small>{conPlaces ? 'Google conectado' : 'falta la llave de Google Places'}</small></h2>
               {!externas?.length ? <Vacio texto="Nada traído todavía." /> : externas.map((x) => {
-                const cuantos = (x.extractos as unknown as { count: number }[] | null)?.[0]?.count ?? 0;
+                type Cita = { id: string; autor_nombre: string; calificacion: number | null; texto: string; publicada_en: string | null; destacado: boolean };
+                const citas = ((x.extractos ?? []) as unknown as Cita[])
+                  .slice()
+                  .sort((a, b) => {
+                    if (a.destacado !== b.destacado) return a.destacado ? -1 : 1;
+                    return (b.publicada_en ?? '').localeCompare(a.publicada_en ?? '');
+                  });
                 return (
-                  <div key={x.plataforma} style={{ fontSize: 13, marginBottom: 6 }}>
-                    <strong>{x.plataforma}</strong>: {x.calificacion} ({x.total_resenas}) · {cuantos} con texto · <a href={x.url_fuente ?? '#'} target="_blank" rel="noreferrer">fuente</a>{' '}
-                    <span className="gris">vence {fecha(x.expira_en, destino.zona_horaria, false)}</span>
+                  <div key={x.plataforma} style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 13 }}>
+                      <strong>{x.plataforma}</strong>: {x.calificacion} ({x.total_resenas}) · {citas.length} con texto · <a href={x.url_fuente ?? '#'} target="_blank" rel="noreferrer">fuente</a>{' '}
+                      <span className="gris">vence {fecha(x.expira_en, destino.zona_horaria, false)}</span>
+                    </div>
+
+                    {/* Las tres primeras de esta lista son las que salen en la
+                        ficha. Destacar sube una; no esconde ninguna: la nota y
+                        el conteo publicados siguen siendo los de todas. */}
+                    <ul className="citas-admin">
+                      {citas.map((c, i) => (
+                        <li key={c.id} className={i < 3 ? 'sale' : undefined}>
+                          <span className="cita-nota">{c.calificacion ?? '—'}★</span>
+                          <span className="cita-cuerpo">
+                            <strong>{c.autor_nombre}</strong>
+                            <span>{c.texto.slice(0, 110)}{c.texto.length > 110 ? '…' : ''}</span>
+                          </span>
+                          {/* formAction y no un <form>: esta tarjeta vive dentro
+                              del formulario grande. El id del negocio lo aporta
+                              el hidden de arriba; el de la cita, este botón. */}
+                          <button type="submit" name="extracto_id" value={c.id}
+                                  formAction={destacarExtracto}
+                                  className={c.destacado ? 'boton chico' : 'boton chico secundario'}>
+                            {c.destacado ? 'Destacada' : 'Destacar'}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 );
               })}
