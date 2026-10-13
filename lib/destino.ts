@@ -453,3 +453,47 @@ export async function toursDe(negocioId: string): Promise<TourDeNegocio[]> {
   if (error) return [];
   return (data ?? []) as TourDeNegocio[];
 }
+
+export type TourPublico = TourDeNegocio & {
+  descripcion: string | null;
+  incluye: string | null;
+  no_incluye: string | null;
+  que_llevar: string | null;
+  edad_minima: number | null;
+  cupo_maximo: number | null;
+  idiomas_guia: string[];
+  cancelacion_libre_horas: number;
+  precio_nino_usd: number | null;
+  negocio: { nombre: string; babosa: string; categoria_babosa: string | null } | null;
+};
+
+/*
+ * Una tour por su babosa, para su página pública.
+ *
+ * Solo publicadas: lo decide la RLS de la tabla, no un filtro de acá. Y trae
+ * el operador porque una tour sin saber quién la lleva no se puede vender —
+ * ni reservar, ni reclamar.
+ */
+export async function tourPorBabosa(destino: Destino, babosa: string): Promise<TourPublico | null> {
+  const { data, error } = await supabase
+    .from('dst_tour')
+    .select(`id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
+             duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
+             idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
+             precio_adulto_usd, precio_nino_usd, imagen_url,
+             negocio:dst_negocio(nombre, babosa, categoria:dst_categoria(babosa))`)
+    .eq('destino_id', destino.id)
+    .eq('babosa', babosa)
+    .eq('estado', 'publicado')
+    .maybeSingle();
+  if (error || !data) return null;
+
+  const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
+  const n = uno(data.negocio as never) as { nombre: string; babosa: string; categoria: unknown } | null;
+  const cat = n ? uno(n.categoria as never) as { babosa: string } | null : null;
+
+  return {
+    ...(data as unknown as TourPublico),
+    negocio: n ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null } : null,
+  };
+}

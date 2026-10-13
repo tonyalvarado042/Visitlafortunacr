@@ -4,6 +4,13 @@
   --negro: #0B0B0B;
   --blanco: #FFFFFF;
   --naranja: #FF6A00;
+  /* La tinta que va SOBRE el naranja. Fija en los tres temas, y esa es toda
+     la idea: el naranja es el mismo en claro y en oscuro, asi que el texto que
+     se pinta encima tampoco puede cambiar. Antes decia `var(--negro)`, y en
+     tema claro `--negro` vale #FFFFFF: cada boton del sitio quedo con texto
+     blanco sobre naranja, 2.87 de contraste. Ilegible, y encima en los
+     botones, que son justo lo que hay que poder leer. */
+  --sobre-naranja: #0B0B0B;
   --verde: #66BB2E;
   --gris: #333333;
   --humo: #8B8B87;
@@ -134,6 +141,13 @@
   --gris: #333333;
   --humo: #8B8B87;
   --naranja: #FF6A00;
+  /* La tinta que va SOBRE el naranja. Fija en los tres temas, y esa es toda
+     la idea: el naranja es el mismo en claro y en oscuro, asi que el texto que
+     se pinta encima tampoco puede cambiar. Antes decia `var(--negro)`, y en
+     tema claro `--negro` vale #FFFFFF: cada boton del sitio quedo con texto
+     blanco sobre naranja, 2.87 de contraste. Ilegible, y encima en los
+     botones, que son justo lo que hay que poder leer. */
+  --sobre-naranja: #0B0B0B;
   --negro: #0B0B0B;
   --peligro: #FF8A6B;
   --peligro-2: #E2795A;
@@ -180,6 +194,13 @@
   --gris: #333333;
   --humo: #8B8B87;
   --naranja: #FF6A00;
+  /* La tinta que va SOBRE el naranja. Fija en los tres temas, y esa es toda
+     la idea: el naranja es el mismo en claro y en oscuro, asi que el texto que
+     se pinta encima tampoco puede cambiar. Antes decia `var(--negro)`, y en
+     tema claro `--negro` vale #FFFFFF: cada boton del sitio quedo con texto
+     blanco sobre naranja, 2.87 de contraste. Ilegible, y encima en los
+     botones, que son justo lo que hay que poder leer. */
+  --sobre-naranja: #0B0B0B;
   --negro: #0B0B0B;
   --peligro: #FF8A6B;
   --peligro-2: #E2795A;
@@ -218,7 +239,7 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--naranja); outline-offset: 3px; }
-::selection { background: var(--naranja); color: var(--negro); }
+::selection { background: var(--naranja); color: var(--sobre-naranja); }
 img { max-width: 100%; display: block; }
 
 /* Todo campo, venga su estilo de donde venga.
@@ -547,14 +568,14 @@ input[type="date"], input[type="time"], input[type="number"], input[type="dateti
    insinua con un "sorteo" en gris. */
 .sello-gran {
   display: inline-block;
-  background: var(--naranja); color: var(--negro);
+  background: var(--naranja); color: var(--sobre-naranja);
   font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
   padding: 6px 13px; border-radius: 100px;
 }
 
 .aviso-gran {
   justify-self: start;
-  background: var(--naranja); color: var(--negro);
+  background: var(--naranja); color: var(--sobre-naranja);
   font-size: 10.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
   padding: 5px 11px; border-radius: 100px;
 }
@@ -957,7 +978,7 @@ input[type="date"], input[type="time"], input[type="number"], input[type="dateti
 }
 
 .boton {
-  display: inline-block; background: var(--naranja); color: var(--negro);
+  display: inline-block; background: var(--naranja); color: var(--sobre-naranja);
   font-family: var(--fuente); font-weight: 800; font-size: 13px; letter-spacing: .02em;
   padding: 11px 20px; border: none; border-radius: 3px; cursor: pointer;
   transition: transform .18s, background .18s; text-align: center;
@@ -1025,7 +1046,7 @@ section { padding: 84px 0; }
 .etiqueta-cat { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--naranja); }
 .sello { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--verde); }
 .sello-tenue { color: var(--humo); background: var(--sup-3); border-radius: 100px; padding: 2px 9px; }
-.sello-pagado { background: var(--naranja); color: var(--negro); border-radius: 3px; padding: 3px 9px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.sello-pagado { background: var(--naranja); color: var(--sobre-naranja); border-radius: 3px; padding: 3px 9px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 
 /* ---- Galería de la ficha ---- */
 /* Sin JavaScript: una retícula de figuras. El crédito va pegado a su foto
@@ -1643,7 +1664,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   position: fixed; right: 22px; bottom: 22px; z-index: 80;
   display: inline-flex; align-items: center; gap: 9px;
   padding: 12px 18px; border-radius: 100px; border: 0; cursor: pointer;
-  background: var(--naranja); color: var(--negro); font-family: inherit;
+  background: var(--naranja); color: var(--sobre-naranja); font-family: inherit;
   font-weight: 700; font-size: 13px; letter-spacing: .02em;
   box-shadow: 0 10px 30px rgba(0,0,0,.45); transition: transform .2s, opacity .2s;
 }
@@ -1698,7 +1719,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   text-decoration: none; transition: background .2s, border-color .2s, color .2s;
 }
 .concierge .pastilla span { color: var(--naranja); font-weight: 700; }
-.concierge .pastilla:hover { background: var(--naranja); border-color: var(--naranja); color: var(--negro); text-decoration: none; }
+.concierge .pastilla:hover { background: var(--naranja); border-color: var(--naranja); color: var(--sobre-naranja); text-decoration: none; }
 .concierge .pastilla:hover span { color: var(--negro); }
 .concierge .burbuja.yo { align-self: flex-end; background: var(--verde); color: var(--negro); border-bottom-right-radius: 4px; font-weight: 600; }
 .concierge .burbuja.pensando { color: var(--humo); letter-spacing: .2em; }
@@ -1709,7 +1730,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   color: #fff; font-family: inherit; font-size: 13.5px;
 }
 .concierge form button {
-  padding: 0 16px; border-radius: 8px; border: 0; background: var(--naranja); color: var(--negro);
+  padding: 0 16px; border-radius: 8px; border: 0; background: var(--naranja); color: var(--sobre-naranja);
   font-weight: 700; font-family: inherit; cursor: pointer;
 }
 .concierge form button:disabled { opacity: .5; cursor: default; }
@@ -1966,7 +1987,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .galeria-fotos .foto.portada { border-color: var(--naranja); }
 .galeria-fotos .foto img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
 .galeria-fotos .marca-portada {
-  position: absolute; top: 8px; left: 8px; background: var(--naranja); color: var(--negro);
+  position: absolute; top: 8px; left: 8px; background: var(--naranja); color: var(--sobre-naranja);
   font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
   padding: 3px 8px; border-radius: 100px;
 }
@@ -2087,7 +2108,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .exp-solapas button:hover { background: var(--borde-2); border-color: var(--borde-5); color: var(--blanco); transform: translateY(-1px); }
 .exp-solapas button.activa,
 .exp-solapas button.activa:hover {
-  background: var(--naranja); border-color: var(--naranja); color: var(--negro);
+  background: var(--naranja); border-color: var(--naranja); color: var(--sobre-naranja);
   box-shadow: 0 5px 18px rgba(255,106,0,.32); transform: none;
 }
 .exp-solapas button:focus-visible { outline: 2px solid var(--blanco); outline-offset: 3px; }
@@ -2139,7 +2160,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .exp-prosa ol.dias { list-style: none; margin: 0; padding: 0; counter-reset: dia; }
 .exp-prosa ol.dias > li { counter-increment: dia; position: relative; padding: 0 0 30px 62px; border-left: 1px solid var(--borde); margin-left: 17px; }
 .exp-prosa ol.dias > li:last-child { border-left-color: transparent; padding-bottom: 0; }
-.exp-prosa ol.dias > li::before { content: counter(dia); position: absolute; left: -18px; top: -2px; width: 36px; height: 36px; border-radius: 50%; background: var(--naranja); color: var(--negro); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.exp-prosa ol.dias > li::before { content: counter(dia); position: absolute; left: -18px; top: -2px; width: 36px; height: 36px; border-radius: 50%; background: var(--naranja); color: var(--sobre-naranja); font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .exp-prosa ol.dias > li > h3 { margin: 4px 0 10px; color: var(--blanco); font-size: 19px; }
 .exp-prosa ol.dias p { margin: 0 0 9px; }
 .exp-prosa p.porque { font-size: 13.5px; color: var(--humo); border-left: 2px solid var(--naranja); padding-left: 12px; margin-top: 12px; }
@@ -2185,7 +2206,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .boton-destapar {
   display: inline-flex; align-items: center; justify-content: center; gap: 9px;
   width: 100%; margin-top: 12px; padding: 13px; border: 0; border-radius: 4px;
-  background: var(--naranja); color: var(--negro);
+  background: var(--naranja); color: var(--sobre-naranja);
   font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
   transition: transform .14s, box-shadow .18s;
 }
@@ -2217,7 +2238,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .video-rotulo { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
 .video-sello {
   font-size: 10.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--negro); background: var(--naranja); border-radius: 100px; padding: 5px 13px;
+  color: var(--sobre-naranja); background: var(--naranja); border-radius: 100px; padding: 5px 13px;
 }
 .video-rotulo h2 { margin: 0; font-size: 24px; letter-spacing: -.02em; text-transform: none; }
 .video-marco {
@@ -2229,7 +2250,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 
 .boton-ver-video {
   display: inline-flex; align-items: center; gap: 9px; margin-top: 20px;
-  background: var(--naranja); color: var(--negro);
+  background: var(--naranja); color: var(--sobre-naranja);
   font-size: 13.5px; font-weight: 800; padding: 11px 20px; border-radius: 100px;
   transition: transform .14s, box-shadow .18s;
 }
@@ -2411,7 +2432,7 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* El cintillo sobre la foto */
 .cintillo {
   position: absolute; top: 12px; left: 12px; z-index: 2;
-  background: var(--naranja); color: var(--negro);
+  background: var(--naranja); color: var(--sobre-naranja);
   font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
   padding: 5px 12px; border-radius: 100px;
   box-shadow: 0 4px 14px rgba(0,0,0,.4);
@@ -2620,7 +2641,8 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   display: flex; gap: 16px; align-items: flex-start;
   padding: 16px 0; border-top: 1px solid var(--borde);
 }
-.lista-tours .tour-fila:first-child { border-top: none; padding-top: 0; }
+.lista-tours li:first-child .tour-fila { border-top: none; padding-top: 0; }
+.lista-tours .tour-fila:hover strong { color: var(--naranja); }
 .tour-fila > img, .tour-sin-foto {
   width: 88px; height: 88px; flex-shrink: 0; object-fit: cover;
   border-radius: 6px; border: 1px solid var(--borde); background: var(--sup-3);
@@ -2657,3 +2679,73 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .reservar-total small { font-size: 11.5px; color: var(--humo); }
 .reservar-total b { font-size: 25px; font-weight: 900; letter-spacing: -.03em; }
 .reservar-elegido b { font-weight: 800; }
+
+/* El editor acotado: negrita, cursiva, listas y enlaces. Lo usan el panel y el
+   portal del comerciante, así que vive en el CSS global y no en el del admin. */
+.editor-rico { display: flex; flex-direction: column; gap: 8px; }
+.editor-cabeza {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.editor-botones { display: flex; gap: 5px; flex-wrap: wrap; }
+.editor-botones button {
+  min-width: 32px; height: 30px; padding: 0 9px;
+  background: var(--sup-1); color: var(--txt-0);
+  border: 1px solid var(--borde); border-radius: 5px;
+  font-family: inherit; font-size: 13px; line-height: 1; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.editor-botones button:hover { background: var(--sup-3); border-color: var(--borde-4); }
+.editor-botones .negrita { font-weight: 900; }
+.editor-botones .cursiva { font-style: italic; font-family: Georgia, serif; }
+.editor-botones .editor-previa-boton { font-size: 12px; font-weight: 600; }
+.editor-botones .editor-previa-boton[aria-pressed="true"] {
+  background: var(--naranja); color: var(--sobre-naranja); border-color: var(--naranja);
+}
+.editor-rico textarea {
+  width: 100%; box-sizing: border-box; padding: 12px 13px;
+  font-family: inherit; font-size: 14px; line-height: 1.6;
+  resize: vertical; min-height: 120px;
+}
+.editor-previa {
+  min-height: 120px; padding: 14px 16px;
+  background: var(--sup-0); border: 1px solid var(--borde); border-radius: 6px;
+}
+.editor-previa > :first-child { margin-top: 0; }
+.editor-previa > :last-child { margin-bottom: 0; }
+.editor-ayuda { font-size: 11.5px; line-height: 1.6; color: var(--humo); }
+.editor-ayuda code {
+  font-size: 11px; padding: 1px 5px; border-radius: 3px;
+  background: var(--sup-1); border: 1px solid var(--borde);
+}
+
+/* La cabecera de una tour SIN foto. No reusa `.ficha-hero-texto` a propósito:
+   esa pinta el texto de blanco porque cuenta con una foto oscura debajo. */
+.tour-cabecera { padding: 26px 0 4px; }
+.tour-cabecera-texto h1 {
+  font-size: clamp(30px, 4.2vw, 46px); line-height: 1.05; letter-spacing: -.03em;
+  color: var(--txt-0); margin: 8px 0 0;
+}
+.tour-cabecera-texto .migas a, .tour-cabecera-texto .migas span { color: var(--humo); }
+.tour-cabecera-texto .migas span[style] { color: var(--txt-0) !important; }
+.tour-cabecera-texto .ficha-sub {
+  font-size: 17px; line-height: 1.55; color: var(--txt-1); margin: 12px 0 0; max-width: 62ch;
+}
+
+/* La página de una tour: los datos duros en una tira y las dos listas. */
+.tour-ficha-datos {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: 1px;
+  background: var(--borde); border: 1px solid var(--borde); border-radius: 6px; overflow: hidden;
+}
+.tour-ficha-datos li {
+  background: var(--carbon); padding: 13px 15px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.tour-ficha-datos span { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--humo); }
+.tour-ficha-datos strong { font-size: 16px; text-transform: capitalize; }
+.tour-listas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 26px; }
+.tour-marcas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.tour-marcas li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; line-height: 1.5; }
+.tour-marcas svg { flex-shrink: 0; margin-top: 2px; }
+.tour-marcas.apagada li { color: var(--humo); }

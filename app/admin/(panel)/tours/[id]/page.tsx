@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Cabecera, Etiqueta } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
@@ -33,7 +34,15 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo"><label>Operador</label><select name="negocio_id" defaultValue={t.negocio_id ?? ''}><option value="">—</option>{operadores?.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}</select></div>
                 <div className="campo"><label>Categoría</label><select name="categoria_id" defaultValue={t.categoria_id ?? ''}><option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.nombre} · {c.seccion}</option>)}</select></div>
                 <div className="campo ancho"><label>Resumen</label><input name="resumen" defaultValue={t.resumen ?? ''} maxLength={200} /></div>
-                <div className="campo ancho"><label>Descripción</label><textarea name="descripcion" defaultValue={t.descripcion ?? ''} style={{ minHeight: 120 }} /></div>
+                <div className="campo ancho">
+                  <EditorRico
+                    nombre="descripcion"
+                    etiqueta="Descripción"
+                    valor={t.descripcion}
+                    ayuda="Es lo que lee quien está decidiendo si va"
+                    filas={10}
+                  />
+                </div>
                 <div className="campo"><label>Incluye</label><textarea name="incluye" defaultValue={t.incluye ?? ''} style={{ minHeight: 70 }} /></div>
                 <div className="campo"><label>No incluye</label><textarea name="no_incluye" defaultValue={t.no_incluye ?? ''} style={{ minHeight: 70 }} /></div>
                 <div className="campo ancho"><label>Qué llevar</label><input name="que_llevar" defaultValue={t.que_llevar ?? ''} /></div>

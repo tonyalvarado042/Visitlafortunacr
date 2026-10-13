@@ -228,7 +228,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 </div>
                 <ul className="lista-tours">
                   {tours.map((tu) => (
-                    <li key={tu.id} className="tour-fila">
+                    <li key={tu.id}>
+                      <Link className="tour-fila" href={`/${idioma}/tour/${tu.babosa}`}>
                       {tu.imagen_url
                         ? <img src={tu.imagen_url} alt="" loading="lazy" decoding="async" />
                         : <span className="tour-sin-foto" aria-hidden="true" />}
@@ -247,6 +248,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
                         <strong>${Number(tu.precio_adulto_usd).toFixed(0)}</strong>
                         <span className="quien">{t('por_adulto', idioma)}</span>
                       </div>
+                      </Link>
                     </li>
                   ))}
                 </ul>
