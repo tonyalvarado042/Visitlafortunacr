@@ -113,6 +113,9 @@ function PasoNegocio({
   categorias: { id: string; nombre: string }[];
 }) {
   const [estado, accion, pendiente] = useActionState(sumarNegocio, NADA_NEGOCIO);
+  /* Solo para cambiar los rotulos mientras escribe. Lo que vale es el radio
+     que viaja en el formulario, no este estado. */
+  const [esOperador, setEsOperador] = useState(false);
 
   /* Las fotos van ACA y no en una pantalla aparte despues. Redirigiendo al
      panel, la gente daba el tramite por terminado y la ficha se quedaba sin
@@ -158,8 +161,35 @@ function PasoNegocio({
           </>
         )}
 
+        {/* ---- La pregunta que parte el camino ----
+            Un hotel y un operador de tours no son lo mismo: el hotel es un
+            lugar que la gente visita y tiene ficha; el operador vende tours y
+            no tiene local que mostrar. Preguntarlo acá evita que Jacamar
+            termine listado entre los hoteles sin nada que poner en la ficha.
+            Lo que decide de verdad es `es_operador` en la base. */}
+        <fieldset className="sumar-que-sos">
+          <legend>¿Qué tenés? *</legend>
+          <label className="sumar-opcion">
+            <input type="radio" name="es_operador" value="0" defaultChecked
+                   onChange={() => setEsOperador(false)} />
+            <span>
+              <strong>Un lugar que la gente visita</strong>
+              Hotel, restaurante, termales, tienda. Tenés tu ficha en el directorio.
+            </span>
+          </label>
+          <label className="sumar-opcion">
+            <input type="radio" name="es_operador" value="1"
+                   onChange={() => setEsOperador(true)} />
+            <span>
+              <strong>Vendo tours</strong>
+              Sos operador. Lo que sale en el sitio son tus tours, una por una,
+              no una ficha tuya.
+            </span>
+          </label>
+        </fieldset>
+
         <label>
-          <span>{t('sumar_nombre_negocio', idioma)} *</span>
+          <span>{esOperador ? '¿Cómo se llama tu empresa?' : t('sumar_nombre_negocio', idioma)} *</span>
           <input name="nombre" type="text" required maxLength={120} />
         </label>
 
@@ -169,7 +199,11 @@ function PasoNegocio({
             <option value="" disabled>{t('sumar_elegi', idioma)}</option>
             {categorias.map((c) => <option key={c.id} value={c.id}>{c.nombre}</option>)}
           </select>
-          <small>{t('sumar_categoria_fija', idioma)}</small>
+          <small>
+            {esOperador
+              ? 'De qué son la mayoría de tus tours. Cada tour después lleva la suya.'
+              : t('sumar_categoria_fija', idioma)}
+          </small>
         </label>
 
         <label>
@@ -239,8 +273,41 @@ function PasoFotos({
   idioma, creado,
 }: {
   idioma: Idioma;
-  creado: { id: string; babosa: string; destinoBabosa: string };
+  creado: { id: string; babosa: string; destinoBabosa: string; esOperador?: boolean };
 }) {
+  /* El operador no tiene ficha, asi que no hay galeria que llenar: lo suyo
+     son las tours, y mandarlo a subir fotos de un local que no existe es
+     pedirle algo que no tiene. */
+  if (creado.esOperador) {
+    return (
+      <div className="tarjeta-forma">
+        <div className="pasos-forma">
+          <span>1. {t('sumar_paso_cuenta', idioma)} ✓</span>
+          <span>2. {t('sumar_paso_negocio', idioma)} ✓</span>
+          <span className="paso-activo">3. Tus tours</span>
+        </div>
+
+        <div className="aviso-logro">
+          <strong>Listo, ya quedaste registrado.</strong>
+          <p>
+            Ahora cargá tus tours: una por una, con su precio, qué incluye y una
+            foto. Las revisamos y las publicamos. Podés cargar una hoy y el resto
+            cuando querrás — lo que escribas se guarda.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginTop: 26 }}>
+          <Link className="boton" href={`/negocio/${creado.id}/tours`}>
+            Cargar mi primera tour
+          </Link>
+          <Link className="enlace-flojo" href={`/negocio/${creado.id}`}>
+            Después
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="tarjeta-forma">
       <div className="pasos-forma">

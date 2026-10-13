@@ -78,6 +78,7 @@ export async function editarNegocio(datos: FormData) {
     verificado_en: verificacion === 'verificado' && antes.estado_verificacion !== 'verificado' ? new Date().toISOString() : antes.verificado_en,
     es_destacado: marca(datos, 'es_destacado'),
     es_casa: marca(datos, 'es_casa'),
+    es_operador: marca(datos, 'es_operador'),
     esta_cerrado: marca(datos, 'esta_cerrado'),
   }).eq('id', id);
   if (error) console.error('editarNegocio:', error.message);

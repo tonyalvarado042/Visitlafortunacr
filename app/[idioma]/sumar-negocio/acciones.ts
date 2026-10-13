@@ -17,7 +17,7 @@ export type EstadoNegocio = {
   /* Cuando se creo, en vez de redirigir se devuelve el negocio: el formulario
      sigue al paso de las fotos sin salir de la pagina. Redirigiendo, la gente
      daba por terminado el tramite y la ficha se quedaba sin una sola foto. */
-  creado?: { id: string; babosa: string; destinoBabosa: string } | null;
+  creado?: { id: string; babosa: string; destinoBabosa: string; esOperador?: boolean } | null;
 };
 
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -142,6 +142,10 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
     p_mi_nombre: texto(datos, 'mi_nombre') || null,
     p_mi_telefono: telefono(texto(datos, 'mi_telefono')),
     p_nota: nota,
+    /* Un operador vende tours y no tiene local: no se lista, no tiene ficha y
+       no se le crean rutas publicas. Lo decide la base, no esta linea — ver
+       `crear_mi_negocio`. */
+    p_es_operador: texto(datos, 'es_operador') === '1',
   });
 
   if (error) {
@@ -181,7 +185,12 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
   }
 
   return {
-    creado: { id: negocioId, babosa: babosaNueva, destinoBabosa: destino.babosa },
+    creado: {
+      id: negocioId, babosa: babosaNueva, destinoBabosa: destino.babosa,
+      /* Para saber a donde mandarlo: el operador va derecho a cargar tours,
+         que es lo unico que tiene para hacer. */
+      esOperador: texto(datos, 'es_operador') === '1',
+    },
   };
 }
 

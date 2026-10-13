@@ -73,6 +73,17 @@ export default async function EditarMiNegocio({
         </div>
       )}
 
+      {/* Las tours, arriba de todo lo demas para el operador: es lo unico que
+          tiene para hacer acá. Para un hotel es un extra, y va igual — un
+          hotel que vende un tour de aguas termales existe. */}
+      <Link href={`/negocio/${negocio.id}/tours`} className="comercio-atajo">
+        <div>
+          <strong>Mis tours</strong>
+          <span>Cargá lo que vendés: precio, qué incluye y una foto de cada una.</span>
+        </div>
+        <span className="comercio-atajo-flecha" aria-hidden="true">→</span>
+      </Link>
+
       <FormularioNegocio negocio={negocio} />
 
       <Fotos

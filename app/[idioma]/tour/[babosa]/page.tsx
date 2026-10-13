@@ -90,11 +90,18 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
             <div className="migas">
               <Link href={`/${idioma}`}>{t('inicio', idioma)}</Link>
               <span>/</span>
+              {/* Un OPERADOR no tiene ficha: su nombre va como texto. Enlazarlo
+                  seria mandar a un 404, y mostrarlo igual importa — la gente
+                  quiere saber quien lleva la tour. */}
               {tour.negocio ? (
                 <>
-                  <Link href={`/${idioma}/${tour.negocio.categoria_babosa ?? 'tours'}/${tour.negocio.babosa}`}>
-                    {tour.negocio.nombre}
-                  </Link>
+                  {tour.negocio.es_operador ? (
+                    <span>{tour.negocio.nombre}</span>
+                  ) : (
+                    <Link href={`/${idioma}/${tour.negocio.categoria_babosa ?? 'tours'}/${tour.negocio.babosa}`}>
+                      {tour.negocio.nombre}
+                    </Link>
+                  )}
                   <span>/</span>
                 </>
               ) : null}
@@ -206,7 +213,11 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                     </div>
                   </div>
 
-                  {tour.negocio && (
+                  {/* Sin contrato no se reserva acá. Si el operador tiene ficha,
+                      se manda ahí; si no la tiene, no hay a dónde mandar y el
+                      botón no sale — un botón que no lleva a ninguna parte es
+                      peor que ninguno. */}
+                  {tour.negocio && !tour.negocio.es_operador && (
                     <Link className="boton"
                           href={`/${idioma}/${tour.negocio.categoria_babosa ?? 'tours'}/${tour.negocio.babosa}#reservar`}
                           style={{ display: 'block', textAlign: 'center', marginTop: 16 }}>

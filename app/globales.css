@@ -1996,6 +1996,88 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 
 .comercio-bloque { margin-top: 48px; padding-top: 30px; border-top: 1px solid var(--borde); }
 
+/* ---- Las tours del operador, en su portal ---------------------------------
+   Reusa los tokens del portal (--sup-*, --borde, --naranja) para que no se
+   vea como una pantalla pegada de otro sitio. */
+.comercio-atajo {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  margin: 26px 0; padding: 18px 22px;
+  border: 1px solid var(--borde); border-radius: 6px; background: var(--sup-2);
+  text-decoration: none; color: inherit; transition: border-color .15s, background .15s;
+}
+.comercio-atajo:hover { border-color: var(--naranja); background: var(--sup-3); }
+.comercio-atajo strong { display: block; font-size: 15px; }
+.comercio-atajo span { font-size: 12.5px; color: var(--humo); }
+.comercio-atajo-flecha { font-size: 19px; color: var(--naranja); }
+
+.tour-tarjetas { display: grid; gap: 14px; margin: 24px 0; }
+.tour-tarjeta {
+  display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: stretch;
+  border: 1px solid var(--borde); border-radius: 6px; overflow: hidden;
+  background: var(--sup-2); text-decoration: none; color: inherit;
+  transition: border-color .15s;
+}
+.tour-tarjeta:hover { border-color: var(--naranja); }
+.tour-tarjeta-foto { background: var(--sup-3); display: grid; place-items: center; min-height: 96px; }
+.tour-tarjeta-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tour-tarjeta-foto span { font-size: 11.5px; color: var(--txt-5); }
+.tour-tarjeta-datos { padding: 14px 16px 14px 0; display: grid; gap: 5px; align-content: center; }
+.tour-tarjeta-datos h2 { margin: 0; font-size: 15.5px; }
+.tour-tarjeta-datos p { margin: 0; font-size: 13px; color: var(--humo); line-height: 1.5; }
+.tour-tarjeta-pie { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 12.5px; margin-top: 3px; }
+
+.tour-nueva { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--borde); }
+
+.tour-enviar, .tour-borrar { margin-top: 30px; }
+.tour-enviar {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  flex-wrap: wrap; padding: 18px 22px;
+  border: 1px solid var(--borde); border-radius: 6px; background: var(--sup-2);
+}
+.tour-enviar strong { display: block; font-size: 15px; }
+.tour-enviar span { font-size: 12.5px; color: var(--humo); max-width: 44ch; display: block; }
+.tour-borrar { padding-top: 22px; border-top: 1px solid var(--borde); }
+
+.tour-precio-fijo {
+  display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-end;
+  padding: 16px 20px; border: 1px solid var(--borde); border-radius: 6px;
+  background: var(--sup-2); margin-bottom: 6px;
+}
+.tour-precio-fijo span { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--txt-5); }
+.tour-precio-fijo strong { font-size: 21px; }
+.tour-precio-fijo small { flex-basis: 100%; font-size: 12px; color: var(--humo); }
+
+/* La foto de una tour: botón, nunca una caja para pegar una URL. */
+.foto-tour { display: grid; gap: 12px; margin-bottom: 8px; }
+.foto-tour-caja {
+  aspect-ratio: 16 / 9; max-width: 420px; border-radius: 6px; overflow: hidden;
+  background: var(--sup-3); display: grid; place-items: center;
+  border: 1px dashed var(--borde);
+}
+.foto-tour-caja img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-tour-caja span { font-size: 12.5px; color: var(--txt-5); }
+.foto-tour-botones { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.foto-tour-botones label { cursor: pointer; margin: 0; }
+
+/* La pregunta que parte el registro en dos caminos. */
+.sumar-que-sos { border: 0; padding: 0; margin: 0 0 6px; display: grid; gap: 10px; }
+.sumar-que-sos legend { font-size: 13.5px; font-weight: 700; padding: 0; margin-bottom: 4px; }
+.sumar-opcion {
+  display: flex; gap: 12px; align-items: flex-start; cursor: pointer;
+  padding: 14px 16px; border: 1px solid var(--borde); border-radius: 6px;
+  background: var(--sup-2); transition: border-color .15s;
+}
+.sumar-opcion:hover { border-color: var(--naranja); }
+.sumar-opcion:has(input:checked) { border-color: var(--naranja); background: var(--sup-3); }
+.sumar-opcion input { margin-top: 3px; flex: none; }
+.sumar-opcion strong { display: block; font-size: 14px; margin-bottom: 2px; }
+.sumar-opcion span { font-size: 12.5px; color: var(--humo); line-height: 1.5; }
+
+@media (max-width: 560px) {
+  .tour-tarjeta { grid-template-columns: 84px 1fr; }
+  .tour-enviar { flex-direction: column; align-items: flex-start; }
+}
+
 /* ---- Galeria de fotos del duenno ---- */
 .galeria-fotos { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; margin: 22px 0 18px; }
 .galeria-fotos .foto { position: relative; margin: 0; border: 1px solid var(--borde); border-radius: 5px; overflow: hidden; background: var(--sup-1); }

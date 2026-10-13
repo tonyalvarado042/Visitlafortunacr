@@ -92,6 +92,11 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                   <label><input type="checkbox" name="es_destacado" value="1" defaultChecked={n.es_destacado} /> Destacado (se rotula como pagado)</label>
                   <label><input type="checkbox" name="es_casa" value="1" defaultChecked={n.es_casa} /> Es de la casa (interno, nunca se muestra)</label>
                   <label><input type="checkbox" name="esta_cerrado" value="1" defaultChecked={n.esta_cerrado} /> Cerrado temporalmente</label>
+                  {/* Un operador vende tours y no es un lugar visitable: no se
+                      lista, no tiene ficha publica y no entra al sitemap. Lo
+                      publico son sus tours. Marcarlo NO lo saca de la venta —
+                      para eso esta «vende por aqui» en Operadores. */}
+                  <label><input type="checkbox" name="es_operador" value="1" defaultChecked={n.es_operador} /> Es operador de tours (no sale en el directorio)</label>
                 </div>
               </div>
             </div>

@@ -202,3 +202,106 @@ export async function avisarmeDeResenas(datos: FormData): Promise<void> {
   else if (!data?.length) console.error('avisarmeDeResenas: sin fila de comerciante para', user.id);
   revalidatePath('/negocio');
 }
+
+
+/* ---------------------------------------------------------------------------
+ * Las tours del operador.
+ *
+ * Mismo criterio que la ficha: todo va contra funciones de la base, que son
+ * las que tienen escrita la lista de campos tocables. Si alguien agrega
+ * `contrato_id` o `precio_neto_usd` al HTML a mano, no llega a ninguna
+ * columna, porque no son parámetros de esas funciones.
+ * ------------------------------------------------------------------------ */
+
+const numero = (d: FormData, k: string) => {
+  const v = texto(d, k);
+  if (v === '') return null;
+  const n = Number(v.replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
+};
+
+export async function crearMiTour(_previo: EstadoComercio, datos: FormData): Promise<EstadoComercio> {
+  const negocioId = texto(datos, 'negocio_id');
+  const nombre = texto(datos, 'nombre');
+  if (!esUuid(negocioId)) return { error: 'Falta el negocio.' };
+  if (!nombre) return { error: 'Ponele un nombre a la tour.' };
+
+  const db = await sesion();
+  const { data, error } = await db.rpc('crear_mi_tour', {
+    p_negocio_id: negocioId,
+    p_nombre: nombre,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/negocio/${negocioId}/tours`);
+  redirect(`/negocio/${negocioId}/tours/${data}`);
+}
+
+export async function guardarMiTour(_previo: EstadoComercio, datos: FormData): Promise<EstadoComercio> {
+  const tourId = texto(datos, 'tour_id');
+  const negocioId = texto(datos, 'negocio_id');
+  if (!esUuid(tourId) || !esUuid(negocioId)) return { error: 'Falta la tour.' };
+
+  const nombre = texto(datos, 'nombre');
+  if (!nombre) return { error: 'La tour necesita un nombre.' };
+
+  /* Los idiomas entran como "es, en" y salen como arreglo. La base vuelve a
+     filtrar a dos letras: esto es comodidad, no validación. */
+  const idiomas = texto(datos, 'idiomas_guia')
+    .split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+
+  const db = await sesion();
+  const { error } = await db.rpc('actualizar_mi_tour', {
+    p_tour_id: tourId,
+    p_nombre: nombre,
+    p_resumen: texto(datos, 'resumen') || null,
+    p_descripcion: texto(datos, 'descripcion') || null,
+    p_incluye: texto(datos, 'incluye') || null,
+    p_no_incluye: texto(datos, 'no_incluye') || null,
+    p_que_llevar: texto(datos, 'que_llevar') || null,
+    p_duracion_horas: numero(datos, 'duracion_horas'),
+    p_hora_inicio: texto(datos, 'hora_inicio') || null,
+    p_dificultad: texto(datos, 'dificultad') || null,
+    p_edad_minima: numero(datos, 'edad_minima'),
+    p_cupo_maximo: numero(datos, 'cupo_maximo'),
+    p_recoge_en_hotel: texto(datos, 'recoge_en_hotel') === '1',
+    p_idiomas_guia: idiomas.length ? idiomas : null,
+    p_imagen_url: texto(datos, 'imagen_url') || null,
+    p_precio_adulto_usd: numero(datos, 'precio_adulto_usd'),
+    p_precio_nino_usd: numero(datos, 'precio_nino_usd'),
+    p_cancelacion_libre_horas: numero(datos, 'cancelacion_libre_horas'),
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/negocio/${negocioId}/tours`);
+  revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
+  return { ok: 'Guardado.' };
+}
+
+export async function mandarMiTourARevision(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const negocioId = texto(datos, 'negocio_id');
+  if (!esUuid(tourId) || !esUuid(negocioId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('mandar_mi_tour_a_revision', { p_tour_id: tourId });
+  if (error) console.error('mandar_mi_tour_a_revision:', error.message);
+  revalidatePath(`/negocio/${negocioId}/tours`);
+  revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
+}
+
+export async function borrarMiTour(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const negocioId = texto(datos, 'negocio_id');
+  if (!esUuid(tourId) || !esUuid(negocioId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('borrar_mi_tour', { p_tour_id: tourId });
+  if (error) {
+    console.error('borrar_mi_tour:', error.message);
+    revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
+    return;
+  }
+  revalidatePath(`/negocio/${negocioId}/tours`);
+  redirect(`/negocio/${negocioId}/tours`);
+}

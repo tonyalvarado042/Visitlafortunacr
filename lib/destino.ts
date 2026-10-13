@@ -467,7 +467,11 @@ export type TourPublico = TourDeNegocio & {
   idiomas_guia: string[];
   cancelacion_libre_horas: number;
   precio_nino_usd: number | null;
-  negocio: { nombre: string; babosa: string; categoria_babosa: string | null } | null;
+  /* `es_operador`: vende tours pero no tiene ficha. Su nombre sale como TEXTO,
+     nunca como enlace — la pagina no existe y el enlace daria 404. */
+  negocio: {
+    nombre: string; babosa: string; categoria_babosa: string | null; es_operador: boolean;
+  } | null;
 };
 
 /*
@@ -484,7 +488,7 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
              precio_adulto_usd, precio_nino_usd, imagen_url,
-             negocio:dst_negocio(nombre, babosa, categoria:dst_categoria(babosa))`)
+             negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
     .eq('destino_id', destino.id)
     .eq('babosa', babosa)
     .eq('estado', 'publicado')
@@ -492,12 +496,14 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
   if (error || !data) return null;
 
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
-  const n = uno(data.negocio as never) as { nombre: string; babosa: string; categoria: unknown } | null;
+  const n = uno(data.negocio as never) as { nombre: string; babosa: string; es_operador: boolean; categoria: unknown } | null;
   const cat = n ? uno(n.categoria as never) as { babosa: string } | null : null;
 
   return {
     ...(data as unknown as TourPublico),
-    negocio: n ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null } : null,
+    negocio: n
+      ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null, es_operador: Boolean(n.es_operador) }
+      : null,
   };
 }
 

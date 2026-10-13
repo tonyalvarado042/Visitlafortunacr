@@ -135,6 +135,73 @@ export async function fotosDeMiNegocio(negocioId: string): Promise<MiFoto[]> {
   return (data ?? []) as MiFoto[];
 }
 
+/*
+ * Las tours del operador.
+ *
+ * `se_vende` es la que manda en el formulario: cuando la tour ya tiene
+ * contrato, el precio deja de ser suyo —la comisión se calcula contra el neto
+ * firmado— y el portal lo muestra bloqueado con el motivo. La función de la
+ * base ignora el precio igual; esto es para que se entienda, no para proteger.
+ */
+export type MiTour = {
+  id: string;
+  nombre: string;
+  babosa: string;
+  resumen: string | null;
+  estado: 'borrador' | 'pendiente' | 'publicado' | 'archivado';
+  precio_adulto_usd: number;
+  precio_nino_usd: number | null;
+  imagen_url: string | null;
+  total_reservas: number;
+  actualizado_en: string;
+  se_vende: boolean;
+};
+
+/** Lo que el portal necesita para editar UNA tour. Sale de la misma lista. */
+export type MiTourDetalle = MiTour & {
+  descripcion: string | null;
+  incluye: string | null;
+  no_incluye: string | null;
+  que_llevar: string | null;
+  duracion_horas: number | null;
+  hora_inicio: string | null;
+  dificultad: string | null;
+  edad_minima: number | null;
+  cupo_maximo: number | null;
+  recoge_en_hotel: boolean;
+  idiomas_guia: string[];
+  cancelacion_libre_horas: number;
+};
+
+export async function misTours(negocioId: string): Promise<MiTour[]> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('mis_tours', { p_negocio_id: negocioId });
+  if (error) {
+    console.error('mis_tours:', error.message);
+    return [];
+  }
+  return (data ?? []) as MiTour[];
+}
+
+/** Una tour mía, entera. `null` si no es mía: la página da 404, no "prohibido". */
+export async function miTour(tourId: string): Promise<MiTourDetalle | null> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('mi_tour', { p_tour_id: tourId });
+  if (error) {
+    console.error('mi_tour:', error.message);
+    return null;
+  }
+  return ((data ?? []) as MiTourDetalle[])[0] ?? null;
+}
+
+/** Cómo se le explica al operador en qué estado está una tour suya. */
+export const ESTADO_TOUR: Record<string, { texto: string; detalle: string; color: string }> = {
+  borrador:  { texto: 'Borrador',    detalle: 'Solo la ves vos. Mandala a revisión cuando esté lista.', color: '#8B8B87' },
+  pendiente: { texto: 'En revisión', detalle: 'La estamos revisando. Te avisamos al publicarla.',       color: '#FF6A00' },
+  publicado: { texto: 'Publicada',   detalle: 'Ya aparece en el sitio.',                                color: '#66BB2E' },
+  archivado: { texto: 'Archivada',   detalle: 'No aparece. Escribinos si es un error.',                 color: '#B42318' },
+};
+
 /** Cuánta gente pidió los datos de este negocio. La prueba de que el directorio sirve. */
 export async function pedidosDeMiNegocio(negocioId: string, dias = 30): Promise<{ cuantos: number; ultimo: string | null }> {
   const db = await sesion();
