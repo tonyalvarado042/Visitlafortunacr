@@ -5,7 +5,16 @@ import { revalidatePath } from 'next/cache';
 import { sesion } from '@/lib/supabase-sesion';
 import { escribirClaveNueva, pedirEnlaceDeClave } from '@/lib/recuperacion';
 
-export type EstadoComercio = { ok?: string | null; error?: string | null };
+export type EstadoComercio = {
+  ok?: string | null;
+  error?: string | null;
+  /* Lo que de verdad quedó guardado. `revalidatePath` invalida la caché pero
+     el componente de cliente puede volver a montarse ANTES de que lleguen las
+     propiedades nuevas, y entonces pinta las viejas: se guardaba una cédula
+     jurídica y el formulario seguía diciendo «física». Devolviéndolo acá, lo
+     que se muestra no depende de quién gane esa carrera. */
+  guardados?: Record<string, unknown> | null;
+};
 
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
@@ -304,4 +313,45 @@ export async function borrarMiTour(datos: FormData): Promise<void> {
   }
   revalidatePath(`/negocio/${negocioId}/tours`);
   redirect(`/negocio/${negocioId}/tours`);
+}
+
+
+/**
+ * Los datos legales del negocio: cédula, razón social y patente.
+ *
+ * El formato de la cédula no se valida acá sino en la base, con el largo que
+ * le toca a cada tipo. Un dedazo en una cédula no se descubre hasta que hay
+ * que facturar, y entonces ya hay una reserva hecha.
+ */
+export async function guardarMisDatosFiscales(
+  _previo: EstadoComercio, datos: FormData,
+): Promise<EstadoComercio> {
+  const negocioId = texto(datos, 'negocio_id');
+  if (!esUuid(negocioId)) return { error: 'Falta el negocio.' };
+
+  const patente = texto(datos, 'tiene_patente');
+
+  const db = await sesion();
+  const { error } = await db.rpc('guardar_mis_datos_fiscales', {
+    p_negocio_id: negocioId,
+    p_tipo_cedula: texto(datos, 'tipo_cedula'),
+    p_cedula: texto(datos, 'cedula'),
+    p_razon_social: texto(datos, 'razon_social') || null,
+    /* Sin responder es `null`, no `false`: "todavía no contestó" y "no tiene"
+       son cosas distintas, y de la primera hay que preguntar de nuevo. */
+    p_tiene_patente: patente === '' ? null : patente === '1',
+    p_patente_numero: texto(datos, 'patente_numero') || null,
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath(`/negocio/${negocioId}`);
+
+  /* Se lee de vuelta de la base y no se arma con lo que vino del formulario:
+     la función normaliza la cédula a dígitos, así que lo que se guardó no es
+     exactamente lo que se escribió. */
+  const { data } = await db.rpc('mis_datos_fiscales', { p_negocio_id: negocioId });
+  return {
+    ok: 'Datos guardados.',
+    guardados: ((data ?? []) as Record<string, unknown>[])[0] ?? null,
+  };
 }

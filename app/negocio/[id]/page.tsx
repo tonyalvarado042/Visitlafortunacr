@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { fotosDeMiNegocio, miNegocio, pedidosDeMiNegocio, resenasDeMiNegocio, ESTADO_FICHA } from '@/lib/comercio';
+import { fotosDeMiNegocio, miNegocio, pedidosDeMiNegocio, resenasDeMiNegocio, misDatosFiscales, ESTADO_FICHA } from '@/lib/comercio';
+import { DatosFiscales } from './DatosFiscales';
 import { FormularioNegocio } from './FormularioNegocio';
 import { Fotos } from './Fotos';
 import { Resenas } from './Resenas';
@@ -21,10 +22,11 @@ export default async function EditarMiNegocio({
   const negocio = await miNegocio(id);
   if (!negocio) notFound();
 
-  const [resenas, fotos, pedidos] = await Promise.all([
+  const [resenas, fotos, pedidos, fiscales] = await Promise.all([
     negocio.estado_publicacion === 'publicado' ? resenasDeMiNegocio(id) : Promise.resolve([]),
     fotosDeMiNegocio(id),
     pedidosDeMiNegocio(id),
+    misDatosFiscales(id),
   ]);
 
   const estado = ESTADO_FICHA[negocio.estado_publicacion] ?? ESTADO_FICHA.borrador;
@@ -85,6 +87,8 @@ export default async function EditarMiNegocio({
       </Link>
 
       <FormularioNegocio negocio={negocio} />
+
+      <DatosFiscales negocioId={negocio.id} nombreComercial={negocio.nombre} datos={fiscales} />
 
       <Fotos
         negocioId={negocio.id}

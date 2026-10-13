@@ -194,6 +194,35 @@ export async function miTour(tourId: string): Promise<MiTourDetalle | null> {
   return ((data ?? []) as MiTourDetalle[])[0] ?? null;
 }
 
+/*
+ * La identidad legal del negocio: cédula, razón social y patente.
+ *
+ * Vive en `dst_negocio_fiscal` y no en `dst_negocio` porque `anon` lee las
+ * fichas publicadas enteras: una columna `cedula` ahí quedaría a una llamada
+ * REST de distancia. Una cédula jurídica es registro público; una física es el
+ * número de identidad de una persona, y eso no puede estar a un clic.
+ *
+ * El NOMBRE COMERCIAL no está acá: es `dst_negocio.nombre`, el que se muestra
+ * en el sitio. Guardarlo dos veces garantiza que un día no coincidan.
+ */
+export type MisDatosFiscales = {
+  tipo_cedula: 'fisica' | 'dimex' | 'juridica' | 'asociacion' | null;
+  cedula: string | null;
+  razon_social: string | null;
+  tiene_patente: boolean | null;
+  patente_numero: string | null;
+};
+
+export async function misDatosFiscales(negocioId: string): Promise<MisDatosFiscales | null> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('mis_datos_fiscales', { p_negocio_id: negocioId });
+  if (error) {
+    console.error('mis_datos_fiscales:', error.message);
+    return null;
+  }
+  return ((data ?? []) as MisDatosFiscales[])[0] ?? null;
+}
+
 /** Cómo se le explica al operador en qué estado está una tour suya. */
 export const ESTADO_TOUR: Record<string, { texto: string; detalle: string; color: string }> = {
   borrador:  { texto: 'Borrador',    detalle: 'Solo la ves vos. Mandala a revisión cuando esté lista.', color: '#8B8B87' },

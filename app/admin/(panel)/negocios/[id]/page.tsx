@@ -8,6 +8,16 @@ import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada,
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
+import { cedulaConForma } from '@/lib/cedula';
+
+/* Como se lee cada tipo de cedula en el panel. La babosa que guarda la base es
+   corta a proposito; el rotulo es para humanos. */
+const ROTULO_CEDULA: Record<string, string> = {
+  fisica: 'Física',
+  dimex: 'DIMEX',
+  juridica: 'Jurídica',
+  asociacion: 'Asociación',
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +29,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   const { data: n } = await db.from('dst_negocio').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n) notFound();
 
-  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: tradHijas }, { data: otrosNegocios }] = await Promise.all([
+  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: tradHijas }, { data: otrosNegocios }, { data: fiscal }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
@@ -29,6 +39,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     db.from('dst_negocio_combina').select('id, motivo, otro:dst_negocio!dst_negocio_combina_combina_id_fkey(nombre)').eq('negocio_id', id).order('orden'),
     db.from('dst_traduccion').select('entidad, entidad_id, campo, idioma, texto, esta_revisada, origen').in('entidad', ['razon', 'combina']),
     db.from('dst_negocio').select('id, nombre').eq('destino_id', destino.id).neq('id', id).eq('estado_publicacion', 'publicado').order('nombre'),
+    db.from('dst_negocio_fiscal').select('*').eq('negocio_id', id).maybeSingle(),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
@@ -97,6 +108,50 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                       publico son sus tours. Marcarlo NO lo saca de la venta —
                       para eso esta «vende por aqui» en Operadores. */}
                   <label><input type="checkbox" name="es_operador" value="1" defaultChecked={n.es_operador} /> Es operador de tours (no sale en el directorio)</label>
+                </div>
+
+                {/* ---- Los datos legales ----
+                    Viven en `dst_negocio_fiscal`, aparte, porque `anon` lee las
+                    fichas publicadas enteras y una cedula fisica es el numero de
+                    identidad de una persona. Aca se ven y se corrigen; el duenno
+                    los llena desde su portal. */}
+                <div className="campo ancho">
+                  <h3 style={{ fontSize: 15, marginTop: 20, marginBottom: 2 }}>
+                    Datos de la empresa <small className="gris">no salen en el sitio</small>
+                  </h3>
+                  {!fiscal ? (
+                    <small className="gris">
+                      Todavía no los llenó. Los carga desde su portal, en{' '}
+                      <strong>Datos de la empresa</strong>.
+                    </small>
+                  ) : (
+                    <table className="tabla" style={{ marginTop: 8 }}>
+                      <tbody>
+                        <tr>
+                          <td className="gris">Cédula</td>
+                          <td className="fuerte">
+                            {ROTULO_CEDULA[fiscal.tipo_cedula as string] ?? fiscal.tipo_cedula}
+                            {' · '}
+                            {cedulaConForma(fiscal.cedula, fiscal.tipo_cedula)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="gris">Razón social</td>
+                          <td>{fiscal.razon_social ?? <span className="gris">—</span>}</td>
+                        </tr>
+                        <tr>
+                          <td className="gris">Patente</td>
+                          <td>
+                            {fiscal.tiene_patente == null
+                              ? <span className="gris">sin responder</span>
+                              : fiscal.tiene_patente
+                                ? <>sí{fiscal.patente_numero ? ` · ${fiscal.patente_numero}` : ''}</>
+                                : 'no tiene'}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </div>
             </div>
