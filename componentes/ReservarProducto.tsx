@@ -59,6 +59,35 @@ export function totalEstimado(
   return adultos * (porAdulto ?? 0) + ninos * (porNino ?? 0);
 }
 
+/*
+ * El rótulo de una tarifa, en el idioma de quien mira.
+ *
+ * El `nombre` de la tarifa es texto libre que escribió alguien en el panel —
+ * "Adulto", "Niño (3 a 11)"— y está en español y solo en español: en inglés la
+ * tarjeta decía "Adulto $47" al lado de un "Total" traducido, que se lee como
+ * un descuido.
+ *
+ * El rótulo sale de `es_para`, que es el valor CANÓNICO y está acotado por
+ * constraint a cuatro: adulto, nino, senior, general. Lo que el nombre tenga
+ * entre paréntesis —"(3 a 11)", un rango de edad— se conserva: ahí sí hay un
+ * dato que el rótulo no trae y que no depende del idioma.
+ */
+const ROTULO: Record<string, 'reserva_adulto_uno' | 'reserva_nino_uno' | 'reserva_senior_uno' | 'reserva_general_uno'> = {
+  adulto: 'reserva_adulto_uno',
+  nino: 'reserva_nino_uno',
+  senior: 'reserva_senior_uno',
+  general: 'reserva_general_uno',
+};
+
+function rotuloDeTarifa(tarifa: ProductoReservable['tarifas'][number], idioma: Idioma): string {
+  const clave = ROTULO[tarifa.es_para];
+  if (!clave) return tarifa.nombre;
+  const base = t(clave, idioma);
+  const entreParentesis = tarifa.nombre.match(/\(([^)]+)\)/);
+  const rotulo = base.charAt(0).toUpperCase() + base.slice(1);
+  return entreParentesis ? `${rotulo} (${entreParentesis[1]})` : rotulo;
+}
+
 function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): string {
   if (accion === 'reservar_y_pagar') return t('reserva_y_pagar', idioma);
   if (accion === 'solicitar_disponibilidad') return t('reserva_pedir_dispo', idioma);
@@ -169,7 +198,7 @@ export function ReservarProducto({
             <ul className="reservar-tarifas">
               {producto.tarifas.map((x) => (
                 <li key={x.nombre}>
-                  <span>{x.nombre}</span>
+                  <span>{rotuloDeTarifa(x, idioma)}</span>
                   <strong>${x.precio}</strong>
                 </li>
               ))}

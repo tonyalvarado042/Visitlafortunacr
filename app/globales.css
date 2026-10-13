@@ -2795,13 +2795,23 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .incluye-si { background: var(--verde-suave, var(--carbon)); }
 
 /* ---- La prueba social, arriba y a la vista ---- */
+/* Cabecera ARRIBA y tarjetas abajo, no en dos columnas.
+   La columna de la ficha mide 696px de contenido: con 260 para la cabecera y
+   30 de separación quedaban 406 para tres citas, o sea 126px cada una. A ese
+   ancho el texto cae de a dos palabras por renglón y las tarjetas se estiran
+   a lo alto. Apiladas, cada cita tiene 225px y se lee. */
 .prueba-social {
   margin-top: 34px; padding: 26px; border-radius: 8px;
   background: var(--carbon); border: 1px solid var(--borde);
-  display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 30px;
-  align-items: start;
+  display: flex; flex-direction: column; gap: 22px;
 }
-.prueba-cabeza { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.prueba-cabeza {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; min-width: 0;
+}
+/* El título toma su propio renglón; las cifras y el enlace comparten el de
+   abajo, que es como se lee un titular con su dato. */
+.prueba-cabeza h2 { flex: 1 1 100%; }
+.prueba-enlace { margin-left: auto; }
 .prueba-cabeza h2 {
   font-size: 27px; font-weight: 900; letter-spacing: -.03em; line-height: 1.08;
   margin: 0; text-transform: none;
@@ -2822,15 +2832,18 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .prueba-otras a:hover { border-color: var(--borde-4); }
 .prueba-otras strong { font-weight: 800; color: var(--txt-0); }
 
-.prueba-citas { display: grid; grid-template-columns: repeat(auto-fit, minmax(188px, 1fr)); gap: 14px; }
+.prueba-citas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .prueba-citas blockquote {
   margin: 0; padding: 16px; border-radius: 7px;
   background: var(--sup-0); border: 1px solid var(--borde);
   display: flex; flex-direction: column; gap: 10px;
 }
 .cita-volcanes { display: flex; gap: 2px; }
+/* Seis renglones y corta. Sin esto, una reseña de cinco líneas al lado de una
+   de una deja dos tarjetas enanas y una gigante, y la fila se ve rota. */
 .prueba-citas p {
   margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--txt-1);
+  display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;
 }
 .prueba-citas footer { margin-top: auto; display: flex; flex-direction: column; gap: 2px; }
 .prueba-citas footer strong { font-size: 12.5px; }
@@ -2839,8 +2852,14 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .prueba-citas footer a:hover { color: var(--naranja); }
 
 @media (max-width: 860px) {
-  .prueba-social { grid-template-columns: 1fr; gap: 22px; padding: 20px; }
+  .prueba-social { padding: 20px; }
   .prueba-nota { font-size: 38px; }
+  .prueba-enlace { margin-left: 0; flex-basis: 100%; }
+}
+@media (max-width: 620px) {
+  /* Tres citas de 150px no son tres citas. Una debajo de otra, enteras. */
+  .prueba-citas { grid-template-columns: 1fr; }
+  .prueba-citas p { -webkit-line-clamp: 4; }
 }
 
 /* ---- La galería como tira ---- */

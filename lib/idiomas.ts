@@ -93,6 +93,8 @@ export const T: Record<string, Diccionario> = {
   tour_cancelacion:  { es: 'Cancelación libre hasta', en: 'Free cancellation up to', pt: 'Cancelamento livre até', fr: 'Annulation gratuite jusqu’à', de: 'Kostenlose Stornierung bis' },
   reserva_total:     { es: 'Total', en: 'Total', pt: 'Total', fr: 'Total', de: 'Gesamt' },
   reserva_adulto_uno:{ es: 'adulto', en: 'adult', pt: 'adulto', fr: 'adulte', de: 'Erwachsener' },
+  reserva_senior_uno:{ es: 'adulto mayor', en: 'senior', pt: 'idoso', fr: 'senior', de: 'Senior' },
+  reserva_general_uno:{ es: 'entrada general', en: 'general admission', pt: 'entrada geral', fr: 'entrée générale', de: 'Normalpreis' },
   reserva_nino_uno:  { es: 'niño', en: 'child', pt: 'criança', fr: 'enfant', de: 'Kind' },
   sus_tours:         { es: 'Lo que lleva este operador', en: 'What this operator runs', pt: 'O que este operador leva', fr: 'Ce que propose cet opérateur', de: 'Was dieser Anbieter anbietet' },
   desde:             { es: 'desde', en: 'from', pt: 'a partir de', fr: 'à partir de', de: 'ab' },
