@@ -70,6 +70,13 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label><input type="checkbox" name="chat_activo" value="1" defaultChecked={d.chat_activo} disabled={!esAdmin} /> Burbuja de chat en el sitio</label>
                   <small>Apagada, la burbuja no se pinta y el chat deja de atender. Lo que ya estaba conversado no se borra.</small>
                 </div>
+                <div className="campo"><label><input type="checkbox" name="combina_automatico" value="1" defaultChecked={d.combina_automatico} disabled={!esAdmin} /> Rellenar &quot;Combinalo con&quot; solo</label>
+                  <small>
+                    En la ficha que no tiene combinaciones a mano, se rellena con tres de <strong>otras</strong>
+                    categorías — nunca del mismo rubro, que sería recomendar al competidor. Donde alguien cargó
+                    combinaciones a mano, estas no aparecen. Apagado, la ficha sin combinaciones termina sin ese bloque.
+                  </small>
+                </div>
               </div>
             </div>
             <div className="tarjeta">

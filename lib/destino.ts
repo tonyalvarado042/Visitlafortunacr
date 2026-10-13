@@ -541,6 +541,10 @@ export type NegocioCombina = {
   categoria_babosa: string | null;
   categoria_nombre: string | null;
   foto_url: string | null;
+  /* Si la puso el equipo o la rellenó la base. En la ficha no se distingue
+     —ambas son sugerencias nuestras y ninguna afirma nada falso—; en el panel
+     sí, para saber a cuáles les falta mano. */
+  es_automatica: boolean;
 };
 
 /*
@@ -554,6 +558,11 @@ export type NegocioCombina = {
  * una ficha archivada no llega hasta acá — nadie termina en un 404 por una
  * sugerencia nuestra. Y pasa por `texto_en()`, para que el "por qué va junto"
  * salga en el idioma de quien mira.
+ *
+ * Si el negocio no tiene ninguna a mano, la base rellena con tres de OTRAS
+ * categorías —nunca del mismo rubro, que sería pagarle la publicidad al
+ * competidor— y una sola por categoría, para que cubran el día en vez de
+ * competir entre ellas. Lo manual, cuando existe, le gana al relleno.
  */
 export async function combinaCon(negocioId: string, idioma: Idioma): Promise<NegocioCombina[]> {
   const { data, error } = await supabase.rpc('combina_de_negocio', {

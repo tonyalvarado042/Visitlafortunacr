@@ -172,7 +172,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               <h2>Combinalo con <small>{combina?.length ?? 0} de 6 · salen al final de la ficha</small></h2>
 
               {!combina?.length ? (
-                <Vacio texto="Nadie recomendado todavía. La gente que viene a esto casi nunca viene solo a esto." />
+                <Vacio texto="Sin nadie cargado a mano, la ficha muestra tres de otras categorías elegidas solas. Una recomendación pensada —con su por qué— vende más que un relleno." />
               ) : (
                 <ul className="combina-admin">
                   {combina.map((c) => {

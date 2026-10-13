@@ -95,6 +95,7 @@ export async function editarDestino(datos: FormData) {
       tema: texto(datos, 'tema') === 'oscuro' ? 'oscuro' : 'claro',
       barra_oscura: texto(datos, 'barra_oscura') === '1',
       contacto_bloqueado: texto(datos, 'contacto_bloqueado') === '1',
+      combina_automatico: texto(datos, 'combina_automatico') === '1',
       esta_activo: texto(datos, 'esta_activo') === '1',
     };
   } else {
