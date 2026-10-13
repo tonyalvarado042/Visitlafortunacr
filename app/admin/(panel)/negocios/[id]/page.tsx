@@ -19,7 +19,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   const { data: n } = await db.from('dst_negocio').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n) notFound();
 
-  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: otrosNegocios }] = await Promise.all([
+  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: tradHijas }, { data: otrosNegocios }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
@@ -27,12 +27,19 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     db.from('dst_solicitud').select('id, tipo, etapa, creado_en').eq('negocio_id', id).order('creado_en', { ascending: false }).limit(10),
     db.from('dst_negocio_razon').select('id, titulo, texto, foto_url, orden').eq('negocio_id', id).order('orden'),
     db.from('dst_negocio_combina').select('id, motivo, otro:dst_negocio!dst_negocio_combina_combina_id_fkey(nombre)').eq('negocio_id', id).order('orden'),
+    db.from('dst_traduccion').select('entidad, entidad_id, campo, idioma, texto, esta_revisada, origen').in('entidad', ['razon', 'combina']),
     db.from('dst_negocio').select('id, nombre').eq('destino_id', destino.id).neq('id', id).eq('estado_publicacion', 'publicado').order('nombre'),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
   const otrosIdiomas = destino.idiomas.filter((i) => i !== destino.idioma_principal);
   const trad = (campo: string, idioma: string) => traducciones?.find((t) => t.campo === campo && t.idioma === idioma);
+  /* Las traducciones de razones y combinaciones. Se piden todas de esas dos
+     entidades y se filtran acá: son pocas, y una consulta por razón serían
+     doce viajes para llenar una tarjeta. */
+  const tradHija = (entidad: string, entidadId: string, campo: string, idioma: string) =>
+    tradHijas?.find((t) => t.entidad === entidad && t.entidad_id === entidadId
+                        && t.campo === campo && t.idioma === idioma);
 
   return (
     <>
@@ -353,6 +360,58 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               );
             }))}
           </div>
+
+          {/* Las razones y los motivos de "combinalo con". Son redacción libre:
+              no hay campo canónico del que sacar la palabra, como sí lo hubo
+              con las tarifas. Si falta una, sale el texto original. */}
+          {(razones?.length ?? 0) > 0 && (
+            <>
+              <h3 style={{ marginTop: 26, fontSize: 15 }}>Razones para elegir</h3>
+              <div className="campos">
+                {razones!.map((r) => (['titulo', 'texto'] as const).map((campo) => otrosIdiomas.map((idioma) => {
+                  const t = tradHija('razon', r.id, campo, idioma);
+                  return (
+                    <form action={traducirCampo} key={`r-${r.id}-${campo}-${idioma}`} className="campo">
+                      <input type="hidden" name="entidad" value="razon" /><input type="hidden" name="entidad_id" value={r.id} />
+                      <input type="hidden" name="campo" value={campo} /><input type="hidden" name="idioma" value={idioma} />
+                      <input type="hidden" name="volver_a" value={id} />
+                      <label>
+                        {r.titulo.slice(0, 26)}{r.titulo.length > 26 ? '…' : ''} · {campo} · {idioma}
+                        {t ? <> <Etiqueta suave>{t.origen}{t.esta_revisada ? ' ✓' : ''}</Etiqueta></> : null}
+                      </label>
+                      <input name="texto" defaultValue={t?.texto ?? ''} placeholder={(campo === 'titulo' ? r.titulo : r.texto) ?? ''} />
+                      <div className="pie-formulario" style={{ marginTop: 6 }}><BotonAccion clase="boton secundario chico">Guardar</BotonAccion></div>
+                    </form>
+                  );
+                })))}
+              </div>
+            </>
+          )}
+
+          {(combina?.filter((c) => c.motivo).length ?? 0) > 0 && (
+            <>
+              <h3 style={{ marginTop: 26, fontSize: 15 }}>Por qué va junto</h3>
+              <div className="campos">
+                {combina!.filter((c) => c.motivo).map((c) => otrosIdiomas.map((idioma) => {
+                  const otro = uno(c.otro as never) as { nombre: string } | null;
+                  const t = tradHija('combina', c.id, 'motivo', idioma);
+                  return (
+                    <form action={traducirCampo} key={`c-${c.id}-${idioma}`} className="campo">
+                      <input type="hidden" name="entidad" value="combina" /><input type="hidden" name="entidad_id" value={c.id} />
+                      <input type="hidden" name="campo" value="motivo" /><input type="hidden" name="idioma" value={idioma} />
+                      <input type="hidden" name="volver_a" value={id} />
+                      <label>
+                        {otro?.nombre ?? '—'} · {idioma}
+                        {t ? <> <Etiqueta suave>{t.origen}{t.esta_revisada ? ' ✓' : ''}</Etiqueta></> : null}
+                      </label>
+                      <input name="texto" defaultValue={t?.texto ?? ''} placeholder={c.motivo ?? ''} />
+                      <div className="pie-formulario" style={{ marginTop: 6 }}><BotonAccion clase="boton secundario chico">Guardar</BotonAccion></div>
+                    </form>
+                  );
+                }))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </>

@@ -91,7 +91,10 @@ export async function traducirCampo(datos: FormData) {
   const campo = texto(datos, 'campo');
   const idioma = texto(datos, 'idioma');
   const valor = texto(datos, 'texto');
-  if (!esUuid(entidadId) || !['negocio', 'tour', 'guia'].includes(entidad) || !campo || !idioma) return;
+  /* 'razon' y 'combina' son hijas de un negocio: su panel es el del negocio y
+     no tienen página propia, así que la vuelta se dice aparte. */
+  const volverA = texto(datos, 'volver_a');
+  if (!esUuid(entidadId) || !['negocio', 'tour', 'guia', 'razon', 'combina'].includes(entidad) || !campo || !idioma) return;
   if (!valor) {
     await db.from('dst_traduccion').delete().eq('entidad', entidad).eq('entidad_id', entidadId).eq('campo', campo).eq('idioma', idioma);
   } else {
@@ -105,7 +108,11 @@ export async function traducirCampo(datos: FormData) {
       { onConflict: 'entidad,entidad_id,campo,idioma' }
     );
   }
-  revalidatePath(`/admin/${entidad === 'negocio' ? 'negocios' : entidad === 'tour' ? 'tours' : 'guias'}/${entidadId}`);
+  if (volverA && esUuid(volverA)) {
+    revalidatePath(`/admin/negocios/${volverA}`);
+  } else {
+    revalidatePath(`/admin/${entidad === 'negocio' ? 'negocios' : entidad === 'tour' ? 'tours' : 'guias'}/${entidadId}`);
+  }
 }
 
 /* ---- Fotos ---- */

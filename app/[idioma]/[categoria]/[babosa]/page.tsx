@@ -54,7 +54,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
     etiquetasDe(negocio.id, idioma),
     fotosDe(negocio.id, idioma),
     toursDe(negocio.id),
-    razonesDe(negocio.id),
+    razonesDe(negocio.id, idioma),
     combinaCon(negocio.id, idioma),
   ]);
 
