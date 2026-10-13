@@ -41,6 +41,14 @@ export default async function PaginaAjustes() {
     db.from('dst_cupon').select('*').eq('destino_id', destino.id).order('creado_en', { ascending: false })
   ]);
   if (!d) return <Vacio texto="Sin destino." />;
+  /* Un tipo de cambio de hace tres días sigue sirviendo; uno de hace tres
+     semanas ya desfasa la comisión. No se apaga solo —un número viejo es mejor
+     que ninguno— pero se dice, que es la diferencia entre un dato y una
+     sorpresa. */
+  const viejoElCambio = d.tipo_cambio_en
+    ? Date.now() - new Date(d.tipo_cambio_en).getTime() > 7 * 86_400_000
+    : false;
+
   const presente = (n: string) => !!process.env[n]?.trim() || (n === 'SUPABASE_SECRET_KEY' && !!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
 
   return (
@@ -190,20 +198,27 @@ export default async function PaginaAjustes() {
                      defaultValue={d.tipo_cambio_crc ?? ''} disabled={!esAdmin}
                      placeholder="vacío = no se venden tarifas nacionales" />
               <small>
-                El tipo de <strong>compra</strong> del BCCR, que es el que pide el
-                tarifario. <strong>Se actualiza solo todos los días</strong>; esto es
-                para corregirlo a mano si hace falta.
+                Cuántos colones vale un dólar. El tipo de <strong>compra</strong> del
+                BCCR, que es el que pide el tarifario — por ejemplo <code>512.35</code>.
+                Se busca en <a href="https://sdd.bccr.fi.cr/es/IndicadoresEconomicos/Inicio/Contenedor/6"
+                   target="_blank" rel="noreferrer">sdd.bccr.fi.cr ↗</a>.
+              </small>
+              <small className={viejoElCambio ? 'aviso-malo' : undefined}>
                 {d.tipo_cambio_en
-                  ? ` Última actualización: ${new Date(d.tipo_cambio_en).toLocaleString('es-CR')}.`
-                  : ' Todavía no se ha traído ninguno.'}
+                  ? <>Última actualización: <strong>{new Date(d.tipo_cambio_en).toLocaleString('es-CR')}</strong>
+                      {viejoElCambio && ' — está viejo. Mientras tanto se sigue usando ese número.'}</>
+                  : <><strong>Vacío.</strong> Mientras esté así, las tarifas de nacionales y
+                      residentes NO se muestran en el sitio y nadie puede reservarlas.</>}
               </small>
             </div>
             <div className="campo"><label htmlFor="tc-piso">Piso del contrato</label>
               <input id="tc-piso" type="number" step="0.01" min="1" name="tipo_cambio_piso"
                      defaultValue={d.tipo_cambio_piso ?? 550} disabled={!esAdmin} />
               <small>
-                Si el colón se fortalece por debajo de este número, se cobra igual a este tipo.
-                El tarifario de Paradise 2026 lo fija en <strong>550</strong>.
+                El mínimo que pide el contrato: si el colón se fortalece y el BCCR baja
+                de este número, se convierte igual a este tipo. Sale del tarifario del
+                operador — el de Paradise 2026 lo fija en <strong>550</strong>. Si un
+                contrato no dice nada de esto, se deja en 550 y no estorba.
               </small>
             </div>
             <div className="campo ancho">

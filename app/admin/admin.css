@@ -264,3 +264,6 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 .doc-contrato-enlace summary { cursor: pointer; font-size: 12px; color: var(--humo); }
 .doc-contrato-enlace summary:hover { color: var(--naranja); }
 .doc-contrato-enlace input { margin-top: 7px; width: 100%; min-width: 260px; }
+
+/* Un dato que sigue sirviendo pero ya esta viejo: se dice, no se apaga. */
+.aviso-malo { color: #E0A33C !important; font-weight: 700; }
