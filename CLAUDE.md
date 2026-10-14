@@ -338,6 +338,12 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    npx cf queues create --queue-name visit-la-fortuna-trabajos
    npx cf queues list                           # tiene que aparecer
    ```
+   **En Windows**, `npm ci` puede fallar con *"la ejecución de scripts está
+   deshabilitada en este sistema"*: es la política de PowerShell, no el
+   proyecto. Se arregla una vez con
+   `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, o
+   escribiendo `npm.cmd` / `npx.cmd` en vez de `npm` / `npx`. Le pasó a Tony el
+   14 de octubre de 2026; su clon está en `C:\Users\Usuario\.claude\visitlafortunacr`.
    Si `create` dice que Queues no está disponible, falta el plan Workers Paid
    (paso 1). Si la cuenta de `whoami` no es la del Worker: `npx cf auth logout`
    y volver a entrar con la otra. La cola nace **sin consumidor**; el
