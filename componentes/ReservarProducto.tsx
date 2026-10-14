@@ -109,7 +109,7 @@ function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): st
 }
 
 export function ReservarProducto({
-  productos, producto: unoSolo, complementos = [], idioma, esTour,
+  productos, producto: unoSolo, complementos = [], descuentoHasta, idioma, esTour,
 }: {
   /* Varios pases en UNA tarjeta. Antes la ficha pintaba una tarjeta entera por
      producto: dos fechas, dos contadores y dos botones de enviar para el mismo
@@ -118,6 +118,9 @@ export function ReservarProducto({
   /* La página de una tour manda uno solo, que es todo lo que tiene. */
   producto?: ProductoReservable;
   complementos?: Complemento[];
+  /* La fecha en que se acaba el descuento de lanzamiento, para la cuenta
+     regresiva. Null = sin corte, y entonces no se muestra reloj. */
+  descuentoHasta?: string | null;
   idioma: Idioma;
   /* El mismo widget sirve para un producto de una ficha y para una tour con
      su propia página. Lo único que cambia es con qué nombre viaja el id: la
@@ -227,6 +230,20 @@ export function ReservarProducto({
      total en colones que no incluya el upgrade sería mentira. */
   const totalCrc = subtotalCrc == null || extrasPedidos > 0 ? null
     : Math.round(subtotalCrc - (pct > 0 ? (subtotalCrc * pct) / 100 : 0));
+
+  /* Cuántos días quedan de lanzamiento. Sale de la MISMA fecha con la que la
+     base deja de aplicarlo, así que el reloj y el cobro no se pueden separar.
+     Sin fecha de corte no hay reloj: inventar uno sería inventar la urgencia. */
+  const hastaCuando = descuentoHasta ?? null;
+  const diasQueQuedan = (() => {
+    if (!hastaCuando) return null;
+    const corte = new Date(`${hastaCuando}T23:59:59`);
+    if (Number.isNaN(corte.getTime())) return null;
+    const faltan = Math.ceil((corte.getTime() - Date.now()) / 86_400_000);
+    /* Más de dos meses no es urgencia, es un dato: el reloj solo aparece
+       cuando de verdad aprieta. */
+    return faltan > 60 || faltan < 0 ? null : faltan;
+  })();
 
   /* La antelación que pide el producto, convertida a la primera fecha que el
      formulario deja elegir. Así el visitante no escoge una fecha que el
@@ -512,10 +529,36 @@ export function ReservarProducto({
               </div>
             )}
 
+            {/* ---- El descuento de lanzamiento ----
+                Antes era una línea verde de 11px que nadie veía. Ahora dice lo
+                que de verdad convence: CUÁNTA PLATA se ahorra, no un
+                porcentaje que hay que calcular de cabeza.
+
+                Y si hay fecha de corte, la cuenta regresiva es REAL — sale de
+                `descuento_lanzamiento_hasta`, la misma fecha con la que la
+                base deja de aplicar el descuento. Una urgencia inventada se
+                descubre volviendo al día siguiente, y ahí no se cae el
+                descuento: se cae la credibilidad del sitio entero. */}
             {descuento > 0 && (
-              <p className="reservar-lanzamiento">
-                −{pct}% {t('reserva_lanzamiento', idioma)}
-              </p>
+              <div className="lanzamiento">
+                <span className="lanzamiento-sello">−{pct}%</span>
+                <span className="lanzamiento-texto">
+                  <strong>
+                    {t('reserva_ahorras', idioma)}{' '}
+                    {totalCrc != null && subtotalCrc != null
+                      ? colones(subtotalCrc - totalCrc)
+                      : `$${plata(descuento)}`}
+                  </strong>
+                  <small>{t('reserva_lanzamiento_que_es', idioma)}</small>
+                </span>
+                {diasQueQuedan != null && (
+                  <span className="lanzamiento-reloj" title={hastaCuando ?? undefined}>
+                    {diasQueQuedan <= 0
+                      ? t('reserva_ultimo_dia', idioma)
+                      : <>{diasQueQuedan} <small>{diasQueQuedan === 1 ? t('dia', idioma) : t('dias', idioma)}</small></>}
+                  </span>
+                )}
+              </div>
             )}
 
             {error && <p className="sorteo-error" role="alert">{error}</p>}

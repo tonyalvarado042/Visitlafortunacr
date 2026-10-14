@@ -10,7 +10,8 @@ import { IconoVerificado } from '@/componentes/Marca';
 import { Volcanes } from '@/componentes/Volcanes';
 import { Calificar } from '@/componentes/Calificar';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
-import { productosReservables, complementosDeNegocio } from '@/lib/reservas';
+import { productosReservables, complementosDeNegocio, cuponAlSalir } from '@/lib/reservas';
+import { CuponAlSalir } from '@/componentes/CuponAlSalir';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { TiraAtributos } from '@/componentes/TiraAtributos';
 import { PruebaSocial } from '@/componentes/PruebaSocial';
@@ -79,6 +80,9 @@ export default async function Ficha({ params }: { params: Parametros }) {
      como hoy. Ver los tres interruptores en lib/reservas.ts. */
   const reservables = await productosReservables(destino, babosa, idioma);
   const complementos = reservables.length ? await complementosDeNegocio(destino, babosa) : [];
+  /* Solo donde se puede reservar: ofrecerle un cupón a quien mira una ficha
+     que no vende es ofrecerle algo que no va a poder usar. */
+  const cuponSalida = reservables.length ? await cuponAlSalir(destino) : null;
 
   const mapa = negocio.latitud && negocio.longitud
     ? `https://www.google.com/maps/search/?api=1&query=${negocio.latitud},${negocio.longitud}`
@@ -459,7 +463,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 segundo quedaba a dos pantallas. El pase se elige adentro. */}
             {reservables.length > 0 && (
               <div className="ficha-reservar" id="reservar">
-                <ReservarProducto productos={reservables} complementos={complementos} idioma={idioma} />
+                <ReservarProducto productos={reservables} complementos={complementos}
+                                  descuentoHasta={destino.descuento_lanzamiento_hasta} idioma={idioma} />
               </div>
             )}
 
@@ -580,6 +585,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
           <span className="boton">{t('reserva_pedir', idioma)}</span>
         </a>
       )}
+
+      {cuponSalida && <CuponAlSalir cupon={cuponSalida} idioma={idioma} />}
 
       <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>

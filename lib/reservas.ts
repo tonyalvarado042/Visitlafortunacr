@@ -184,3 +184,30 @@ export async function cupoLibre(productoId: string, fecha: string): Promise<numb
   }
   return data as number | null;
 }
+
+
+/*
+ * El cupón que se le ofrece a quien está por irse sin reservar.
+ *
+ * La base devuelve nada cuando el cupón se agotó o venció, así que acá no hay
+ * nada que decidir: si no viene, no hay ventana. Ofrecer un código que la
+ * reserva va a rechazar después es peor que no ofrecer nada.
+ */
+export type CuponOfrecible = {
+  codigo: string;
+  tipo_descuento: 'porcentaje' | 'monto';
+  valor: number;
+  gancho: string | null;
+  vale_hasta: string | null;
+  quedan: number | null;
+};
+
+export async function cuponAlSalir(destino: Destino): Promise<CuponOfrecible | null> {
+  if (!destino.reservas_activas) return null;
+  const { data, error } = await supabase.rpc('cupon_al_salir', { p_dominio: destino.dominio });
+  if (error) {
+    console.error('cupon_al_salir:', error.message);
+    return null;
+  }
+  return ((data ?? []) as CuponOfrecible[])[0] ?? null;
+}

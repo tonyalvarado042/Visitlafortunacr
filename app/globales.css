@@ -3047,9 +3047,43 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* El precio de antes y el de ahora, uno al lado del otro. */
 .reservar-cifras { display: flex; align-items: baseline; gap: 9px; }
 .reservar-cifras s { font-size: 15px; color: var(--humo); text-decoration-thickness: 1.5px; }
-.reservar-lanzamiento {
-  margin: -6px 0 0; font-size: 12px; font-weight: 800; letter-spacing: .02em;
-  color: var(--verde-texto, #3D7A17);
+/* ---- El sello del descuento de lanzamiento --------------------------------
+   Antes era una linea verde de 11px que nadie miraba. Lo que convence no es el
+   porcentaje sino la PLATA, asi que el monto va en grande y el porcentaje en
+   el sello de la izquierda.
+
+   La animacion entra UNA VEZ al aparecer y no se repite: un elemento que
+   late sin parar al lado de un precio se lee como anuncio y la gente deja de
+   verlo. Y respeta a quien pidio menos movimiento. */
+.lanzamiento {
+  display: flex; align-items: center; gap: 12px;
+  margin: 10px 0 0; padding: 11px 13px; border-radius: 9px;
+  background: linear-gradient(100deg, rgba(102,187,46,.16), rgba(102,187,46,.06));
+  border: 1px solid rgba(102,187,46,.45);
+  animation: lanzamiento-entra .45s cubic-bezier(.2,.9,.3,1.2) both;
+}
+@keyframes lanzamiento-entra {
+  from { opacity: 0; transform: translateY(6px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+.lanzamiento-sello {
+  flex: none; display: grid; place-items: center;
+  min-width: 46px; padding: 7px 9px; border-radius: 7px;
+  background: var(--verde); color: #0B0B0B;
+  font-size: 14px; font-weight: 800; letter-spacing: -.02em;
+}
+.lanzamiento-texto { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex-grow: 1; }
+.lanzamiento-texto strong { font-size: 14.5px; color: var(--blanco); }
+.lanzamiento-texto small { font-size: 11px; line-height: 1.4; color: var(--txt-3); }
+.lanzamiento-reloj {
+  flex: none; display: flex; flex-direction: column; align-items: center; gap: 0;
+  padding: 5px 9px; border-radius: 7px; border: 1px solid rgba(102,187,46,.45);
+  font-size: 15px; font-weight: 800; color: var(--verde); line-height: 1.1;
+}
+.lanzamiento-reloj small { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lanzamiento { animation: none; }
 }
 
 /* ---- Extranjero o nacional/residente -------------------------------------
@@ -3103,3 +3137,56 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 .reservar-extra-cabeza b { font-size: 13px; color: var(--acento-vivo); white-space: nowrap; }
 .reservar-extra small { font-size: 11.5px; line-height: 1.5; color: var(--txt-4); }
 .reservar-extra-regla { font-weight: 700; color: var(--txt-3) !important; }
+
+/* ---- La ventana del cupon de salida ---------------------------------------
+   Aparece UNA vez, y nunca mientras la persona esta mirando el formulario de
+   reserva: interrumpir a quien ya esta reservando es sabotearse. */
+.cupon-fondo {
+  position: fixed; inset: 0; z-index: 400;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(0, 0, 0, .72);
+  animation: cupon-fondo-entra .2s ease both;
+}
+@keyframes cupon-fondo-entra { from { opacity: 0 } to { opacity: 1 } }
+.cupon-caja {
+  position: relative; width: min(400px, 100%);
+  display: grid; justify-items: center; gap: 12px; text-align: center;
+  padding: 34px 26px 26px; border-radius: 14px;
+  background: var(--sup-1); border: 1px solid var(--borde-3);
+  animation: cupon-caja-entra .32s cubic-bezier(.2,.9,.3,1.15) both;
+}
+@keyframes cupon-caja-entra {
+  from { opacity: 0; transform: translateY(14px) scale(.96) }
+  to   { opacity: 1; transform: none }
+}
+.cupon-cerrar {
+  position: absolute; top: 8px; right: 10px;
+  width: 36px; height: 36px; border: 0; background: none; cursor: pointer;
+  font-size: 26px; line-height: 1; color: var(--txt-4);
+}
+.cupon-cerrar:hover { color: var(--blanco); }
+.cupon-sello {
+  display: grid; place-items: center; min-width: 76px; padding: 10px 16px;
+  border-radius: 10px; background: var(--verde); color: #0B0B0B;
+  font-size: 26px; font-weight: 800; letter-spacing: -.02em;
+}
+.cupon-caja h2 { margin: 0; font-size: 20px; line-height: 1.25; }
+.cupon-que { margin: 0; font-size: 13px; line-height: 1.55; color: var(--txt-3); max-width: 34ch; }
+.cupon-codigo {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  padding: 11px 16px; border-radius: 9px;
+  border: 1px dashed var(--naranja); background: var(--sup-3);
+  font-family: inherit;
+}
+.cupon-codigo code {
+  font-family: ui-monospace, monospace; font-size: 19px; font-weight: 700;
+  letter-spacing: .08em; color: var(--naranja);
+}
+.cupon-codigo span { font-size: 11.5px; font-weight: 700; color: var(--txt-3); }
+.cupon-letra { margin: 0; font-size: 12px; color: var(--txt-4); }
+.cupon-letra strong { color: var(--verde); }
+.cupon-caja .boton { width: 100%; text-align: center; margin-top: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cupon-fondo, .cupon-caja { animation: none; }
+}

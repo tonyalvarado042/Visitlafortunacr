@@ -73,6 +73,12 @@ export type Destino = {
   /* El candado que protege plata: sin pasarela probada no se le cobra a
      nadie, diga lo que diga el contrato. */
   pasarela_lista: boolean;
+  /* El descuento de lanzamiento y su fecha de corte. La fecha viaja al
+     navegador para poder mostrar una cuenta regresiva DE VERDAD: una urgencia
+     inventada se descubre volviendo al día siguiente, y entonces el sitio
+     entero pierde credibilidad, no solo el descuento. */
+  descuento_lanzamiento_pct: number | null;
+  descuento_lanzamiento_hasta: string | null;
 };
 
 /**
