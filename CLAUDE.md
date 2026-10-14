@@ -442,12 +442,26 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ☐ | Buscador `/es?q=termales` | Mismos resultados |
    | ✅ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion`. 14 oct 2026, 12:48 UTC: `buscar_conocimiento` + `web_fetch`, sin error, 7,6 s, $0,15; y `buscar_lugares` a $0,035 |
    | ✅ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...`. **14 oct 2026: la solicitud entró a las 12:52:50 UTC y el planificador tardó 72 s, sin error, $0,27**, y dejó `tres-dias-en-la-fortuna-aguas-termales-y-aguas-bravas-en-par-ed99r5`. Con `after()` se habría cortado a los 30 s: **es la prueba de que la Queue funciona** |
-   | ◐ | Reseña propia y solicitud de lead (la del itinerario cuenta: entró a `dst_solicitud`) | Quedan en `dst_resena` y `dst_solicitud`. La reseña entró bien (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente`, **porque La Fortuna tiene `resenas_moderadas = true`**: no sale hasta publicarla en `/admin/resenas`. No es un fallo. Falta el lead |
+   | ✅ | Reseña propia y solicitud de lead | La reseña entró (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente` porque La Fortuna tiene `resenas_moderadas = true`; la solicitud del itinerario entró a `dst_solicitud`. **`/admin/resenas` salía vacío en Vercel y en Cloudflare**: ver "PGRST201" abajo |
    | ☐ | Panel: entrar a `/admin`, editar algo, cerrar sesión | La cookie de Supabase se mantiene entre páginas |
    | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
    | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
    | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
    | ☐ | Crons | En *Settings* → *Triggers* están los tres; al día siguiente, sus registros en *Logs* sin error |
+
+   **PGRST201: el panel de reseñas llevaba roto quién sabe desde cuándo, en
+   los dos lados.** Lo destapó esta prueba, no la migración. `dst_resena_util`
+   (los votos de "útil") une reseña y viajero, así que entre `dst_resena` y
+   `dst_viajero` hay dos caminos y PostgREST se niega a elegir: responde 300
+   con `PGRST201`. La página descartaba el error y mostraba "Nada por revisar"
+   con reseñas pendientes en la base. Le pasaba igual al correo que avisa al
+   negocio cuando se publica una (`lib/aviso-resena.ts`). Arreglado el 14 de
+   octubre de 2026 nombrando la llave: `dst_viajero!fk_dst_resena_viajero(...)`.
+   **Regla**: si se crea una tabla que une dos tablas por su clave primaria
+   —como `dst_resena_util` o `dst_favorito`—, todo embebido entre esas dos
+   tablas pasa a necesitar `!nombre_de_la_llave`. Se encontró en los registros
+   de Supabase (`edge_logs`, `response.headers.proxy_status`), no en el sitio:
+   **un error de PostgREST no se ve en pantalla si el código no lo mira.**
 
    **Ojo con los crons durante la prueba**: con los dos lados encendidos, cada
    cron corre DOS veces al día, una en Vercel y otra en Cloudflare, contra la

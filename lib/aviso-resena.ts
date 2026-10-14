@@ -30,7 +30,7 @@ export async function avisarResenaPublicada(resenaId: string): Promise<void> {
 
   const { data: resena } = await db
     .from('dst_resena')
-    .select('id, negocio_id, calificacion, titulo, cuerpo, idioma, estado, respuesta_negocio, viajero:dst_viajero(nombre), negocio:dst_negocio(nombre)')
+    .select('id, negocio_id, calificacion, titulo, cuerpo, idioma, estado, respuesta_negocio, viajero:dst_viajero!fk_dst_resena_viajero(nombre), negocio:dst_negocio(nombre)')
     .eq('id', resenaId)
     .maybeSingle();
 
