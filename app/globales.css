@@ -3190,3 +3190,11 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 @media (prefers-reduced-motion: reduce) {
   .cupon-fondo, .cupon-caja { animation: none; }
 }
+
+/* La leyenda que acompana al descuento. Escudo y no estrella: lo que afirma es
+   que la compra es segura, no que es una oferta. */
+.reservar-leyenda {
+  display: flex; align-items: center; gap: 7px; margin: 9px 0 0;
+  font-size: 12px; font-weight: 700; line-height: 1.4; color: var(--txt-2);
+}
+.reservar-leyenda svg { flex: none; color: var(--verde); }

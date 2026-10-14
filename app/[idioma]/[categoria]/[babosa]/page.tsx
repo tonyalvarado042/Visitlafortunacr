@@ -464,7 +464,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
             {reservables.length > 0 && (
               <div className="ficha-reservar" id="reservar">
                 <ReservarProducto productos={reservables} complementos={complementos}
-                                  descuentoHasta={destino.descuento_lanzamiento_hasta} idioma={idioma} />
+                                  descuentoHasta={destino.descuento_lanzamiento_hasta}
+                                  leyenda={destino.leyenda_precio} idioma={idioma} />
               </div>
             )}
 

@@ -109,7 +109,7 @@ function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): st
 }
 
 export function ReservarProducto({
-  productos, producto: unoSolo, complementos = [], descuentoHasta, idioma, esTour,
+  productos, producto: unoSolo, complementos = [], descuentoHasta, leyenda, idioma, esTour,
 }: {
   /* Varios pases en UNA tarjeta. Antes la ficha pintaba una tarjeta entera por
      producto: dos fechas, dos contadores y dos botones de enviar para el mismo
@@ -121,6 +121,10 @@ export function ReservarProducto({
   /* La fecha en que se acaba el descuento de lanzamiento, para la cuenta
      regresiva. Null = sin corte, y entonces no se muestra reloj. */
   descuentoHasta?: string | null;
+  /* La frase que acompaña al descuento, si el equipo puso alguna. Vacía = no
+     se muestra nada: lo que se escribe ahí es una afirmación que lee alguien
+     que está por pagar. */
+  leyenda?: string | null;
   idioma: Idioma;
   /* El mismo widget sirve para un producto de una ficha y para una tour con
      su propia página. Lo único que cambia es con qué nombre viaja el id: la
@@ -559,6 +563,21 @@ export function ReservarProducto({
                   </span>
                 )}
               </div>
+            )}
+
+            {/* La leyenda, debajo del descuento. Va con escudo y no con una
+                estrella ni un megáfono: lo que se afirma acá es que la compra
+                es segura, no que es una oferta. */}
+            {leyenda && (
+              <p className="reservar-leyenda">
+                <svg width="15" height="15" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M10 1.8l6.5 2.6v5.1c0 3.9-2.7 7.3-6.5 8.7-3.8-1.4-6.5-4.8-6.5-8.7V4.4z"
+                        fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                  <path d="M7 10.2l2.2 2.2L13.2 8" fill="none" stroke="currentColor"
+                        strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {leyenda}
+              </p>
             )}
 
             {error && <p className="sorteo-error" role="alert">{error}</p>}

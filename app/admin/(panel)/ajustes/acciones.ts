@@ -69,6 +69,10 @@ export async function editarDestino(datos: FormData) {
       tipo_cambio_crc: numero(datos, 'tipo_cambio_crc'),
       tipo_cambio_piso: numero(datos, 'tipo_cambio_piso') ?? 550,
       tipo_cambio_en: numero(datos, 'tipo_cambio_crc') != null ? new Date().toISOString() : null,
+      /* La frase que acompaña al descuento. Se guarda tal cual la escriben:
+         qué se puede afirmar depende del convenio de cada negocio, y eso el
+         código no lo sabe. Lo que sí hace el panel es advertir. */
+      leyenda_precio: texto(datos, 'leyenda_precio') || null,
     };
   } else if (grupo === 'destino') {
     const whatsapp = texto(datos, 'whatsapp').replace(/[\s\-().]/g, '');

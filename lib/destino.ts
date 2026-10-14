@@ -79,6 +79,9 @@ export type Destino = {
      entero pierde credibilidad, no solo el descuento. */
   descuento_lanzamiento_pct: number | null;
   descuento_lanzamiento_hasta: string | null;
+  /* La frase que acompaña al descuento. Vacía = no se muestra: una leyenda es
+     una afirmación, y ninguna afirmación se enciende sola. */
+  leyenda_precio: string | null;
 };
 
 /**

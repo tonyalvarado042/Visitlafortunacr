@@ -232,6 +232,38 @@ export default async function PaginaAjustes() {
                 último bueno: un tipo de cambio de ayer es correcto, uno inventado no.
               </small>
             </div>
+            {/* ---- La leyenda del descuento ----
+                Lo que se escribe acá es una AFIRMACIÓN que lee quien está por
+                pagar. Las sugerencias son las que se pueden probar; la que la
+                gente escribe sola suele ser «mejor precio garantizado», que es
+                una promesa vinculante y no una frase de marketing. */}
+            <div className="campo ancho">
+              <label htmlFor="ley">Leyenda junto al descuento <small className="gris">opcional</small></label>
+              <input id="ley" name="leyenda_precio" maxLength={70}
+                     defaultValue={d.leyenda_precio ?? ''} disabled={!esAdmin}
+                     list="leyendas-sugeridas"
+                     placeholder="vacío = no se muestra nada" />
+              <datalist id="leyendas-sugeridas">
+                <option value="Sin cargos por reservar" />
+                <option value="Precio oficial del operador" />
+                <option value="Reservás sin pagar nada hoy" />
+              </datalist>
+              <small>
+                Sale debajo del descuento, en la tarjeta de reserva. <strong>Es una
+                afirmación que lee alguien que está por pagar</strong>, así que solo va lo
+                que se pueda probar. Las tres sugeridas se sostienen:
+                <em>sin cargos por reservar</em> (no se le cobra comisión al viajero),
+                <em>precio oficial del operador</em> (sale de su tarifario), y
+                <em>reservás sin pagar nada hoy</em> (cierto mientras la pasarela esté
+                apagada — <strong>acordate de quitarla el día que se encienda el cobro</strong>).
+              </small>
+              <small className="aviso-malo">
+                Cuidado con «mejor precio garantizado»: no es marketing, es una promesa
+                que obliga a igualar el precio de quien sea. Para sostenerla hay que poder
+                saber que sos el más barato y tener cómo atender el reclamo.
+              </small>
+            </div>
+
             <div className="campo ancho">
               <small>
                 <strong>Nacional quiere decir nacional o residente en Costa Rica</strong>, no «tico»:

@@ -190,7 +190,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
               <div className="ficha-reservar">
                 {vendible ? (
                   <ReservarProducto producto={vendible} descuentoHasta={destino.descuento_lanzamiento_hasta}
-                                    idioma={idioma} esTour />
+                                    leyenda={destino.leyenda_precio} idioma={idioma} esTour />
                 ) : (
                 <div className="reservar">
                   <div className="reservar-cabeza">
