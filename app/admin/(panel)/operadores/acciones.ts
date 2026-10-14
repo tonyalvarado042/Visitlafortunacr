@@ -162,10 +162,19 @@ export async function guardarTarifa(datos: FormData) {
   if (usuario.rol !== 'admin') return;
   const id = texto(datos, 'id');
   const producto = texto(datos, 'producto_id');
+  /* Una tarifa de NACIONALES se guarda en colones y deja los dólares en null;
+     una normal al revés. Mandar las dos monedas dejaría dos precios
+     compitiendo, y la base lo rechaza con un check — mejor decidirlo acá y que
+     el formulario no pueda armar algo imposible. */
+  const esNacional = texto(datos, 'residencia') === 'nacional';
   const fila = {
     nombre: texto(datos, 'nombre') || 'General',
-    precio_publico_usd: numero(datos, 'precio_publico_usd'),
-    precio_neto_usd: numero(datos, 'precio_neto_usd'),
+    residencia: esNacional ? 'nacional' : 'todos',
+    precio_publico_usd: esNacional ? null : numero(datos, 'precio_publico_usd'),
+    precio_neto_usd: esNacional ? null : numero(datos, 'precio_neto_usd'),
+    precio_publico_crc: esNacional ? numero(datos, 'precio_publico_crc') : null,
+    precio_neto_crc: esNacional ? numero(datos, 'precio_neto_crc') : null,
+    moneda: esNacional ? 'CRC' : 'USD',
     es_para: texto(datos, 'es_para') || 'general',
     verificada: esSi(datos, 'verificada'),
     fuente: texto(datos, 'fuente') || null,
@@ -218,4 +227,42 @@ export async function borrarElContrato(ruta: string): Promise<{ ok?: boolean; er
   const { error } = await db.storage.from('contratos').remove([ruta]);
   if (error) return { error: error.message };
   return { ok: true };
+}
+
+/*
+ * Los complementos: lo que se AÑADE a un pase y nunca se vende solo.
+ *
+ * El Wellness Upgrade de Paradise es el caso. Las reglas —solo adultos, horas
+ * de antelación, tope por reserva— las hace cumplir `pedir_reserva`; acá solo
+ * se escriben. Por eso el formulario explica qué hace cada una: un número
+ * suelto en «antelación» no le dice nada a quien lo llena dentro de un año.
+ */
+export async function guardarComplemento(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('operadores');
+  if (usuario.rol !== 'admin') return;
+
+  const id = texto(datos, 'id');
+  const negocio = texto(datos, 'negocio_id');
+  const nombre = texto(datos, 'nombre');
+  if (!nombre) return;
+
+  const fila = {
+    nombre,
+    descripcion: texto(datos, 'descripcion') || null,
+    precio_publico_usd: numero(datos, 'precio_publico_usd') ?? 0,
+    precio_neto_usd: numero(datos, 'precio_neto_usd'),
+    solo_adultos: esSi(datos, 'solo_adultos'),
+    horas_antelacion: numero(datos, 'horas_antelacion') ?? 0,
+    maximo_por_reserva: numero(datos, 'maximo_por_reserva'),
+    esta_activo: esSi(datos, 'esta_activo'),
+    actualizado_en: new Date().toISOString(),
+  };
+
+  const { error } = esUuid(id)
+    ? await db.from('dst_complemento').update(fila).eq('id', id)
+    : esUuid(negocio)
+      ? await db.from('dst_complemento').insert({ ...fila, negocio_id: negocio, destino_id: destino.id })
+      : { error: null };
+  if (error) console.error('guardarComplemento:', error.message);
+  refrescar();
 }

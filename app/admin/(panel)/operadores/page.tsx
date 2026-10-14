@@ -4,14 +4,29 @@ import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import {
   cambiarOperador, guardarContrato, guardarProducto, guardarTarifa, borrarTarifa,
+  guardarComplemento,
 } from './acciones';
 import { DocumentoContrato } from './DocumentoContrato';
 import { NuevoContrato, NuevoProducto } from './Nuevos';
 
 export const dynamic = 'force-dynamic';
 
+/* Cómo se escribe el precio de una tarifa: en colones si es de nacionales, en
+   dólares si no. Un solo lugar, para que la tabla y el resumen no se separen. */
+function plataDeTarifa(t: Tarifa): string {
+  if (t.precio_publico_crc != null) {
+    return `₡${Math.round(t.precio_publico_crc).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+  }
+  return t.precio_publico_usd != null ? `$${t.precio_publico_usd}` : 'sin precio';
+}
+
 type Tarifa = {
   id: string; nombre: string; precio_publico_usd: number | null; precio_neto_usd: number | null;
+  /* Una tarifa de nacionales se guarda en COLONES y los dólares quedan en
+     null: el precio en colones es el que manda. Sin esto, el resumen imprimía
+     «Adulto nacional $null». */
+  precio_publico_crc: number | null; precio_neto_crc: number | null;
+  residencia: 'todos' | 'nacional';
   es_para: string; verificada: boolean; fuente: string | null;
   vigencia_desde: string | null; vigencia_hasta: string | null; esta_activa: boolean;
 };
@@ -31,6 +46,12 @@ type Contrato = {
   productos: Producto[];
 };
 type Negocio = { id: string; nombre: string; babosa: string; vende_por_aqui: boolean };
+type Complemento = {
+  id: string; negocio_id: string; nombre: string; descripcion: string | null;
+  precio_publico_usd: number; precio_neto_usd: number | null;
+  solo_adultos: boolean; horas_antelacion: number;
+  maximo_por_reserva: number | null; esta_activo: boolean;
+};
 
 const MODO_COBRO = [
   ['operador_cobra', 'Cobra el operador'],
@@ -50,7 +71,7 @@ export default async function PaginaOperadores() {
   const { destino, db, usuario } = await contextoPanel('operadores');
   const esAdmin = usuario.rol === 'admin';
 
-  const [{ data: d }, { data: neg }, { data: tur }, { data: con }] = await Promise.all([
+  const [{ data: d }, { data: neg }, { data: tur }, { data: con }, { data: comp }] = await Promise.all([
     db.from('dst_destino').select('reservas_activas, pasarela_lista, email_contacto').eq('id', destino.id).single(),
     db.from('dst_negocio')
       .select('id, nombre, babosa, vende_por_aqui')
@@ -60,10 +81,12 @@ export default async function PaginaOperadores() {
     db.from('dst_contrato')
       .select('*, productos:dst_producto(*, tarifas:dst_tarifa(*))')
       .eq('destino_id', destino.id).order('creado_en'),
+    db.from('dst_complemento').select('*').eq('destino_id', destino.id).order('orden'),
   ]);
 
   const negocios = (neg ?? []) as Negocio[];
   const contratos = (con ?? []) as Contrato[];
+  const complementos = (comp ?? []) as Complemento[];
   /* Las tours de cada operador, contadas una sola vez acá. Un operador con
      doce tours es lo normal; lo que importa de un vistazo es cuántas están
      PUBLICADAS, porque una en borrador no la ofrece nadie. */
@@ -170,16 +193,34 @@ export default async function PaginaOperadores() {
       ) : contratos.map((c) => {
         const n = porNegocio.get(c.negocio_id);
         const listoParaCobrar = c.comision_valor != null && c.politica_cancelacion && c.vigencia_desde;
+        const cuantosProductos = c.productos?.length ?? 0;
+        const cuantasTarifas = (c.productos ?? [])
+          .reduce((n2, p) => n2 + (p.tarifas ?? []).filter((t) => t.verificada).length, 0);
         return (
-          <div className="tarjeta" key={c.id}>
-            <h2>
-              {n?.nombre ?? '—'} · {c.nombre}{' '}
-              <small>
+          /* El contrato va PLEGADO. Antes se abrían todos a la vez, con doce
+             campos cada uno, y había que bajar media pantalla para llegar a
+             los productos — que es a lo que uno viene casi siempre. Abierto
+             queda el que de verdad falta configurar. */
+          <details className="tarjeta contrato-ficha" key={c.id}
+                   open={c.modo_cobro === 'plataforma_cobra' && !listoParaCobrar}>
+            <summary className="contrato-cabeza">
+              <span className="contrato-titulo">
+                <strong>{n?.nombre ?? '—'}</strong>
+                <span className="gris">{c.nombre}</span>
+              </span>
+              <span className="contrato-datos">
+                <span>{cuantosProductos} producto{cuantosProductos === 1 ? '' : 's'}</span>
+                <span>{cuantasTarifas} tarifa{cuantasTarifas === 1 ? '' : 's'} verificada{cuantasTarifas === 1 ? '' : 's'}</span>
+                <span>
+                  {c.comision_valor != null
+                    ? `${c.comision_tipo === 'porcentaje' ? `${c.comision_valor}%` : `$${c.comision_valor}`}`
+                    : <em className="gris">sin comisión</em>}
+                </span>
                 <Etiqueta color={c.esta_activo ? '#66BB2E' : '#9CA3AF'}>
                   {c.esta_activo ? 'activo' : 'apagado'}
                 </Etiqueta>
-              </small>
-            </h2>
+              </span>
+            </summary>
 
             {c.modo_cobro === 'plataforma_cobra' && !listoParaCobrar && (
               <Aviso tipo="mal">
@@ -191,8 +232,11 @@ export default async function PaginaOperadores() {
             <form action={guardarContrato} className="campos">
               <input type="hidden" name="id" value={c.id} />
               <div className="campo ancho"><label>Nombre del contrato</label>
-                <input name="nombre" defaultValue={c.nombre} disabled={!esAdmin} /></div>
+                <input name="nombre" defaultValue={c.nombre} disabled={!esAdmin} />
+                <small>Para distinguirlo de otros con el mismo negocio. Ej.: «Piloto Paradise».</small></div>
 
+              {/* ---- Cómo se vende ---- */}
+              <h4 className="contrato-seccion">Cómo se vende</h4>
               <div className="campo"><label>Quién cobra</label>
                 <select name="modo_cobro" defaultValue={c.modo_cobro} disabled={!esAdmin}>
                   {MODO_COBRO.map(([v, n2]) => <option key={v} value={v}>{n2}</option>)}
@@ -207,6 +251,8 @@ export default async function PaginaOperadores() {
                   {MODO_CONF.map(([v, n2]) => <option key={v} value={v}>{n2}</option>)}
                 </select></div>
 
+              {/* ---- La plata ---- */}
+              <h4 className="contrato-seccion">La plata</h4>
               <div className="campo"><label>Comisión</label>
                 <input name="comision_valor" type="number" step="0.5" min={0}
                        defaultValue={c.comision_valor ?? ''} disabled={!esAdmin} /></div>
@@ -229,6 +275,8 @@ export default async function PaginaOperadores() {
                   <option value="mensual">Mensual</option>
                 </select></div>
 
+              {/* ---- Vigencia y papeles ---- */}
+              <h4 className="contrato-seccion">Vigencia y papeles</h4>
               <div className="campo"><label>Vigencia desde</label>
                 <input name="vigencia_desde" type="date" defaultValue={c.vigencia_desde ?? ''} disabled={!esAdmin} /></div>
               <div className="campo"><label>Hasta <small>vacío = sin fin</small></label>
@@ -243,6 +291,8 @@ export default async function PaginaOperadores() {
               <div className="campo ancho"><label>Notas internas</label>
                 <textarea name="notas" rows={2} defaultValue={c.notas ?? ''} disabled={!esAdmin} /></div>
 
+              {/* ---- Interruptores ---- */}
+              <h4 className="contrato-seccion">Interruptores</h4>
               <div className="campo ancho"><label>
                 <input type="checkbox" name="emite_voucher_propio" value="1"
                        defaultChecked={c.emite_voucher_propio} disabled={!esAdmin} />
@@ -268,7 +318,7 @@ export default async function PaginaOperadores() {
                   {' · '}
                   {(p.tarifas ?? []).filter((t) => t.verificada).length > 0
                     ? (p.tarifas ?? []).filter((t) => t.verificada)
-                        .map((t) => `${t.nombre} $${t.precio_publico_usd}`).join(' · ')
+                        .map((t) => `${t.nombre} ${plataDeTarifa(t)}`).join(' · ')
                     : <span className="gris">sin tarifa verificada</span>}
                   {!p.esta_activo && ' · (apagado)'}
                 </summary>
@@ -307,12 +357,12 @@ export default async function PaginaOperadores() {
                   solo cuando el número venga del operador, no de una página ni de memoria.
                 </p>
                 <table className="tabla">
-                  <thead><tr><th>Nombre</th><th>Para</th><th className="num">Público</th><th className="num">Neto</th><th>Verificada</th><th>Fuente</th><th></th></tr></thead>
+                  <thead><tr><th>Nombre</th><th>Para</th><th>Quién</th><th className="num">Público</th><th className="num">Neto</th><th>Verif.</th><th>Fuente</th><th></th></tr></thead>
                   <tbody>
                     {(p.tarifas ?? []).map((t) => (
                       <tr key={t.id}>
-                        <td colSpan={7} style={{ padding: 0 }}>
-                          <form action={guardarTarifa} style={{ display: 'grid', gridTemplateColumns: '1.2fr .8fr .7fr .7fr .6fr 1.3fr auto auto', gap: 8, alignItems: 'center', padding: 10 }}>
+                        <td colSpan={8} style={{ padding: 0 }}>
+                          <form action={guardarTarifa} style={{ display: 'grid', gridTemplateColumns: '1.1fr .7fr .9fr .7fr .7fr .5fr 1.1fr auto auto', gap: 8, alignItems: 'center', padding: 10 }}>
                             <input type="hidden" name="id" value={t.id} />
                             <input type="hidden" name="esta_activa" value="1" />
                             <input name="nombre" defaultValue={t.nombre} disabled={!esAdmin} className="mini" />
@@ -322,11 +372,33 @@ export default async function PaginaOperadores() {
                               <option value="senior">Senior</option>
                               <option value="general">General</option>
                             </select>
-                            <input name="precio_publico_usd" type="number" step="0.01" min={0}
-                                   defaultValue={t.precio_publico_usd ?? ''} disabled={!esAdmin} className="mini" />
-                            <input name="precio_neto_usd" type="number" step="0.01" min={0}
-                                   defaultValue={t.precio_neto_usd ?? ''} disabled={!esAdmin} className="mini"
-                                   title="Lo que le queda al operador. No sale al público." />
+                            <select name="residencia" defaultValue={t.residencia} disabled={!esAdmin} className="mini"
+                                    title="«Nacional» es para quien vive en Costa Rica, con cédula o DIMEX. Esa tarifa se cobra en colones.">
+                              <option value="todos">Cualquiera · $</option>
+                              <option value="nacional">Nacional/residente · ₡</option>
+                            </select>
+                            {/* Los campos cambian de moneda según la residencia: una tarifa
+                                nacional se guarda en COLONES y la de extranjeros en dólares.
+                                Mostrar los cuatro dejaría dos precios compitiendo. */}
+                            {t.residencia === 'nacional' ? (
+                              <>
+                                <input name="precio_publico_crc" type="number" step="1" min={0}
+                                       defaultValue={t.precio_publico_crc ?? ''} disabled={!esAdmin} className="mini"
+                                       title="Precio al público EN COLONES." />
+                                <input name="precio_neto_crc" type="number" step="1" min={0}
+                                       defaultValue={t.precio_neto_crc ?? ''} disabled={!esAdmin} className="mini"
+                                       title="Lo que le queda al operador, en colones. No sale al público." />
+                              </>
+                            ) : (
+                              <>
+                                <input name="precio_publico_usd" type="number" step="0.01" min={0}
+                                       defaultValue={t.precio_publico_usd ?? ''} disabled={!esAdmin} className="mini"
+                                       title="Precio al público en dólares." />
+                                <input name="precio_neto_usd" type="number" step="0.01" min={0}
+                                       defaultValue={t.precio_neto_usd ?? ''} disabled={!esAdmin} className="mini"
+                                       title="Lo que le queda al operador. No sale al público." />
+                              </>
+                            )}
                             <label style={{ fontSize: 12 }}>
                               <input type="checkbox" name="verificada" value="1"
                                      defaultChecked={t.verificada} disabled={!esAdmin} /> sí
@@ -368,7 +440,78 @@ export default async function PaginaOperadores() {
             ))}
 
             {esAdmin && <NuevoProducto contratoId={c.id} negocioId={c.negocio_id} />}
-          </div>
+
+            {/* ---- Complementos ----
+                Cuelgan del NEGOCIO y no del contrato: el mismo upgrade se
+                añade a cualquiera de sus pases. Salen acá porque es donde uno
+                está mirando ese negocio. */}
+            <h3 style={{ marginTop: 26, fontSize: 15 }}>
+              Complementos{' '}
+              <small className="gris">se suman a un pase, nunca se venden solos</small>
+            </h3>
+            {(complementos ?? []).filter((x) => x.negocio_id === c.negocio_id).map((x) => (
+              <details key={x.id} className="complemento-ficha">
+                <summary>
+                  <strong>{x.nombre}</strong>
+                  {' · '}<b>+${x.precio_publico_usd}</b>
+                  {x.solo_adultos && <span className="gris"> · solo adultos</span>}
+                  {x.horas_antelacion > 0 && <span className="gris"> · {x.horas_antelacion} h antes</span>}
+                  {!x.esta_activo && <span className="gris"> · (apagado)</span>}
+                </summary>
+                <form action={guardarComplemento} className="campos" style={{ marginTop: 12 }}>
+                  <input type="hidden" name="id" value={x.id} />
+                  <div className="campo ancho"><label>Nombre</label>
+                    <input name="nombre" defaultValue={x.nombre} disabled={!esAdmin} />
+                    <small>Como lo ve quien reserva. Ej.: «Wellness Upgrade».</small></div>
+                  <div className="campo ancho"><label>Qué es</label>
+                    <textarea name="descripcion" rows={2} defaultValue={x.descripcion ?? ''} disabled={!esAdmin} />
+                    <small>Una línea que explique qué incluye. Sale en la tarjeta de reserva.</small></div>
+                  <div className="campo"><label>Precio al público USD</label>
+                    <input name="precio_publico_usd" type="number" step="0.01" min={0}
+                           defaultValue={x.precio_publico_usd} disabled={!esAdmin} />
+                    <small>Por persona. Se cobra en dólares aunque el pase vaya en colones.</small></div>
+                  <div className="campo"><label>Neto al operador USD</label>
+                    <input name="precio_neto_usd" type="number" step="0.01" min={0}
+                           defaultValue={x.precio_neto_usd ?? ''} disabled={!esAdmin} />
+                    <small>Lo que se le paga. <strong>Sin esto tu comisión sale en cero.</strong></small></div>
+                  <div className="campo"><label>Horas de antelación</label>
+                    <input name="horas_antelacion" type="number" min={0} max={720}
+                           defaultValue={x.horas_antelacion} disabled={!esAdmin} />
+                    <small>Cuántas horas antes hay que pedirlo. Se mide contra el momento de reservar, no contra el día. 0 = sin mínimo.</small></div>
+                  <div className="campo"><label>Máximo por reserva</label>
+                    <input name="maximo_por_reserva" type="number" min={1} max={99}
+                           defaultValue={x.maximo_por_reserva ?? ''} disabled={!esAdmin} placeholder="sin tope" />
+                    <small>Vacío = tantos como personas haya.</small></div>
+                  <div className="campo ancho"><label>
+                    <input type="checkbox" name="solo_adultos" value="1"
+                           defaultChecked={x.solo_adultos} disabled={!esAdmin} /> Solo para adultos</label>
+                    <small>Con esto marcado, nadie puede pedir más complementos que adultos tenga la reserva.</small></div>
+                  <div className="campo ancho"><label>
+                    <input type="checkbox" name="esta_activo" value="1"
+                           defaultChecked={x.esta_activo} disabled={!esAdmin} />
+                    {' '}<strong>Activo</strong></label>
+                    <small>Apagado desaparece de la tarjeta de reserva al instante.</small></div>
+                  {esAdmin && <BotonAccion>Guardar el complemento</BotonAccion>}
+                </form>
+              </details>
+            ))}
+            {esAdmin && (
+              <details className="complemento-ficha">
+                <summary>+ Nuevo complemento</summary>
+                <form action={guardarComplemento} className="campos" style={{ marginTop: 12 }}>
+                  <input type="hidden" name="negocio_id" value={c.negocio_id} />
+                  <input type="hidden" name="esta_activo" value="1" />
+                  <div className="campo ancho"><label>Nombre</label>
+                    <input name="nombre" required placeholder="Wellness Upgrade" /></div>
+                  <div className="campo"><label>Precio al público USD</label>
+                    <input name="precio_publico_usd" type="number" step="0.01" min={0} required /></div>
+                  <div className="campo"><label>Neto al operador USD</label>
+                    <input name="precio_neto_usd" type="number" step="0.01" min={0} /></div>
+                  <div className="campo"><BotonAccion clase="boton chico">Crear</BotonAccion></div>
+                </form>
+              </details>
+            )}
+          </details>
         );
       })}
     </>

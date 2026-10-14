@@ -267,3 +267,34 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 
 /* Un dato que sigue sirviendo pero ya esta viejo: se dice, no se apaga. */
 .aviso-malo { color: #E0A33C !important; font-weight: 700; }
+
+/* ---- La ficha de un contrato ----------------------------------------------
+   Plegada, con un resumen que dice lo que uno viene a mirar: cuantos
+   productos, cuantas tarifas verificadas y la comision. Abierta son doce
+   campos, y abiertos todos a la vez era una pagina que no se podia leer. */
+.contrato-ficha { padding: 0; }
+.contrato-cabeza {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  flex-wrap: wrap; padding: 16px 20px; cursor: pointer; list-style: none;
+}
+.contrato-cabeza::-webkit-details-marker { display: none; }
+.contrato-ficha[open] .contrato-cabeza { border-bottom: 1px solid var(--borde-4); }
+.contrato-titulo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.contrato-titulo strong { font-size: 16px; }
+.contrato-titulo .gris { font-size: 12.5px; }
+.contrato-datos { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--humo); }
+.contrato-ficha > *:not(.contrato-cabeza) { padding-left: 20px; padding-right: 20px; }
+.contrato-ficha > *:last-child { padding-bottom: 20px; }
+
+/* Los titulos que parten el formulario del contrato en tandas. */
+.contrato-seccion {
+  grid-column: 1 / -1; margin: 14px 0 -2px; font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--humo);
+  padding-top: 14px; border-top: 1px solid var(--borde-4);
+}
+.campos > .contrato-seccion:first-of-type { border-top: 0; padding-top: 0; margin-top: 4px; }
+
+/* Un complemento: plegado, con lo que importa en el resumen. */
+.complemento-ficha { border-top: 1px solid var(--borde-4); padding: 10px 0; }
+.complemento-ficha > summary { cursor: pointer; font-size: 14px; }
+.complemento-ficha > summary b { color: var(--naranja); }
