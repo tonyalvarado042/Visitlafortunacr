@@ -214,6 +214,49 @@ dos lados.
 el proxy). Así que después de cada cambio en GoDaddy se verifica desde aquí:
 A del apex, CNAME de www, MX, NS y TXT. Cambiarlo no; leerlo sí.
 
+### El sitio también compila para Cloudflare Workers (14 de octubre de 2026)
+
+Pedido por Tony. **Vercel sigue siendo producción** hasta que el Worker esté
+desplegado y probado: la migración es aditiva y no rompe nada de lo de arriba.
+`npm run build` arma para Vercel, como siempre; `npm run build:vinext` arma
+para Workers con **vinext** (lo que Cloudflare recomienda hoy para Next.js en
+vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
+
+| Archivo | Qué hace |
+|---|---|
+| `cloudflare.config.ts` | El Worker `visit-la-fortuna`: `nodejs_compat`, binding `IMAGES` y los tres crons |
+| `cloudflare/entrada.ts` | Puerta del Worker: el sitio de vinext + `scheduled()`, que traduce cada cron a la misma petición con `Bearer CRON_SECRET` que hace Vercel |
+| `cloudflare/sharp-imagenes.ts` | Reemplazo de `sharp` (nativo, no corre en Workers) con Cloudflare Images. `vite.config.ts` cambia el import solo en el build de Workers |
+| `.claude/settings.json` | Activa el plugin oficial de Cloudflare (Skills + MCP) para toda sesión de Claude Code en este repo |
+
+**Tres cosas no se arreglan con el build y hay que tenerlas presentes:**
+
+1. **Los crons tienen dos copias**: `vercel.json` y `cloudflare.config.ts` +
+   `CRONES` en `cloudflare/entrada.ts`. Cloudflare entrega la expresión como
+   texto y con eso se elige la ruta, así que las dos tienen que ser idénticas.
+2. **`after()` en Workers tiene 30 segundos** después de mandar la respuesta
+   (`waitUntil`). `/api/solicitud` dispara ahí el planificador, que llama a
+   Claude y puede tardar más. Si en Workers los planes quedan a medias, ese es
+   el motivo, y la salida es pasarlo a una Queue o a un Workflow.
+   `maxDuration` no significa nada en Workers. Hace falta el plan **Workers
+   Paid**: el gratuito da 10 ms de CPU por petición.
+3. **Sin comprobar contra Cloudflare de verdad**: que el correo por **SMTP**
+   (`nodemailer`) funcione con `nodejs_compat` (Resend va por `fetch` y no
+   tiene problema), y que Images **enderece las fotos verticales** según el
+   EXIF como hacía `sharp().rotate()`. Las dos se prueban en el primer
+   despliegue: mandar un correo de prueba y subir una foto de teléfono.
+
+**Probado el 14 de octubre de 2026 desde el contenedor** (`npm run
+start:vinext`, workerd local): `/` redirige a `/es`, `/admin/ingresar` da 200,
+`/api/salud` da 200 y `/api/cron/externas` sin clave da 401. Las páginas que
+leen la base no se pudieron ver porque el contenedor no alcanza
+`*.supabase.co`. `npx tsc --noEmit`, `npm run build` y `npm run build:vinext`
+pasan.
+
+Para Claude: **con Cloudflare se usa el CLI `cf`** (ya está en
+`devDependencies`), no `wrangler`: este proyecto tiene `cloudflare.config.ts`
+y no `wrangler.jsonc`.
+
 ## El backend (CRM + IA)
 
 Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
@@ -252,6 +295,50 @@ Pasos que dependen de un panel externo. **Una sesión local sí puede hacerlos**
 nube no, y por eso los deja escritos aquí con los valores exactos.
 
 Antes de empezar en la máquina: `git pull` de la rama, que aquí está lo último.
+
+### Cloudflare · desplegar el Worker
+
+El código ya está listo (ver "El sitio también compila para Cloudflare
+Workers"). Lo que falta es de panel. La sesión en la nube **no puede**: el
+proxy corta `api.cloudflare.com` y no hay `CLOUDFLARE_API_TOKEN`. El conector
+de Cloudflare sí responde, y confirma que la cuenta tiene **0 Workers** (14 de
+octubre de 2026).
+
+1. Cloudflare → *Workers & Pages* → *Plans*: pasar a **Workers Paid**
+   (5 USD/mes). Con el plan gratuito el sitio no cabe en 10 ms de CPU.
+2. Desde la máquina, en la raíz del repo: `npx cf auth login` (abre el
+   navegador; el login lo hace Tony) y después `npm run deploy:vinext`.
+   O, para que despliegue solo con cada push: *Workers & Pages* → *Create* →
+   *Import a repository* → `tonyalvarado042/Visitlafortunacr`, rama
+   `claude/la-fortuna-directory-design-l8qnxg`, comando de build
+   `npm run build:vinext`, comando de deploy `npm run deploy:vinext`.
+3. El Worker → *Settings* → *Variables and Secrets*. **Como texto** (y también
+   como *Build variables* si se usa el paso 2 por repo, porque las
+   `NEXT_PUBLIC_*` se pegan dentro del código al compilar):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=<la misma de Vercel>
+   NEXT_PUBLIC_SUPABASE_KEY=<la misma de Vercel>
+   NEXT_PUBLIC_DOMINIO_POR_DEFECTO=visitlafortunacr.com
+   ```
+   **Como secreto** (*Encrypt*), los mismos valores que tiene Vercel:
+   `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_WORKSPACE_ID` (si se
+   usa), `CRON_SECRET`, `EMAIL_REMITENTE`, `SMTP_HOST`, `SMTP_PUERTO`,
+   `SMTP_USUARIO`, `SMTP_CLAVE`, `WHATSAPP_*`, `GOOGLE_PLACES_API_KEY`.
+   `NEXT_PUBLIC_DOMINIO_POR_DEFECTO` no es opcional: el destino se elige por
+   el `Host`, y `visit-la-fortuna.<cuenta>.workers.dev` no está en
+   `dst_destino.dominio`.
+4. Probar en la URL `*.workers.dev`: `/api/salud` tiene que decir que ve la
+   base y las dos claves; la portada, una ficha y el chat; **un correo de
+   prueba por SMTP y una foto vertical subida desde el panel** (las dos cosas
+   que no se pudieron comprobar). En *Settings* → *Triggers* tienen que
+   aparecer los tres crons.
+5. **El dominio, solo cuando lo anterior funcione, y es una decisión aparte.**
+   Un Worker con dominio propio necesita que la zona viva en Cloudflare, o sea
+   **cambiar los nameservers de GoDaddy** — justo lo que la sección de GoDaddy
+   evita para no perder el correo. Con Cloudflare no se pierde si se hace bien:
+   al agregar el sitio, Cloudflare copia los registros existentes, y **antes de
+   cambiar los NS hay que comprobar que estén los MX y el SPF de SiteGround**.
+   Hasta decidir esto, el dominio sigue el plan de Vercel de abajo.
 
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
