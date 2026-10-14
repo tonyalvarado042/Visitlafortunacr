@@ -1,8 +1,9 @@
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarDestino, eliminarCanal, guardarCanal, crearCupon, prenderCupon } from './acciones';
+import { editarDestino, eliminarCanal, guardarCanal, crearCupon, prenderCupon, cuponDeSalida, guardarGanchoCupon } from './acciones';
 import { LanzarDestino } from './LanzarDestino';
 
 export const dynamic = 'force-dynamic';
@@ -273,10 +274,13 @@ export default async function PaginaAjustes() {
           <Vacio texto="Sin cupones. El de lanzamiento no necesita ninguno: es automático." />
         ) : (
           <table className="tabla">
-            <thead><tr><th>Código</th><th>Descuento</th><th>Vigencia</th><th className="num">Usos</th><th>Estado</th></tr></thead>
+            <thead><tr><th>Código</th><th>Descuento</th><th>Vigencia</th><th className="num">Usos</th><th>Estado</th><th>Al salir</th></tr></thead>
             <tbody>
+              {/* Dos filas por cupón —la fila y, si es el de salida, su frase—
+                  así que el map devuelve un Fragment con la llave. */}
               {cupones.map((c) => (
-                <tr key={c.id}>
+                <Fragment key={c.id}>
+                <tr>
                   <td className="fuerte">{c.codigo}{c.descripcion && <div className="gris" style={{ fontSize: 12 }}>{c.descripcion}</div>}</td>
                   <td>{c.tipo_descuento === 'porcentaje' ? `${c.valor}%` : `$${c.valor}`}{c.minimo_usd ? <span className="gris"> · desde ${c.minimo_usd}</span> : null}</td>
                   <td className="gris">{c.vale_desde ?? '—'} a {c.vale_hasta ?? 'sin corte'}</td>
@@ -289,7 +293,48 @@ export default async function PaginaAjustes() {
                       {esAdmin && <BotonAccion clase={c.esta_activo ? 'boton peligro chico' : 'boton chico'}>{c.esta_activo ? 'Apagar' : 'Prender'}</BotonAccion>}
                     </form>
                   </td>
+                  {/* ---- El que se ofrece al salir ----
+                      Uno solo por destino: la base lo exige y dos ventanas
+                      peleando por la misma salida hace que cierren las dos.
+                      Marcar otro apaga el anterior solo. */}
+                  <td>
+                    <form action={cuponDeSalida}>
+                      <input type="hidden" name="cupon_id" value={c.id} />
+                      <input type="hidden" name="prender" value={c.mostrar_al_salir ? '0' : '1'} />
+                      {c.mostrar_al_salir
+                        ? <Etiqueta color="#FF6A00">se ofrece</Etiqueta>
+                        : <span className="gris" style={{ fontSize: 12 }}>no</span>}
+                      {esAdmin && c.esta_activo && (
+                        <BotonAccion clase="boton tenue chico">
+                          {c.mostrar_al_salir ? 'Quitar' : 'Usar este'}
+                        </BotonAccion>
+                      )}
+                    </form>
+                  </td>
                 </tr>
+                {c.mostrar_al_salir && esAdmin && (
+                  <tr>
+                    <td colSpan={6} style={{ background: 'var(--sup-1)' }}>
+                      <form action={guardarGanchoCupon} className="campos">
+                        <input type="hidden" name="cupon_id" value={c.id} />
+                        <div className="campo ancho">
+                          <label htmlFor={`g-${c.id}`}>La frase de la ventana</label>
+                          <input id={`g-${c.id}`} name="gancho" maxLength={90}
+                                 defaultValue={c.gancho ?? ''}
+                                 placeholder="Esperá — te dejamos un 8% extra" />
+                          <small>
+                            Lo que se lee en grande cuando alguien está por irse sin reservar.
+                            Si lo dejás vacío se usa una frase genérica. <strong>No prometas
+                            escasez que no tenga número</strong>: la ventana ya dice «quedan N»
+                            sola, pero solo si el cupón tiene tope de usos.
+                          </small>
+                        </div>
+                        <div className="campo"><BotonAccion clase="boton chico">Guardar la frase</BotonAccion></div>
+                      </form>
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -313,7 +358,13 @@ export default async function PaginaAjustes() {
             <div className="campo"><label htmlFor="cp-h">Vale hasta</label>
               <input id="cp-h" name="vale_hasta" type="date" /></div>
             <div className="campo"><label htmlFor="cp-u">Usos máximos</label>
-              <input id="cp-u" name="usos_maximos" type="number" step="1" min="1" placeholder="sin límite" /></div>
+              <input id="cp-u" name="usos_maximos" type="number" step="1" min="1" placeholder="sin límite" />
+              <small>
+                Cuántas veces se puede usar en total. <strong>Ponelo si el cupón va a salir
+                en la ventana de «al salir»</strong>: solo con tope la ventana puede decir
+                «quedan 50», que es lo único que hace creíble la escasez. Vacío = sin límite
+                y la ventana no menciona cantidad.
+              </small></div>
             <div className="campo ancho"><label htmlFor="cp-desc">Para qué es</label>
               <input id="cp-desc" name="descripcion" maxLength={120} placeholder="Campaña de Instagram de noviembre" /></div>
             <div className="campo"><BotonAccion clase="boton chico">Crear cupón</BotonAccion></div>

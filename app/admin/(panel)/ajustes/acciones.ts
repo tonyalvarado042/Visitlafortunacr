@@ -228,3 +228,52 @@ export async function prenderCupon(datos: FormData) {
   if (error) console.error('prenderCupon:', error.message);
   revalidatePath('/admin/ajustes');
 }
+
+/*
+ * Elegir cuál cupón se le ofrece a quien está por irse sin reservar.
+ *
+ * Solo UNO por destino, y la base lo exige con un índice único. Por eso acá se
+ * apagan todos antes de prender el elegido: sin eso, marcar un segundo cupón
+ * reventaría con un error de llave duplicada que no le dice nada a nadie.
+ *
+ * Dos ventanas peleando por la misma salida es, además, la forma más rápida de
+ * que la gente cierre las dos.
+ */
+export async function cuponDeSalida(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('ajustes');
+  if (usuario.rol !== 'admin') return;
+
+  const id = String(datos.get('cupon_id') ?? '');
+  const prender = String(datos.get('prender') ?? '') === '1';
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+
+  /* Siempre se apagan todos primero: así «prender» y «cambiar de cupón» son la
+     misma operación y no hay estado intermedio con dos marcados. */
+  const { error: eApagar } = await db.from('dst_cupon')
+    .update({ mostrar_al_salir: false })
+    .eq('destino_id', destino.id)
+    .eq('mostrar_al_salir', true);
+  if (eApagar) { console.error('cuponDeSalida, al apagar:', eApagar.message); return; }
+
+  if (prender) {
+    const { error } = await db.from('dst_cupon')
+      .update({ mostrar_al_salir: true })
+      .eq('id', id).eq('destino_id', destino.id);
+    if (error) console.error('cuponDeSalida:', error.message);
+  }
+  revalidatePath('/admin/ajustes');
+}
+
+/** El gancho: la frase que encabeza la ventana. */
+export async function guardarGanchoCupon(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('ajustes');
+  if (usuario.rol !== 'admin') return;
+  const id = String(datos.get('cupon_id') ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+
+  const { error } = await db.from('dst_cupon')
+    .update({ gancho: String(datos.get('gancho') ?? '').trim() || null })
+    .eq('id', id).eq('destino_id', destino.id);
+  if (error) console.error('guardarGanchoCupon:', error.message);
+  revalidatePath('/admin/ajustes');
+}
