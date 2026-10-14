@@ -7,6 +7,7 @@ import {
   guardarComplemento,
 } from './acciones';
 import { DocumentoContrato } from './DocumentoContrato';
+import { TerminosIA, type Terminos } from './TerminosIA';
 import { NuevoContrato, NuevoProducto } from './Nuevos';
 
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,8 @@ type Contrato = {
   frecuencia_liquidacion: string; emite_voucher_propio: boolean;
   politica_cancelacion: string | null; vigencia_desde: string | null; vigencia_hasta: string | null;
   documento_url: string | null; notas: string | null; esta_activo: boolean;
+  condiciones_pago: string | null; que_llevar: string | null;
+  terminos_ia: Terminos; terminos_ia_en: string | null; terminos_ia_modelo: string | null;
   productos: Producto[];
 };
 type Negocio = {
@@ -318,7 +321,26 @@ export default async function PaginaOperadores() {
               <div className="campo ancho"><label>Política de cancelación</label>
                 <textarea name="politica_cancelacion" rows={3}
                           defaultValue={c.politica_cancelacion ?? ''} disabled={!esAdmin} />
-                <small>Se le muestra a quien reserva. Si no está, no se puede cobrar.</small></div>
+                <small>
+                  Qué pasa si el cliente cancela, con los plazos exactos. <strong>Sale en el
+                  correo de la reserva</strong> y sin esto no se puede cobrar. Si no la sabés,
+                  está en el contrato: usá «Leer el contrato con IA» más abajo.
+                </small></div>
+              <div className="campo ancho"><label>Condiciones de pago</label>
+                <textarea name="condiciones_pago" rows={2}
+                          defaultValue={c.condiciones_pago ?? ''} disabled={!esAdmin} />
+                <small>
+                  Cómo y cuándo se paga, en palabras para el cliente. Sale en el correo de
+                  la reserva. Ej.: «el pago se hace por adelantado, mínimo una semana antes».
+                </small></div>
+              <div className="campo ancho"><label>Qué llevar</label>
+                <textarea name="que_llevar" rows={2}
+                          defaultValue={c.que_llevar ?? ''} disabled={!esAdmin} />
+                <small>
+                  Documentos y cosas que necesita el día de la visita. Sale en el correo.
+                  Acá van las sorpresas que arruinan una llegada: un depósito en efectivo,
+                  una cédula que hay que mostrar.
+                </small></div>
               <DocumentoContrato contratoId={c.id} negocioBabosa={n?.babosa ?? 'sin-negocio'}
                                  valor={c.documento_url} puedeEditar={esAdmin} />
               <div className="campo ancho"><label>Notas internas</label>
@@ -338,6 +360,20 @@ export default async function PaginaOperadores() {
 
               {esAdmin && <BotonAccion>Guardar el contrato</BotonAccion>}
             </form>
+
+            <TerminosIA
+              contratoId={c.id}
+              terminos={c.terminos_ia}
+              leidoEn={c.terminos_ia_en}
+              modelo={c.terminos_ia_modelo}
+              hayDocumento={Boolean(c.documento_url)}
+              puedeEditar={esAdmin}
+              yaPuestos={{
+                politica_cancelacion: c.politica_cancelacion,
+                condiciones_pago: c.condiciones_pago,
+                que_llevar: c.que_llevar,
+              }}
+            />
 
             {/* ---- Productos del contrato ---- */}
             <h3 style={{ marginTop: 26, fontSize: 15 }}>

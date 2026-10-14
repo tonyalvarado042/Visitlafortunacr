@@ -81,6 +81,8 @@ export async function guardarContrato(datos: FormData) {
     frecuencia_liquidacion: texto(datos, 'frecuencia_liquidacion'),
     emite_voucher_propio: esSi(datos, 'emite_voucher_propio'),
     politica_cancelacion: texto(datos, 'politica_cancelacion') || null,
+    condiciones_pago: texto(datos, 'condiciones_pago') || null,
+    que_llevar: texto(datos, 'que_llevar') || null,
     vigencia_desde: texto(datos, 'vigencia_desde') || null,
     vigencia_hasta: texto(datos, 'vigencia_hasta') || null,
     /* Dos formas válidas: un enlace de afuera (Drive, Dropbox) o la RUTA de un
@@ -264,5 +266,51 @@ export async function guardarComplemento(datos: FormData) {
       ? await db.from('dst_complemento').insert({ ...fila, negocio_id: negocio, destino_id: destino.id })
       : { error: null };
   if (error) console.error('guardarComplemento:', error.message);
+  refrescar();
+}
+
+/*
+ * Leer el contrato con IA y dejar una PROPUESTA.
+ *
+ * No escribe ni una de las columnas que salen al cliente: deja todo en
+ * `terminos_ia` para que una persona lo compare contra las citas y lo apruebe.
+ * Ver `lib/ia/contrato.ts` para el porqué.
+ */
+export async function analizarContrato(contratoId: string): Promise<{ ok?: boolean; error?: string }> {
+  const { db, destino, usuario } = await contextoPanel('operadores');
+  if (usuario.rol !== 'admin') return { error: 'Solo un administrador.' };
+  if (!esUuid(contratoId)) return { error: 'Falta el contrato.' };
+
+  const { data: c } = await db.from('dst_contrato')
+    .select('documento_url').eq('id', contratoId).maybeSingle();
+  if (!c?.documento_url) {
+    return { error: 'Primero subí el contrato: no hay documento que leer.' };
+  }
+
+  const { leerContrato } = await import('@/lib/ia/contrato');
+  const r = await leerContrato(destino.id, contratoId, c.documento_url);
+  if (!r.ok) return { error: r.motivo };
+  refrescar();
+  return { ok: true };
+}
+
+/*
+ * Aprobar UN término: pasarlo de la propuesta a la columna que de verdad se
+ * manda. Uno por uno y no todos de golpe, porque cada uno se compara contra su
+ * cita por separado — aprobar en bloque es firmar sin leer.
+ */
+export async function aprobarTermino(datos: FormData) {
+  const { db, usuario } = await contextoPanel('operadores');
+  if (usuario.rol !== 'admin') return;
+  const id = texto(datos, 'id');
+  const campo = texto(datos, 'campo');
+  const valor = texto(datos, 'valor');
+  const PERMITIDOS = ['politica_cancelacion', 'condiciones_pago', 'que_llevar'];
+  if (!esUuid(id) || !PERMITIDOS.includes(campo) || !valor) return;
+
+  const { error } = await db.from('dst_contrato')
+    .update({ [campo]: valor, actualizado_en: new Date().toISOString() })
+    .eq('id', id);
+  if (error) console.error('aprobarTermino:', error.message);
   refrescar();
 }

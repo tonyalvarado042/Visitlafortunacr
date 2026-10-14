@@ -302,3 +302,31 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 /* El enlace para ver algo en el sitio publico, desde el panel. */
 .ver-online { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 10px 0 0; font-size: 12.5px; }
 .ver-online a { font-weight: 700; color: var(--naranja); }
+
+/* ---- Lo que la IA leyo del contrato ---------------------------------------
+   Cada termino con su CITA al lado: se aprueba comparando contra el documento,
+   no leyendo un resumen. Sin cita no hay nada que aprobar. */
+.terminos-ia { margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--borde-4); }
+.terminos-avisos {
+  margin: 12px 0; padding: 12px 14px; border-radius: 7px;
+  background: #FFF6E8; border: 1px solid #E0A33C; font-size: 12.5px; line-height: 1.6;
+}
+.terminos-avisos strong { display: block; margin-bottom: 4px; }
+.terminos-avisos ul { margin: 0; padding-left: 18px; }
+
+.termino { padding: 12px 0; border-top: 1px solid var(--borde-4); }
+.termino-cabeza { display: flex; align-items: center; gap: 10px; }
+.termino-estado { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.termino-estado.puesto { color: #4F8F23; }
+.termino-estado.falta { color: #C9453B; }
+.termino-actual { margin: 6px 0 0; font-size: 13px; line-height: 1.6; }
+.termino-propuesta {
+  margin-top: 10px; padding: 11px 13px; border-radius: 7px;
+  background: var(--sup-1); border: 1px dashed var(--borde-3);
+}
+.termino-propuesta p { margin: 0 0 8px; font-size: 13px; line-height: 1.6; }
+.termino-propuesta blockquote {
+  margin: 0 0 10px; padding-left: 11px; border-left: 2px solid var(--borde-3);
+  font-size: 12px; line-height: 1.55; color: var(--humo); font-style: italic;
+}
+.termino-datos { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.8; }

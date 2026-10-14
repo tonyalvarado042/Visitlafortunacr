@@ -307,6 +307,9 @@ const RES_ROT_QUE: Texto = { es: 'Qué', en: 'What', pt: 'O quê', fr: 'Quoi', d
 const RES_ROT_CUANDO: Texto = { es: 'Cuándo', en: 'When', pt: 'Quando', fr: 'Quand', de: 'Wann' };
 const RES_ROT_GENTE: Texto = { es: 'Personas', en: 'People', pt: 'Pessoas', fr: 'Personnes', de: 'Personen' };
 const RES_ROT_TOTAL: Texto = { es: 'Total estimado', en: 'Estimated total', pt: 'Total estimado', fr: 'Total estimé', de: 'Geschätzte Summe' };
+const RES_ROT_PAGO: Texto = { es: 'Cómo se paga', en: 'How to pay', pt: 'Como se paga', fr: 'Comment payer', de: 'Bezahlung' };
+const RES_ROT_LLEVAR: Texto = { es: 'Qué llevar', en: 'What to bring', pt: 'O que levar', fr: 'À apporter', de: 'Was mitbringen' };
+const RES_ROT_CANCELA: Texto = { es: 'Si necesitás cancelar', en: 'If you need to cancel', pt: 'Se precisar cancelar', fr: 'En cas d’annulation', de: 'Wenn Sie stornieren müssen' };
 const RES_NOTA: Texto = {
   es: 'El operador del servicio es quien presta la actividad. Nosotros gestionamos la reserva.',
   en: 'The operator provides the activity itself. We handle the booking.',
@@ -325,6 +328,12 @@ export async function correoReservaPedida(opciones: {
   paraEl: string;
   personas: number;
   totalUsd: number | null;
+  /* Lo que el operador firmó y el viajero tiene que saber ANTES de llegar.
+     Sale del contrato y lo aprobó una persona en el panel — nunca se arma
+     acá ni se completa con algo plausible: ver lib/ia/contrato.ts. */
+  politicaCancelacion?: string | null;
+  condicionesPago?: string | null;
+  queLlevar?: string | null;
 }): Promise<Envio> {
   const { destino, idioma, para, codigo, producto, operador, paraEl, personas, totalUsd } = opciones;
   return enviarCorreo({
@@ -342,6 +351,14 @@ export async function correoReservaPedida(opciones: {
       { rotulo: d(RES_ROT_GENTE, idioma), valor: String(personas) },
       /* El total solo si de verdad hay uno. Un "$0" aqui se lee como gratis. */
       ...(totalUsd != null ? [{ rotulo: d(RES_ROT_TOTAL, idioma), valor: `$${totalUsd}` }] : []),
+      /* Cada uno solo si está. Un rótulo «Cancelación» seguido de nada es
+         peor que no ponerlo: parece que no hay política. */
+      ...(opciones.condicionesPago
+        ? [{ rotulo: d(RES_ROT_PAGO, idioma), valor: opciones.condicionesPago }] : []),
+      ...(opciones.queLlevar
+        ? [{ rotulo: d(RES_ROT_LLEVAR, idioma), valor: opciones.queLlevar }] : []),
+      ...(opciones.politicaCancelacion
+        ? [{ rotulo: d(RES_ROT_CANCELA, idioma), valor: opciones.politicaCancelacion }] : []),
     ],
     nota: d(RES_NOTA, idioma),
   });

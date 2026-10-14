@@ -114,7 +114,7 @@ export async function POST(peticion: NextRequest) {
         const destino = await destinoActual();
         const { data: r } = await servicio()
           .from('dst_reserva')
-          .select('id, codigo, para_el, adultos, ninos, total_usd, descuento_usd, nombre_titular, email_titular, whatsapp_titular, notas, producto:dst_producto(nombre), operador:dst_negocio(nombre), lineas:dst_reserva_linea(descripcion)')
+          .select('id, codigo, para_el, adultos, ninos, total_usd, descuento_usd, nombre_titular, email_titular, whatsapp_titular, notas, producto:dst_producto(nombre), operador:dst_negocio(nombre), contrato:dst_contrato(politica_cancelacion, condiciones_pago, que_llevar), lineas:dst_reserva_linea(descripcion)')
           .eq('codigo', fila.codigo).maybeSingle();
         if (!r) return;
 
@@ -127,6 +127,14 @@ export async function POST(peticion: NextRequest) {
           ?? lineas[0]?.descripcion?.replace(/\s·\s(adulto|nino|niño)$/i, '')
           ?? '';
         const oper = uno(r.operador as { nombre: string } | { nombre: string }[] | null)?.nombre ?? '';
+        /* PostgREST devuelve el embebido como objeto o como arreglo segun la
+           relacion; `uno` normaliza las dos formas. */
+        type Terminos = {
+          politica_cancelacion: string | null;
+          condiciones_pago: string | null;
+          que_llevar: string | null;
+        };
+        const contrato = uno(r.contrato as unknown as Terminos | Terminos[] | null);
         const total = r.total_usd == null ? null : Number(r.total_usd);
 
         await correoReservaPedida({
@@ -135,6 +143,12 @@ export async function POST(peticion: NextRequest) {
           paraEl: r.para_el as string,
           personas: Number(r.adultos ?? 0) + Number(r.ninos ?? 0),
           totalUsd: total,
+          /* Lo que firmó el operador. Si no está aprobado en el panel va null
+             y el correo simplemente no lo menciona: mejor callado que
+             inventado. */
+          politicaCancelacion: contrato?.politica_cancelacion ?? null,
+          condicionesPago: contrato?.condiciones_pago ?? null,
+          queLlevar: contrato?.que_llevar ?? null,
         });
 
         /* Al equipo solo si hay a quien escribirle. Sin correo de contacto
