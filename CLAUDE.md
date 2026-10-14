@@ -247,12 +247,11 @@ vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
    funciones) porque tienen que viajar por la cola, y nunca lanzan: un
    reintento sería un plan o una respuesta de WhatsApp repetidos.
    Hace falta el plan **Workers Paid**: el gratuito da 10 ms de CPU.
-3. **Sin comprobar contra Cloudflare de verdad**: que el correo por **SMTP**
-   llegue (Resend va por `fetch` y no tiene problema), y que Images **enderece
-   las fotos verticales** según el EXIF como hacía `sharp().rotate()`. Del SMTP
-   se sabe esto: en workerd local `nodemailer` carga y llega hasta resolver el
-   servidor, y ahí se para solo porque el contenedor no tiene DNS de salida.
-   Buena señal, no prueba.
+3. **Sin comprobar contra Cloudflare de verdad**: que Images **enderece
+   las fotos verticales** según el EXIF como hacía `sharp().rotate()`. El
+   correo **no es riesgo**: el canal es Resend, que va por `fetch`. SMTP solo
+   importaría si algún día el canal pasa a `smtp`; de eso se sabe que en
+   workerd local `nodemailer` carga y llega a resolver el servidor, nada más.
 
 **Probado el 14 de octubre de 2026 desde el contenedor** (`npm run
 start:vinext`, workerd local): `/` redirige a `/es`, `/admin/ingresar` da 200,
@@ -317,7 +316,9 @@ máquina. El Worker está en **`https://visit-la-fortuna.aalvarado-171.workers.d
 productor y consumidor de la cola. El conector de Cloudflare lo ve. El
 contenedor de la nube **no alcanza `*.workers.dev`** (lo corta el proxy, como
 `*.vercel.app`): las pruebas del paso 5 se hacen desde un navegador.
-Falta: paso 4 (secretos) y paso 5 (la lista).
+El 14 de octubre de 2026 `/api/salud` en el Worker ya leía la base (destino
+La Fortuna, 64 negocios) y Tony puso `SUPABASE_SECRET_KEY` y
+`ANTHROPIC_API_KEY`. Falta: `CRON_SECRET` del paso 4 y el paso 5 (la lista).
 
 El código ya está listo (ver "El sitio también compila para Cloudflare
 Workers"). Lo que falta es de panel. La sesión en la nube **no puede**: el
@@ -378,12 +379,34 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    que entre ahí sale a producción en Vercel (está probado que `npm run build`
    sigue pasando con estos cambios).
 4. El Worker → *Settings* → *Variables and Secrets* → *Add* → tipo
-   **Secret**, uno por uno, copiando el valor desde Vercel → *Settings* →
-   *Environment Variables* (el ojo muestra el valor). Por el panel y no por la
-   terminal, para que las claves no queden en el historial de PowerShell:
-   `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_WORKSPACE_ID` (si
-   está en Vercel), `CRON_SECRET`, y los que haya de `EMAIL_REMITENTE`,
-   `SMTP_*`, `WHATSAPP_*` y `GOOGLE_PLACES_API_KEY`.
+   **Secret**. **Son pocas, porque casi todo vive en la base** (comprobado el
+   14 de octubre de 2026 leyendo el código y `vault.secrets`):
+
+   | Llave | De dónde la lee el código | ¿Va en Cloudflare? |
+   |---|---|---|
+   | `SUPABASE_SECRET_KEY` | Solo del entorno: es la que abre la base, no puede vivir dentro | ✅ Puesta |
+   | `ANTHROPIC_API_KEY` | Solo del entorno (`lib/ia/cliente.ts`) | ✅ Puesta. **Tiene que ser clave de workspace** |
+   | `ANTHROPIC_WORKSPACE_ID` | Solo del entorno | Solo si la clave NO es de workspace |
+   | `CRON_SECRET` | `externas` y `tipo-cambio`: bóveda primero. `automatizaciones` y `/api/ia/planificar`: **solo entorno** | Sí, un valor **nuevo cualquiera** (ver abajo) |
+   | `GOOGLE_PLACES_API_KEY` | Bóveda (*Ajustes → Llaves*), ya está | No |
+   | `RESEND_API_KEY` | Bóveda, ya está. **El correo sale por Resend, no por SMTP** (`dst_canal`: email/resend) | No |
+   | `EMAIL_REMITENTE` | `dst_canal.identificador` (`hola@visitlafortunacr.com`) | No |
+   | `SMTP_*` | Solo si el canal fuera `smtp`, y no lo es | No |
+   | `WHATSAPP_*` | No hay canal de WhatsApp todavía | No, hasta conectarlo |
+
+   **`CRON_SECRET` no se puede copiar de la bóveda** (el panel la escribe y
+   nunca la muestra) **y no hace falta**: el Worker manda primero la de su
+   entorno y, si la ruta dice 401, la de la bóveda (`cloudflare/entrada.ts`).
+   Así un valor nuevo sirve a `automatizaciones` y la bóveda sigue sirviendo a
+   las otras dos. Se genera en PowerShell con
+   `-join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Maximum 16) })`.
+   **No se toca la de Vercel**: Vercel la sigue usando con su propio valor.
+   **La clave de Anthropic**: en <https://console.anthropic.com> se crea
+   **dentro de un workspace** (*Settings → Workspaces → el workspace → API
+   keys*), no a nivel de organización. Si en el chat aparece *"This API key is
+   not scoped to a workspace"*, o se cambia la clave o se agrega
+   `ANTHROPIC_WORKSPACE_ID` (*Settings → Workspaces*, el ID que empieza con
+   `wrkspc_`).
    **Las `NEXT_PUBLIC_*` no hacen falta**: `lib/credenciales-publicas.ts` trae
    la URL y la clave publicable de Supabase como respaldo, y el dominio por
    defecto es `visitlafortunacr.com`. Las URLs `*.workers.dev` se tratan como
@@ -421,7 +444,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ☐ | Reseña propia y solicitud de lead | Quedan en `dst_resena` y `dst_solicitud` |
    | ☐ | Panel: entrar a `/admin`, editar algo, cerrar sesión | La cookie de Supabase se mantiene entre páginas |
    | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
-   | ☐ | Un **correo de prueba** por SMTP | Llega, y no a spam |
+   | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
    | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
    | ☐ | Crons | En *Settings* → *Triggers* están los tres; al día siguiente, sus registros en *Logs* sin error |
 
