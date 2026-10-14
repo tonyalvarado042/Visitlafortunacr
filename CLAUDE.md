@@ -471,8 +471,9 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    la variable `CLOUDFLARE_ES_PRODUCCION=si` (está en `cloudflare/entrada.ts`;
    en *Logs* se ve "en pausa"). Para probarlo se llama a mano:
    `curl -H "Authorization: Bearer $CRON_SECRET" .../api/cron/automatizaciones?limite=1`.
-   **El despliegue aborta si NO hay terminal de verdad (14 de octubre de 2026).**
-   `npm run deploy:vinext` compila bien y se cae al subir:
+   **El primer despliegue por CLI hay que confirmarlo a mano, una sola vez
+   (14 de octubre de 2026).** `npm run deploy:vinext` compila bien y se cae al
+   subir:
 
    ```
    The local configuration ... differs from the remote configuration of your
@@ -482,25 +483,67 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    To override and upload anyway, remove the `--strict` flag
    ```
 
-   **La causa: Cloudflare guarda aparte la configuración que se tocó desde el
-   panel**, y desde noviembre de 2025 el despliegue la compara con la local.
-   **Con terminal, muestra la diferencia y ofrece arreglarla; sin terminal, se
-   aborta.** Claude Code corre los comandos sin TTY, así que siempre cae en la
-   rama que aborta. Por eso **este despliegue lo corre Tony en su PowerShell**,
-   no Claude:
+   **La causa, leída en el código de `cf` y de `vinext`, son dos cosas que se
+   juntan:**
+
+   1. **El Worker se desplegó por última vez desde el panel.** `cf` solo
+      pregunta en ese caso:
+      `if (worker.last_deployed_from === 'dash') { avisa del diff; if (!await confirmar()) aborta }`.
+      Mientras el panel sea el último en haber desplegado, la pregunta sale
+      siempre, y **no hay nada que tocar en el panel que la haga desaparecer**.
+   2. **`npm run deploy:vinext` no puede contestarla, desde ninguna terminal.**
+      El envoltorio lanza a `cf` así
+      (`node_modules/@vinext/cloudflare/dist/deploy.js`, `runCfDeploy`):
+
+      ```js
+      stdio: ["inherit", "pipe", "pipe"]   // stdin, stdout, stderr
+      ```
+
+      Entuba stdout para leerle la URL del Worker al texto
+      (`parseWorkerDeploymentUrl(output)`). Y `cf` decide así:
+
+      ```js
+      isTtyInteractive  = () => !!(process.stdin.isTTY && process.stdout.isTTY)
+      isNonInteractiveOrCI = () => !isInteractive() || isCI
+      // getDeployConfirmFunction({ strictMode: e.strict }):
+      //   no interactivo + strict -> aborta;  no interactivo sin strict -> sí;
+      //   interactivo -> pregunta
+      ```
+
+      Dentro del hijo `process.stdout.isTTY` es **false** porque es un tubo.
+      Y `strict: true` está **fijo en el código** para `command: 'deploy'`
+      (`node_modules/cf/dist/deploy-input-*.mjs`), sin bandera que lo apague.
+      O sea: no era la terminal de Tony ni era CI. Es el tubo de vinext.
+
+   **Cómo se desbloquea:** llamar a `cf` **directo**, sin el envoltorio, en una
+   terminal de verdad. Ahí stdout sí es TTY, sale la pregunta y se contesta `y`.
+   El Build Output ya está armado, así que `--prebuilt` lo reusa:
 
    ```
-   npm run deploy:vinext
+   npx cf deploy --prebuilt
    ```
+
+   Con eso el Worker deja de ser "del panel" y **de ahí en adelante
+   `npm run deploy:vinext` funciona solo**, también desde Claude Code.
+
+   **Sobrescribir la config remota no borra las llaves.** La doc de Cloudflare
+   lo dice así: *"Wrangler will not delete your secrets (encrypted environment
+   variables) unless you run `wrangler secret delete <key>`"*. `keep_vars` solo
+   manda sobre las variables en texto plano. Antes de confirmar, el Worker
+   tenía estas tres (`cf workers secrets list --script-name visit-la-fortuna`):
+   `ANTHROPIC_API_KEY`, `CRON_SECRET`, `SUPABASE_SECRET_KEY` — hay que volver a
+   contarlas después.
 
    Lo comprobado, para no volver a investigarlo:
 
-   - **El mensaje miente**: `--strict` no es flag de `cf deploy` (`--no-strict`
-     responde *Unknown argument: strict*) y el envoltorio tampoco lo pasa. Sale
-     de adentro de `cf` (`strictMode: e.strict`), y `cf` decide por `isTTY`.
+   - **El mensaje miente**: `--strict` no es flag de `cf deploy`. `--no-strict`
+     responde *Unknown argument: strict*, y eso lo tira el `parseArgs` del
+     envoltorio de vinext (que corre con `strict: true`, el de Node, otra cosa),
+     no `cf`.
    - `npx cf deploy --prebuilt --dry-run` **pasa** y lista los tres bindings
-     (TRABAJOS, IMAGES, ASSETS): lo compilado es válido. El `--dry-run` no
-     compara configuraciones, por eso no avisa.
+     (TRABAJOS, IMAGES, ASSETS): lo compilado es válido. Pasa porque el chequeo
+     arranca con `if (e.dryRun || ...) return { aborted: false }` — el
+     `--dry-run` **se salta la comparación entera**, no es que la apruebe.
    - **Soltar el consumidor de la cola NO sirve, y se probó.** Se borró, quedó
      en cero, se desplegó y **abortó igual**: la diferencia es contra la copia
      del panel, que no tiene nada que ver con los consumidores de la cola. El
