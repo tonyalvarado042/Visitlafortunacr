@@ -471,8 +471,8 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    la variable `CLOUDFLARE_ES_PRODUCCION=si` (está en `cloudflare/entrada.ts`;
    en *Logs* se ve "en pausa"). Para probarlo se llama a mano:
    `curl -H "Authorization: Bearer $CRON_SECRET" .../api/cron/automatizaciones?limite=1`.
-   **El despliegue está trabado desde el 14 de octubre de 2026 (tarde), y no
-   es del código.** `npm run deploy:vinext` compila bien y aborta al subir:
+   **El despliegue aborta si NO hay terminal de verdad (14 de octubre de 2026).**
+   `npm run deploy:vinext` compila bien y se cae al subir:
 
    ```
    The local configuration ... differs from the remote configuration of your
@@ -482,31 +482,32 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    To override and upload anyway, remove the `--strict` flag
    ```
 
-   Lo comprobado, para no repetirlo:
+   **La causa: Cloudflare guarda aparte la configuración que se tocó desde el
+   panel**, y desde noviembre de 2025 el despliegue la compara con la local.
+   **Con terminal, muestra la diferencia y ofrece arreglarla; sin terminal, se
+   aborta.** Claude Code corre los comandos sin TTY, así que siempre cae en la
+   rama que aborta. Por eso **este despliegue lo corre Tony en su PowerShell**,
+   no Claude:
 
-   - **El mensaje miente**: `--strict` no es un flag de `cf deploy` (`--no-strict`
-     responde *Unknown argument: strict*), y `vinext-cloudflare deploy` tampoco
-     lo pasa. Viene de adentro de `cf` (`node_modules/cf/dist/containers-*.mjs`,
-     `strictMode: e.strict`). No hay forma por línea de comandos de apagarlo.
+   ```
+   npm run deploy:vinext
+   ```
+
+   Lo comprobado, para no volver a investigarlo:
+
+   - **El mensaje miente**: `--strict` no es flag de `cf deploy` (`--no-strict`
+     responde *Unknown argument: strict*) y el envoltorio tampoco lo pasa. Sale
+     de adentro de `cf` (`strictMode: e.strict`), y `cf` decide por `isTTY`.
    - `npx cf deploy --prebuilt --dry-run` **pasa** y lista los tres bindings
-     correctos (TRABAJOS, IMAGES, ASSETS): lo que está armado es válido.
-   - `npx cf queues list` dice que la cola **sí** tiene 1 productor y 1
-     consumidor, los dos `visit-la-fortuna`. O sea: el consumidor existe en la
-     COLA, y lo que no lo tiene es la copia de configuración del Worker que
-     Cloudflare guarda del lado del panel. Esa es toda la diferencia.
-   - El Worker sigue vivo con el código ANTERIOR a `ca648af`: `/api/salud`
-     responde, las tres llaves están puestas y usables, y lee la base. O sea
-     **`/admin/resenas` en el Worker todavía tiene el error PGRST201**.
-
-   Dos salidas, y la segunda es de panel (de Tony):
-
-   1. Soltar el consumidor y dejar que el despliegue lo vuelva a crear:
-      `npx cf queues consumers list` → `delete <consumer-id>` → desplegar. Deja
-      la cola sin consumidor un minuto, así que **no se hace mientras haya un
-      itinerario en vuelo**, y hay que comprobar con `queues list` que volvió.
-      **Es tocar infraestructura que funciona: se pregunta antes.**
-   2. En el panel del Worker, borrar la configuración que Cloudflare guarda del
-      lado del panel para que deje de competir con `cloudflare.config.ts`.
+     (TRABAJOS, IMAGES, ASSETS): lo compilado es válido. El `--dry-run` no
+     compara configuraciones, por eso no avisa.
+   - **Soltar el consumidor de la cola NO sirve, y se probó.** Se borró, quedó
+     en cero, se desplegó y **abortó igual**: la diferencia es contra la copia
+     del panel, que no tiene nada que ver con los consumidores de la cola. El
+     consumidor se volvió a crear con los mismos valores (batch 1, reintentos
+     1, espera 5000, demora 0) y la cola quedó como estaba. **No repetir.**
+   - Claude **no puede** borrar ni crear consumidores sin permiso del harness
+     (los clasifica como recurso compartido), y tampoco le sirve de nada.
 
 6. **El cambio**, cuando la lista esté completa: se pasa el dominio (punto 7),
    se pone `CLOUDFLARE_ES_PRODUCCION=si` en el Worker y **en el mismo
