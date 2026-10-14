@@ -2,8 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { NextRequest, NextResponse, after } from 'next/server';
 import { hayClaveDeServicio, servicio } from '@/lib/supabase-servidor';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
-import { responderConversacion } from '@/lib/ia/agente';
-import { generarItinerarioParaSolicitud } from '@/lib/ia/planificador';
+import { enSegundoPlano, type Trabajo } from '@/lib/segundo-plano';
 
 /*
  * WhatsApp Cloud API (Meta). GET verifica el webhook; POST recibe mensajes y
@@ -73,6 +72,8 @@ export async function POST(peticion: NextRequest) {
 
   const db = servicio();
   const trabajos: (() => Promise<void>)[] = [];
+  // Lo que llama a Claude va aparte: en Workers no cabe en after(). Ver lib/segundo-plano.ts.
+  const largos: Trabajo[] = [];
 
   for (const entrada of cuerpo.entry ?? []) {
     for (const cambio of entrada.changes ?? []) {
@@ -123,16 +124,7 @@ export async function POST(peticion: NextRequest) {
         if (entradaMsg.duplicado || entradaMsg.atendida_por !== 'ia' || !hayClaveDeIA()) continue;
 
         const conversacionId = entradaMsg.conversacion_id as string;
-        trabajos.push(async () => {
-          try {
-            const r = await responderConversacion(conversacionId, { origen: 'whatsapp' });
-            if (r.solicitud_creada?.tipo === 'itinerario') {
-              await generarItinerarioParaSolicitud(r.solicitud_creada.id, 'whatsapp');
-            }
-          } catch (fallo) {
-            console.error('El concierge falló por WhatsApp:', fallo);
-          }
-        });
+        largos.push({ tipo: 'concierge_whatsapp', conversacionId });
       }
     }
   }
@@ -142,5 +134,6 @@ export async function POST(peticion: NextRequest) {
       for (const trabajo of trabajos) await trabajo();
     });
   }
+  for (const trabajo of largos) await enSegundoPlano(trabajo);
   return NextResponse.json({ ok: true });
 }

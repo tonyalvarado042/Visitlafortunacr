@@ -1,5 +1,12 @@
+import { env as entorno } from 'cloudflare:workers';
 import manejador from 'vinext/server/fetch-handler';
 import { secreto } from '../lib/secretos';
+import { ejecutarTrabajo, type Trabajo } from '../lib/trabajos';
+
+/* La cola de trabajos largos queda a mano de lib/segundo-plano.ts, que no
+   puede importar 'cloudflare:workers' porque también compila para Vercel. */
+(globalThis as { __colaTrabajos?: unknown }).__colaTrabajos =
+  (entorno as { TRABAJOS?: unknown }).TRABAJOS;
 
 export * from 'vinext/server/fetch-handler';
 
@@ -35,6 +42,15 @@ export default {
       console.error(`cron sin ruta: "${evento.cron}"`);
       return;
     }
+    /* Mientras Vercel siga siendo producción, sus crons también corren, contra
+       la misma base. Refrescar dos veces no hace daño; mandar dos veces el
+       seguimiento a un viajero sí. Así que este cron espera a que el Worker
+       sea oficialmente producción: CLOUDFLARE_ES_PRODUCCION=si, que se pone
+       el mismo día que se quitan los crons de Vercel. */
+    if (ruta === '/api/cron/automatizaciones' && process.env.CLOUDFLARE_ES_PRODUCCION?.trim() !== 'si') {
+      console.log('cron automatizaciones: en pausa hasta CLOUDFLARE_ES_PRODUCCION=si');
+      return;
+    }
     /* Mismo orden que las rutas: primero la bóveda, después el entorno. */
     const clave = await secreto('CRON_SECRET');
     if (!clave) {
@@ -46,5 +62,15 @@ export default {
     });
     const respuesta = await (manejador as unknown as Manejador).fetch(peticion, env, ctx);
     if (!respuesta.ok) console.error(`cron ${ruta}: ${respuesta.status} ${await respuesta.text()}`);
+  },
+
+  /* El consumidor de la Queue: aquí corre lo que en Vercel corría en after().
+     ejecutarTrabajo nunca lanza, así que todo mensaje se da por hecho y la
+     cola no lo reintenta (un reintento sería un plan o una respuesta doble). */
+  async queue(lote: MessageBatch<Trabajo>) {
+    for (const mensaje of lote.messages) {
+      await ejecutarTrabajo(mensaje.body);
+      mensaje.ack();
+    }
   },
 };

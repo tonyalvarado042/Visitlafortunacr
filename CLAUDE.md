@@ -216,8 +216,11 @@ A del apex, CNAME de www, MX, NS y TXT. Cambiarlo no; leerlo sí.
 
 ### El sitio también compila para Cloudflare Workers (14 de octubre de 2026)
 
-Pedido por Tony. **Vercel sigue siendo producción** hasta que el Worker esté
-desplegado y probado: la migración es aditiva y no rompe nada de lo de arriba.
+Pedido por Tony. **La decisión es migrar, pero Vercel sigue siendo producción
+hasta que el Worker pase TODA la lista de "Cloudflare · desplegar el Worker"**
+(Trabajo a mano). Mientras tanto no se apaga nada en Vercel, no se borra
+`vercel.json` y el dominio no se mueve. La migración es aditiva: el mismo código
+compila para los dos lados.
 `npm run build` arma para Vercel, como siempre; `npm run build:vinext` arma
 para Workers con **vinext** (lo que Cloudflare recomienda hoy para Next.js en
 vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
@@ -226,6 +229,7 @@ vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
 |---|---|
 | `cloudflare.config.ts` | El Worker `visit-la-fortuna`: `nodejs_compat`, binding `IMAGES` y los tres crons |
 | `cloudflare/entrada.ts` | Puerta del Worker: el sitio de vinext + `scheduled()`, que traduce cada cron a la misma petición con `Bearer CRON_SECRET` que hace Vercel |
+| `lib/segundo-plano.ts` + `lib/trabajos.ts` | Los trabajos largos (planificador, concierge de WhatsApp): `after()` en Vercel, Queue `visit-la-fortuna-trabajos` en Workers |
 | `cloudflare/sharp-imagenes.ts` | Reemplazo de `sharp` (nativo, no corre en Workers) con Cloudflare Images. `vite.config.ts` cambia el import solo en el build de Workers |
 | `.claude/settings.json` | Activa el plugin oficial de Cloudflare (Skills + MCP) para toda sesión de Claude Code en este repo |
 
@@ -235,16 +239,20 @@ vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
    `CRONES` en `cloudflare/entrada.ts`. Cloudflare entrega la expresión como
    texto y con eso se elige la ruta, así que las dos tienen que ser idénticas.
 2. **`after()` en Workers tiene 30 segundos** después de mandar la respuesta
-   (`waitUntil`). `/api/solicitud` dispara ahí el planificador, que llama a
-   Claude y puede tardar más. Si en Workers los planes quedan a medias, ese es
-   el motivo, y la salida es pasarlo a una Queue o a un Workflow.
-   `maxDuration` no significa nada en Workers. Hace falta el plan **Workers
-   Paid**: el gratuito da 10 ms de CPU por petición.
+   (`waitUntil`), y `maxDuration` no significa nada. Los correos caben; **lo
+   que llama a Claude no**. Por eso el planificador y el concierge de WhatsApp
+   ya no se lanzan con `after()` sino con `enSegundoPlano(...)`: en Workers van
+   a una Queue, cuyo consumidor tiene 15 minutos. **Todo trabajo nuevo que
+   llame a Claude va por ahí**, no por `after()`. Los trabajos son datos (no
+   funciones) porque tienen que viajar por la cola, y nunca lanzan: un
+   reintento sería un plan o una respuesta de WhatsApp repetidos.
+   Hace falta el plan **Workers Paid**: el gratuito da 10 ms de CPU.
 3. **Sin comprobar contra Cloudflare de verdad**: que el correo por **SMTP**
-   (`nodemailer`) funcione con `nodejs_compat` (Resend va por `fetch` y no
-   tiene problema), y que Images **enderece las fotos verticales** según el
-   EXIF como hacía `sharp().rotate()`. Las dos se prueban en el primer
-   despliegue: mandar un correo de prueba y subir una foto de teléfono.
+   llegue (Resend va por `fetch` y no tiene problema), y que Images **enderece
+   las fotos verticales** según el EXIF como hacía `sharp().rotate()`. Del SMTP
+   se sabe esto: en workerd local `nodemailer` carga y llega hasta resolver el
+   servidor, y ahí se para solo porque el contenedor no tiene DNS de salida.
+   Buena señal, no prueba.
 
 **Probado el 14 de octubre de 2026 desde el contenedor** (`npm run
 start:vinext`, workerd local): `/` redirige a `/es`, `/admin/ingresar` da 200,
@@ -252,6 +260,11 @@ start:vinext`, workerd local): `/` redirige a `/es`, `/admin/ingresar` da 200,
 leen la base no se pudieron ver porque el contenedor no alcanza
 `*.supabase.co`. `npx tsc --noEmit`, `npm run build` y `npm run build:vinext`
 pasan.
+**Ojo al verificar en local**: `build:vinext` reescribe
+`.next/types/routes.d.ts` con su propia versión, y `tsc` da errores en
+`.next/types/validator.ts` hasta el próximo `npm run build`. No es un error del
+código: se corre `npm run build` y después `tsc`. En Vercel y en Workers Builds
+no pasa, porque cada uno compila desde cero.
 
 Para Claude: **con Cloudflare se usa el CLI `cf`** (ya está en
 `devDependencies`), no `wrangler`: este proyecto tiene `cloudflare.config.ts`
@@ -304,16 +317,29 @@ proxy corta `api.cloudflare.com` y no hay `CLOUDFLARE_API_TOKEN`. El conector
 de Cloudflare sí responde, y confirma que la cuenta tiene **0 Workers** (14 de
 octubre de 2026).
 
+**Vercel no se toca en ninguno de estos pasos.** El Worker se prueba en su
+URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
+
 1. Cloudflare → *Workers & Pages* → *Plans*: pasar a **Workers Paid**
-   (5 USD/mes). Con el plan gratuito el sitio no cabe en 10 ms de CPU.
-2. Desde la máquina, en la raíz del repo: `npx cf auth login` (abre el
+   (5 USD/mes). Con el plan gratuito el sitio no cabe en 10 ms de CPU, y las
+   Queues son solo de ese plan.
+2. Crear la cola, una sola vez: *Storage & Databases* → *Queues* → *Create* →
+   nombre **`visit-la-fortuna-trabajos`** (exacto: es el que espera
+   `cloudflare.config.ts`). Desde la máquina es `npx cf queues create
+   visit-la-fortuna-trabajos`; si `cf` muestra otro nombre de comando, manda
+   lo que diga `npx cf queues --help`.
+3. Desde la máquina, en la raíz del repo: `npx cf auth login` (abre el
    navegador; el login lo hace Tony) y después `npm run deploy:vinext`.
    O, para que despliegue solo con cada push: *Workers & Pages* → *Create* →
-   *Import a repository* → `tonyalvarado042/Visitlafortunacr`, rama
-   `claude/la-fortuna-directory-design-l8qnxg`, comando de build
-   `npm run build:vinext`, comando de deploy `npm run deploy:vinext`.
-3. El Worker → *Settings* → *Variables and Secrets*. **Como texto** (y también
-   como *Build variables* si se usa el paso 2 por repo, porque las
+   *Import a repository* → `tonyalvarado042/Visitlafortunacr`, comando de
+   build `npm run build:vinext`, comando de deploy `npm run deploy:vinext`.
+   **La rama, mientras no se mezcle, es `claude/cloudflare-agent-setup-mm1mos`**:
+   la de siempre (`claude/la-fortuna-directory-design-l8qnxg`) todavía no tiene
+   nada de Cloudflare. Ojo al mezclarla: Vercel despliega esa rama, así que lo
+   que entre ahí sale a producción en Vercel (está probado que `npm run build`
+   sigue pasando con estos cambios).
+4. El Worker → *Settings* → *Variables and Secrets*. **Como texto** (y también
+   como *Build variables* si se usa el paso 3 por repo, porque las
    `NEXT_PUBLIC_*` se pegan dentro del código al compilar):
    ```
    NEXT_PUBLIC_SUPABASE_URL=<la misma de Vercel>
@@ -327,12 +353,37 @@ octubre de 2026).
    `NEXT_PUBLIC_DOMINIO_POR_DEFECTO` no es opcional: el destino se elige por
    el `Host`, y `visit-la-fortuna.<cuenta>.workers.dev` no está en
    `dst_destino.dominio`.
-4. Probar en la URL `*.workers.dev`: `/api/salud` tiene que decir que ve la
-   base y las dos claves; la portada, una ficha y el chat; **un correo de
-   prueba por SMTP y una foto vertical subida desde el panel** (las dos cosas
-   que no se pudieron comprobar). En *Settings* → *Triggers* tienen que
-   aparecer los tres crons.
-5. **El dominio, solo cuando lo anterior funcione, y es una decisión aparte.**
+5. **La lista que decide.** Todo en la URL `*.workers.dev`, y **cada punto
+   tiene que dar lo mismo que en `visit-la-fortuna.vercel.app`**. Hasta que
+   estén todos, producción sigue en Vercel:
+
+   | | Qué se prueba | Cómo se sabe que sirve |
+   |---|---|---|
+   | ☐ | `/api/salud` | Ve la base, la clave de servicio y la de IA |
+   | ☐ | Portada `/es`, `/en`, un listado, una ficha | Mismas fotos, mismos negocios, el video del hero |
+   | ☐ | Buscador `/es?q=termales` | Mismos resultados |
+   | ☐ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion` |
+   | ☐ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...` (prueba la Queue: en *Queues* se ve el mensaje consumido) |
+   | ☐ | Reseña propia y solicitud de lead | Quedan en `dst_resena` y `dst_solicitud` |
+   | ☐ | Panel: entrar a `/admin`, editar algo, cerrar sesión | La cookie de Supabase se mantiene entre páginas |
+   | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
+   | ☐ | Un **correo de prueba** por SMTP | Llega, y no a spam |
+   | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
+   | ☐ | Crons | En *Settings* → *Triggers* están los tres; al día siguiente, sus registros en *Logs* sin error |
+
+   **Ojo con los crons durante la prueba**: con los dos lados encendidos, cada
+   cron corre DOS veces al día, una en Vercel y otra en Cloudflare, contra la
+   misma base. `externas` y `tipo-cambio` solo refrescan y no pasa nada, pero
+   **`automatizaciones` manda mensajes a viajeros**: podría mandar un
+   seguimiento repetido. Por eso **el Worker no lo corre** mientras no exista
+   la variable `CLOUDFLARE_ES_PRODUCCION=si` (está en `cloudflare/entrada.ts`;
+   en *Logs* se ve "en pausa"). Para probarlo se llama a mano:
+   `curl -H "Authorization: Bearer $CRON_SECRET" .../api/cron/automatizaciones?limite=1`.
+6. **El cambio**, cuando la lista esté completa: se pasa el dominio (punto 7),
+   se pone `CLOUDFLARE_ES_PRODUCCION=si` en el Worker y **en el mismo
+   momento** se quitan los crons de `vercel.json`. Vercel se deja vivo unas semanas
+   sin dominio, por si hay que volver atrás: volver es apuntar el DNS de nuevo.
+7. **El dominio, solo cuando lo anterior funcione, y es una decisión aparte.**
    Un Worker con dominio propio necesita que la zona viva en Cloudflare, o sea
    **cambiar los nameservers de GoDaddy** — justo lo que la sección de GoDaddy
    evita para no perder el correo. Con Cloudflare no se pierde si se hace bien:

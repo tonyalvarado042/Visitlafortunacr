@@ -21,6 +21,8 @@ export default defineConfig({
       ASSETS: bindings.assets(),
       // Reemplaza a sharp: ver cloudflare/sharp-imagenes.ts
       IMAGES: bindings.images(),
+      // Trabajos largos (planificador, concierge de WhatsApp): ver lib/segundo-plano.ts
+      TRABAJOS: bindings.queue({ name: "visit-la-fortuna-trabajos" }),
     },
     // Los mismos de vercel.json. Las expresiones tienen que coincidir con
     // CRONES en cloudflare/entrada.ts.
@@ -28,6 +30,8 @@ export default defineConfig({
       triggers.scheduled({ schedule: "0 13 * * *" }),
       triggers.scheduled({ schedule: "0 5 * * *" }),
       triggers.scheduled({ schedule: "15 12 * * *" }),
+      // De a uno: cada trabajo puede tardar minutos con Claude.
+      triggers.queue({ name: "visit-la-fortuna-trabajos", maxBatchSize: 1, maxRetries: 1 }),
     ],
   }),
 });
