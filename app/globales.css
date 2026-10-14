@@ -3204,7 +3204,33 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* La leyenda que acompana al descuento. Escudo y no estrella: lo que afirma es
    que la compra es segura, no que es una oferta. */
 .reservar-leyenda {
-  display: flex; align-items: center; gap: 7px; margin: 9px 0 0;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  margin: 9px 0 0; text-align: center;
   font-size: 12px; font-weight: 700; line-height: 1.4; color: var(--txt-2);
 }
 .reservar-leyenda svg { flex: none; color: var(--verde); }
+
+/* ---- El boton de reservar -------------------------------------------------
+   Del ancho de la tarjeta: es LA accion de este bloque, y un boton que no
+   llega a los bordes compite con todo lo que tiene al lado.
+
+   El latido llama la atencion y PARA SOLO a los tres pulsos. Un parpadeo
+   infinito al lado de un precio se vuelve ruido: a los diez segundos la gente
+   deja de verlo, y ademas la norma de accesibilidad pide poder detener lo que
+   destella mas de cinco segundos. Tres pulsos avisan; el cuarto molesta. */
+.reservar .boton[type="submit"],
+.reservar button.boton {
+  display: block; width: 100%; text-align: center;
+  animation: latido-reservar 1.5s ease-out 3;
+}
+@keyframes latido-reservar {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 106, 0, 0); }
+  18%      { box-shadow: 0 0 0 5px rgba(255, 106, 0, .34); }
+  55%      { box-shadow: 0 0 0 11px rgba(255, 106, 0, 0); }
+}
+/* Mientras envia no late: el movimiento ahi diria «segui tocando». */
+.reservar .boton[disabled] { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reservar .boton[type="submit"], .reservar button.boton { animation: none; }
+}
