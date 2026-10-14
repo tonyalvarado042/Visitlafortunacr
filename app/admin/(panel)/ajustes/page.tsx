@@ -172,7 +172,12 @@ export default async function PaginaAjustes() {
             <div className="campo"><label>Hasta</label>
               <input type="date" name="descuento_lanzamiento_hasta"
                      defaultValue={d.descuento_lanzamiento_hasta ?? ''} disabled={!esAdmin} />
-              <small>Vacío = sin fecha de corte.</small>
+              <small>
+                Vacío = sin fecha de corte, y entonces <strong>no sale cuenta
+                regresiva</strong> en la tarjeta. Con fecha dice «Quedan 14 días», y en
+                las últimas 48 horas pasa a horas. No se inventa una urgencia que no
+                esté acá: eso se descubre volviendo al día siguiente.
+              </small>
             </div>
             <div className="campo ancho">
               <small>

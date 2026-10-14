@@ -235,18 +235,37 @@ export function ReservarProducto({
   const totalCrc = subtotalCrc == null || extrasPedidos > 0 ? null
     : Math.round(subtotalCrc - (pct > 0 ? (subtotalCrc * pct) / 100 : 0));
 
-  /* Cuántos días quedan de lanzamiento. Sale de la MISMA fecha con la que la
-     base deja de aplicarlo, así que el reloj y el cobro no se pueden separar.
-     Sin fecha de corte no hay reloj: inventar uno sería inventar la urgencia. */
+  /* Cuánto queda de lanzamiento, en palabras que se entiendan solas.
+     Antes decía «14 DÍAS» a secas y no se entendía de qué: leído al lado de un
+     precio, un número con «días» puede ser cualquier cosa. Ahora dice
+     «Quedan 14 días», y cuando de verdad aprieta cambia a horas — que es
+     cuando una cuenta regresiva significa algo.
+
+     Sale de la MISMA fecha con la que la base deja de aplicar el descuento,
+     así que el reloj y el cobro no se pueden separar. Sin fecha de corte no
+     hay reloj: inventar uno sería inventar la urgencia, y eso se descubre
+     volviendo al día siguiente. */
   const hastaCuando = descuentoHasta ?? null;
-  const diasQueQuedan = (() => {
+  const cuentaAtras = (() => {
     if (!hastaCuando) return null;
     const corte = new Date(`${hastaCuando}T23:59:59`);
     if (Number.isNaN(corte.getTime())) return null;
-    const faltan = Math.ceil((corte.getTime() - Date.now()) / 86_400_000);
-    /* Más de dos meses no es urgencia, es un dato: el reloj solo aparece
-       cuando de verdad aprieta. */
-    return faltan > 60 || faltan < 0 ? null : faltan;
+    const faltanMs = corte.getTime() - Date.now();
+    if (faltanMs <= 0) return null;
+    /* Más de dos meses no es urgencia, es un dato: el reloj no aparece. */
+    if (faltanMs > 60 * 86_400_000) return null;
+
+    /* Se redondea para ABAJO. Con `ceil`, un corte a 15 días y pico decía
+       «quedan 16 días» — más tiempo del que de verdad hay. El piso nunca
+       promete de más: «quedan 15» significa que hay al menos 15. */
+    const horas = Math.floor(faltanMs / 3_600_000);
+    if (horas <= 48) {
+      return horas <= 1
+        ? t('reserva_ultimas_horas', idioma)
+        : `${t('reserva_quedan', idioma)} ${horas} ${t('horas', idioma)}`;
+    }
+    const dias = Math.floor(faltanMs / 86_400_000);
+    return `${t('reserva_quedan', idioma)} ${dias} ${dias === 1 ? t('dia', idioma) : t('dias', idioma)}`;
   })();
 
   /* La antelación que pide el producto, convertida a la primera fecha que el
@@ -555,12 +574,8 @@ export function ReservarProducto({
                   </strong>
                   <small>{t('reserva_lanzamiento_que_es', idioma)}</small>
                 </span>
-                {diasQueQuedan != null && (
-                  <span className="lanzamiento-reloj" title={hastaCuando ?? undefined}>
-                    {diasQueQuedan <= 0
-                      ? t('reserva_ultimo_dia', idioma)
-                      : <>{diasQueQuedan} <small>{diasQueQuedan === 1 ? t('dia', idioma) : t('dias', idioma)}</small></>}
-                  </span>
+                {cuentaAtras && (
+                  <span className="lanzamiento-reloj">{cuentaAtras}</span>
                 )}
               </div>
             )}
