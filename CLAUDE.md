@@ -311,6 +311,14 @@ Antes de empezar en la máquina: `git pull` de la rama, que aquí está lo últi
 
 ### Cloudflare · desplegar el Worker
 
+**Estado al 14 de octubre de 2026: pasos 1, 2 y 3 hechos** por Tony desde su
+máquina. El Worker está en **`https://visit-la-fortuna.aalvarado-171.workers.dev`**
+(versión `51fc8e69…`), con `TRABAJOS`, `IMAGES` y `ASSETS`, los tres crons, y
+productor y consumidor de la cola. El conector de Cloudflare lo ve. El
+contenedor de la nube **no alcanza `*.workers.dev`** (lo corta el proxy, como
+`*.vercel.app`): las pruebas del paso 5 se hacen desde un navegador.
+Falta: paso 4 (secretos) y paso 5 (la lista).
+
 El código ya está listo (ver "El sitio también compila para Cloudflare
 Workers"). Lo que falta es de panel. La sesión en la nube **no puede**: el
 proxy corta `api.cloudflare.com` y no hay `CLOUDFLARE_API_TOKEN`. El conector
