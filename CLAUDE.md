@@ -392,6 +392,21 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    destino activo" en todas las páginas — lo arreglan `lib/destino.ts`,
    `lib/dominio.ts` y `/api/salud`.
    Un secreto nuevo se aplica solo: no hay que volver a desplegar.
+   Enlaces directos (el de Cloudflare elige la cuenta solo; el de Vercel pide
+   elegir equipo y proyecto, porque **el proyecto `visit-la-fortuna` no está en
+   el equipo `tonyalvarado`** que ve el conector de Vercel — vive en otra
+   cuenta):
+   - Cloudflare: <https://dash.cloudflare.com/?to=/:account/workers/services/view/visit-la-fortuna/production/settings>
+   - Vercel: <https://vercel.com/d?to=%2F%5Bteam%5D%2F%5Bproject%5D%2Fsettings%2Fenvironment-variables>
+   **Si Vercel no deja ver un valor** (variables marcadas *Sensitive*), se saca
+   de la fuente: `SUPABASE_SECRET_KEY` en
+   <https://supabase.com/dashboard/project/eulkufetcymallfbpone/settings/api-keys>
+   (la *secret*, de `visitdestinos` y no del proyecto del CRM); la de
+   Anthropic se crea nueva en <https://console.anthropic.com/settings/keys>,
+   **dentro del workspace** (ver "El agente ya contestó"). `CRON_SECRET` puede
+   ser uno nuevo solo para Cloudflare: el Worker prueba el de su entorno y el
+   de la bóveda (`cloudflare/entrada.ts`), y las rutas que miran la bóveda lo
+   encuentran ahí.
 5. **La lista que decide.** Todo en la URL `*.workers.dev`, y **cada punto
    tiene que dar lo mismo que en `visit-la-fortuna.vercel.app`**. Hasta que
    estén todos, producción sigue en Vercel:

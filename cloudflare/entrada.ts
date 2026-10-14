@@ -51,17 +51,26 @@ export default {
       console.log('cron automatizaciones: en pausa hasta CLOUDFLARE_ES_PRODUCCION=si');
       return;
     }
-    /* Mismo orden que las rutas: primero la bóveda, después el entorno. */
-    const clave = await secreto('CRON_SECRET');
-    if (!clave) {
+    /* Las rutas no leen la clave igual: externas y tipo-cambio miran primero la
+       bóveda del panel (secreto()), automatizaciones solo la variable de
+       entorno. Si las dos difieren, una sola clave sirve a una ruta y no a la
+       otra. No se tocan las rutas —eso cambiaría Vercel—: se prueba con la del
+       entorno y, si da 401, con la de la bóveda. */
+    const claves = [...new Set([process.env.CRON_SECRET?.trim(), await secreto('CRON_SECRET')])]
+      .filter((c): c is string => !!c);
+    if (!claves.length) {
       console.error(`cron ${ruta}: no hay CRON_SECRET`);
       return;
     }
-    const peticion = new Request(`https://cron.interno${ruta}`, {
-      headers: { authorization: `Bearer ${clave}` },
-    });
-    const respuesta = await (manejador as unknown as Manejador).fetch(peticion, env, ctx);
-    if (!respuesta.ok) console.error(`cron ${ruta}: ${respuesta.status} ${await respuesta.text()}`);
+    let respuesta: Response | null = null;
+    for (const clave of claves) {
+      const peticion = new Request(`https://cron.interno${ruta}`, {
+        headers: { authorization: `Bearer ${clave}` },
+      });
+      respuesta = await (manejador as unknown as Manejador).fetch(peticion, env, ctx);
+      if (respuesta.status !== 401) break;
+    }
+    if (respuesta && !respuesta.ok) console.error(`cron ${ruta}: ${respuesta.status} ${await respuesta.text()}`);
   },
 
   /* El consumidor de la Queue: aquí corre lo que en Vercel corría en after().
