@@ -317,8 +317,9 @@ productor y consumidor de la cola. El conector de Cloudflare lo ve. El
 contenedor de la nube **no alcanza `*.workers.dev`** (lo corta el proxy, como
 `*.vercel.app`): las pruebas del paso 5 se hacen desde un navegador.
 El 14 de octubre de 2026 `/api/salud` en el Worker ya leía la base (destino
-La Fortuna, 64 negocios) y Tony puso `SUPABASE_SECRET_KEY` y
-`ANTHROPIC_API_KEY`. Falta: `CRON_SECRET` del paso 4 y el paso 5 (la lista).
+La Fortuna, 64 negocios), Tony puso las llaves del paso 4 y **el concierge
+contestó desde el Worker** (ver la lista del paso 5). Falta el resto de esa
+lista: itinerario (la cola), reseña y lead, panel, fotos, correo y crons.
 
 El código ya está listo (ver "El sitio también compila para Cloudflare
 Workers"). Lo que falta es de panel. La sesión en la nube **no puede**: el
@@ -436,10 +437,10 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
 
    | | Qué se prueba | Cómo se sabe que sirve |
    |---|---|---|
-   | ☐ | `/api/salud` | Ve la base, la clave de servicio y la de IA |
-   | ☐ | Portada `/es`, `/en`, un listado, una ficha | Mismas fotos, mismos negocios, el video del hero |
+   | ✅ | `/api/salud` | Ve la base, la clave de servicio y la de IA (14 oct 2026) |
+   | ✅ | Portada `/es`, `/en`, un listado, una ficha | Mismas fotos, mismos negocios, el video del hero (Tony, 14 oct 2026) |
    | ☐ | Buscador `/es?q=termales` | Mismos resultados |
-   | ☐ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion` |
+   | ✅ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion`. 14 oct 2026, 12:48 UTC: `buscar_conocimiento` + `web_fetch`, sin error, 7,6 s, $0,15; y `buscar_lugares` a $0,035 |
    | ☐ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...` (prueba la Queue: en *Queues* se ve el mensaje consumido) |
    | ☐ | Reseña propia y solicitud de lead | Quedan en `dst_resena` y `dst_solicitud` |
    | ☐ | Panel: entrar a `/admin`, editar algo, cerrar sesión | La cookie de Supabase se mantiene entre páginas |
