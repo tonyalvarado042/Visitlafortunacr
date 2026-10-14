@@ -323,11 +323,27 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
 1. Cloudflare → *Workers & Pages* → *Plans*: pasar a **Workers Paid**
    (5 USD/mes). Con el plan gratuito el sitio no cabe en 10 ms de CPU, y las
    Queues son solo de ese plan.
-2. Crear la cola, una sola vez: *Storage & Databases* → *Queues* → *Create* →
-   nombre **`visit-la-fortuna-trabajos`** (exacto: es el que espera
-   `cloudflare.config.ts`). Desde la máquina es `npx cf queues create
-   visit-la-fortuna-trabajos`; si `cf` muestra otro nombre de comando, manda
-   lo que diga `npx cf queues --help`.
+2. Crear la cola, una sola vez. Nombre **`visit-la-fortuna-trabajos`**, exacto:
+   es el que espera `cloudflare.config.ts`. Desde la máquina (comandos
+   comprobados contra `cf` 1.0.0-beta.17):
+   ```
+   git status                                   # nada a medias antes de cambiar de rama
+   git fetch origin
+   git checkout claude/cloudflare-agent-setup-mm1mos
+   git pull
+   npm ci                                       # instala cf, vinext y lo demás
+   npx cf auth login                            # abre el navegador: aprobar
+   npx cf auth whoami                           # ¿es la cuenta donde está el Worker?
+   npx cf queues create --queue-name visit-la-fortuna-trabajos --dry-run
+   npx cf queues create --queue-name visit-la-fortuna-trabajos
+   npx cf queues list                           # tiene que aparecer
+   ```
+   Si `create` dice que Queues no está disponible, falta el plan Workers Paid
+   (paso 1). Si la cuenta de `whoami` no es la del Worker: `npx cf auth logout`
+   y volver a entrar con la otra. La cola nace **sin consumidor**; el
+   consumidor lo engancha el despliegue del paso 3, que lee `triggers` de
+   `cloudflare.config.ts`.
+   Desde el panel es lo mismo: *Storage & Databases* → *Queues* → *Create*.
 3. Desde la máquina, en la raíz del repo: `npx cf auth login` (abre el
    navegador; el login lo hace Tony) y después `npm run deploy:vinext`.
    O, para que despliegue solo con cada push: *Workers & Pages* → *Create* →
