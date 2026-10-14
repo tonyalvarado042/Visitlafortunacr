@@ -442,7 +442,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ☐ | Buscador `/es?q=termales` | Mismos resultados |
    | ✅ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion`. 14 oct 2026, 12:48 UTC: `buscar_conocimiento` + `web_fetch`, sin error, 7,6 s, $0,15; y `buscar_lugares` a $0,035 |
    | ☐ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...` (prueba la Queue: en *Queues* se ve el mensaje consumido) |
-   | ☐ | Reseña propia y solicitud de lead | Quedan en `dst_resena` y `dst_solicitud` |
+   | ◐ | Reseña propia y solicitud de lead | Quedan en `dst_resena` y `dst_solicitud`. La reseña entró bien (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente`, **porque La Fortuna tiene `resenas_moderadas = true`**: no sale hasta publicarla en `/admin/resenas`. No es un fallo. Falta el lead |
    | ☐ | Panel: entrar a `/admin`, editar algo, cerrar sesión | La cookie de Supabase se mantiene entre páginas |
    | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
    | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
