@@ -350,8 +350,17 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    consumidor lo engancha el despliegue del paso 3, que lee `triggers` de
    `cloudflare.config.ts`.
    Desde el panel es lo mismo: *Storage & Databases* → *Queues* → *Create*.
-3. Desde la máquina, en la raíz del repo: `npx cf auth login` (abre el
-   navegador; el login lo hace Tony) y después `npm run deploy:vinext`.
+3. Desde la máquina, en la raíz del repo (ya con `npx cf auth login` hecho):
+   ```
+   git pull
+   npm run deploy:vinext -- --dry-run     # valida sin compilar ni subir
+   npm run deploy:vinext                  # compila y sube; tarda unos minutos
+   ```
+   Al final imprime la URL `https://visit-la-fortuna.<cuenta>.workers.dev`.
+   El Worker se llama `visit-la-fortuna` (`cloudflare.config.ts`): si ya había
+   uno con ese nombre, lo reemplaza; si el que se creó a mano tiene otro
+   nombre, queda aparte y se puede borrar. Después de esto, `npx cf queues
+   list` tiene que mostrar 1 productor y 1 consumidor.
    O, para que despliegue solo con cada push: *Workers & Pages* → *Create* →
    *Import a repository* → `tonyalvarado042/Visitlafortunacr`, comando de
    build `npm run build:vinext`, comando de deploy `npm run deploy:vinext`.
@@ -360,21 +369,21 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    nada de Cloudflare. Ojo al mezclarla: Vercel despliega esa rama, así que lo
    que entre ahí sale a producción en Vercel (está probado que `npm run build`
    sigue pasando con estos cambios).
-4. El Worker → *Settings* → *Variables and Secrets*. **Como texto** (y también
-   como *Build variables* si se usa el paso 3 por repo, porque las
-   `NEXT_PUBLIC_*` se pegan dentro del código al compilar):
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=<la misma de Vercel>
-   NEXT_PUBLIC_SUPABASE_KEY=<la misma de Vercel>
-   NEXT_PUBLIC_DOMINIO_POR_DEFECTO=visitlafortunacr.com
-   ```
-   **Como secreto** (*Encrypt*), los mismos valores que tiene Vercel:
-   `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_WORKSPACE_ID` (si se
-   usa), `CRON_SECRET`, `EMAIL_REMITENTE`, `SMTP_HOST`, `SMTP_PUERTO`,
-   `SMTP_USUARIO`, `SMTP_CLAVE`, `WHATSAPP_*`, `GOOGLE_PLACES_API_KEY`.
-   `NEXT_PUBLIC_DOMINIO_POR_DEFECTO` no es opcional: el destino se elige por
-   el `Host`, y `visit-la-fortuna.<cuenta>.workers.dev` no está en
-   `dst_destino.dominio`.
+4. El Worker → *Settings* → *Variables and Secrets* → *Add* → tipo
+   **Secret**, uno por uno, copiando el valor desde Vercel → *Settings* →
+   *Environment Variables* (el ojo muestra el valor). Por el panel y no por la
+   terminal, para que las claves no queden en el historial de PowerShell:
+   `SUPABASE_SECRET_KEY`, `ANTHROPIC_API_KEY`, `ANTHROPIC_WORKSPACE_ID` (si
+   está en Vercel), `CRON_SECRET`, y los que haya de `EMAIL_REMITENTE`,
+   `SMTP_*`, `WHATSAPP_*` y `GOOGLE_PLACES_API_KEY`.
+   **Las `NEXT_PUBLIC_*` no hacen falta**: `lib/credenciales-publicas.ts` trae
+   la URL y la clave publicable de Supabase como respaldo, y el dominio por
+   defecto es `visitlafortunacr.com`. Las URLs `*.workers.dev` se tratan como
+   vista previa (igual que `*.vercel.app`) y sirven ese destino; **antes del 14
+   de octubre de 2026 no era así** y el Worker habría dado "No hay ningún
+   destino activo" en todas las páginas — lo arreglan `lib/destino.ts`,
+   `lib/dominio.ts` y `/api/salud`.
+   Un secreto nuevo se aplica solo: no hay que volver a desplegar.
 5. **La lista que decide.** Todo en la URL `*.workers.dev`, y **cada punto
    tiene que dar lo mismo que en `visit-la-fortuna.vercel.app`**. Hasta que
    estén todos, producción sigue en Vercel:

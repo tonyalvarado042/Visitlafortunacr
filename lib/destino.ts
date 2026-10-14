@@ -100,8 +100,9 @@ export async function destinoActual(): Promise<Destino> {
     ? desdeEntorno
     : 'visitlafortunacr.com';
 
-  // En desarrollo y en las URLs de vista previa el Host no es un dominio real.
-  const esLocal = !host || host === 'localhost' || host.endsWith('.vercel.app');
+  // En desarrollo y en las URLs de vista previa (*.vercel.app, *.workers.dev) el
+  // Host no es un dominio real.
+  const esLocal = !host || host === 'localhost' || host.endsWith('.vercel.app') || host.endsWith('.workers.dev');
   const dominio = esLocal ? porDefecto : host;
 
   const { data, error } = await supabase
