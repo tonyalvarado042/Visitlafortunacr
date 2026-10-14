@@ -298,3 +298,7 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 .complemento-ficha { border-top: 1px solid var(--borde-4); padding: 10px 0; }
 .complemento-ficha > summary { cursor: pointer; font-size: 14px; }
 .complemento-ficha > summary b { color: var(--naranja); }
+
+/* El enlace para ver algo en el sitio publico, desde el panel. */
+.ver-online { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 10px 0 0; font-size: 12.5px; }
+.ver-online a { font-weight: 700; color: var(--naranja); }

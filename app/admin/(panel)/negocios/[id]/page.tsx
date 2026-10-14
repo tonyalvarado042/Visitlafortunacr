@@ -30,7 +30,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   if (!n) notFound();
 
   const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: tradHijas }, { data: otrosNegocios }, { data: fiscal }] = await Promise.all([
-    db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
+    db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion, babosa)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
     db.from('dst_negocio_foto').select('id, url, es_portada, orden, credito, licencia, fuente_url, es_generica').eq('negocio_id', id).order('es_generica').order('orden'),
@@ -42,7 +42,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     db.from('dst_negocio_fiscal').select('*').eq('negocio_id', id).maybeSingle(),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
-  const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
+  const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string; babosa: string } | null).filter((c): c is { id: string; nombre: string; seccion: string; babosa: string } => !!c);
   const otrosIdiomas = destino.idiomas.filter((i) => i !== destino.idioma_principal);
   const trad = (campo: string, idioma: string) => traducciones?.find((t) => t.campo === campo && t.idioma === idioma);
   /* Las traducciones de razones y combinaciones. Se piden todas de esas dos
@@ -55,7 +55,18 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
   return (
     <>
       <Cabecera titulo={n.nombre} migas={[{ ruta: '/admin/negocios', nombre: 'Negocios' }]} sub={<><Etiqueta suave>{n.estado_publicacion}</Etiqueta> <Etiqueta suave>{n.estado_verificacion}</Etiqueta> · {n.membresia} · actualizado {relativo(n.actualizado_en)}</>}>
-        {n.estado_publicacion === 'publicado' && <a className="boton secundario" href={`https://${destino.dominio}/${destino.idioma_principal}/${cats.find((c) => c.id === n.categoria_id)?.nombre ? '' : ''}`.replace(/\/$/, '') + `/${destino.idioma_principal}`} target="_blank" rel="noreferrer">Ver sitio ↗</a>}
+        {/* El enlace a la ficha de verdad. Antes armaba
+            `https://dominio/es/es` con un ternario que siempre daba vacío y el
+            idioma pegado dos veces: el botón decía «Ver sitio» y llevaba a un
+            404. Un operador no tiene ficha —lo suyo son sus tours— así que ahí
+            no sale botón. */}
+        {n.estado_publicacion === 'publicado' && !n.es_operador
+          && cats.find((c) => c.id === n.categoria_id)?.babosa && (
+          <a className="boton secundario" target="_blank" rel="noreferrer"
+             href={`https://${destino.dominio}/${destino.idioma_principal}/${cats.find((c) => c.id === n.categoria_id)!.babosa}/${n.babosa}`}>
+            Ver la ficha ↗
+          </a>
+        )}
       </Cabecera>
 
       <form action={editarNegocio}>

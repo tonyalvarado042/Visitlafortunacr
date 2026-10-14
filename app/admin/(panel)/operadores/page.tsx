@@ -45,7 +45,11 @@ type Contrato = {
   documento_url: string | null; notas: string | null; esta_activo: boolean;
   productos: Producto[];
 };
-type Negocio = { id: string; nombre: string; babosa: string; vende_por_aqui: boolean };
+type Negocio = {
+  id: string; nombre: string; babosa: string; vende_por_aqui: boolean;
+  estado_publicacion: string; es_operador: boolean;
+  categoria: { babosa: string } | { babosa: string }[] | null;
+};
 type Complemento = {
   id: string; negocio_id: string; nombre: string; descripcion: string | null;
   precio_publico_usd: number; precio_neto_usd: number | null;
@@ -74,7 +78,7 @@ export default async function PaginaOperadores() {
   const [{ data: d }, { data: neg }, { data: tur }, { data: con }, { data: comp }] = await Promise.all([
     db.from('dst_destino').select('reservas_activas, pasarela_lista, email_contacto').eq('id', destino.id).single(),
     db.from('dst_negocio')
-      .select('id, nombre, babosa, vende_por_aqui')
+      .select('id, nombre, babosa, vende_por_aqui, estado_publicacion, es_operador, categoria:dst_categoria(babosa)')
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
       .order('nombre'),
     db.from('dst_tour').select('id, negocio_id, estado').eq('destino_id', destino.id),
@@ -86,6 +90,16 @@ export default async function PaginaOperadores() {
 
   const negocios = (neg ?? []) as Negocio[];
   const contratos = (con ?? []) as Contrato[];
+
+  /* La dirección pública de un negocio. Devuelve null cuando NO hay nada que
+     mirar: sin publicar todavía no existe, y un OPERADOR no tiene ficha —
+     lo suyo son sus tours. Un enlace que lleva a un 404 es peor que ninguno. */
+  const urlPublica = (n: Negocio | undefined): string | null => {
+    if (!n || n.estado_publicacion !== 'publicado' || n.es_operador) return null;
+    const cat = Array.isArray(n.categoria) ? n.categoria[0] : n.categoria;
+    if (!cat?.babosa) return null;
+    return `https://${destino.dominio}/${destino.idioma_principal}/${cat.babosa}/${n.babosa}`;
+  };
   const complementos = (comp ?? []) as Complemento[];
   /* Las tours de cada operador, contadas una sola vez acá. Un operador con
      doce tours es lo normal; lo que importa de un vistazo es cuántas están
@@ -222,6 +236,25 @@ export default async function PaginaOperadores() {
               </span>
             </summary>
 
+            {/* Ver cómo quedó, sin tener que buscar la ficha a mano. Si no hay
+                nada publicado todavía, se dice en vez de dar un enlace roto. */}
+            {urlPublica(n) ? (
+              <p className="ver-online">
+                <a href={`${urlPublica(n)}#reservar`} target="_blank" rel="noreferrer">
+                  Ver la ficha en el sitio ↗
+                </a>
+                <span className="gris">Abre en la tarjeta de reservar.</span>
+              </p>
+            ) : (
+              <p className="ver-online">
+                <span className="gris">
+                  {n?.es_operador
+                    ? 'Es un operador: no tiene ficha propia, lo que sale en el sitio son sus tours.'
+                    : 'Todavía no está publicado, así que no hay ficha que mirar.'}
+                </span>
+              </p>
+            )}
+
             {c.modo_cobro === 'plataforma_cobra' && !listoParaCobrar && (
               <Aviso tipo="mal">
                 Para cobrar nosotros hacen falta <strong>comisión, política de cancelación
@@ -322,6 +355,20 @@ export default async function PaginaOperadores() {
                     : <span className="gris">sin tarifa verificada</span>}
                   {!p.esta_activo && ' · (apagado)'}
                 </summary>
+
+                {/* Un producto no tiene dirección propia: vive dentro de la
+                    tarjeta de reservar de la ficha. Por eso el enlace es a la
+                    ficha con `#reservar`, que es donde de verdad se ve. */}
+                {urlPublica(n) && p.esta_activo && (
+                  <p className="ver-online">
+                    <a href={`${urlPublica(n)}#reservar`} target="_blank" rel="noreferrer">
+                      Ver este producto en el sitio ↗
+                    </a>
+                    <span className="gris">
+                      Sale en la tarjeta de reservar, junto con los otros pases del negocio.
+                    </span>
+                  </p>
+                )}
 
                 <form action={guardarProducto} className="campos" style={{ marginTop: 12 }}>
                   <input type="hidden" name="id" value={p.id} />
