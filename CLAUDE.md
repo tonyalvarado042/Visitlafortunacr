@@ -447,7 +447,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
    | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
    | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
-   | ☐ | Crons | En *Settings* → *Triggers* están los tres; al día siguiente, sus registros en *Logs* sin error |
+   | ◐ | Crons | **Los tres están registrados**: el despliegue del 15 oct 2026 los lista (`0 13`, `0 5`, `15 12`), junto al productor y el consumidor de la cola. Falta verlos en *Logs*, y para eso **se encendió `observability` en `cloudflare.config.ts` ese mismo día** — sin eso los `console.log` del Worker no se guardan en ninguna parte. Lo que sí está probado es lo que importaba: **`automatizaciones` no mandó nada**. La pausa se commiteó el 14 oct a las 12:15:10Z y el Worker nació a las 12:30:45Z, así que **nunca existió sin ella**; y `destinos.dst_automatizacion_envio` sigue con 3 filas, todas del 11 de setiembre, aunque el cron ya disparó dos veces (14 y 15 oct, 13:00 UTC) |
 
    **PGRST201: el panel de reseñas llevaba roto quién sabe desde cuándo, en
    los dos lados.** Lo destapó esta prueba, no la migración. `dst_resena_util`
@@ -515,24 +515,27 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
       (`node_modules/cf/dist/deploy-input-*.mjs`), sin bandera que lo apague.
       O sea: no era la terminal de Tony ni era CI. Es el tubo de vinext.
 
-   **Cómo se desbloquea:** llamar a `cf` **directo**, sin el envoltorio, en una
-   terminal de verdad. Ahí stdout sí es TTY, sale la pregunta y se contesta `y`.
-   El Build Output ya está armado, así que `--prebuilt` lo reusa:
+   **Cómo se desbloqueó, y ya está hecho (15 de octubre de 2026).** Tony llamó
+   a `cf` **directo**, sin el envoltorio, en su PowerShell. Ahí stdout sí es
+   TTY, salió la pregunta y la contestó `y`:
 
    ```
    npx cf deploy --prebuilt
    ```
 
-   Con eso el Worker deja de ser "del panel" y **de ahí en adelante
-   `npm run deploy:vinext` funciona solo**, también desde Claude Code.
+   Con eso el Worker dejó de ser "del panel". **Comprobado después: dos
+   `npm run deploy:vinext` seguidos, los dos con código 0 y sin preguntar
+   nada** (versiones `2e63ea7b` y `3583cb95`), listando los tres bindings, los
+   tres crons y el productor y el consumidor de la cola. **No hay que repetir
+   el paso manual**: de aquí en adelante el despliegue corre solo, también
+   desde Claude Code.
 
    **Sobrescribir la config remota no borra las llaves.** La doc de Cloudflare
    lo dice así: *"Wrangler will not delete your secrets (encrypted environment
    variables) unless you run `wrangler secret delete <key>`"*. `keep_vars` solo
-   manda sobre las variables en texto plano. Antes de confirmar, el Worker
-   tenía estas tres (`cf workers secrets list --script-name visit-la-fortuna`):
-   `ANTHROPIC_API_KEY`, `CRON_SECRET`, `SUPABASE_SECRET_KEY` — hay que volver a
-   contarlas después.
+   manda sobre las variables en texto plano. **Se comprobó contando con
+   `cf workers secrets list --script-name visit-la-fortuna` antes y después: las
+   mismas tres.**
 
    Lo comprobado, para no volver a investigarlo:
 

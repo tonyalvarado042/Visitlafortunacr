@@ -17,6 +17,15 @@ export default defineConfig({
       notFoundHandling: "none",
       runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*"],
     },
+    /* Sin esto el Worker es una caja negra: los console.log de los crons y de
+       la cola no se guardan en ninguna parte, y el paso 5 de CLAUDE.md pide
+       poder leerlos. La doc de Cloudflare lo recomienda antes de producción.
+       Viene encendido por omisión en Workers nuevos, pero se deja escrito para
+       que la config mande y un despliegue futuro no lo apague. */
+    observability: {
+      enabled: true,
+      logs: { enabled: true, invocationLogs: true, headSamplingRate: 1 },
+    },
     env: {
       ASSETS: bindings.assets(),
       // Reemplaza a sharp: ver cloudflare/sharp-imagenes.ts
