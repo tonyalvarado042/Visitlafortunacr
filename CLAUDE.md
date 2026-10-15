@@ -439,7 +439,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    |---|---|---|
    | ✅ | `/api/salud` | Ve la base, la clave de servicio y la de IA (14 oct 2026) |
    | ✅ | Portada `/es`, `/en`, un listado, una ficha | Mismas fotos, mismos negocios, el video del hero (Tony, 14 oct 2026) |
-   | ☐ | Buscador `/es?q=termales` | Mismos resultados |
+   | ✅ | Buscador `/es?q=termales` | **17 fichas en el Worker y las mismas 17 en Vercel**, comparadas una por una (15 oct 2026) |
    | ✅ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion`. 14 oct 2026, 12:48 UTC: `buscar_conocimiento` + `web_fetch`, sin error, 7,6 s, $0,15; y `buscar_lugares` a $0,035 |
    | ✅ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...`. **14 oct 2026: la solicitud entró a las 12:52:50 UTC y el planificador tardó 72 s, sin error, $0,27**, y dejó `tres-dias-en-la-fortuna-aguas-termales-y-aguas-bravas-en-par-ed99r5`. Con `after()` se habría cortado a los 30 s: **es la prueba de que la Queue funciona** |
    | ✅ | Reseña propia y solicitud de lead | La reseña entró (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente` porque La Fortuna tiene `resenas_moderadas = true`; la solicitud del itinerario entró a `dst_solicitud`. **`/admin/resenas` salía vacío en Vercel y en Cloudflare**: ver "PGRST201" abajo |
