@@ -447,7 +447,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
    | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
    | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
-   | ◐ | Crons | **Los tres están registrados**: el despliegue del 15 oct 2026 los lista (`0 13`, `0 5`, `15 12`), junto al productor y el consumidor de la cola. Falta verlos en *Logs*, y para eso **se encendió `observability` en `cloudflare.config.ts` ese mismo día** — sin eso los `console.log` del Worker no se guardan en ninguna parte. Lo que sí está probado es lo que importaba: **`automatizaciones` no mandó nada**. La pausa se commiteó el 14 oct a las 12:15:10Z y el Worker nació a las 12:30:45Z, así que **nunca existió sin ella**; y `destinos.dst_automatizacion_envio` sigue con 3 filas, todas del 11 de setiembre, aunque el cron ya disparó dos veces (14 y 15 oct, 13:00 UTC) |
+   | ✅ | Crons | **Los tres dispararon en el Worker el 16 oct 2026, los tres `outcome=ok`**, leídos en la telemetría: `05:00:36Z` externas (sin registro, que es el éxito silencioso), `12:15:35Z` tipo-cambio, `13:00:31Z` automatizaciones con `cron automatizaciones: en pausa hasta CLOUDFLARE_ES_PRODUCCION=si`. **Esa línea es la prueba de que la pausa funciona.** Un solo error en 20 h y no es de la migración: `tipo de cambio BCCR: Falta la suscripción al BCCR (BCCR_TOKEN y BCCR_CORREO)`, que falla igual en Vercel. Para leerlos hace falta `observability` encendido en `cloudflare.config.ts`: sin eso los `console.log` no se guardan |
 
    **PGRST201: el panel de reseñas llevaba roto quién sabe desde cuándo, en
    los dos lados.** Lo destapó esta prueba, no la migración. `dst_resena_util`
@@ -569,13 +569,13 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
 
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
-**Estado verificado por DNS el 11 de septiembre de 2026:**
+**Estado verificado por DNS el 16 de octubre de 2026** (los NS siguen en GoDaddy, como se planeó):
 
 | Registro | Hoy | Qué significa |
 |---|---|---|
 | NS | `ns57` / `ns58.domaincontrol.com` | El DNS lo manda GoDaddy. Es lo que queremos. |
-| A `@` | `13.248.243.5`, `76.223.105.230` | Aparcado en GoDaddy. **Todavía no apunta a Vercel.** |
-| CNAME `www` | → el apex | Hay que **cambiarlo**, no agregar otro. |
+| A `@` | `216.198.79.1` | **Ya apunta a Vercel** (verificado por DNS el 16 oct 2026; la foto de setiembre decía "aparcado en GoDaddy" y quedó vieja). |
+| CNAME `www` | → `14dfe25f1a2b72cf.vercel-dns-017.com` | **Ya hecho.** Apunta a Vercel. |
 | MX | ninguno | **El correo del dominio no existe todavía.** |
 | TXT | ninguno | No hay SPF. |
 
