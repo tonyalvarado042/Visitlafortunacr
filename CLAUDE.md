@@ -443,7 +443,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ✅ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion`. 14 oct 2026, 12:48 UTC: `buscar_conocimiento` + `web_fetch`, sin error, 7,6 s, $0,15; y `buscar_lugares` a $0,035 |
    | ✅ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...`. **14 oct 2026: la solicitud entró a las 12:52:50 UTC y el planificador tardó 72 s, sin error, $0,27**, y dejó `tres-dias-en-la-fortuna-aguas-termales-y-aguas-bravas-en-par-ed99r5`. Con `after()` se habría cortado a los 30 s: **es la prueba de que la Queue funciona** |
    | ✅ | Reseña propia y solicitud de lead | La reseña entró (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente` porque La Fortuna tiene `resenas_moderadas = true`; la solicitud del itinerario entró a `dst_solicitud`. **`/admin/resenas` salía vacío en Vercel y en Cloudflare**: ver "PGRST201" abajo |
-   | ☐ | Panel: entrar a `/admin`, editar algo, cerrar sesión | La cookie de Supabase se mantiene entre páginas |
+   | ✅ | Panel: entrar a `/admin` | **16 oct 2026: Tony entró al Worker y `/admin/resenas` muestra la reseña del Arenal Volcano Inn** en *Por revisar* (pendiente, 14-oct). O sea la sesión de Supabase aguanta entre páginas **y el PGRST201 quedó arreglado de verdad**, no solo en el código |
    | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
    | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
    | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
@@ -555,17 +555,60 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    - Claude **no puede** borrar ni crear consumidores sin permiso del harness
      (los clasifica como recurso compartido), y tampoco le sirve de nada.
 
-6. **El cambio**, cuando la lista esté completa: se pasa el dominio (punto 7),
-   se pone `CLOUDFLARE_ES_PRODUCCION=si` en el Worker y **en el mismo
-   momento** se quitan los crons de `vercel.json`. Vercel se deja vivo unas semanas
-   sin dominio, por si hay que volver atrás: volver es apuntar el DNS de nuevo.
-7. **El dominio, solo cuando lo anterior funcione, y es una decisión aparte.**
-   Un Worker con dominio propio necesita que la zona viva en Cloudflare, o sea
-   **cambiar los nameservers de GoDaddy** — justo lo que la sección de GoDaddy
-   evita para no perder el correo. Con Cloudflare no se pierde si se hace bien:
-   al agregar el sitio, Cloudflare copia los registros existentes, y **antes de
-   cambiar los NS hay que comprobar que estén los MX y el SPF de SiteGround**.
-   Hasta decidir esto, el dominio sigue el plan de Vercel de abajo.
+6. **El cambio, en tres movimientos separados. Ninguno apaga el sitio.**
+
+   No hace falta página de mantenimiento y **no conviene ponerla**: los dos lados
+   corren el mismo código contra la misma base de Supabase, así que mientras el DNS
+   propaga, a unos visitantes les cae Vercel y a otros el Worker y **los dos sirven
+   lo mismo**. Apagar Vercel crearía la caída que de otro modo no existe, le daría
+   una página de mantenimiento a Googlebot — y el sitio vive del SEO — y mataría la
+   vuelta atrás justo cuando se necesita.
+
+   **El riesgo real no es que el sitio se caiga: es el correo, y los mensajes
+   repetidos.** Por eso van separados, y cada uno se verifica antes del siguiente.
+
+   **Movimiento A — mudar la zona a Cloudflare SIN tocar el sitio.**
+   Un Worker con dominio propio exige que la zona viva en Cloudflare, o sea cambiar
+   los NS en GoDaddy. Es la parte peligrosa, por el correo. Orden:
+
+   1. En GoDaddy: *DNS* → **exportar la zona completa** (o fotografiar cada
+      registro). **Esto primero. El DNS no se puede "listar" desde afuera**, así que
+      lo que no esté en el export se pierde sin que nadie se dé cuenta.
+   2. Agregar el sitio en Cloudflare (plan Free). Cloudflare escanea y copia lo que
+      encuentra, **pero no se le cree**: se compara contra el export, uno por uno.
+   3. **Los que no pueden faltar** (verificados el 16 oct 2026): los **tres MX** de
+      `antispam.mailspamprotection.com`, el **SPF**, el CNAME **`default._domainkey`**
+      (DKIM de SiteGround), el CNAME **`send` → `send.forge.rmta.net`** (Resend, por
+      ahí salen las confirmaciones de reserva), y las A de **`mail`** y
+      **`autodiscover`**.
+   4. Dejar `@` y `www` **apuntando a Vercel todavía**, y en **DNS-only (nube gris)**:
+      así Cloudflare no se mete a proxear a Vercel ni hay lío de certificados.
+   5. Recién ahí, cambiar los NS en GoDaddy a los dos de Cloudflare.
+   6. **Verificar antes de seguir:** que los MX resuelvan, **mandar un correo de
+      prueba al dominio y otro desde el sitio**, y que la página siga sirviendo de
+      Vercel. Si algo salió mal, **se devuelven los NS a GoDaddy**: esa es la vuelta
+      atrás de este movimiento.
+
+   **Movimiento B — pasar el sitio al Worker.** Instantáneo y reversible.
+   En el Worker → *Settings* → *Domains & Routes* → agregar `visitlafortunacr.com` y
+   `www`. Eso reemplaza los registros que apuntaban a Vercel. Se comprueba que el
+   sitio responde desde el Worker. **Vuelta atrás: borrar el dominio del Worker y
+   devolver `@` y `www` a Vercel.** Minutos, y el correo ni se entera.
+
+   **Movimiento C — las dos banderas de producción, en el mismo momento.**
+   Poner `CLOUDFLARE_ES_PRODUCCION=si` en el Worker (por el panel) **y** quitar los
+   crons de `vercel.json` y desplegar a Vercel. **Juntas, no una hoy y otra mañana**:
+   si las dos plataformas corren `automatizaciones` a la vez, un viajero recibe el
+   mismo seguimiento dos veces. Hasta que se haga C, la pausa del Worker lo
+   protege — y está comprobada en los registros del 16 de octubre.
+
+   **Vercel se deja vivo unas semanas sin dominio**, como red.
+
+7. **Lo que queda después del cambio.** El `vercel.json` sin crons, y la suscripción
+   al BCCR, que **ya está fallando hoy** (`tipo de cambio BCCR: Falta la suscripción
+   al BCCR (BCCR_TOKEN y BCCR_CORREO)`, visto en los registros del Worker el 16 oct).
+   No es de la migración: falla igual en Vercel, porque es el mismo código sin las
+   mismas variables.
 
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
@@ -576,14 +619,18 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
 | NS | `ns57` / `ns58.domaincontrol.com` | El DNS lo manda GoDaddy. Es lo que queremos. |
 | A `@` | `216.198.79.1` | **Ya apunta a Vercel** (verificado por DNS el 16 oct 2026; la foto de setiembre decía "aparcado en GoDaddy" y quedó vieja). |
 | CNAME `www` | → `14dfe25f1a2b72cf.vercel-dns-017.com` | **Ya hecho.** Apunta a Vercel. |
-| MX | ninguno | **El correo del dominio no existe todavía.** |
-| TXT | ninguno | No hay SPF. |
+| MX | `mx10` / `mx20` / `mx30.antispam.mailspamprotection.com` | **El correo YA existe, en SiteGround.** La foto de setiembre decía "ninguno" y quedó vieja y peligrosa. |
+| TXT (SPF) | `v=spf1 +a +mx include:visitlafortunacr.com.spf.auto.dnssmarthost.net ~all` | SiteGround. |
+| CNAME `default._domainkey` | → `...default.dkim.auto.dnssmarthost.net` | DKIM de SiteGround. |
+| CNAME `send` | → `send.forge.rmta.net` | **Resend.** Por ahí salen los correos del sitio. |
+| A `mail`, A `autodiscover` | `34.174.251.210` | SiteGround. |
+| CNAME `_domainconnect` | → `_domainconnect.gd.domaincontrol.com` | GoDaddy. |
 
-**La trampa:** SiteGround dará el correo del mismo dominio. Si se cambian los
-nameservers a los de Vercel, Vercel se queda con todo el DNS y **los MX
-desaparecen: el correo se cae**. Hoy no hay MX que romper, pero los va a haber,
-así que **los nameservers se quedan en GoDaddy** y solo se cambian dos
-registros.
+**La trampa, que el 16 de octubre de 2026 ya está armada:** SiteGround da el correo
+de este dominio y **ya está funcionando**. Quien mueva los nameservers sin copiar
+primero los MX, el SPF, el DKIM y el CNAME `send` de Resend **le tumba a Tony el
+correo que recibe Y los correos de confirmación de reserva que manda el sitio**.
+Ya no es un riesgo futuro: es el estado de hoy.
 
 En GoDaddy → *My Products* → el dominio → *DNS* → *Manage Zones*:
 
