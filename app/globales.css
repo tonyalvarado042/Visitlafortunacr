@@ -1203,14 +1203,19 @@ section { padding: 84px 0; }
    la tarjeta, con el precio y todo, desaparecia detras de la foto. */
 .ficha-reservar { position: relative; z-index: 5; scroll-margin-top: 85px; }
 
-/* Y el pegado solo donde la tarjeta CABE. El paso 2 mide 833px: en una
-   pantalla de 768 —que es media laptop todavía— pegarla a 85px deja el botón
-   de enviar debajo del borde para siempre, sin forma de alcanzarlo. Una
-   tarjeta pegada que no se puede usar es peor que una que no se pega.
-   Debajo de 880 se comporta como siempre: baja con la página. */
-@media (min-height: 880px) {
-  .ficha-reservar { position: sticky; top: 85px; }
-}
+/* LA TARJETA NO SE PEGA. Antes se pegaba en pantallas de 880px de alto o más,
+   con este razonamiento: "el paso 2 mide 833px, así que debajo de 880 no cabe".
+   Ese número quedó viejo. Con los dos pases en una sola tarjeta, el reloj del
+   descuento, la leyenda y el botón de ancho completo, **hoy mide 1217px**
+   (medido el 21 de octubre de 2026 en la ficha de Paradise). Para que quepa
+   pegada a 85px haría falta una ventana de 1302px de alto, que casi nadie
+   tiene: en la práctica se pegaba, le colgaba medio cuerpo fuera de la vista
+   y flotaba encima de lo que seguía al bajar.
+
+   Si algún día se quiere volver a pegar, **primero hay que medirla otra vez**
+   (`document.querySelector('.ficha-reservar').getBoundingClientRect().height`)
+   y el `min-height` del media query tiene que ser esa altura + 85, no un
+   número heredado. */
 
 /* Y sube a montarse sobre la cabecera. Alineada con el texto arrancaba a la
    misma altura que el titulo "FOTOS", o sea media pantalla abajo del lugar
