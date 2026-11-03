@@ -604,6 +604,30 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    Cerrar ese hueco cuesta un botón en GoDaddy (*DNS → exportar la zona*) y una
    comparación.
 
+   **MOVIMIENTO A TERMINADO — 3 de noviembre de 2026.** Tony cambió los
+   nameservers en GoDaddy a `keira` y `luke`. Comprobado, no supuesto:
+
+   | Prueba | Resultado |
+   |---|---|
+   | Delegación en el registro | 8.8.8.8 y 9.9.9.9 ya devuelven los NS de Cloudflare |
+   | Los 9 registros por el camino nuevo | **9 de 9**: MX, SPF, los dos DKIM, el CNAME de Resend, webmail, DMARC |
+   | El sitio | `www` → 200 · el apex → 308 → `www` → 200 (sigue en Vercel, como toca) |
+   | Los MX de SiteGround | aceptan conexión en el puerto 25 |
+   | **Resend de punta a punta** | Se envió una reserva de prueba por el dominio real. **Dos correos `enviado`, sin error**: la confirmación al viajero y el aviso interno a `tony@tonyalvarado.com` |
+
+   La reserva de prueba (`VLF-2026-0002`) y su solicitud **se borraron**, y se
+   contó el resultado: 0 y 0. Los dos renglones de `dst_correo` se dejaron a
+   propósito: son la prueba de que el envío funcionó.
+
+   **Las tres direcciones del sistema**, por si hace falta probar otra vez:
+   `hola@visitlafortunacr.com` (de donde SALEN los correos, canal Resend),
+   `tony@tonyalvarado.com` (contacto del destino, **otro dominio**, no lo toca
+   esta migración) y `aalvarado@gmail.com` (el usuario admin).
+
+   **Lo único que no se pudo comprobar desde aquí:** si el correo **llegó a la
+   bandeja o cayó en spam** — `enviado` solo dice que Resend lo aceptó — y el
+   **correo entrante** a un buzón `@visitlafortunacr.com`. Las dos las mira Tony.
+
    **Movimiento A — mudar la zona a Cloudflare SIN tocar el sitio.**
    Un Worker con dominio propio exige que la zona viva en Cloudflare, o sea cambiar
    los NS en GoDaddy. Es la parte peligrosa, por el correo. Orden:
