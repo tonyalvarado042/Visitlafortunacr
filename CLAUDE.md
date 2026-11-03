@@ -567,6 +567,43 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    **El riesgo real no es que el sitio se caiga: es el correo, y los mensajes
    repetidos.** Por eso van separados, y cada uno se verifica antes del siguiente.
 
+   **HECHO el 3 de noviembre de 2026, la parte de Cloudflare.** La zona existe
+   (`f548997525d44a576fcc912b404417ba`), con **14 registros**, en estado
+   `pending` — dormida hasta que cambien los NS en GoDaddy. Los nameservers que
+   hay que poner son **`keira.ns.cloudflare.com`** y **`luke.ns.cloudflare.com`**,
+   los mismos de `liderax10.com` y `stayhumaya.com`, que ya se migraron bien.
+
+   **AL ESCANEO AUTOMÁTICO DE CLOUDFLARE SE LE ESCAPAN REGISTROS. No se le cree.**
+   Encontró **12**; el sondeo a mano había encontrado **20**. Lo que se le pasó:
+
+   | Registro | De quién | Qué se rompía |
+   |---|---|---|
+   | `default._domainkey` CNAME | SiteGround | El correo saliente pierde la firma DKIM → spam |
+   | `send` CNAME → `send.forge.rmta.net` | **Resend** | **Se caen los correos de confirmación de reserva** |
+
+   Y al revés: el escaneo vio `autoconfig`, que el sondeo no había adivinado.
+   **Ninguno de los dos basta solo; se usó la unión.** El patrón común es que el
+   escaneo falla con los **CNAME de subdominios que no son `www`** — justo donde
+   viven el DKIM y el correo transaccional.
+
+   **La prueba que vale, y se puede hacer ANTES de cambiar nada:** preguntarle a
+   los nameservers de Cloudflare directamente y comparar contra los de GoDaddy,
+   registro por registro:
+
+   ```
+   Resolve-DnsName <nombre> -Type <tipo> -Server keira.ns.cloudflare.com -DnsOnly
+   Resolve-DnsName <nombre> -Type <tipo> -Server ns57.domaincontrol.com  -DnsOnly
+   ```
+
+   Resultado el 3 de noviembre: **12 de 12 iguales, 0 diferencias.** Con eso el
+   cambio de NS es invisible para quien resuelva.
+
+   **Lo que quedó sin red:** nunca se consiguió el **export de la zona de
+   GoDaddy**. El DNS no se puede listar desde afuera, así que si existe un
+   subdominio que ni el sondeo ni el escaneo adivinaron, no está en Cloudflare.
+   Cerrar ese hueco cuesta un botón en GoDaddy (*DNS → exportar la zona*) y una
+   comparación.
+
    **Movimiento A — mudar la zona a Cloudflare SIN tocar el sitio.**
    Un Worker con dominio propio exige que la zona viva en Cloudflare, o sea cambiar
    los NS en GoDaddy. Es la parte peligrosa, por el correo. Orden:
