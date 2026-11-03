@@ -18,6 +18,14 @@
 .lateral .usuario button { background: none; border: 0; color: #8B8B87; padding: 0; cursor: pointer; font-family: inherit; font-size: 12.5px; margin-top: 6px; }
 .lateral .usuario button:hover { color: var(--naranja); }
 
+/* El plegado del menú en el teléfono. En ESCRITORIO estas dos reglas hacen que
+   la estructura nueva sea invisible: `display: contents` saca a los envoltorios
+   del layout, así que `.marca`, `.destino`, `nav` y `.usuario` vuelven a ser
+   hijos directos del flex de `.lateral` — y el `margin-top: auto` del usuario
+   lo sigue empujando al fondo. El botón no existe hasta el teléfono. */
+.lateral-cabecera, .lateral-cuerpo { display: contents; }
+.lateral-boton { display: none; }
+
 .contenido { padding: 28px 34px 70px; max-width: 1400px; min-width: 0; }
 .cabecera { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 22px; flex-wrap: wrap; }
 .cabecera h1 { margin: 0; font-size: 24px; letter-spacing: -.02em; }
@@ -43,10 +51,41 @@
 .lado { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 18px; }
 @media (max-width: 1100px) { .tres { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
-  .panel { grid-template-columns: 1fr; }
-  .lateral { position: static; height: auto; }
+  /* `auto 1fr` y no solo una columna: `.panel` tiene `min-height: 100vh` y, con
+     filas automaticas, el grid REPARTE el sobrante entre las dos. Medido: la
+     cabecera plegada mide 40px pero la barra terminaba midiendo 298 — 238px de
+     aire negro. Con `auto` la barra mide lo que mide, y `1fr` le da el resto a
+     la pagina. */
+  .panel { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
   .dos, .tres, .lado { grid-template-columns: 1fr; }
   .contenido { padding: 20px 16px 60px; }
+
+  /* Pegada arriba para que el botón «Menú» esté siempre a mano, pero con alto
+     automático: antes era `height: 100vh` y se comía la pantalla entera. */
+  .lateral { position: sticky; top: 0; height: auto; z-index: 50; padding: 10px 14px; }
+
+  /* Plegado: solo se ve la marca y el botón. */
+  .lateral-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .lateral .marca { padding: 0; }
+  .lateral-cuerpo { display: none; }
+
+  .lateral-boton {
+    display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    background: #1F1F1F; color: #fff; border: 1px solid #2E2E2E; border-radius: 8px;
+    padding: 8px 14px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+    /* 40px de alto: por debajo de eso el dedo falla. */
+    min-height: 40px;
+  }
+  .lateral-boton:hover { background: #2A2A2A; }
+
+  /* Desplegado. El tope de alto es para que el menú no pase de la pantalla:
+     con 19 entradas no cabe, así que se desliza por dentro. */
+  .lateral.abierto .lateral-cuerpo {
+    display: block; margin-top: 12px; max-height: 70vh; overflow-y: auto;
+  }
+  /* En el teléfono el bloque del usuario ya no va al fondo de la pantalla:
+     va al final de la lista, que es donde se lo encuentra. */
+  .lateral.abierto .usuario { margin-top: 14px; }
 }
 
 table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
