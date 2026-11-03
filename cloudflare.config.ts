@@ -12,6 +12,9 @@ export default defineConfig({
     entrypoint: "./cloudflare/entrada.ts",
     compatibilityDate: "2026-10-14",
     compatibilityFlags: ["nodejs_compat"],
+    /* Se deja encendido a proposito. Al declarar dominios o rutas, cf lo apaga
+       por omision y se pierde la URL de pruebas del Worker. */
+    workersDev: true,
     assets: {
       htmlHandling: "none",
       notFoundHandling: "none",
@@ -39,6 +42,17 @@ export default defineConfig({
       triggers.scheduled({ schedule: "0 13 * * *" }),
       triggers.scheduled({ schedule: "0 5 * * *" }),
       triggers.scheduled({ schedule: "15 12 * * *" }),
+      /* EL CORTE, y por eso es RUTA y no "custom domain".
+         Un custom domain exige borrar antes los registros de DNS que apuntan a
+         Vercel, y entre borrarlos y que el Worker tome el dominio el sitio se
+         cae un minuto. Una ruta no: **no hace nada mientras el registro este
+         en DNS-only (nube gris)**. El cambio ocurre al poner el registro en
+         proxy (nube naranja), y es instantaneo.
+
+         PARA VOLVER ATRAS: apagar el proxy de esos dos registros. Vercel
+         vuelve a servir en segundos, sin tocar este archivo ni desplegar. */
+      triggers.fetch({ pattern: "visitlafortunacr.com/*", zone: "visitlafortunacr.com" }),
+      triggers.fetch({ pattern: "www.visitlafortunacr.com/*", zone: "visitlafortunacr.com" }),
       // De a uno: cada trabajo puede tardar minutos con Claude.
       triggers.queue({ name: "visit-la-fortuna-trabajos", maxBatchSize: 1, maxRetries: 1 }),
     ],

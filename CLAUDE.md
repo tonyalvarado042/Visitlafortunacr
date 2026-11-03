@@ -444,7 +444,7 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    | ✅ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...`. **14 oct 2026: la solicitud entró a las 12:52:50 UTC y el planificador tardó 72 s, sin error, $0,27**, y dejó `tres-dias-en-la-fortuna-aguas-termales-y-aguas-bravas-en-par-ed99r5`. Con `after()` se habría cortado a los 30 s: **es la prueba de que la Queue funciona** |
    | ✅ | Reseña propia y solicitud de lead | La reseña entró (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente` porque La Fortuna tiene `resenas_moderadas = true`; la solicitud del itinerario entró a `dst_solicitud`. **`/admin/resenas` salía vacío en Vercel y en Cloudflare**: ver "PGRST201" abajo |
    | ✅ | Panel: entrar a `/admin` | **16 oct 2026: Tony entró al Worker y `/admin/resenas` muestra la reseña del Arenal Volcano Inn** en *Por revisar* (pendiente, 14-oct). O sea la sesión de Supabase aguanta entre páginas **y el PGRST201 quedó arreglado de verdad**, no solo en el código |
-   | ☐ | Subir una **foto vertical de teléfono** y una **HEIC** desde el panel | Salen derechas y en WebP (prueba Cloudflare Images) |
+   | ✅ | Subir una **foto vertical de teléfono** | **3 nov 2026, probado en el Worker con Acacia Restaurant.** Salió **WebP** (211 KB), **1600×2844 vertical** y con el contenido **derecho** — se miró la imagen, no solo las medidas. Cloudflare Images reemplaza a sharp sin problema |
    | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
    | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
    | ✅ | Crons | **Los tres dispararon en el Worker el 16 oct 2026, los tres `outcome=ok`**, leídos en la telemetría: `05:00:36Z` externas (sin registro, que es el éxito silencioso), `12:15:35Z` tipo-cambio, `13:00:31Z` automatizaciones con `cron automatizaciones: en pausa hasta CLOUDFLARE_ES_PRODUCCION=si`. **Esa línea es la prueba de que la pausa funciona.** Un solo error en 20 h y no es de la migración: `tipo de cambio BCCR: Falta la suscripción al BCCR (BCCR_TOKEN y BCCR_CORREO)`, que falla igual en Vercel. Para leerlos hace falta `observability` encendido en `cloudflare.config.ts`: sin eso los `console.log` no se guardan |
@@ -649,6 +649,51 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
       prueba al dominio y otro desde el sitio**, y que la página siga sirviendo de
       Vercel. Si algo salió mal, **se devuelven los NS a GoDaddy**: esa es la vuelta
       atrás de este movimiento.
+
+   **MOVIMIENTO B HECHO — 3 de noviembre de 2026. Y NO se hizo con "custom
+   domains": se hizo con RUTAS, que es lo único que no tumba el sitio.**
+
+   El intento con `domains: [...]` en `cloudflare.config.ts` **falla**:
+
+   ```
+   Hostname 'visitlafortunacr.com' already has externally managed DNS records
+   (A, CNAME, etc). Delete them first or try a different hostname. [100117]
+   ```
+
+   Un custom domain exige **borrar antes** los registros que apuntan al host
+   viejo, y entre borrarlos y que el Worker tome el dominio **el sitio se cae**.
+   Encima, al declarar `domains` cf **apaga `workers.dev` por omisión** y se
+   pierde la URL de pruebas (pasó; se arregla con `workersDev: true`).
+
+   **Lo que sí funciona, sin un segundo de caída:**
+
+   1. Declarar **rutas** en los `triggers` del Worker:
+      `triggers.fetch({ pattern: "visitlafortunacr.com/*", zone: "visitlafortunacr.com" })`
+      y lo mismo para `www`. **Una ruta no hace NADA mientras el registro de DNS
+      esté en DNS-only (nube gris)**, así que desplegar es inofensivo.
+   2. Desplegar. El sitio sigue en Vercel, ni se entera.
+   3. **Encender el proxy (nube naranja)** en la `A` del apex y el `CNAME` de
+      `www`. Ahí, y solo ahí, el Worker empieza a servir. Instantáneo.
+
+   **PARA VOLVER ATRÁS: apagar el proxy de esos dos registros.** Vercel vuelve a
+   servir en segundos, sin desplegar ni tocar un archivo. Es la vuelta atrás más
+   barata que hay, y por eso se eligió este camino.
+
+   **Cómo se comprobó que de verdad sirve el Worker** (y no Vercel detrás del
+   proxy): `/api/salud` por Cloudflare lista **`ANTHROPIC_API_KEY, CRON_SECRET,
+   SUPABASE_SECRET_KEY`** — las llaves del Worker. Vercel tiene otro juego
+   (`VERCEL_ENV`, `VERCEL_GIT_COMMIT_REF`). Las cabeceras lo confirman:
+   `Server: cloudflare` + `CF-RAY`, **sin** `x-vercel-id`.
+
+   **OJO al verificar desde la casa de Tony:** su router cachea DNS y sigue
+   devolviendo la IP de Vercel un buen rato. Para ver la verdad hay que saltarse
+   el DNS:
+   `curl --resolve www.visitlafortunacr.com:443:172.67.219.235 https://www.visitlafortunacr.com/api/salud`
+
+   **Efecto lateral bueno:** antes el apex redirigía 308 a `www` pero el
+   `canonical` apuntaba al apex — estaban peleados. Ahora el apex **sirve 200** y
+   el canonical dice apex: quedaron alineados. `www` también sirve, con canonical
+   al apex, así que Google consolida ahí.
 
    **Movimiento B — pasar el sitio al Worker.** Instantáneo y reversible.
    En el Worker → *Settings* → *Domains & Routes* → agregar `visitlafortunacr.com` y
