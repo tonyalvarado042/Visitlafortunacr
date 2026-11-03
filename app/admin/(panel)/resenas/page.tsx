@@ -98,15 +98,19 @@ function Resena({ r, zona }: { r: Fila; zona: string }) {
 export default async function PaginaResenas() {
   const { destino, db } = await contextoPanel('resenas');
 
-  const [{ data: filas }, { data: ajuste }] = await Promise.all([
+  const [{ data: filas, error: fallo }, { data: ajuste }] = await Promise.all([
     db.from('dst_resena')
-      .select('id, calificacion, titulo, cuerpo, idioma, estado, visitado_el, creado_en, motivo_rechazo, respuesta_negocio, negocio:dst_negocio!inner(id, nombre, destino_id), viajero:dst_viajero(nombre, email)')
+      .select('id, calificacion, titulo, cuerpo, idioma, estado, visitado_el, creado_en, motivo_rechazo, respuesta_negocio, negocio:dst_negocio!inner(id, nombre, destino_id), viajero:dst_viajero!fk_dst_resena_viajero(nombre, email)')
       .eq('negocio.destino_id', destino.id)
       .order('creado_en', { ascending: false })
       .limit(200),
     db.from('dst_destino').select('resenas_moderadas').eq('id', destino.id).maybeSingle(),
   ]);
 
+  /* Sin esto, un error de la consulta se ve como "Nada por revisar". Pasó: el
+     embebido de dst_viajero era ambiguo (PGRST201, ver !fk_dst_resena_viajero)
+     y la página estuvo vacía con reseñas pendientes en la base. */
+  if (fallo) console.error('panel de reseñas:', fallo.code, fallo.message);
   const todas = (filas ?? []) as unknown as Fila[];
   const modera = !!ajuste?.resenas_moderadas;
   const por = (estado: Fila['estado']) => todas.filter((r) => r.estado === estado);

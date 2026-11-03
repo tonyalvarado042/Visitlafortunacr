@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { dominioDeHost } from '@/lib/dominio';
 import { hayClaveDeServicio } from '@/lib/supabase-servidor';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
-import { generarItinerarioParaSolicitud } from '@/lib/ia/planificador';
+import { enSegundoPlano } from '@/lib/segundo-plano';
 import { destinoActual } from '@/lib/destino';
 import { experienciaPorBabosa } from '@/lib/experiencias';
 import { correoConsultaRecibida } from '@/lib/correo/cartas';
@@ -74,13 +74,7 @@ export async function POST(peticion: NextRequest) {
   const solicitudId = data as string;
   const generaPlan = tipo === 'itinerario' && hayClaveDeServicio() && hayClaveDeIA();
   if (generaPlan) {
-    after(async () => {
-      try {
-        await generarItinerarioParaSolicitud(solicitudId, 'web');
-      } catch (fallo) {
-        console.error('No se pudo generar el itinerario:', fallo);
-      }
-    });
+    await enSegundoPlano({ tipo: 'itinerario', solicitudId, canal: 'web' });
   }
 
   /* La confirmacion a quien escribio. Regla de la casa: todo registro lleva su

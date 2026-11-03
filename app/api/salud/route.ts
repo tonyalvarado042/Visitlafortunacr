@@ -43,7 +43,7 @@ function diagnosticoSecreto(nombre: string, bueno: boolean) {
 export async function GET(peticion: NextRequest) {
   const claveEnv = process.env.NEXT_PUBLIC_SUPABASE_KEY;
   const host = (peticion.headers.get('host') ?? '').split(':')[0].replace(/^www\./, '');
-  const esLocal = !host || host === 'localhost' || host.endsWith('.vercel.app');
+  const esLocal = !host || host === 'localhost' || host.endsWith('.vercel.app') || host.endsWith('.workers.dev');
   const dominio = esLocal
     ? (process.env.NEXT_PUBLIC_DOMINIO_POR_DEFECTO ?? 'visitlafortunacr.com')
     : host;

@@ -214,6 +214,61 @@ dos lados.
 el proxy). Así que después de cada cambio en GoDaddy se verifica desde aquí:
 A del apex, CNAME de www, MX, NS y TXT. Cambiarlo no; leerlo sí.
 
+### El sitio también compila para Cloudflare Workers (14 de octubre de 2026)
+
+Pedido por Tony. **La decisión es migrar, pero Vercel sigue siendo producción
+hasta que el Worker pase TODA la lista de "Cloudflare · desplegar el Worker"**
+(Trabajo a mano). Mientras tanto no se apaga nada en Vercel, no se borra
+`vercel.json` y el dominio no se mueve. La migración es aditiva: el mismo código
+compila para los dos lados.
+`npm run build` arma para Vercel, como siempre; `npm run build:vinext` arma
+para Workers con **vinext** (lo que Cloudflare recomienda hoy para Next.js en
+vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
+
+| Archivo | Qué hace |
+|---|---|
+| `cloudflare.config.ts` | El Worker `visit-la-fortuna`: `nodejs_compat`, binding `IMAGES` y los tres crons |
+| `cloudflare/entrada.ts` | Puerta del Worker: el sitio de vinext + `scheduled()`, que traduce cada cron a la misma petición con `Bearer CRON_SECRET` que hace Vercel |
+| `lib/segundo-plano.ts` + `lib/trabajos.ts` | Los trabajos largos (planificador, concierge de WhatsApp): `after()` en Vercel, Queue `visit-la-fortuna-trabajos` en Workers |
+| `cloudflare/sharp-imagenes.ts` | Reemplazo de `sharp` (nativo, no corre en Workers) con Cloudflare Images. `vite.config.ts` cambia el import solo en el build de Workers |
+| `.claude/settings.json` | Activa el plugin oficial de Cloudflare (Skills + MCP) para toda sesión de Claude Code en este repo |
+
+**Tres cosas no se arreglan con el build y hay que tenerlas presentes:**
+
+1. **Los crons tienen dos copias**: `vercel.json` y `cloudflare.config.ts` +
+   `CRONES` en `cloudflare/entrada.ts`. Cloudflare entrega la expresión como
+   texto y con eso se elige la ruta, así que las dos tienen que ser idénticas.
+2. **`after()` en Workers tiene 30 segundos** después de mandar la respuesta
+   (`waitUntil`), y `maxDuration` no significa nada. Los correos caben; **lo
+   que llama a Claude no**. Por eso el planificador y el concierge de WhatsApp
+   ya no se lanzan con `after()` sino con `enSegundoPlano(...)`: en Workers van
+   a una Queue, cuyo consumidor tiene 15 minutos. **Todo trabajo nuevo que
+   llame a Claude va por ahí**, no por `after()`. Los trabajos son datos (no
+   funciones) porque tienen que viajar por la cola, y nunca lanzan: un
+   reintento sería un plan o una respuesta de WhatsApp repetidos.
+   Hace falta el plan **Workers Paid**: el gratuito da 10 ms de CPU.
+3. **Sin comprobar contra Cloudflare de verdad**: que Images **enderece
+   las fotos verticales** según el EXIF como hacía `sharp().rotate()`. El
+   correo **no es riesgo**: el canal es Resend, que va por `fetch`. SMTP solo
+   importaría si algún día el canal pasa a `smtp`; de eso se sabe que en
+   workerd local `nodemailer` carga y llega a resolver el servidor, nada más.
+
+**Probado el 14 de octubre de 2026 desde el contenedor** (`npm run
+start:vinext`, workerd local): `/` redirige a `/es`, `/admin/ingresar` da 200,
+`/api/salud` da 200 y `/api/cron/externas` sin clave da 401. Las páginas que
+leen la base no se pudieron ver porque el contenedor no alcanza
+`*.supabase.co`. `npx tsc --noEmit`, `npm run build` y `npm run build:vinext`
+pasan.
+**Ojo al verificar en local**: `build:vinext` reescribe
+`.next/types/routes.d.ts` con su propia versión, y `tsc` da errores en
+`.next/types/validator.ts` hasta el próximo `npm run build`. No es un error del
+código: se corre `npm run build` y después `tsc`. En Vercel y en Workers Builds
+no pasa, porque cada uno compila desde cero.
+
+Para Claude: **con Cloudflare se usa el CLI `cf`** (ya está en
+`devDependencies`), no `wrangler`: este proyecto tiene `cloudflare.config.ts`
+y no `wrangler.jsonc`.
+
 ## El backend (CRM + IA)
 
 Detalle en `docs/plataforma/backend-e-inteligencia.md`. Lo que no se olvida:
@@ -253,23 +308,435 @@ nube no, y por eso los deja escritos aquí con los valores exactos.
 
 Antes de empezar en la máquina: `git pull` de la rama, que aquí está lo último.
 
+### Cloudflare · desplegar el Worker
+
+**Estado al 14 de octubre de 2026: pasos 1, 2 y 3 hechos** por Tony desde su
+máquina. El Worker está en **`https://visit-la-fortuna.aalvarado-171.workers.dev`**
+(versión `51fc8e69…`), con `TRABAJOS`, `IMAGES` y `ASSETS`, los tres crons, y
+productor y consumidor de la cola. El conector de Cloudflare lo ve. El
+contenedor de la nube **no alcanza `*.workers.dev`** (lo corta el proxy, como
+`*.vercel.app`): las pruebas del paso 5 se hacen desde un navegador.
+El 14 de octubre de 2026 `/api/salud` en el Worker ya leía la base (destino
+La Fortuna, 64 negocios), Tony puso las llaves del paso 4 y **el concierge
+contestó desde el Worker** (ver la lista del paso 5). Falta el resto de esa
+lista: itinerario (la cola), reseña y lead, panel, fotos, correo y crons.
+
+El código ya está listo (ver "El sitio también compila para Cloudflare
+Workers"). Lo que falta es de panel. La sesión en la nube **no puede**: el
+proxy corta `api.cloudflare.com` y no hay `CLOUDFLARE_API_TOKEN`. El conector
+de Cloudflare sí responde, y confirma que la cuenta tiene **0 Workers** (14 de
+octubre de 2026).
+
+**Vercel no se toca en ninguno de estos pasos.** El Worker se prueba en su
+URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
+
+1. Cloudflare → *Workers & Pages* → *Plans*: pasar a **Workers Paid**
+   (5 USD/mes). Con el plan gratuito el sitio no cabe en 10 ms de CPU, y las
+   Queues son solo de ese plan.
+2. Crear la cola, una sola vez. Nombre **`visit-la-fortuna-trabajos`**, exacto:
+   es el que espera `cloudflare.config.ts`. Desde la máquina (comandos
+   comprobados contra `cf` 1.0.0-beta.17):
+   ```
+   git status                                   # nada a medias antes de cambiar de rama
+   git fetch origin
+   git checkout claude/cloudflare-agent-setup-mm1mos
+   git pull
+   npm ci                                       # instala cf, vinext y lo demás
+   npx cf auth login                            # abre el navegador: aprobar
+   npx cf auth whoami                           # ¿es la cuenta donde está el Worker?
+   npx cf queues create --queue-name visit-la-fortuna-trabajos --dry-run
+   npx cf queues create --queue-name visit-la-fortuna-trabajos
+   npx cf queues list                           # tiene que aparecer
+   ```
+   **En Windows**, `npm ci` puede fallar con *"la ejecución de scripts está
+   deshabilitada en este sistema"*: es la política de PowerShell, no el
+   proyecto. Se arregla una vez con
+   `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, o
+   escribiendo `npm.cmd` / `npx.cmd` en vez de `npm` / `npx`. Le pasó a Tony el
+   14 de octubre de 2026; su clon está en `C:\Users\Usuario\.claude\visitlafortunacr`.
+   Si `create` dice que Queues no está disponible, falta el plan Workers Paid
+   (paso 1). Si la cuenta de `whoami` no es la del Worker: `npx cf auth logout`
+   y volver a entrar con la otra. La cola nace **sin consumidor**; el
+   consumidor lo engancha el despliegue del paso 3, que lee `triggers` de
+   `cloudflare.config.ts`.
+   Desde el panel es lo mismo: *Storage & Databases* → *Queues* → *Create*.
+3. Desde la máquina, en la raíz del repo (ya con `npx cf auth login` hecho):
+   ```
+   git pull
+   npm run deploy:vinext -- --dry-run     # valida sin compilar ni subir
+   npm run deploy:vinext                  # compila y sube; tarda unos minutos
+   ```
+   Al final imprime la URL `https://visit-la-fortuna.<cuenta>.workers.dev`.
+   El Worker se llama `visit-la-fortuna` (`cloudflare.config.ts`): si ya había
+   uno con ese nombre, lo reemplaza; si el que se creó a mano tiene otro
+   nombre, queda aparte y se puede borrar. Después de esto, `npx cf queues
+   list` tiene que mostrar 1 productor y 1 consumidor.
+   O, para que despliegue solo con cada push: *Workers & Pages* → *Create* →
+   *Import a repository* → `tonyalvarado042/Visitlafortunacr`, comando de
+   build `npm run build:vinext`, comando de deploy `npm run deploy:vinext`.
+   **La rama, mientras no se mezcle, es `claude/cloudflare-agent-setup-mm1mos`**:
+   la de siempre (`claude/la-fortuna-directory-design-l8qnxg`) todavía no tiene
+   nada de Cloudflare. Ojo al mezclarla: Vercel despliega esa rama, así que lo
+   que entre ahí sale a producción en Vercel (está probado que `npm run build`
+   sigue pasando con estos cambios).
+4. El Worker → *Settings* → *Variables and Secrets* → *Add* → tipo
+   **Secret**. **Son pocas, porque casi todo vive en la base** (comprobado el
+   14 de octubre de 2026 leyendo el código y `vault.secrets`):
+
+   | Llave | De dónde la lee el código | ¿Va en Cloudflare? |
+   |---|---|---|
+   | `SUPABASE_SECRET_KEY` | Solo del entorno: es la que abre la base, no puede vivir dentro | ✅ Puesta |
+   | `ANTHROPIC_API_KEY` | Solo del entorno (`lib/ia/cliente.ts`) | ✅ Puesta. **Tiene que ser clave de workspace** |
+   | `ANTHROPIC_WORKSPACE_ID` | Solo del entorno | Solo si la clave NO es de workspace |
+   | `CRON_SECRET` | `externas` y `tipo-cambio`: bóveda primero. `automatizaciones` y `/api/ia/planificar`: **solo entorno** | Sí, un valor **nuevo cualquiera** (ver abajo) |
+   | `GOOGLE_PLACES_API_KEY` | Bóveda (*Ajustes → Llaves*), ya está | No |
+   | `RESEND_API_KEY` | Bóveda, ya está. **El correo sale por Resend, no por SMTP** (`dst_canal`: email/resend) | No |
+   | `EMAIL_REMITENTE` | `dst_canal.identificador` (`hola@visitlafortunacr.com`) | No |
+   | `SMTP_*` | Solo si el canal fuera `smtp`, y no lo es | No |
+   | `WHATSAPP_*` | No hay canal de WhatsApp todavía | No, hasta conectarlo |
+
+   **`CRON_SECRET` no se puede copiar de la bóveda** (el panel la escribe y
+   nunca la muestra) **y no hace falta**: el Worker manda primero la de su
+   entorno y, si la ruta dice 401, la de la bóveda (`cloudflare/entrada.ts`).
+   Así un valor nuevo sirve a `automatizaciones` y la bóveda sigue sirviendo a
+   las otras dos. Se genera en PowerShell con
+   `-join ((1..48) | ForEach-Object { '{0:x}' -f (Get-Random -Maximum 16) })`.
+   **No se toca la de Vercel**: Vercel la sigue usando con su propio valor.
+   **La clave de Anthropic**: en <https://console.anthropic.com> se crea
+   **dentro de un workspace** (*Settings → Workspaces → el workspace → API
+   keys*), no a nivel de organización. Si en el chat aparece *"This API key is
+   not scoped to a workspace"*, o se cambia la clave o se agrega
+   `ANTHROPIC_WORKSPACE_ID` (*Settings → Workspaces*, el ID que empieza con
+   `wrkspc_`).
+   **Las `NEXT_PUBLIC_*` no hacen falta**: `lib/credenciales-publicas.ts` trae
+   la URL y la clave publicable de Supabase como respaldo, y el dominio por
+   defecto es `visitlafortunacr.com`. Las URLs `*.workers.dev` se tratan como
+   vista previa (igual que `*.vercel.app`) y sirven ese destino; **antes del 14
+   de octubre de 2026 no era así** y el Worker habría dado "No hay ningún
+   destino activo" en todas las páginas — lo arreglan `lib/destino.ts`,
+   `lib/dominio.ts` y `/api/salud`.
+   Un secreto nuevo se aplica solo: no hay que volver a desplegar.
+   Enlaces directos (el de Cloudflare elige la cuenta solo; el de Vercel pide
+   elegir equipo y proyecto, porque **el proyecto `visit-la-fortuna` no está en
+   el equipo `tonyalvarado`** que ve el conector de Vercel — vive en otra
+   cuenta):
+   - Cloudflare: <https://dash.cloudflare.com/?to=/:account/workers/services/view/visit-la-fortuna/production/settings>
+   - Vercel: <https://vercel.com/d?to=%2F%5Bteam%5D%2F%5Bproject%5D%2Fsettings%2Fenvironment-variables>
+   **Si Vercel no deja ver un valor** (variables marcadas *Sensitive*), se saca
+   de la fuente: `SUPABASE_SECRET_KEY` en
+   <https://supabase.com/dashboard/project/eulkufetcymallfbpone/settings/api-keys>
+   (la *secret*, de `visitdestinos` y no del proyecto del CRM); la de
+   Anthropic se crea nueva en <https://console.anthropic.com/settings/keys>,
+   **dentro del workspace** (ver "El agente ya contestó"). `CRON_SECRET` puede
+   ser uno nuevo solo para Cloudflare: el Worker prueba el de su entorno y el
+   de la bóveda (`cloudflare/entrada.ts`), y las rutas que miran la bóveda lo
+   encuentran ahí.
+5. **La lista que decide.** Todo en la URL `*.workers.dev`, y **cada punto
+   tiene que dar lo mismo que en `visit-la-fortuna.vercel.app`**. Hasta que
+   estén todos, producción sigue en Vercel:
+
+   | | Qué se prueba | Cómo se sabe que sirve |
+   |---|---|---|
+   | ✅ | `/api/salud` | Ve la base, la clave de servicio y la de IA (14 oct 2026) |
+   | ✅ | Portada `/es`, `/en`, un listado, una ficha | Mismas fotos, mismos negocios, el video del hero (Tony, 14 oct 2026) |
+   | ✅ | Buscador `/es?q=termales` | **17 fichas en el Worker y las mismas 17 en Vercel**, comparadas una por una (15 oct 2026) |
+   | ✅ | Chat concierge | Contesta, y aparece en `dst_agente_ejecucion`. 14 oct 2026, 12:48 UTC: `buscar_conocimiento` + `web_fetch`, sin error, 7,6 s, $0,15; y `buscar_lugares` a $0,035 |
+   | ✅ | Pedir un itinerario | El plan llega completo a `/[idioma]/plan/...`. **14 oct 2026: la solicitud entró a las 12:52:50 UTC y el planificador tardó 72 s, sin error, $0,27**, y dejó `tres-dias-en-la-fortuna-aguas-termales-y-aguas-bravas-en-par-ed99r5`. Con `after()` se habría cortado a los 30 s: **es la prueba de que la Queue funciona** |
+   | ✅ | Reseña propia y solicitud de lead | La reseña entró (14 oct 2026, 12:53 UTC, Arenal Volcano Inn) como `pendiente` porque La Fortuna tiene `resenas_moderadas = true`; la solicitud del itinerario entró a `dst_solicitud`. **`/admin/resenas` salía vacío en Vercel y en Cloudflare**: ver "PGRST201" abajo |
+   | ✅ | Panel: entrar a `/admin` | **16 oct 2026: Tony entró al Worker y `/admin/resenas` muestra la reseña del Arenal Volcano Inn** en *Por revisar* (pendiente, 14-oct). O sea la sesión de Supabase aguanta entre páginas **y el PGRST201 quedó arreglado de verdad**, no solo en el código |
+   | ✅ | Subir una **foto vertical de teléfono** | **3 nov 2026, probado en el Worker con Acacia Restaurant.** Salió **WebP** (211 KB), **1600×2844 vertical** y con el contenido **derecho** — se miró la imagen, no solo las medidas. Cloudflare Images reemplaza a sharp sin problema |
+   | ☐ | Un **correo de prueba** (sale por Resend, desde `hola@visitlafortunacr.com`) | Llega, y no a spam |
+   | ☐ | WhatsApp (si ya está conectado) | El concierge contesta (otra vez la Queue) |
+   | ✅ | Crons | **Los tres dispararon en el Worker el 16 oct 2026, los tres `outcome=ok`**, leídos en la telemetría: `05:00:36Z` externas (sin registro, que es el éxito silencioso), `12:15:35Z` tipo-cambio, `13:00:31Z` automatizaciones con `cron automatizaciones: en pausa hasta CLOUDFLARE_ES_PRODUCCION=si`. **Esa línea es la prueba de que la pausa funciona.** Un solo error en 20 h y no es de la migración: `tipo de cambio BCCR: Falta la suscripción al BCCR (BCCR_TOKEN y BCCR_CORREO)`, que falla igual en Vercel. Para leerlos hace falta `observability` encendido en `cloudflare.config.ts`: sin eso los `console.log` no se guardan |
+
+   **PGRST201: el panel de reseñas llevaba roto quién sabe desde cuándo, en
+   los dos lados.** Lo destapó esta prueba, no la migración. `dst_resena_util`
+   (los votos de "útil") une reseña y viajero, así que entre `dst_resena` y
+   `dst_viajero` hay dos caminos y PostgREST se niega a elegir: responde 300
+   con `PGRST201`. La página descartaba el error y mostraba "Nada por revisar"
+   con reseñas pendientes en la base. Le pasaba igual al correo que avisa al
+   negocio cuando se publica una (`lib/aviso-resena.ts`). Arreglado el 14 de
+   octubre de 2026 nombrando la llave: `dst_viajero!fk_dst_resena_viajero(...)`.
+   **Regla**: si se crea una tabla que une dos tablas por su clave primaria
+   —como `dst_resena_util` o `dst_favorito`—, todo embebido entre esas dos
+   tablas pasa a necesitar `!nombre_de_la_llave`. Se encontró en los registros
+   de Supabase (`edge_logs`, `response.headers.proxy_status`), no en el sitio:
+   **un error de PostgREST no se ve en pantalla si el código no lo mira.**
+
+   **Ojo con los crons durante la prueba**: con los dos lados encendidos, cada
+   cron corre DOS veces al día, una en Vercel y otra en Cloudflare, contra la
+   misma base. `externas` y `tipo-cambio` solo refrescan y no pasa nada, pero
+   **`automatizaciones` manda mensajes a viajeros**: podría mandar un
+   seguimiento repetido. Por eso **el Worker no lo corre** mientras no exista
+   la variable `CLOUDFLARE_ES_PRODUCCION=si` (está en `cloudflare/entrada.ts`;
+   en *Logs* se ve "en pausa"). Para probarlo se llama a mano:
+   `curl -H "Authorization: Bearer $CRON_SECRET" .../api/cron/automatizaciones?limite=1`.
+   **El primer despliegue por CLI hay que confirmarlo a mano, una sola vez
+   (14 de octubre de 2026).** `npm run deploy:vinext` compila bien y se cae al
+   subir:
+
+   ```
+   The local configuration ... differs from the remote configuration of your
+   Worker set via the Cloudflare Dashboard:
+     queues: { + consumers: [ { queue: "visit-la-fortuna-trabajos", ... } ] }
+   Aborting the upload operation because of conflicts.
+   To override and upload anyway, remove the `--strict` flag
+   ```
+
+   **La causa, leída en el código de `cf` y de `vinext`, son dos cosas que se
+   juntan:**
+
+   1. **El Worker se desplegó por última vez desde el panel.** `cf` solo
+      pregunta en ese caso:
+      `if (worker.last_deployed_from === 'dash') { avisa del diff; if (!await confirmar()) aborta }`.
+      Mientras el panel sea el último en haber desplegado, la pregunta sale
+      siempre, y **no hay nada que tocar en el panel que la haga desaparecer**.
+   2. **`npm run deploy:vinext` no puede contestarla, desde ninguna terminal.**
+      El envoltorio lanza a `cf` así
+      (`node_modules/@vinext/cloudflare/dist/deploy.js`, `runCfDeploy`):
+
+      ```js
+      stdio: ["inherit", "pipe", "pipe"]   // stdin, stdout, stderr
+      ```
+
+      Entuba stdout para leerle la URL del Worker al texto
+      (`parseWorkerDeploymentUrl(output)`). Y `cf` decide así:
+
+      ```js
+      isTtyInteractive  = () => !!(process.stdin.isTTY && process.stdout.isTTY)
+      isNonInteractiveOrCI = () => !isInteractive() || isCI
+      // getDeployConfirmFunction({ strictMode: e.strict }):
+      //   no interactivo + strict -> aborta;  no interactivo sin strict -> sí;
+      //   interactivo -> pregunta
+      ```
+
+      Dentro del hijo `process.stdout.isTTY` es **false** porque es un tubo.
+      Y `strict: true` está **fijo en el código** para `command: 'deploy'`
+      (`node_modules/cf/dist/deploy-input-*.mjs`), sin bandera que lo apague.
+      O sea: no era la terminal de Tony ni era CI. Es el tubo de vinext.
+
+   **Cómo se desbloqueó, y ya está hecho (15 de octubre de 2026).** Tony llamó
+   a `cf` **directo**, sin el envoltorio, en su PowerShell. Ahí stdout sí es
+   TTY, salió la pregunta y la contestó `y`:
+
+   ```
+   npx cf deploy --prebuilt
+   ```
+
+   Con eso el Worker dejó de ser "del panel". **Comprobado después: dos
+   `npm run deploy:vinext` seguidos, los dos con código 0 y sin preguntar
+   nada** (versiones `2e63ea7b` y `3583cb95`), listando los tres bindings, los
+   tres crons y el productor y el consumidor de la cola. **No hay que repetir
+   el paso manual**: de aquí en adelante el despliegue corre solo, también
+   desde Claude Code.
+
+   **Sobrescribir la config remota no borra las llaves.** La doc de Cloudflare
+   lo dice así: *"Wrangler will not delete your secrets (encrypted environment
+   variables) unless you run `wrangler secret delete <key>`"*. `keep_vars` solo
+   manda sobre las variables en texto plano. **Se comprobó contando con
+   `cf workers secrets list --script-name visit-la-fortuna` antes y después: las
+   mismas tres.**
+
+   Lo comprobado, para no volver a investigarlo:
+
+   - **El mensaje miente**: `--strict` no es flag de `cf deploy`. `--no-strict`
+     responde *Unknown argument: strict*, y eso lo tira el `parseArgs` del
+     envoltorio de vinext (que corre con `strict: true`, el de Node, otra cosa),
+     no `cf`.
+   - `npx cf deploy --prebuilt --dry-run` **pasa** y lista los tres bindings
+     (TRABAJOS, IMAGES, ASSETS): lo compilado es válido. Pasa porque el chequeo
+     arranca con `if (e.dryRun || ...) return { aborted: false }` — el
+     `--dry-run` **se salta la comparación entera**, no es que la apruebe.
+   - **Soltar el consumidor de la cola NO sirve, y se probó.** Se borró, quedó
+     en cero, se desplegó y **abortó igual**: la diferencia es contra la copia
+     del panel, que no tiene nada que ver con los consumidores de la cola. El
+     consumidor se volvió a crear con los mismos valores (batch 1, reintentos
+     1, espera 5000, demora 0) y la cola quedó como estaba. **No repetir.**
+   - Claude **no puede** borrar ni crear consumidores sin permiso del harness
+     (los clasifica como recurso compartido), y tampoco le sirve de nada.
+
+6. **El cambio, en tres movimientos separados. Ninguno apaga el sitio.**
+
+   No hace falta página de mantenimiento y **no conviene ponerla**: los dos lados
+   corren el mismo código contra la misma base de Supabase, así que mientras el DNS
+   propaga, a unos visitantes les cae Vercel y a otros el Worker y **los dos sirven
+   lo mismo**. Apagar Vercel crearía la caída que de otro modo no existe, le daría
+   una página de mantenimiento a Googlebot — y el sitio vive del SEO — y mataría la
+   vuelta atrás justo cuando se necesita.
+
+   **El riesgo real no es que el sitio se caiga: es el correo, y los mensajes
+   repetidos.** Por eso van separados, y cada uno se verifica antes del siguiente.
+
+   **HECHO el 3 de noviembre de 2026, la parte de Cloudflare.** La zona existe
+   (`f548997525d44a576fcc912b404417ba`), con **14 registros**, en estado
+   `pending` — dormida hasta que cambien los NS en GoDaddy. Los nameservers que
+   hay que poner son **`keira.ns.cloudflare.com`** y **`luke.ns.cloudflare.com`**,
+   los mismos de `liderax10.com` y `stayhumaya.com`, que ya se migraron bien.
+
+   **AL ESCANEO AUTOMÁTICO DE CLOUDFLARE SE LE ESCAPAN REGISTROS. No se le cree.**
+   Encontró **12**; el sondeo a mano había encontrado **20**. Lo que se le pasó:
+
+   | Registro | De quién | Qué se rompía |
+   |---|---|---|
+   | `default._domainkey` CNAME | SiteGround | El correo saliente pierde la firma DKIM → spam |
+   | `send` CNAME → `send.forge.rmta.net` | **Resend** | **Se caen los correos de confirmación de reserva** |
+
+   Y al revés: el escaneo vio `autoconfig`, que el sondeo no había adivinado.
+   **Ninguno de los dos basta solo; se usó la unión.** El patrón común es que el
+   escaneo falla con los **CNAME de subdominios que no son `www`** — justo donde
+   viven el DKIM y el correo transaccional.
+
+   **La prueba que vale, y se puede hacer ANTES de cambiar nada:** preguntarle a
+   los nameservers de Cloudflare directamente y comparar contra los de GoDaddy,
+   registro por registro:
+
+   ```
+   Resolve-DnsName <nombre> -Type <tipo> -Server keira.ns.cloudflare.com -DnsOnly
+   Resolve-DnsName <nombre> -Type <tipo> -Server ns57.domaincontrol.com  -DnsOnly
+   ```
+
+   Resultado el 3 de noviembre: **12 de 12 iguales, 0 diferencias.** Con eso el
+   cambio de NS es invisible para quien resuelva.
+
+   **Lo que quedó sin red:** nunca se consiguió el **export de la zona de
+   GoDaddy**. El DNS no se puede listar desde afuera, así que si existe un
+   subdominio que ni el sondeo ni el escaneo adivinaron, no está en Cloudflare.
+   Cerrar ese hueco cuesta un botón en GoDaddy (*DNS → exportar la zona*) y una
+   comparación.
+
+   **MOVIMIENTO A TERMINADO — 3 de noviembre de 2026.** Tony cambió los
+   nameservers en GoDaddy a `keira` y `luke`. Comprobado, no supuesto:
+
+   | Prueba | Resultado |
+   |---|---|
+   | Delegación en el registro | 8.8.8.8 y 9.9.9.9 ya devuelven los NS de Cloudflare |
+   | Los 9 registros por el camino nuevo | **9 de 9**: MX, SPF, los dos DKIM, el CNAME de Resend, webmail, DMARC |
+   | El sitio | `www` → 200 · el apex → 308 → `www` → 200 (sigue en Vercel, como toca) |
+   | Los MX de SiteGround | aceptan conexión en el puerto 25 |
+   | **Resend de punta a punta** | Se envió una reserva de prueba por el dominio real. **Dos correos `enviado`, sin error**: la confirmación al viajero y el aviso interno a `tony@tonyalvarado.com` |
+
+   La reserva de prueba (`VLF-2026-0002`) y su solicitud **se borraron**, y se
+   contó el resultado: 0 y 0. Los dos renglones de `dst_correo` se dejaron a
+   propósito: son la prueba de que el envío funcionó.
+
+   **Las tres direcciones del sistema**, por si hace falta probar otra vez:
+   `hola@visitlafortunacr.com` (de donde SALEN los correos, canal Resend),
+   `tony@tonyalvarado.com` (contacto del destino, **otro dominio**, no lo toca
+   esta migración) y `aalvarado@gmail.com` (el usuario admin).
+
+   **Lo único que no se pudo comprobar desde aquí:** si el correo **llegó a la
+   bandeja o cayó en spam** — `enviado` solo dice que Resend lo aceptó — y el
+   **correo entrante** a un buzón `@visitlafortunacr.com`. Las dos las mira Tony.
+
+   **Movimiento A — mudar la zona a Cloudflare SIN tocar el sitio.**
+   Un Worker con dominio propio exige que la zona viva en Cloudflare, o sea cambiar
+   los NS en GoDaddy. Es la parte peligrosa, por el correo. Orden:
+
+   1. En GoDaddy: *DNS* → **exportar la zona completa** (o fotografiar cada
+      registro). **Esto primero. El DNS no se puede "listar" desde afuera**, así que
+      lo que no esté en el export se pierde sin que nadie se dé cuenta.
+   2. Agregar el sitio en Cloudflare (plan Free). Cloudflare escanea y copia lo que
+      encuentra, **pero no se le cree**: se compara contra el export, uno por uno.
+   3. **Los que no pueden faltar** (verificados el 16 oct 2026): los **tres MX** de
+      `antispam.mailspamprotection.com`, el **SPF**, el CNAME **`default._domainkey`**
+      (DKIM de SiteGround), el CNAME **`send` → `send.forge.rmta.net`** (Resend, por
+      ahí salen las confirmaciones de reserva), y las A de **`mail`** y
+      **`autodiscover`**.
+   4. Dejar `@` y `www` **apuntando a Vercel todavía**, y en **DNS-only (nube gris)**:
+      así Cloudflare no se mete a proxear a Vercel ni hay lío de certificados.
+   5. Recién ahí, cambiar los NS en GoDaddy a los dos de Cloudflare.
+   6. **Verificar antes de seguir:** que los MX resuelvan, **mandar un correo de
+      prueba al dominio y otro desde el sitio**, y que la página siga sirviendo de
+      Vercel. Si algo salió mal, **se devuelven los NS a GoDaddy**: esa es la vuelta
+      atrás de este movimiento.
+
+   **MOVIMIENTO B HECHO — 3 de noviembre de 2026. Y NO se hizo con "custom
+   domains": se hizo con RUTAS, que es lo único que no tumba el sitio.**
+
+   El intento con `domains: [...]` en `cloudflare.config.ts` **falla**:
+
+   ```
+   Hostname 'visitlafortunacr.com' already has externally managed DNS records
+   (A, CNAME, etc). Delete them first or try a different hostname. [100117]
+   ```
+
+   Un custom domain exige **borrar antes** los registros que apuntan al host
+   viejo, y entre borrarlos y que el Worker tome el dominio **el sitio se cae**.
+   Encima, al declarar `domains` cf **apaga `workers.dev` por omisión** y se
+   pierde la URL de pruebas (pasó; se arregla con `workersDev: true`).
+
+   **Lo que sí funciona, sin un segundo de caída:**
+
+   1. Declarar **rutas** en los `triggers` del Worker:
+      `triggers.fetch({ pattern: "visitlafortunacr.com/*", zone: "visitlafortunacr.com" })`
+      y lo mismo para `www`. **Una ruta no hace NADA mientras el registro de DNS
+      esté en DNS-only (nube gris)**, así que desplegar es inofensivo.
+   2. Desplegar. El sitio sigue en Vercel, ni se entera.
+   3. **Encender el proxy (nube naranja)** en la `A` del apex y el `CNAME` de
+      `www`. Ahí, y solo ahí, el Worker empieza a servir. Instantáneo.
+
+   **PARA VOLVER ATRÁS: apagar el proxy de esos dos registros.** Vercel vuelve a
+   servir en segundos, sin desplegar ni tocar un archivo. Es la vuelta atrás más
+   barata que hay, y por eso se eligió este camino.
+
+   **Cómo se comprobó que de verdad sirve el Worker** (y no Vercel detrás del
+   proxy): `/api/salud` por Cloudflare lista **`ANTHROPIC_API_KEY, CRON_SECRET,
+   SUPABASE_SECRET_KEY`** — las llaves del Worker. Vercel tiene otro juego
+   (`VERCEL_ENV`, `VERCEL_GIT_COMMIT_REF`). Las cabeceras lo confirman:
+   `Server: cloudflare` + `CF-RAY`, **sin** `x-vercel-id`.
+
+   **OJO al verificar desde la casa de Tony:** su router cachea DNS y sigue
+   devolviendo la IP de Vercel un buen rato. Para ver la verdad hay que saltarse
+   el DNS:
+   `curl --resolve www.visitlafortunacr.com:443:172.67.219.235 https://www.visitlafortunacr.com/api/salud`
+
+   **Efecto lateral bueno:** antes el apex redirigía 308 a `www` pero el
+   `canonical` apuntaba al apex — estaban peleados. Ahora el apex **sirve 200** y
+   el canonical dice apex: quedaron alineados. `www` también sirve, con canonical
+   al apex, así que Google consolida ahí.
+
+   **Movimiento B — pasar el sitio al Worker.** Instantáneo y reversible.
+   En el Worker → *Settings* → *Domains & Routes* → agregar `visitlafortunacr.com` y
+   `www`. Eso reemplaza los registros que apuntaban a Vercel. Se comprueba que el
+   sitio responde desde el Worker. **Vuelta atrás: borrar el dominio del Worker y
+   devolver `@` y `www` a Vercel.** Minutos, y el correo ni se entera.
+
+   **Movimiento C — las dos banderas de producción, en el mismo momento.**
+   Poner `CLOUDFLARE_ES_PRODUCCION=si` en el Worker (por el panel) **y** quitar los
+   crons de `vercel.json` y desplegar a Vercel. **Juntas, no una hoy y otra mañana**:
+   si las dos plataformas corren `automatizaciones` a la vez, un viajero recibe el
+   mismo seguimiento dos veces. Hasta que se haga C, la pausa del Worker lo
+   protege — y está comprobada en los registros del 16 de octubre.
+
+   **Vercel se deja vivo unas semanas sin dominio**, como red.
+
+7. **Lo que queda después del cambio.** El `vercel.json` sin crons, y la suscripción
+   al BCCR, que **ya está fallando hoy** (`tipo de cambio BCCR: Falta la suscripción
+   al BCCR (BCCR_TOKEN y BCCR_CORREO)`, visto en los registros del Worker el 16 oct).
+   No es de la migración: falla igual en Vercel, porque es el mismo código sin las
+   mismas variables.
+
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
-**Estado verificado por DNS el 11 de septiembre de 2026:**
+**Estado verificado por DNS el 16 de octubre de 2026** (los NS siguen en GoDaddy, como se planeó):
 
 | Registro | Hoy | Qué significa |
 |---|---|---|
 | NS | `ns57` / `ns58.domaincontrol.com` | El DNS lo manda GoDaddy. Es lo que queremos. |
-| A `@` | `13.248.243.5`, `76.223.105.230` | Aparcado en GoDaddy. **Todavía no apunta a Vercel.** |
-| CNAME `www` | → el apex | Hay que **cambiarlo**, no agregar otro. |
-| MX | ninguno | **El correo del dominio no existe todavía.** |
-| TXT | ninguno | No hay SPF. |
+| A `@` | `216.198.79.1` | **Ya apunta a Vercel** (verificado por DNS el 16 oct 2026; la foto de setiembre decía "aparcado en GoDaddy" y quedó vieja). |
+| CNAME `www` | → `14dfe25f1a2b72cf.vercel-dns-017.com` | **Ya hecho.** Apunta a Vercel. |
+| MX | `mx10` / `mx20` / `mx30.antispam.mailspamprotection.com` | **El correo YA existe, en SiteGround.** La foto de setiembre decía "ninguno" y quedó vieja y peligrosa. |
+| TXT (SPF) | `v=spf1 +a +mx include:visitlafortunacr.com.spf.auto.dnssmarthost.net ~all` | SiteGround. |
+| CNAME `default._domainkey` | → `...default.dkim.auto.dnssmarthost.net` | DKIM de SiteGround. |
+| CNAME `send` | → `send.forge.rmta.net` | **Resend.** Por ahí salen los correos del sitio. |
+| A `mail`, A `autodiscover` | `34.174.251.210` | SiteGround. |
+| CNAME `_domainconnect` | → `_domainconnect.gd.domaincontrol.com` | GoDaddy. |
 
-**La trampa:** SiteGround dará el correo del mismo dominio. Si se cambian los
-nameservers a los de Vercel, Vercel se queda con todo el DNS y **los MX
-desaparecen: el correo se cae**. Hoy no hay MX que romper, pero los va a haber,
-así que **los nameservers se quedan en GoDaddy** y solo se cambian dos
-registros.
+**La trampa, que el 16 de octubre de 2026 ya está armada:** SiteGround da el correo
+de este dominio y **ya está funcionando**. Quien mueva los nameservers sin copiar
+primero los MX, el SPF, el DKIM y el CNAME `send` de Resend **le tumba a Tony el
+correo que recibe Y los correos de confirmación de reserva que manda el sitio**.
+Ya no es un riesgo futuro: es el estado de hoy.
 
 En GoDaddy → *My Products* → el dominio → *DNS* → *Manage Zones*:
 

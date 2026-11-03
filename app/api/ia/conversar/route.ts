@@ -2,7 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { hayClaveDeServicio, servicio } from '@/lib/supabase-servidor';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
 import { responderConversacion } from '@/lib/ia/agente';
-import { generarItinerarioParaSolicitud } from '@/lib/ia/planificador';
+import { enSegundoPlano } from '@/lib/segundo-plano';
 import { dominioDeHost } from '@/lib/dominio';
 
 /*
@@ -96,13 +96,7 @@ export async function POST(peticion: NextRequest) {
     const r = await responderConversacion(conversacionId, { origen: 'web' });
     if (r.solicitud_creada?.tipo === 'itinerario') {
       const id = r.solicitud_creada.id;
-      after(async () => {
-        try {
-          await generarItinerarioParaSolicitud(id, 'web');
-        } catch (fallo) {
-          console.error('No se pudo generar el itinerario:', fallo);
-        }
-      });
+      await enSegundoPlano({ tipo: 'itinerario', solicitudId: id, canal: 'web' });
     }
     return NextResponse.json({
       conversacion_id: conversacionId,
