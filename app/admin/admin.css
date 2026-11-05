@@ -63,6 +63,20 @@
 .plegable-bloque > summary:hover::after { border-color: var(--naranja); }
 .plegable-bloque[open] > summary { margin-bottom: 14px; }
 
+/* Los bloques que solo sirven para una ficha publica. Un operador de tours no
+   tiene ficha —lo publico son sus tours— asi que razones, combinaciones,
+   opiniones, fotos y traducciones ahi sobran y solo alargan la pantalla. */
+.solo-ficha { display: none !important; }
+
+/* La tarjeta que explica el hueco. Sin esto los bloques desaparecian sin
+   decir por que, que es peor que tenerlos de mas. */
+.aviso-operador {
+  border: 1px dashed #D6D6D0; border-radius: 10px;
+  padding: 16px 18px; margin-bottom: 18px; background: #FAFAF8;
+}
+.aviso-operador strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.aviso-operador p { margin: 0 0 10px; font-size: 13px; color: #8B8B87; line-height: 1.55; }
+
 @media (max-width: 900px) {
   .barra-guardar { gap: 10px; }
   .barra-guardar span { font-size: 12.5px; }

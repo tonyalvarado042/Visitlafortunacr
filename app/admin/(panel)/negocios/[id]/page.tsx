@@ -98,6 +98,25 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               <div className="campos">
                 <div className="campo"><label>Nombre (no se traduce)</label><input name="nombre" defaultValue={n.nombre} required /></div>
                 <div className="campo"><label>Categoría</label><select name="categoria_id" defaultValue={n.categoria_id ?? ''}>{cats.map((c) => <option key={c.id} value={c.id}>{c.nombre} · {c.seccion}</option>)}</select></div>
+                {/* QUE ES esto, y va arriba de todo porque cambia la pantalla
+                    entera: un operador vende tours, no es un lugar visitable.
+                    No se lista, no tiene ficha publica y no entra al sitemap;
+                    lo publico son sus tours. Estaba enterrada abajo, entre la
+                    comision y las notas internas, donde nadie la veia.
+                    Marcarlo NO lo saca de la venta — para eso esta «vende por
+                    aqui» en Operadores. */}
+                <div className="campo ancho" style={{ padding: '10px 12px', borderRadius: 8, background: '#FAFAF8', border: '1px solid #E6E6E2' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontWeight: 600 }}>
+                    <input type="checkbox" name="es_operador" value="1" defaultChecked={n.es_operador} style={{ marginTop: 3 }} />
+                    <span>
+                      Es un operador de tours, no un lugar visitable
+                      <small style={{ display: 'block', fontWeight: 400, color: '#8B8B87', marginTop: 2 }}>
+                        No sale en el directorio ni tiene ficha propia: lo que se publica son sus tours.
+                        Al guardar desaparecen de esta pantalla los bloques que solo sirven para una ficha.
+                      </small>
+                    </span>
+                  </label>
+                </div>
                 <div className="campo ancho"><label>Resumen (una frase para tarjetas)</label><input name="resumen" defaultValue={n.resumen ?? ''} maxLength={200} /></div>
                 <div className="campo ancho"><label>Descripción (obligatoria para publicar)</label><textarea name="descripcion" defaultValue={n.descripcion ?? ''} style={{ minHeight: 140 }} /></div>
                 <div className="campo"><label>Rango de precio</label><select name="rango_precio" defaultValue={n.rango_precio ?? ''}><option value="">—</option>{['economico', 'moderado', 'alto', 'lujo'].map((x) => <option key={x} value={x}>{x}</option>)}</select></div>
@@ -136,11 +155,6 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                   <label><input type="checkbox" name="es_destacado" value="1" defaultChecked={n.es_destacado} /> Destacado (se rotula como pagado)</label>
                   <label><input type="checkbox" name="es_casa" value="1" defaultChecked={n.es_casa} /> Es de la casa (interno, nunca se muestra)</label>
                   <label><input type="checkbox" name="esta_cerrado" value="1" defaultChecked={n.esta_cerrado} /> Cerrado temporalmente</label>
-                  {/* Un operador vende tours y no es un lugar visitable: no se
-                      lista, no tiene ficha publica y no entra al sitemap. Lo
-                      publico son sus tours. Marcarlo NO lo saca de la venta —
-                      para eso esta «vende por aqui» en Operadores. */}
-                  <label><input type="checkbox" name="es_operador" value="1" defaultChecked={n.es_operador} /> Es operador de tours (no sale en el directorio)</label>
                 </div>
 
                 {/* ---- Los datos legales ----
@@ -206,12 +220,26 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               </dl>
             </div>
 
+            {/* El hueco explicado. Si se esconden cinco bloques sin decir
+                por que, el que entra cree que la pantalla esta rota. */}
+            {n.es_operador && (
+              <div className="aviso-operador">
+                <strong>Esto es un operador, no un lugar visitable.</strong>
+                <p>
+                  Por eso no ves razones, combinaciones, opiniones, fotos ni traducciones:
+                  un operador no tiene ficha propia en el directorio. Lo que se publica
+                  —con sus fotos, su precio y su descripción— son sus tours.
+                </p>
+                <Link href={`/admin/tours?operador=${n.id}`} className="boton secundario chico">Ver sus tours</Link>
+              </div>
+            )}
+
             {/* ---- Las tres razones para elegir ----
                 Es el bloque que más convence de la ficha. No se rellena solo:
                 si nadie las escribe, no sale. Los campos viven dentro del
                 formulario grande y cada botón usa `formAction` — un formulario
                 dentro de otro no es HTML válido. */}
-            <div className="tarjeta">
+            <div className={n.es_operador ? 'tarjeta solo-ficha' : 'tarjeta'}>
               <h2>Razones para elegir <small>{razones?.length ?? 0} de 3 · salen en la ficha</small></h2>
 
               {!razones?.length ? (
@@ -260,7 +288,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
             {/* ---- Con qué se combina ----
                 Lo elige el equipo a mano. Calcularlo por categoría
                 recomendaría al competidor de al lado. */}
-            <div className="tarjeta">
+            <div className={n.es_operador ? 'tarjeta solo-ficha' : 'tarjeta'}>
               <h2>Combinalo con <small>{combina?.length ?? 0} de 6 · salen al final de la ficha</small></h2>
 
               {!combina?.length ? (
@@ -297,7 +325,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               )}
             </div>
 
-            <div className="tarjeta">
+            <div className={n.es_operador ? 'tarjeta solo-ficha' : 'tarjeta'}>
               <h2>Opiniones de afuera <small>{conPlaces ? 'Google conectado' : 'falta la llave de Google Places'}</small></h2>
               {!externas?.length ? <Vacio texto="Nada traído todavía." /> : externas.map((x) => {
                 type Cita = { id: string; autor_nombre: string; calificacion: number | null; texto: string; publicada_en: string | null; destacado: boolean };
@@ -376,7 +404,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
           nada. Lo delata la base: 178 fotos y NINGUNA con autor ni origen,
           que son los campos que solo ese formulario escribe. La regla ya
           estaba escrita dos tarjetas mas arriba, en la de opiniones. */}
-          <div className="tarjeta">
+          <div className={n.es_operador ? 'tarjeta solo-ficha' : 'tarjeta'}>
             <h2>Fotos</h2>
             {!fotos?.length ? <Vacio texto="Sin fotos." /> : (
               <div className="rejilla-fotos">
@@ -463,7 +491,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
           por idioma, por campo— y el que menos se toca. Abierto empujaba todo
           lo demas fuera de la vista. */}
       {otrosIdiomas.length > 0 && (
-        <details className="tarjeta plegable-bloque">
+        <details className={n.es_operador ? 'tarjeta plegable-bloque solo-ficha' : 'tarjeta plegable-bloque'}>
           <summary><h2>Traducciones <small>si falta una, el sitio muestra el {destino.idioma_principal}</small></h2></summary>
           <div className="campos">
             {(['resumen', 'descripcion'] as const).map((campo) => otrosIdiomas.map((idioma) => {
