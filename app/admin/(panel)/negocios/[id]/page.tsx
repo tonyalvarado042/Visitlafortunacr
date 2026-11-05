@@ -204,7 +204,6 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                 <dt>Reseñas</dt><dd>{n.promedio_calificacion ?? '—'} ({n.total_resenas}) · {n.total_vistas} vistas</dd>
                 <dt>Babosa</dt><dd>{n.babosa}</dd>
               </dl>
-              <div className="pie-formulario"><BotonAccion>Guardar todo</BotonAccion></div>
             </div>
 
             {/* ---- Las tres razones para elegir ----
@@ -357,6 +356,17 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
 
           </div>
         </div>
+
+        {/* LA BARRA DE GUARDAR, PEGADA ABAJO.
+            Antes este boton vivia dentro del bloque "Publicacion" de la
+            columna derecha: o sea en la MITAD de una pagina de 500 lineas.
+            Uno editaba las opiniones alla abajo y tenia que subir a buscarlo
+            en la otra columna. Con `sticky` queda siempre a la vista mientras
+            haya formulario en pantalla. */}
+        <div className="barra-guardar">
+          <span>Los cambios de esta pantalla no se guardan solos.</span>
+          <BotonAccion>Guardar todo</BotonAccion>
+        </div>
       </form>
 
       {/* Fotos y leads viven FUERA del formulario grande, y no es cosmetico:
@@ -410,18 +420,19 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
             <form action={subirFoto} className="subir-foto">
               <input type="hidden" name="id" value={id} />
               <div className="campo">
-                <label>Agregar una foto</label>
-                <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" required />
+                <label>Agregar fotos <small style={{ fontWeight: 400, color: '#8B8B87' }}>podés elegir varias de un solo</small></label>
+                <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
               </div>
               <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={n.nombre} /></div>
               <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra" /></div>
               <div className="campo"><label>Licencia</label><input name="licencia" placeholder="CC BY 4.0, cedida por el negocio…" /></div>
               <div className="campo"><label>Enlace de origen</label><input name="fuente_url" placeholder="https://…" /></div>
               <p className="gris" style={{ fontSize: 12, margin: '6px 0 10px' }}>
-                Si ponés enlace de origen, el autor y la licencia son obligatorios. Se
-                redimensiona a 1600 px y se convierte a webp al subir.
+                Si ponés enlace de origen, el autor y la licencia son obligatorios, y se
+                aplican a TODAS las que subas de un saque. Cada una se redimensiona a
+                1600 px y se convierte a webp. Si alguna falla, las demás entran igual.
               </p>
-              <BotonAccion>Subir foto</BotonAccion>
+              <BotonAccion>Subir fotos</BotonAccion>
             </form>
 
             {/* Y la via de a muchas: pegar las direcciones del sitio del

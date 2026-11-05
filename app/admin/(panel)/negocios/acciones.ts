@@ -171,11 +171,27 @@ const ANCHO_MAX = 1600;
  * Se redimensiona y se pasa a webp antes de subir: el bucket corta en 10 MB y
  * una foto de teléfono los pasa sin esfuerzo.
  */
+/*
+ * Sube UNA O VARIAS fotos de un saque.
+ *
+ * Antes leia `datos.get('archivo')` —la primera y nada mas— y el input no
+ * tenia `multiple`: habia que repetir todo el formulario por cada foto,
+ * incluido el credito y la licencia. Con ocho fotos eran ocho vueltas.
+ *
+ * Los datos de autoria se piden UNA vez y se aplican a toda la tanda, que es
+ * como se sube en la vida real: un lote sale de la misma fuente.
+ *
+ * Y NO se corta en la primera que falle. Si la numero 3 esta rota, las otras
+ * siete entran igual y se anota cual fallo. Cortar en seco dejaba al que subia
+ * sin saber cuales habian pasado.
+ */
 export async function subirFoto(datos: FormData) {
   const { db, destino } = await contextoPanel('negocios');
   const id = texto(datos, 'id');
-  const archivo = datos.get('archivo');
-  if (!esUuid(id) || !(archivo instanceof File) || !archivo.size) return;
+  if (!esUuid(id)) return;
+
+  const archivos = datos.getAll('archivo').filter((a): a is File => a instanceof File && a.size > 0);
+  if (!archivos.length) return;
 
   const { data: negocio } = await db.from('dst_negocio')
     .select('id, babosa, nombre').eq('id', id).eq('destino_id', destino.id).maybeSingle();
@@ -188,41 +204,56 @@ export async function subirFoto(datos: FormData) {
   const fuente = texto(datos, 'fuente_url') || null;
   if (fuente && (!credito || !licencia)) return;
 
-  let webp: Buffer;
-  try {
-    const sharp = (await import('sharp')).default;
-    webp = await sharp(Buffer.from(await archivo.arrayBuffer()))
-      .rotate()
-      .resize({ width: ANCHO_MAX, withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer();
-  } catch (e) {
-    console.error('subirFoto: no se pudo procesar la imagen', e);
-    return;
-  }
+  const alternativo = texto(datos, 'texto_alternativo') || negocio.nombre;
 
-  const base = archivo.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60) || 'foto';
-  const ruta = `${destino.babosa}/${negocio.babosa}/${base}-${Date.now().toString(36)}.webp`;
-
-  const { error: eSubida } = await db.storage.from(BUCKET).upload(ruta, webp, { contentType: 'image/webp' });
-  if (eSubida) { console.error('subirFoto:', eSubida.message); return; }
-
-  const { data: publica } = db.storage.from(BUCKET).getPublicUrl(ruta);
+  /* El contador arranca del total que YA hay y sube con cada una: si no, las
+     de la misma tanda nacerian todas con el mismo `orden` y la galeria las
+     mostraria en cualquier lado. */
   const { count } = await db.from('dst_negocio_foto')
     .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+  let siguiente = count ?? 0;
 
-  const { error } = await db.from('dst_negocio_foto').insert({
-    negocio_id: id,
-    url: publica.publicUrl,
-    orden: count ?? 0,
-    // La primera foto real que entra manda; las genéricas nunca son portada.
-    es_portada: !count,
-    es_generica: false,
-    credito, licencia, fuente_url: fuente,
-    texto_alternativo_es: texto(datos, 'texto_alternativo') || negocio.nombre,
-    texto_alternativo_en: texto(datos, 'texto_alternativo') || negocio.nombre,
-  });
-  if (error) console.error('subirFoto fila:', error.message);
+  const sharp = (await import('sharp')).default;
+  const fallaron: string[] = [];
+
+  for (const archivo of archivos) {
+    try {
+      const webp = await sharp(Buffer.from(await archivo.arrayBuffer()))
+        .rotate()
+        .resize({ width: ANCHO_MAX, withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+
+      const base = archivo.name.replace(/\.[^.]+$/, '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').slice(0, 60) || 'foto';
+      const ruta = `${destino.babosa}/${negocio.babosa}/${base}-${Date.now().toString(36)}-${siguiente}.webp`;
+
+      const { error: eSubida } = await db.storage.from(BUCKET)
+        .upload(ruta, webp, { contentType: 'image/webp' });
+      if (eSubida) throw new Error(eSubida.message);
+
+      const { data: publica } = db.storage.from(BUCKET).getPublicUrl(ruta);
+      const { error } = await db.from('dst_negocio_foto').insert({
+        negocio_id: id,
+        url: publica.publicUrl,
+        orden: siguiente,
+        // La primera foto real que entra manda; las genéricas nunca son portada.
+        es_portada: siguiente === 0,
+        es_generica: false,
+        credito, licencia, fuente_url: fuente,
+        texto_alternativo_es: alternativo,
+        texto_alternativo_en: alternativo,
+      });
+      if (error) throw new Error(error.message);
+
+      siguiente += 1;
+    } catch (fallo) {
+      fallaron.push(archivo.name);
+      console.error('subirFoto:', archivo.name, fallo instanceof Error ? fallo.message : fallo);
+    }
+  }
+
+  if (fallaron.length) console.error(`subirFoto: no entraron ${fallaron.length} de ${archivos.length}:`, fallaron.join(', '));
   refrescar(id);
 }
 

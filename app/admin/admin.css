@@ -28,6 +28,26 @@
 
 .contenido { padding: 28px 34px 70px; max-width: 1400px; min-width: 0; }
 
+/* La barra de guardar de la ficha de negocio. Pegada al fondo de la ventana
+   mientras el formulario este en pantalla: el boton vivia en la mitad de una
+   pagina de 500 lineas y habia que ir a buscarlo. */
+.barra-guardar {
+  position: sticky; bottom: 0; z-index: 40;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  margin: 26px 0 0; padding: 12px 16px;
+  border: 1px solid var(--borde, #E6E6E2); border-radius: 10px;
+  background: rgba(255,255,255,.94); backdrop-filter: blur(10px);
+  box-shadow: 0 -6px 20px rgba(0,0,0,.06);
+}
+.barra-guardar span { font-size: 13px; color: #8B8B87; }
+.barra-guardar .boton { margin-left: auto; }
+
+@media (max-width: 900px) {
+  .barra-guardar { gap: 10px; }
+  .barra-guardar span { font-size: 12.5px; }
+  .barra-guardar .boton { margin-left: 0; width: 100%; justify-content: center; }
+}
+
 /* El aviso de negocios esperando aprobacion, arriba del tablero. Naranja y no
    rojo: no es un error, es trabajo acumulado. */
 .aviso-panel {
