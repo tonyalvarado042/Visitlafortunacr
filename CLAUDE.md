@@ -716,6 +716,40 @@ URL `*.workers.dev`, en paralelo, con la misma base de Supabase.
    No es de la migración: falla igual en Vercel, porque es el mismo código sin las
    mismas variables.
 
+### El slug de un negocio vive en DOS tablas. Cambiar una sola lo rompe.
+
+**4 de noviembre de 2026, y lo rompí yo.** Renombré `dst_negocio.babosa` de
+`jalapas-restaurant-e8cf` a `jalapas-restaurant` para que la URL quedara limpia.
+Quedó a medias y nadie avisó:
+
+| Dónde vive | Qué pasó |
+|---|---|
+| `dst_negocio.babosa` | lo cambié |
+| **`dst_ruta.babosa`** (una fila por idioma, 5) | **siguió con el viejo** |
+
+El resultado: **las dos URL respondían 200** —contenido duplicado— y el
+`canonical` de las dos apuntaba al slug viejo, o sea Google habría indexado el
+que ya no existía. En un sitio que vive del SEO eso es daño real.
+
+**No hay función para renombrar un slug.** `crear_mi_negocio` crea las filas de
+`dst_ruta` al nacer y nadie las toca después: renombrar es una operación que el
+sistema **no contempla**. Si hay que hacerlo igual, hay que tocar las dos tablas
+y después comprobar que digan lo mismo:
+
+```sql
+select n.babosa, string_agg(distinct r.babosa, ' | ')
+  from destinos.dst_negocio n
+  left join destinos.dst_ruta r on r.entidad_id = n.id and r.entidad = 'negocio'
+ where n.id = '...' group by n.babosa;
+```
+
+**Y el enlace viejo muere igual: `dst_redireccion` es una tabla muerta.** Existe,
+tiene las columnas (`babosa_vieja`, `babosa_nueva`, `idioma`) y **ningún código
+la lee** — se comprobó buscándola en todo `app/` y `lib/`. Así que cualquier
+cambio de slug rompe en silencio los enlaces que ya andaban por ahí. O se
+conecta, o se borra, pero dejarla ahí hace creer que hay una red que no existe.
+De paso: su `check` solo acepta `es` y `en`, aunque el sitio tiene cinco idiomas.
+
 ### GoDaddy · apuntar visitlafortunacr.com a Vercel sin romper el correo
 
 **Estado verificado por DNS el 16 de octubre de 2026** (los NS siguen en GoDaddy, como se planeó):
