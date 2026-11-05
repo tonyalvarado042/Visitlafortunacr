@@ -105,17 +105,20 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                     comision y las notas internas, donde nadie la veia.
                     Marcarlo NO lo saca de la venta — para eso esta «vende por
                     aqui» en Operadores. */}
-                <div className="campo ancho" style={{ padding: '10px 12px', borderRadius: 8, background: '#FAFAF8', border: '1px solid #E6E6E2' }}>
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontWeight: 600 }}>
-                    <input type="checkbox" name="es_operador" value="1" defaultChecked={n.es_operador} style={{ marginTop: 3 }} />
-                    <span>
-                      Es un operador de tours, no un lugar visitable
-                      <small style={{ display: 'block', fontWeight: 400, color: '#8B8B87', marginTop: 2 }}>
-                        No sale en el directorio ni tiene ficha propia: lo que se publica son sus tours.
-                        Al guardar desaparecen de esta pantalla los bloques que solo sirven para una ficha.
-                      </small>
-                    </span>
-                  </label>
+                <div className="campo ancho">
+                  <label>¿Qué es?</label>
+                  {/* Desplegable y no casilla: en una casilla el estado «no
+                      marcado» es implicito y hay que deducirlo. Aca los dos
+                      estados se leen, que es lo que corresponde a una decision
+                      que cambia la pantalla entera. */}
+                  <select name="es_operador" defaultValue={n.es_operador ? '1' : '0'}>
+                    <option value="0">Un negocio · sale en el directorio con su ficha</option>
+                    <option value="1">Un operador de tours · no sale, lo que se publica son sus tours</option>
+                  </select>
+                  <small style={{ display: 'block', color: '#8B8B87', marginTop: 5 }}>
+                    Al guardar como operador desaparecen de esta pantalla los bloques que solo
+                    sirven para una ficha: razones, combinaciones, opiniones, fotos y traducciones.
+                  </small>
                 </div>
                 <div className="campo ancho"><label>Resumen (una frase para tarjetas)</label><input name="resumen" defaultValue={n.resumen ?? ''} maxLength={200} /></div>
                 <div className="campo ancho"><label>Descripción (obligatoria para publicar)</label><textarea name="descripcion" defaultValue={n.descripcion ?? ''} style={{ minHeight: 140 }} /></div>
