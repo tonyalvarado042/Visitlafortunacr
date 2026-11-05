@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, combinaCon, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, categoriasDe, negocioPorBabosa, babosaNuevaDe, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, combinaCon, SIMBOLO_PRECIO } from '@/lib/destino';
 import { nota, resenasDe } from '@/lib/resenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -44,7 +44,31 @@ export default async function Ficha({ params }: { params: Parametros }) {
   const { idioma, babosa } = await params;
   const destino = await destinoActual();
   const negocio = await negocioPorBabosa(destino, babosa, idioma);
-  if (!negocio) notFound();
+
+  /* Antes de rendirse: ¿esta babosa vieja lleva a una nueva? La tabla
+     `dst_redireccion` existia desde siempre pero NADIE la leia, asi que
+     cambiarle la babosa a una ficha mataba sus enlaces viejos en silencio —y
+     con ellos el posicionamiento en Google, que es de lo que vive el sitio.
+
+     Se consulta SOLO aca, cuando ya no aparecio: en una visita normal no
+     cuesta nada.
+
+     `permanentRedirect` manda un 308. Google lo entiende igual que un 301 y
+     se lleva el posicionamiento a la direccion nueva. Un 307 NO sirve: le
+     dice a Google que la mudanza es temporal y no mueve nada. */
+  if (!negocio) {
+    const nueva = await babosaNuevaDe(destino, babosa, idioma);
+    if (nueva && nueva !== babosa) {
+      const destinoFicha = await negocioPorBabosa(destino, nueva, idioma);
+      /* Se arma la ruta con la categoria QUE TIENE HOY, no con la de la URL
+         vieja: una ficha puede haber cambiado de categoria ademas de babosa,
+         y mandar a la categoria vieja seria otro 404. */
+      if (destinoFicha) {
+        permanentRedirect(`/${idioma}/${destinoFicha.categoria_babosa}/${destinoFicha.babosa}`);
+      }
+    }
+    notFound();
+  }
 
   const [categorias, externas, propias, secciones, horario, etiquetas, fotos, tours, razones, combina] = await Promise.all([
     categoriasDe(destino, idioma),

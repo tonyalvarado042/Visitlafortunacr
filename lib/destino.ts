@@ -214,6 +214,53 @@ export async function negocioPorBabosa(
   return filas[0] ?? null;
 }
 
+/**
+ * ¿La babosa vieja de una ficha lleva a una nueva?
+ *
+ * POR QUE EXISTE ESTO: `dst_redireccion` estaba en la base desde siempre, con
+ * sus políticas de lectura pública y todo, pero **ningún código la leía**. Se
+ * buscó en todo `app/` y `lib/` y no aparecía. O sea: cambiar la babosa de una
+ * ficha mataba sus enlaces viejos en silencio. Para un sitio que vive del SEO
+ * eso es perder de un día para otro el posicionamiento que costó meses, sin un
+ * error en ningún lado que avise.
+ *
+ * Se consulta SOLO cuando la ficha no apareció, así que no cuesta nada en las
+ * visitas normales.
+ *
+ * Sigue hasta 3 saltos: si A quedó apuntando a B y despues B a C, el que tenía
+ * el enlace de A llega a C igual. El tope corta cualquier cadena circular; sin
+ * él, dos filas que se apunten entre sí cuelgan la petición para siempre.
+ */
+export async function babosaNuevaDe(
+  destino: Destino,
+  babosaVieja: string,
+  idioma: Idioma
+): Promise<string | null> {
+  let actual = babosaVieja;
+
+  for (let salto = 0; salto < 3; salto += 1) {
+    const { data, error } = await supabase
+      .from('dst_redireccion')
+      .select('babosa_nueva')
+      .eq('destino_id', destino.id)
+      .eq('babosa_vieja', actual)
+      .eq('idioma', idioma)
+      .maybeSingle();
+
+    /* Un fallo acá NO debe tumbar la página: lo peor que puede pasar es que no
+       haya redirección y se muestre el 404 que ya se iba a mostrar. */
+    if (error) {
+      console.error('babosaNuevaDe:', error.message);
+      return null;
+    }
+    if (!data?.babosa_nueva) return salto === 0 ? null : actual;
+
+    actual = data.babosa_nueva;
+  }
+
+  return actual;
+}
+
 export type Seccion = { clave: string; orden: number; contenido: string };
 
 /**
