@@ -38,6 +38,8 @@ export type MiNegocio = {
   promedio_calificacion: number | null;
   total_vistas: number;
   mi_rol: 'duenno' | 'encargado';
+  /** Cuando el dueño avisó que terminó de cargar. Null = todavía no avisó. */
+  revision_pedida_en: string | null;
 };
 
 export type ResenaDeMiNegocio = {
@@ -117,7 +119,7 @@ export async function resenasDeMiNegocio(negocioId: string): Promise<ResenaDeMiN
 /** Cómo se le explica al dueño en qué estado está su ficha. */
 export const ESTADO_FICHA: Record<string, { texto: string; detalle: string; color: string }> = {
   borrador:  { texto: 'Borrador',   detalle: 'Todavía no la mandaste a revisar.',                 color: '#8B8B87' },
-  pendiente: { texto: 'En revisión', detalle: 'La estamos revisando. Te avisamos al publicarla.',  color: '#FF6A00' },
+  pendiente: { texto: 'Sin publicar', detalle: 'Todavía no aparece en el directorio.',             color: '#FF6A00' },
   publicado: { texto: 'Publicada',  detalle: 'Ya aparece en el directorio.',                      color: '#66BB2E' },
   archivado: { texto: 'Archivada',  detalle: 'No aparece en el directorio. Escribinos si es un error.', color: '#B42318' },
 };

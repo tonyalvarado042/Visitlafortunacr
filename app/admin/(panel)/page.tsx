@@ -20,7 +20,7 @@ type Tablero = {
 export default async function PaginaTablero() {
   const { usuario, destino, db } = await contextoPanel('tablero');
 
-  const [{ data: tablero }, { data: calientes }, { data: esperando }, { data: tareas }, { data: pendientesManual }] = await Promise.all([
+  const [{ data: tablero }, { data: calientes }, { data: esperando }, { data: tareas }, { data: pendientesManual }, { data: porAprobar }] = await Promise.all([
     db.rpc('tablero', { p_destino_id: destino.id }),
     db.from('dst_solicitud')
       .select('id, tipo, etapa, puntaje_ia, temperatura, siguiente_accion, siguiente_accion_el, valor_estimado_usd, creado_en, viajero:dst_viajero(nombre, email, whatsapp, llega_el)')
@@ -35,6 +35,15 @@ export default async function PaginaTablero() {
       .eq('destino_id', destino.id).eq('esta_hecha', false)
       .lte('vence_el', new Date().toISOString().slice(0, 10)).order('vence_el').limit(8),
     db.from('dst_mensaje').select('id', { count: 'exact', head: true }).eq('destino_id', destino.id).eq('estado_envio', 'pendiente'),
+    /* Los que estan esperando que alguien los apruebe. Se traen el nombre y si
+       el dueño ya aviso, porque el aviso de abajo necesita distinguirlos: un
+       dueño que aviso lleva esperando de verdad; uno que no, quiza ni termino
+       de cargar. */
+    db.from('dst_negocio')
+      .select('id, nombre, revision_pedida_en, creado_en')
+      .eq('destino_id', destino.id).eq('estado_publicacion', 'pendiente')
+      .order('revision_pedida_en', { ascending: true, nullsFirst: false })
+      .order('creado_en').limit(20),
   ]);
 
   const t = (tablero ?? null) as Tablero | null;
@@ -42,8 +51,26 @@ export default async function PaginaTablero() {
   const variacion = t && t.leads_30d_previos > 0 ? Math.round(((t.leads_30d - t.leads_30d_previos) / t.leads_30d_previos) * 100) : null;
   const pendientesEnvio = pendientesManual === null ? 0 : (pendientesManual as unknown as { count?: number })?.count ?? 0;
 
+  const avisaron = (porAprobar ?? []).filter((x) => x.revision_pedida_en).length;
+
   return (
     <>
+      {!!porAprobar?.length && (
+        /* Antes no habia NADA que dijera que estos existian: habia cinco
+           esperando, uno desde hacia 26 dias, y para enterarse habia que
+           acordarse de ir a filtrar la lista de negocios a mano. */
+        <div className="aviso-panel">
+          <strong>
+            {porAprobar.length === 1
+              ? 'Hay 1 negocio esperando aprobación'
+              : `Hay ${porAprobar.length} negocios esperando aprobación`}
+            {avisaron > 0 && ` · ${avisaron} ya avisaron que terminaron`}
+          </strong>
+          <span>{porAprobar.slice(0, 4).map((x) => x.nombre).join(' · ')}{porAprobar.length > 4 ? ' …' : ''}</span>
+          <Link href="/admin/negocios?estado=pendiente" className="boton chico">Revisarlos</Link>
+        </div>
+      )}
+
       <Cabecera titulo={`Hola, ${usuario.nombre.split(' ')[0]}`} sub={`${destino.nombre} · ${fecha(new Date().toISOString(), destino.zona_horaria)}`}>
         <Link href="/admin/leads" className="boton secundario">Ver leads</Link>
         <Link href="/admin/ia/aprobaciones" className="boton">Por aprobar {t ? `(${t.seguimientos_pendientes.por_aprobar})` : ''}</Link>

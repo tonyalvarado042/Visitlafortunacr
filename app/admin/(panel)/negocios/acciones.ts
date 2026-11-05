@@ -85,6 +85,41 @@ export async function editarNegocio(datos: FormData) {
   refrescar(id);
 }
 
+/*
+ * Publicar de un clic. Antes habia que abrir el negocio, bajar por todo el
+ * formulario de edicion, encontrar el desplegable `estado_publicacion`,
+ * cambiarlo y guardar. Cinco negocios llevaban semanas esperando por eso.
+ *
+ * NO toca `estado_verificacion` a proposito: publicar es decir "esta ficha
+ * sirve para el sitio"; verificar es decir "comprobamos que este señor es el
+ * dueño". Son dos cosas y juntarlas haria que publicar afirme algo que nadie
+ * comprobo. Quien quiera verificar lo hace aparte, en el formulario.
+ *
+ * Tampoco bloquea si falta la descripcion o las fotos: la pantalla lo avisa
+ * ANTES, y a veces se publica igual a proposito (paso con Jalapas). La
+ * decision es de quien aprueba, no del codigo.
+ */
+export async function publicarNegocio(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  const { data: antes } = await db.from('dst_negocio')
+    .select('estado_publicacion, publicado_en')
+    .eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!antes || antes.estado_publicacion === 'publicado') return;
+
+  const { error } = await db.from('dst_negocio').update({
+    estado_publicacion: 'publicado',
+    /* Si ya estuvo publicado antes se respeta la fecha vieja: `publicado_en`
+       es "desde cuando existe para Google", no "cuando lo toque yo". */
+    publicado_en: antes.publicado_en ?? new Date().toISOString(),
+  }).eq('id', id).eq('destino_id', destino.id);
+
+  if (error) console.error('publicarNegocio:', error.message);
+  refrescar(id);
+}
+
 export async function traducirCampo(datos: FormData) {
   const { db } = await contextoPanel('negocios');
   const entidad = texto(datos, 'entidad');

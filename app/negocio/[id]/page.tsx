@@ -4,6 +4,7 @@ import { fotosDeMiNegocio, miNegocio, pedidosDeMiNegocio, resenasDeMiNegocio, mi
 import { DatosFiscales } from './DatosFiscales';
 import { FormularioNegocio } from './FormularioNegocio';
 import { Fotos } from './Fotos';
+import { PedirRevision } from './PedirRevision';
 import { Resenas } from './Resenas';
 
 export const dynamic = 'force-dynamic';
@@ -96,6 +97,12 @@ export default async function EditarMiNegocio({
         negocioBabosa={negocio.babosa}
         fotos={fotos}
       />
+
+      {/* Va DESPUES de las fotos a proposito: pedir la revision exige tener al
+          menos una, asi que el boton aparece justo donde acaba de cargarlas. */}
+      {negocio.estado_publicacion !== 'publicado' && negocio.estado_publicacion !== 'archivado' && (
+        <PedirRevision negocioId={negocio.id} yaPidio={negocio.revision_pedida_en} />
+      )}
 
       {negocio.estado_publicacion === 'publicado' && (
         <Resenas negocioId={negocio.id} resenas={resenas} />

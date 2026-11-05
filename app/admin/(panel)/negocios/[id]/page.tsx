@@ -4,7 +4,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
+import { editarNegocio, publicarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
@@ -52,9 +52,29 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     tradHijas?.find((t) => t.entidad === entidad && t.entidad_id === entidadId
                         && t.campo === campo && t.idioma === idioma);
 
+  /* Lo que le falta para ser una ficha presentable. NO bloquea publicar: se
+     avisa y decide la persona. Pero decidirlo A CIEGAS era el problema. */
+  const faltantes = [
+    !String(n.descripcion ?? '').trim() && 'la descripción',
+    !fotos?.length && 'fotos',
+  ].filter(Boolean) as string[];
+
   return (
     <>
-      <Cabecera titulo={n.nombre} migas={[{ ruta: '/admin/negocios', nombre: 'Negocios' }]} sub={<><Etiqueta suave>{n.estado_publicacion}</Etiqueta> <Etiqueta suave>{n.estado_verificacion}</Etiqueta> · {n.membresia} · actualizado {relativo(n.actualizado_en)}</>}>
+      <Cabecera titulo={n.nombre} migas={[{ ruta: '/admin/negocios', nombre: 'Negocios' }]} sub={<><Etiqueta suave>{n.estado_publicacion}</Etiqueta> <Etiqueta suave>{n.estado_verificacion}</Etiqueta>{n.revision_pedida_en ? <> <Etiqueta color="bien">el dueño pidió revisión {relativo(n.revision_pedida_en)}</Etiqueta></> : null}{n.estado_publicacion !== 'publicado' && faltantes.length ? <> <Etiqueta color="alerta">le falta {faltantes.join(' y ')}</Etiqueta></> : null} · {n.membresia} · actualizado {relativo(n.actualizado_en)}</>}>
+        {n.estado_publicacion !== 'publicado' && (
+          <form action={publicarNegocio}>
+            <input type="hidden" name="id" value={n.id} />
+            <BotonAccion
+              confirmar={faltantes.length
+                ? `A esta ficha le falta ${faltantes.join(' y ')}. ¿Publicarla igual?`
+                : undefined}
+            >
+              {faltantes.length ? 'Publicar igual' : 'Publicar'}
+            </BotonAccion>
+          </form>
+        )}
+
         {/* El enlace a la ficha de verdad. Antes armaba
             `https://dominio/es/es` con un ternario que siempre daba vacío y el
             idioma pegado dos veces: el botón decía «Ver sitio» y llevaba a un

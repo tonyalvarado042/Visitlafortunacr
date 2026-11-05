@@ -104,6 +104,35 @@ export async function guardarMiNegocio(_previo: EstadoComercio, datos: FormData)
   return { ok: 'Guardado.' };
 }
 
+/*
+ * "Ya termine, revisen mi ficha."
+ *
+ * EL HUECO QUE TAPA: el negocio nace en 'pendiente' el mismo minuto que el
+ * dueño lo crea, con la ficha vacia. Entonces 'pendiente' no distinguia entre
+ * "recien creado y sin nada" y "listo para que lo miren", y al equipo se le
+ * acumulaban sin saber cual era cual: habia cinco esperando, uno desde hacia
+ * 26 dias. El dueño cargaba todo y quedaba mudo, sin forma de avisar.
+ *
+ * La funcion de la base valida ANTES de avisar (descripcion y al menos una
+ * foto) y devuelve el motivo en castellano, asi que lo que llega aca ya viene
+ * listo para mostrarse tal cual.
+ */
+export async function pedirRevisionDeMiNegocio(_previo: EstadoComercio, datos: FormData): Promise<EstadoComercio> {
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return { error: 'Falta el negocio.' };
+
+  const db = await sesion();
+  const { error } = await db.rpc('pedir_revision_de_mi_negocio', { p_negocio_id: id });
+  if (error) {
+    console.error('pedir_revision_de_mi_negocio:', error.message);
+    return { error: error.message };
+  }
+
+  revalidatePath(`/negocio/${id}`);
+  revalidatePath('/negocio');
+  return { ok: 'Listo, le avisamos al equipo. Te escribimos cuando la revisen.' };
+}
+
 export async function responderResena(_previo: EstadoComercio, datos: FormData): Promise<EstadoComercio> {
   const resenaId = texto(datos, 'resena_id');
   const negocioId = texto(datos, 'negocio_id');
