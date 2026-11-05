@@ -175,15 +175,6 @@ export default async function Ficha({ params }: { params: Parametros }) {
 
             <FotosArriba fotos={fotos} idioma={idioma} />
 
-            {negocio.video_url && (
-              <VideoNegocio
-                url={negocio.video_url}
-                portada={negocio.video_portada_url}
-                nombre={negocio.nombre}
-                idioma={idioma}
-              />
-            )}
-
             {negocio.descripcion && (
               <>
                 <h2 style={{ fontSize: 24, marginBottom: 14 }}>{t('sobre', idioma)} {negocio.nombre}</h2>
@@ -192,6 +183,24 @@ export default async function Ficha({ params }: { params: Parametros }) {
             )}
             {negocio.como_llegar && (
               <p style={{ fontSize: 15, color: 'var(--humo)', marginTop: 18 }}>{negocio.como_llegar}</p>
+            )}
+
+            {/* El video va DESPUES de la descripcion, no antes.
+                Estaba arriba del todo y en una ficha sin fotos —como Jalapas,
+                que tiene cero— se comia la pantalla entera: lo primero que
+                veia alguien era un reproductor, y el texto que dice QUE ES el
+                lugar quedaba debajo del pliegue. Primero se lee de que se
+                trata, despues se mira.
+
+                Al que entro justamente a ver el video no se le pierde: arriba
+                sigue el boton `BotonVerVideo`, que baja hasta aca. */}
+            {negocio.video_url && (
+              <VideoNegocio
+                url={negocio.video_url}
+                portada={negocio.video_portada_url}
+                nombre={negocio.nombre}
+                idioma={idioma}
+              />
             )}
 
             {/* Por qué ESTA y no otra. Es la única pregunta que importa cuando
