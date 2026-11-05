@@ -58,6 +58,10 @@ export async function editarNegocio(datos: FormData) {
     telefono: telefono('telefono'),
     telefono_whatsapp: telefono('telefono_whatsapp'),
     sitio_web: texto(datos, 'sitio_web') || null,
+    /* La base tiene un check: si no parece una URL de esa red, revienta al
+       guardar en vez de dejar un enlace roto en la ficha publica. */
+    facebook_url: texto(datos, 'facebook_url') || null,
+    instagram_url: texto(datos, 'instagram_url') || null,
     direccion: texto(datos, 'direccion') || null,
     como_llegar: texto(datos, 'como_llegar') || null,
     latitud: numero(datos, 'latitud'),

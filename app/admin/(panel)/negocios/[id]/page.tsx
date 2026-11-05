@@ -114,6 +114,8 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                 <div className="campo"><label>Teléfono</label><input name="telefono" defaultValue={n.telefono ?? ''} placeholder="+506…" /></div>
                 <div className="campo"><label>WhatsApp</label><input name="telefono_whatsapp" defaultValue={n.telefono_whatsapp ?? ''} placeholder="+506…" /></div>
                 <div className="campo"><label>Sitio web</label><input name="sitio_web" defaultValue={n.sitio_web ?? ''} placeholder="https://" /></div>
+                <div className="campo"><label>Facebook</label><input name="facebook_url" defaultValue={n.facebook_url ?? ''} placeholder="https://www.facebook.com/..." /></div>
+                <div className="campo"><label>Instagram</label><input name="instagram_url" defaultValue={n.instagram_url ?? ''} placeholder="https://www.instagram.com/..." /></div>
                 <div className="campo ancho"><label>Dirección</label><input name="direccion" defaultValue={n.direccion ?? ''} /></div>
                 <div className="campo ancho"><label>Cómo llegar</label><input name="como_llegar" defaultValue={n.como_llegar ?? ''} /></div>
                 <div className="campo"><label>Latitud</label><input type="number" step="any" name="latitud" defaultValue={n.latitud ?? ''} /></div>
