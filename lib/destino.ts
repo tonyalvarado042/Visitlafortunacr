@@ -490,6 +490,10 @@ export type TourDeNegocio = {
   precio_adulto_usd: number;
   recoge_en_hotel: boolean;
   imagen_url: string | null;
+  /* El video del tour. Hasta noviembre de 2026 solo los negocios tenian uno:
+     un operador con video de su tour no tenia donde ponerlo. */
+  video_url: string | null;
+  video_portada_url: string | null;
 };
 
 /*
@@ -544,7 +548,7 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
     .select(`id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
-             precio_adulto_usd, precio_nino_usd, imagen_url,
+             precio_adulto_usd, precio_nino_usd, imagen_url, video_url, video_portada_url,
              negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
     .eq('destino_id', destino.id)
     .eq('babosa', babosa)

@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, tourPorBabosa } from '@/lib/destino';
 import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
+import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
 import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
@@ -138,6 +139,20 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                    parsea HTML de nadie, se escribe acá. Ver lib/texto-rico.ts. */
                 <div className="blog-prosa" style={{ marginTop: 28 }}
                      dangerouslySetInnerHTML={{ __html: cuerpo }} />
+              )}
+
+              {/* El video, DESPUES de la descripcion y no antes: primero se
+                  lee de que se trata el tour, despues se mira. Mismo orden que
+                  en la ficha de negocio, por la misma razon.
+                  Se reusa VideoNegocio: ya resuelve YouTube, Vimeo y archivo
+                  del bucket, asi que el tour no necesita su propio reproductor. */}
+              {tour.video_url && (
+                <VideoNegocio
+                  url={tour.video_url}
+                  portada={tour.video_portada_url}
+                  nombre={tour.nombre}
+                  idioma={idioma}
+                />
               )}
 
               {(incluye.length > 0 || noIncluye.length > 0) && (

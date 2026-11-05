@@ -67,6 +67,8 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo"><label>Idiomas del guía (coma)</label><input name="idiomas_guia" defaultValue={(t.idiomas_guia ?? []).join(', ')} placeholder="es, en" /></div>
                 <div className="campo"><label>Cancelación libre (horas antes)</label><input type="number" name="cancelacion_libre_horas" defaultValue={t.cancelacion_libre_horas ?? ''} /></div>
                 <div className="campo"><label>Imagen (URL)</label><input name="imagen_url" defaultValue={t.imagen_url ?? ''} /></div>
+                <div className="campo"><label>Video (URL) <small style={{ fontWeight: 400, color: '#8B8B87' }}>YouTube, Vimeo o un archivo</small></label><input name="video_url" defaultValue={t.video_url ?? ''} placeholder="https://www.youtube.com/watch?v=…" /></div>
+                <div className="campo"><label>Portada del video (URL) <small style={{ fontWeight: 400, color: '#8B8B87' }}>opcional</small></label><input name="video_portada_url" defaultValue={t.video_portada_url ?? ''} placeholder="https://" /></div>
                 <div className="campo ancho"><label><input type="checkbox" name="recoge_en_hotel" value="1" defaultChecked={!!t.recoge_en_hotel} /> Recoge en el hotel</label></div>
               </div>
             </div>

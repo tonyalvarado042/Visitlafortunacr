@@ -65,6 +65,10 @@ export async function editarTour(datos: FormData) {
     comision_pct: numero(datos, 'comision_pct'),
     cancelacion_libre_horas: numero(datos, 'cancelacion_libre_horas'),
     imagen_url: texto(datos, 'imagen_url') || null,
+    /* El video del tour. Hasta noviembre de 2026 solo los negocios tenian uno;
+       la pagina del tour ahora lo muestra con el mismo componente. */
+    video_url: texto(datos, 'video_url') || null,
+    video_portada_url: texto(datos, 'video_portada_url') || null,
     es_destacado: texto(datos, 'es_destacado') === '1',
     estado: ['borrador', 'pendiente', 'publicado', 'archivado'].includes(estado) ? estado : antes.estado,
     publicado_en: estado === 'publicado' && !antes.publicado_en ? new Date().toISOString() : antes.publicado_en,
