@@ -4,7 +4,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, publicarNegocio, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
+import { editarNegocio, publicarNegocio, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
@@ -380,7 +380,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
             <h2>Fotos</h2>
             {!fotos?.length ? <Vacio texto="Sin fotos." /> : (
               <div className="rejilla-fotos">
-                {fotos.map((f) => (
+                {fotos.map((f, i) => (
                   <div key={f.id} className="foto-admin">
                     <a href={f.url} target="_blank" rel="noreferrer">
                       <img src={f.url} alt="" className={f.es_portada ? 'es-portada' : ''} />
@@ -395,6 +395,17 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                       </p>
                     )}
                     <div className="acciones-fila">
+                      {/* Mover. Un solo <form> para los dos botones: el id y el
+                          paso viajan juntos en el value, igual que en razones. */}
+                      <form action={moverFoto}>
+                        <input type="hidden" name="id" value={id} />
+                        <button type="submit" name="foto_mover" value={`${f.id}|-1`}
+                                className="boton tenue" disabled={i === 0}
+                                aria-label="Mover antes">◀</button>
+                        <button type="submit" name="foto_mover" value={`${f.id}|1`}
+                                className="boton tenue" disabled={i === (fotos?.length ?? 0) - 1}
+                                aria-label="Mover después">▶</button>
+                      </form>
                       {!f.es_portada && !f.es_generica && (
                         <form action={marcarPortada}>
                           <input type="hidden" name="id" value={id} />
@@ -442,15 +453,18 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
           </div>
 
           {(leads?.length ?? 0) > 0 && (
-            <div className="tarjeta">
-              <h2>Leads sobre este negocio</h2>
+            <details className="tarjeta plegable-bloque">
+              <summary><h2>Leads sobre este negocio <small>{leads!.length}</small></h2></summary>
               {leads!.map((l) => <div key={l.id}><Link href={`/admin/leads/${l.id}`}>{l.tipo} · {l.etapa}</Link> <span className="gris">{relativo(l.creado_en)}</span></div>)}
-            </div>
+            </details>
           )}
 
+      {/* Plegado por omision. Es el bloque mas largo de la pantalla —un campo
+          por idioma, por campo— y el que menos se toca. Abierto empujaba todo
+          lo demas fuera de la vista. */}
       {otrosIdiomas.length > 0 && (
-        <div className="tarjeta">
-          <h2>Traducciones <small>si falta una, el sitio muestra el {destino.idioma_principal}</small></h2>
+        <details className="tarjeta plegable-bloque">
+          <summary><h2>Traducciones <small>si falta una, el sitio muestra el {destino.idioma_principal}</small></h2></summary>
           <div className="campos">
             {(['resumen', 'descripcion'] as const).map((campo) => otrosIdiomas.map((idioma) => {
               const t = trad(campo, idioma);
@@ -516,7 +530,7 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
               </div>
             </>
           )}
-        </div>
+        </details>
       )}
     </>
   );

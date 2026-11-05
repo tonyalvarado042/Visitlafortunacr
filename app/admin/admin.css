@@ -42,6 +42,27 @@
 .barra-guardar span { font-size: 13px; color: #8B8B87; }
 .barra-guardar .boton { margin-left: auto; }
 
+/* Bloques plegables de la ficha de negocio. La pantalla tenia 10 bloques
+   abiertos a la vez en 500 lineas; los de consulta rara —traducciones, leads—
+   empujaban el resto fuera de la vista. */
+.plegable-bloque > summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: 10px;
+}
+.plegable-bloque > summary::-webkit-details-marker { display: none; }
+.plegable-bloque > summary h2 { margin: 0; }
+/* La flechita, dibujada: el marcador propio del navegador se ve distinto en
+   cada uno y no se puede alinear. */
+.plegable-bloque > summary::after {
+  content: ''; margin-left: auto; flex: none;
+  width: 8px; height: 8px;
+  border-right: 2px solid #8B8B87; border-bottom: 2px solid #8B8B87;
+  transform: rotate(45deg); transition: transform .15s;
+}
+.plegable-bloque[open] > summary::after { transform: rotate(-135deg); }
+.plegable-bloque > summary:hover::after { border-color: var(--naranja); }
+.plegable-bloque[open] > summary { margin-bottom: 14px; }
+
 @media (max-width: 900px) {
   .barra-guardar { gap: 10px; }
   .barra-guardar span { font-size: 12.5px; }

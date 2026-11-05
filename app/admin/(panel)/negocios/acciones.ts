@@ -394,6 +394,48 @@ export async function marcarPortada(datos: FormData) {
 }
 
 /** Borra la fila y el archivo. Si queda huérfano el archivo, el bucket engorda solo. */
+/*
+ * Mover una foto en la galeria. Mismo truco que moverRazon: el id y el paso
+ * viajan JUNTOS en el valor del boton, porque un boton manda un solo par
+ * nombre/valor y un campo `paso` suelto valdria lo mismo para subir que para
+ * bajar.
+ *
+ * La columna `orden` existia desde siempre pero NADIE la movia desde el panel:
+ * el orden de la galeria era el de subida y no habia forma de cambiarlo sin
+ * borrar y volver a subir.
+ *
+ * Se ordena dentro del mismo grupo `es_generica`, que es como las lista la
+ * pagina (`.order('es_generica').order('orden')`): mezclar una propia con una
+ * generica al moverla seria una sorpresa.
+ */
+export async function moverFoto(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  const [fotoId, pasoTexto] = texto(datos, 'foto_mover').split('|');
+  const paso = Number(pasoTexto);
+  if (!esUuid(id) || !esUuid(fotoId) || (paso !== 1 && paso !== -1)) return;
+  if (!(await negocioDelDestino(db, destino.id, id))) return;
+
+  const { data: todas } = await db.from('dst_negocio_foto')
+    .select('id, orden, es_generica').eq('negocio_id', id)
+    .order('es_generica').order('orden');
+  const lista = todas ?? [];
+
+  const i = lista.findIndex((f) => f.id === fotoId);
+  if (i < 0) return;
+  const j = i + paso;
+  if (j < 0 || j >= lista.length) return;
+  // No se salta entre propias y genericas.
+  if (lista[i].es_generica !== lista[j].es_generica) return;
+
+  /* Se reescriben los dos ordenes y no se intercambian: si dos filas quedaron
+     con el mismo `orden` —y pueden, nada lo impide— intercambiar no mueve nada
+     y el boton parece roto. */
+  await db.from('dst_negocio_foto').update({ orden: j }).eq('id', lista[i].id).eq('negocio_id', id);
+  await db.from('dst_negocio_foto').update({ orden: i }).eq('id', lista[j].id).eq('negocio_id', id);
+  refrescar(id);
+}
+
 export async function borrarFoto(datos: FormData) {
   const { db, destino } = await contextoPanel('negocios');
   const id = texto(datos, 'id');
