@@ -1228,6 +1228,14 @@ section { padding: 84px 0; }
    - Solo con DOS COLUMNAS. En el telefono la columna derecha cae al FINAL de
      la pagina, asi que ahi el margen negativo no la subiria sobre la
      cabecera: la subiria encima de las resenas. */
+/* La tira de atributos quedaba PEGADA al borde de la foto a sangre: medido en
+   vivo, separacion 0px — el hero terminaba en 599 y la tira empezaba en 599.
+   Va fuera del @media a proposito: la clase `ficha-con-hero` se aplica en todos
+   los anchos aunque los margenes negativos de abajo solo entren en escritorio,
+   asi que en telefono estaba igual de pegada.
+   Solo con hero: sin foto a sangre la tira ya tiene su aire y no hace falta. */
+.ficha-con-hero .tira-atributos { margin-top: 28px; }
+
 @media (min-width: 1001px) {
   .ficha-con-hero .ficha-reservar { margin-top: -132px; }
   /* La COLUMNA entera sube y la COLUMNA entera lleva el z-index. Antes solo lo
