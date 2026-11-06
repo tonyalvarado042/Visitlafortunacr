@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "revisar:formularios": "node scripts/revisar-formularios.mjs",
+    "build": "node scripts/revisar-formularios.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "dev:vinext": "vite dev --port 3001",
-    "build:vinext": "vite build",
+    "build:vinext": "node scripts/revisar-formularios.mjs && vite build",
     "start:vinext": "vite preview",
     "deploy:vinext": "vinext-cloudflare deploy"
   },
