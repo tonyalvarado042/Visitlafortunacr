@@ -77,6 +77,16 @@ export default async function PaginaAjustes() {
                 <div className="campo ancho"><label>Lema ({d.idioma_principal})</label><input name="lema" defaultValue={d.lema ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>WhatsApp del destino</label><input name="whatsapp" defaultValue={d.whatsapp ?? ''} placeholder="+506…" disabled={!esAdmin} /></div>
                 <div className="campo"><label>Correo de contacto</label><input type="email" name="email_contacto" defaultValue={d.email_contacto ?? ''} disabled={!esAdmin} /></div>
+                <div className="campo ancho"><label>Correo desde el que se envía (remitente)</label>
+                  <input type="email" name="email_noreply" defaultValue={d.email_noreply ?? ''} placeholder="noreply@visitlafortunacr.com" disabled={!esAdmin} />
+                  <small>
+                    Es el <strong>De:</strong> de todos los correos. Vacío = sale del canal de correo de abajo.
+                    {' '}<strong>No es adonde se responde.</strong> Quien le dé «Responder» a un correo nuestro
+                    cae en el buzón del canal, y en los correos donde responder es el punto —cuando alguien
+                    pide los datos de un negocio, o pide una reserva— cae directo en el viajero. Eso no se
+                    toca: ahí se juegan los leads.
+                  </small>
+                </div>
                 <div className="campo"><label>Comisión por defecto %</label><input type="number" step="0.5" name="comision_por_defecto" defaultValue={d.comision_por_defecto ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label><input type="checkbox" name="esta_activo" value="1" defaultChecked={d.esta_activo} disabled={!esAdmin} /> Sitio encendido (se sirve al público)</label></div>
                 <div className="campo"><label><input type="checkbox" name="contacto_bloqueado" value="1" defaultChecked={d.contacto_bloqueado} disabled={!esAdmin} /> Tapar el teléfono hasta que dejen sus datos</label>

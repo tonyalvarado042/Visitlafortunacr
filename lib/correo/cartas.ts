@@ -519,3 +519,159 @@ export async function correoResenaNueva(opciones: {
     tokenBaja,
   });
 }
+
+/* ---- Al negocio le falta la descripción o las fotos ---------------------
+ *
+ * EL AGUJERO QUE TAPA: el dueño recibía UN correo en toda su vida —el de
+ * «recibimos tu negocio»— y después silencio. Si no completaba la ficha,
+ * nadie se lo decía nunca. Dreamlike Adventures se inscribió, no subió ni
+ * descripción ni fotos, y así se quedó: no es que el dueño no quisiera, es
+ * que nunca se le pidió.
+ *
+ * Dice QUÉ falta, no «completá tu perfil». Un pedido genérico se pospone; uno
+ * que dice «faltan las fotos» se puede hacer en cinco minutos desde el
+ * teléfono.
+ *
+ * Y dice por qué conviene, sin amenazar: una ficha sin foto se ve menos. Es
+ * verdad y es lo que mueve.
+ */
+
+const FAL_ASUNTO: Texto = {
+  es: 'Le faltan las fotos a tu ficha',
+  en: 'Your listing is missing photos',
+  pt: 'Falta as fotos na sua ficha',
+  fr: 'Il manque des photos à votre fiche',
+  de: 'Deinem Eintrag fehlen Fotos',
+};
+const FAL_ASUNTO_DESC: Texto = {
+  es: 'Le falta la descripción a tu ficha',
+  en: 'Your listing is missing its description',
+  pt: 'Falta a descrição na sua ficha',
+  fr: 'Il manque la description de votre fiche',
+  de: 'Deinem Eintrag fehlt die Beschreibung',
+};
+const FAL_ASUNTO_AMBOS: Texto = {
+  es: 'Te falta poco para que tu ficha salga',
+  en: 'Your listing is almost ready',
+  pt: 'Falta pouco para a sua ficha sair',
+  fr: 'Votre fiche est presque prête',
+  de: 'Dein Eintrag ist fast fertig',
+};
+const FAL_TITULO: Texto = {
+  es: 'Nos falta esto para terminar tu ficha',
+  en: 'We need this to finish your listing',
+  pt: 'Precisamos disto para terminar a sua ficha',
+  fr: 'Il nous faut ceci pour terminer votre fiche',
+  de: 'Das brauchen wir noch für deinen Eintrag',
+};
+const FAL_P1: Texto = {
+  es: 'Tu negocio ya está en el directorio, pero le falta algo para quedar completo. Se arregla desde el teléfono en unos minutos: tocá el botón de abajo y listo.',
+  en: 'Your business is already in the directory, but something is missing. You can sort it from your phone in a few minutes: tap the button below.',
+  pt: 'O seu negócio já está no diretório, mas falta algo. Resolve-se pelo telemóvel em poucos minutos: toque no botão abaixo.',
+  fr: 'Votre établissement est déjà dans l’annuaire, mais il manque quelque chose. Cela se règle depuis votre téléphone en quelques minutes : appuyez sur le bouton ci-dessous.',
+  de: 'Dein Betrieb ist schon im Verzeichnis, aber es fehlt noch etwas. Das geht in wenigen Minuten vom Handy aus: tippe unten auf den Button.',
+};
+const FAL_P2_FOTOS: Texto = {
+  es: 'Las fotos son lo que más mueve: una ficha con fotos la abre mucha más gente que una sin. Con tres o cuatro buenas ya se nota — no hace falta un fotógrafo, las del teléfono sirven.',
+  en: 'Photos move the needle most: a listing with photos gets opened far more than one without. Three or four good ones already make a difference — no photographer needed, phone photos work.',
+  pt: 'As fotos são o que mais pesa: uma ficha com fotos é aberta por muito mais gente. Três ou quatro boas já fazem diferença — não precisa de fotógrafo, as do telemóvel servem.',
+  fr: 'Les photos comptent le plus : une fiche avec photos est bien plus consultée. Trois ou quatre bonnes suffisent — pas besoin de photographe, celles du téléphone conviennent.',
+  de: 'Fotos bringen am meisten: ein Eintrag mit Fotos wird viel öfter geöffnet. Drei oder vier gute reichen schon — kein Fotograf nötig, Handyfotos genügen.',
+};
+const FAL_P2_DESC: Texto = {
+  es: 'Con la descripción contanos en pocas líneas qué hacés y qué tenés de distinto. Escribila como se la contarías a alguien que llega preguntando: eso es lo que lee el viajero.',
+  en: 'For the description, tell us in a few lines what you do and what makes you different. Write it the way you would tell someone who walks in asking: that is what the traveller reads.',
+  pt: 'Na descrição, conte em poucas linhas o que faz e o que tem de diferente. Escreva como contaria a alguém que chega a perguntar: é isso que o viajante lê.',
+  fr: 'Pour la description, dites-nous en quelques lignes ce que vous faites et ce qui vous distingue. Écrivez-la comme vous la raconteriez à quelqu’un qui entre : c’est ce que lit le voyageur.',
+  de: 'Bei der Beschreibung: erzähl in wenigen Zeilen, was du machst und was dich ausmacht. Schreib sie so, wie du es jemandem erzählen würdest, der hereinkommt — genau das liest der Reisende.',
+};
+const FAL_BOTON: Texto = {
+  es: 'Completar mi ficha', en: 'Complete my listing', pt: 'Completar a minha ficha',
+  fr: 'Compléter ma fiche', de: 'Eintrag vervollständigen',
+};
+const FAL_ROT_FALTA: Texto = {
+  es: 'Lo que falta', en: 'What is missing', pt: 'O que falta',
+  fr: 'Ce qui manque', de: 'Was noch fehlt',
+};
+/* En minuscula, porque se unen: «las fotos y la descripcion». Con mayuscula
+   quedaba «Las fotos y La descripción», con una L a media frase. La primera
+   letra se pone en mayuscula al final, una sola vez. */
+const FAL_FOTOS: Texto = {
+  es: 'las fotos', en: 'photos', pt: 'as fotos', fr: 'les photos', de: 'die Fotos',
+};
+const FAL_DESC: Texto = {
+  es: 'la descripción', en: 'the description', pt: 'a descrição',
+  fr: 'la description', de: 'die Beschreibung',
+};
+const FAL_Y: Texto = { es: 'y', en: 'and', pt: 'e', fr: 'et', de: 'und' };
+const FAL_NOTA: Texto = {
+  es: 'Si preferís que lo hagamos nosotros, respondé este correo y lo vemos.',
+  en: 'If you would rather we did it, reply to this email and we will sort it out.',
+  pt: 'Se preferir que façamos nós, responda este e-mail e vemos isso.',
+  fr: 'Si vous préférez que nous nous en chargions, répondez à cet e-mail.',
+  de: 'Wenn wir das lieber übernehmen sollen, antworte einfach auf diese E-Mail.',
+};
+
+/**
+ * Las piezas de la carta, SIN mandarla.
+ *
+ * Va separado del envio por la regla de la casa: el correo se lee en pantalla
+ * antes de que salga. Si armar y mandar fueran lo mismo, la unica forma de ver
+ * como quedo seria mandarselo a alguien — o copiar los textos a una vista
+ * previa aparte, que es peor, porque al primer cambio la vista previa empieza
+ * a mentir.
+ */
+export function piezasFaltaCompletarFicha(opciones: {
+  destino: Destino;
+  idioma: Idioma;
+  negocioId: string;
+  nombreNegocio: string;
+  faltaDescripcion: boolean;
+  faltanFotos: boolean;
+}) {
+  const { destino, idioma, negocioId, nombreNegocio, faltaDescripcion, faltanFotos } = opciones;
+
+  /* El asunto dice QUÉ falta. «Completá tu perfil» se ignora; «le faltan las
+     fotos a tu ficha» se abre, porque ya dice qué hay que hacer. */
+  const asunto = faltaDescripcion && faltanFotos
+    ? d(FAL_ASUNTO_AMBOS, idioma)
+    : faltanFotos ? d(FAL_ASUNTO, idioma) : d(FAL_ASUNTO_DESC, idioma);
+
+  const lista = [
+    faltanFotos ? d(FAL_FOTOS, idioma) : null,
+    faltaDescripcion ? d(FAL_DESC, idioma) : null,
+  ].filter(Boolean).join(` ${d(FAL_Y, idioma)} `);
+  const queFalta = lista.charAt(0).toUpperCase() + lista.slice(1);
+
+  /* Un párrafo por cosa que falte, y solo por lo que falte: explicarle las
+     fotos a quien ya las subió es ruido, y el ruido es lo que hace que el
+     próximo correo no se abra. */
+  const parrafos = [
+    d(FAL_P1, idioma),
+    ...(faltanFotos ? [d(FAL_P2_FOTOS, idioma)] : []),
+    ...(faltaDescripcion ? [d(FAL_P2_DESC, idioma)] : []),
+  ];
+
+  return {
+    asunto: `${asunto} — ${nombreNegocio}`,
+    motivo: 'falta_completar_ficha',
+    titulo: d(FAL_TITULO, idioma),
+    parrafos,
+    datos: [{ rotulo: d(FAL_ROT_FALTA, idioma), valor: queFalta }],
+    boton: { texto: d(FAL_BOTON, idioma), url: `https://${destino.dominio}/negocio/${negocioId}` },
+    nota: d(FAL_NOTA, idioma),
+  };
+}
+
+export async function correoFaltaCompletarFicha(opciones: {
+  destino: Destino;
+  idioma: Idioma;
+  para: string;
+  negocioId: string;
+  nombreNegocio: string;
+  faltaDescripcion: boolean;
+  faltanFotos: boolean;
+}): Promise<Envio> {
+  const { destino, idioma, para } = opciones;
+  return enviarCorreo({ destino, idioma, para, ...piezasFaltaCompletarFicha(opciones) });
+}

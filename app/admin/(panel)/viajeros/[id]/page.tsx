@@ -5,6 +5,7 @@ import { dinero, etapa, fecha, relativo, TIPO_SOLICITUD } from '@/lib/admin/form
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { editarViajero } from '../acciones';
+import { NOMBRE_PROPIO, type Idioma } from '@/lib/idiomas';
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +87,12 @@ export default async function PaginaViajero({ params }: { params: Promise<{ id: 
               <div className="campo"><label>Correo</label><input type="email" name="email" defaultValue={(v.email as string) ?? ''} /></div>
               <div className="campo"><label>WhatsApp</label><input name="whatsapp" defaultValue={(v.whatsapp as string) ?? ''} placeholder="+506…" /></div>
               <div className="campo"><label>País (ISO)</label><input name="pais_iso" maxLength={2} defaultValue={(v.pais_iso as string) ?? ''} /></div>
-              <div className="campo"><label>Idioma</label><select name="idioma" defaultValue={(v.idioma as string) ?? 'es'}>{['es', 'en', 'pt', 'fr', 'de'].map((i) => <option key={i} value={i}>{i}</option>)}</select></div>
+              {/* Los idiomas del destino, no los cinco que existen en el codigo. Si
+                  en Ajustes se apagaron el aleman y el frances, ofrecerlos aca
+                  es ofrecer algo que el sitio ya no sirve. El que el viajero
+                  tenga guardado se respeta aunque se haya apagado: cambiarselo
+                  por lo bajo seria peor. */}
+              <div className="campo"><label>Idioma</label><select name="idioma" defaultValue={(v.idioma as string) ?? destino.idioma_principal}>{[...new Set([...(destino.idiomas ?? []), (v.idioma as string) ?? destino.idioma_principal])].map((i) => <option key={i} value={i}>{NOMBRE_PROPIO[i as Idioma] ?? i}</option>)}</select></div>
               <div className="campo"><label>Llega</label><input type="date" name="llega_el" defaultValue={(v.llega_el as string) ?? ''} /></div>
               <div className="campo"><label>Se va</label><input type="date" name="sale_el" defaultValue={(v.sale_el as string) ?? ''} /></div>
               <div className="campo"><label>Personas</label><input type="number" name="personas" min={1} defaultValue={(v.personas as number) ?? ''} /></div>

@@ -124,6 +124,94 @@ export async function publicarNegocio(datos: FormData) {
   refrescar(id);
 }
 
+/**
+ * Le pide al duenno que complete la ficha: la descripcion, las fotos, o las dos.
+ *
+ * EL AGUJERO QUE TAPA: hasta hoy el duenno recibia UN correo en toda su vida
+ * —el de «recibimos tu negocio»— y despues nada. Si no completaba, nadie se lo
+ * decia nunca. Publicar tampoco mandaba nada: `publicarNegocio` solo cambia el
+ * estado. Asi quedo Dreamlike Adventures: inscrito, sin descripcion y sin una
+ * sola foto, y nunca se le pidio.
+ *
+ * ⚠️ NO MANDA NADA SOLO. Lo dispara alguien del equipo desde la pantalla del
+ * negocio. Un recordatorio automatico habria que pensarlo aparte y decidirlo,
+ * no colarlo aca.
+ *
+ * Calcula lo que falta en el MOMENTO del envio y no confia en lo que diga la
+ * pantalla: entre que se pinto y que se toco el boton, el duenno pudo haber
+ * subido las fotos. Pedirle lo que ya hizo es la forma mas rapida de que el
+ * proximo correo no se abra.
+ */
+export async function pedirCompletarFicha(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  const { data: n } = await db.from('dst_negocio')
+    .select('id, nombre, email, descripcion')
+    .eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!n?.email) return;
+
+  const { count } = await db.from('dst_negocio_foto')
+    .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+
+  const faltaDescripcion = !String(n.descripcion ?? '').trim();
+  const faltanFotos = !count;
+  /* Si no falta nada, no se manda: un correo que dice «te falta» cuando no
+     falta nada quema la confianza del duenno en todos los que vengan. */
+  if (!faltaDescripcion && !faltanFotos) return;
+
+  /* El correo necesita la fila ENTERA del destino —marca, dominio, colores de
+     la plantilla, el remitente—, y `contextoPanel` solo devuelve el resumen que
+     usa el panel. `destinoActual()` la trae completa, igual que hace
+     lib/aviso-resena.ts.
+     ⚠️ La resuelve por el Host de la peticion, no por el destino elegido en el
+     panel. Hoy da lo mismo —hay un solo destino y el panel se sirve desde su
+     propio dominio— pero el dia que haya dos, alguien parado en el panel de
+     Monteverde con el navegador en visitlafortunacr.com mandaria un correo con
+     la marca equivocada. Por eso se comprueba y, si no calzan, no se manda. */
+  const { destinoActual } = await import('@/lib/destino');
+  const completo = await destinoActual();
+  if (completo.id !== destino.id) {
+    console.error('pedirCompletarFicha: el destino del panel y el del dominio no calzan; no se manda.');
+    return;
+  }
+
+  const { correoFaltaCompletarFicha } = await import('@/lib/correo/cartas');
+  const envio = await correoFaltaCompletarFicha({
+    destino: completo,
+    /* Va en el idioma principal porque NO SE SABE el del duenno: `dst_negocio`
+       no guarda ninguno. El correo de bienvenida usa el idioma de la pagina
+       donde se inscribio, y ese dato se pierde ahi mismo. Inventarle un idioma
+       seria peor que el castellano, que en La Fortuna acierta casi siempre.
+       Si algun dia se guarda al inscribirse, este es el lugar donde se usa. */
+    idioma: completo.idioma_principal,
+    para: n.email,
+    negocioId: n.id,
+    nombreNegocio: n.nombre,
+    faltaDescripcion,
+    faltanFotos,
+  });
+
+  /* La fecha se anota SOLO si el correo salio. Anotarla igual haria que la
+     pantalla dijera «ya se le pidio» de algo que nunca llego, y entonces
+     nadie volveria a pedirlo. El error queda en la bitacora de `dst_correo`. */
+  if (envio.ok) {
+    await db.from('dst_negocio')
+      .update({ completar_pedido_en: new Date().toISOString() })
+      .eq('id', id).eq('destino_id', destino.id);
+  } else {
+    console.error('pedirCompletarFicha:', envio.error);
+  }
+  refrescar(id);
+}
+
+/** Publicar y, en el mismo gesto, pedirle lo que falte. */
+export async function publicarYPedirFicha(datos: FormData) {
+  await publicarNegocio(datos);
+  await pedirCompletarFicha(datos);
+}
+
 export async function traducirCampo(datos: FormData) {
   const { db } = await contextoPanel('negocios');
   const entidad = texto(datos, 'entidad');

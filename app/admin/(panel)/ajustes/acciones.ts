@@ -106,6 +106,12 @@ export async function editarDestino(datos: FormData) {
       marca_sigla: texto(datos, 'marca_sigla') || null,
       whatsapp: whatsapp ? (whatsapp.startsWith('+') ? whatsapp : `+${whatsapp}`) : null,
       email_contacto: texto(datos, 'email_contacto').toLowerCase() || null,
+      /* El From. La base tiene un check de formato: lo que no parezca correo
+         se guarda vacio y los correos vuelven a salir del canal, que es el
+         comportamiento de siempre. Fallar hacia lo que ya funcionaba. */
+      email_noreply: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(texto(datos, 'email_noreply').toLowerCase())
+        ? texto(datos, 'email_noreply').toLowerCase()
+        : null,
       comision_por_defecto: numero(datos, 'comision_por_defecto'),
       color_tinta: color(datos, 'color_tinta'),
       color_acento: color(datos, 'color_acento'),

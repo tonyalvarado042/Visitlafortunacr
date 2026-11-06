@@ -35,6 +35,10 @@ export type Destino = {
   /* El buzon del equipo. Es a donde llegan los avisos de solicitudes de
      reserva: sin esto, una solicitud entra y nadie se entera. */
   email_contacto: string | null;
+  /* De donde SALEN los correos (el From). Vacio = se usa el del canal.
+     Ojo: esto NO es adonde se responde — ver `remitenteDe` en
+     lib/correo/enviar.ts, que las mantiene separadas a proposito. */
+  email_noreply: string | null;
   /* El crédito de quien hizo el sitio, en el pie. Por destino y no fijo en el
      código: este lo hizo LIDERAX10, el próximo lo puede hacer otro. */
   pie_credito_texto: string | null;

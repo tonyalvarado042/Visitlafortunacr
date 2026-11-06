@@ -4,11 +4,12 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, publicarNegocio, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
+import { editarNegocio, publicarNegocio, pedirCompletarFicha, publicarYPedirFicha, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
 import { cedulaConForma } from '@/lib/cedula';
+import { NOMBRE_PROPIO, type Idioma } from '@/lib/idiomas';
 
 /* Como se lee cada tipo de cedula en el panel. La babosa que guarda la base es
    corta a proposito; el rotulo es para humanos. */
@@ -61,16 +62,33 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
 
   return (
     <>
-      <Cabecera titulo={n.nombre} migas={[{ ruta: '/admin/negocios', nombre: 'Negocios' }]} sub={<><Etiqueta suave>{n.estado_publicacion}</Etiqueta> <Etiqueta suave>{n.estado_verificacion}</Etiqueta>{n.revision_pedida_en ? <> <Etiqueta color="bien">el dueño pidió revisión {relativo(n.revision_pedida_en)}</Etiqueta></> : null}{n.estado_publicacion !== 'publicado' && faltantes.length ? <> <Etiqueta color="alerta">le falta {faltantes.join(' y ')}</Etiqueta></> : null} · {n.membresia} · actualizado {relativo(n.actualizado_en)}</>}>
+      <Cabecera titulo={n.nombre} migas={[{ ruta: '/admin/negocios', nombre: 'Negocios' }]} sub={<><Etiqueta suave>{n.estado_publicacion}</Etiqueta> <Etiqueta suave>{n.estado_verificacion}</Etiqueta>{n.revision_pedida_en ? <> <Etiqueta color="bien">el dueño pidió revisión {relativo(n.revision_pedida_en)}</Etiqueta></> : null}{n.completar_pedido_en ? <> <Etiqueta suave>se le pidió {relativo(n.completar_pedido_en)}</Etiqueta></> : null}{n.estado_publicacion !== 'publicado' && faltantes.length ? <> <Etiqueta color="alerta">le falta {faltantes.join(' y ')}</Etiqueta></> : null} · {n.membresia} · actualizado {relativo(n.actualizado_en)}</>}>
+        {/* Pedirle al dueño lo que falta. Va ANTES de publicar y también
+            suelto, porque lo normal es pedirlo y esperar, no publicar una
+            ficha vacía. Sin correo del dueño no se ofrece: un botón que no
+            puede hacer nada es peor que ninguno. */}
+        {faltantes.length > 0 && n.email && (
+          <form action={pedirCompletarFicha}>
+            <input type="hidden" name="id" value={n.id} />
+            <BotonAccion
+              confirmar={`Se le manda un correo a ${n.email} pidiéndole ${faltantes.join(' y ')}. ¿Lo mando?`}
+            >
+              {n.completar_pedido_en ? 'Volver a pedírselo' : `Pedirle ${faltantes.join(' y ')}`}
+            </BotonAccion>
+          </form>
+        )}
+
         {n.estado_publicacion !== 'publicado' && (
-          <form action={publicarNegocio}>
+          <form action={faltantes.length && n.email ? publicarYPedirFicha : publicarNegocio}>
             <input type="hidden" name="id" value={n.id} />
             <BotonAccion
               confirmar={faltantes.length
-                ? `A esta ficha le falta ${faltantes.join(' y ')}. ¿Publicarla igual?`
+                ? (n.email
+                    ? `A esta ficha le falta ${faltantes.join(' y ')}. Se publica igual Y se le manda un correo a ${n.email} pidiéndoselo. ¿Dale?`
+                    : `A esta ficha le falta ${faltantes.join(' y ')}, y el negocio no tiene correo cargado, así que no hay a quién pedírselo. ¿Publicarla igual?`)
                 : undefined}
             >
-              {faltantes.length ? 'Publicar igual' : 'Publicar'}
+              {faltantes.length ? (n.email ? 'Publicar y pedirle lo que falta' : 'Publicar igual') : 'Publicar'}
             </BotonAccion>
           </form>
         )}
@@ -94,7 +112,11 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
         <div className="lado">
           <div>
             <div className="tarjeta">
-              <h2>Ficha pública <small>en {destino.idioma_principal}</small></h2>
+              {/* Decia «en {destino.idioma_principal}», o sea «en es». En
+                  mayusculas eso se lee como DOS idiomas, EN y ES, y Tony
+                  entendio justo eso. El nombre entero no se puede confundir
+                  con nada. */}
+              <h2>Ficha pública <small>se escribe en {NOMBRE_PROPIO[destino.idioma_principal as Idioma]}</small></h2>
               <div className="campos">
                 <div className="campo"><label>Nombre (no se traduce)</label><input name="nombre" defaultValue={n.nombre} required /></div>
                 <div className="campo"><label>Categoría</label><select name="categoria_id" defaultValue={n.categoria_id ?? ''}>{cats.map((c) => <option key={c.id} value={c.id}>{c.nombre} · {c.seccion}</option>)}</select></div>

@@ -41,7 +41,30 @@ type Carta = {
 
 const LLAVE = 'RESEND_API_KEY';
 
-async function remitenteDe(destino: Destino): Promise<{ de: string } | { error: string }> {
+/*
+ * De donde SALE el correo y adonde llega el "Responder". Son dos cosas
+ * distintas y hay que tenerlas separadas.
+ *
+ * `de`: el From. Sale de `dst_destino.email_noreply` si esta puesto —hoy
+ * `noreply@visitlafortunacr.com`— y si no, del canal, como era antes. La idea
+ * es que nadie le escriba a un buzon automatico creyendo que hay alguien
+ * leyendo.
+ *
+ * `buzon`: el correo de VERDAD del equipo, el del canal. Se usa como
+ * `reply_to` por omision.
+ *
+ * ⚠️ POR QUE NO SE MANDA SIN reply_to NUNCA. Hay cartas donde responder ES el
+ * punto y se juega plata: la que le avisa a un negocio que alguien pidio sus
+ * datos lleva el `reply_to` del viajero, asi el duenno da "Responder" y le
+ * contesta al cliente. Y tres cartas dicen con todas las letras «podes
+ * responder este correo». Mandarlas desde un noreply pelado tira esas
+ * respuestas a un hueco. Por eso: el From es siempre el noreply, y el
+ * Responder siempre cae en alguien — el viajero cuando corresponde, el buzon
+ * del equipo en todo lo demas.
+ */
+async function remitenteDe(
+  destino: Destino,
+): Promise<{ de: string; buzon?: string } | { error: string }> {
   const { data } = await servicio()
     .from('dst_canal')
     .select('identificador, nombre_visible')
@@ -52,8 +75,9 @@ async function remitenteDe(destino: Destino): Promise<{ de: string } | { error: 
     .limit(1)
     .maybeSingle();
 
-  const correo = (data?.identificador as string | undefined)?.trim()
+  const buzon = (data?.identificador as string | undefined)?.trim()
     ?? process.env.EMAIL_REMITENTE?.trim();
+  const correo = destino.email_noreply?.trim() || buzon;
   if (!correo) {
     return { error: 'No hay remitente: configurá el canal de correo en Ajustes.' };
   }
@@ -61,7 +85,7 @@ async function remitenteDe(destino: Destino): Promise<{ de: string } | { error: 
   const nombre = (data?.nombre_visible as string | undefined)?.trim() || destino.marca_nombre;
   /* El nombre va entre comillas porque una coma en la marca parte la cabecera
      en dos destinatarios y Resend lo rechaza. */
-  return { de: `"${nombre.replace(/"/g, '')}" <${correo}>` };
+  return { de: `"${nombre.replace(/"/g, '')}" <${correo}>`, buzon: buzon || undefined };
 }
 
 /* La bitácora no puede tumbar el envío: si falla anotar, se anota el fallo de
@@ -124,7 +148,12 @@ export async function enviarCorreo(carta: Carta): Promise<Envio> {
         subject: carta.asunto,
         html,
         text: texto,
-        ...(carta.responder_a ? { reply_to: carta.responder_a } : {}),
+        /* La carta manda si trae su propio destinatario de respuesta —el
+           viajero, por ejemplo—; si no, cae en el buzon del equipo. Lo que no
+           puede pasar es salir sin ninguno: ver `remitenteDe`. */
+        ...((carta.responder_a ?? remitente.buzon)
+          ? { reply_to: carta.responder_a ?? remitente.buzon }
+          : {}),
       }),
     });
 
