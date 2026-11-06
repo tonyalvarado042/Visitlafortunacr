@@ -74,6 +74,16 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo"><label>Incluye</label><textarea name="incluye" defaultValue={t.incluye ?? ''} style={{ minHeight: 70 }} /></div>
                 <div className="campo"><label>No incluye</label><textarea name="no_incluye" defaultValue={t.no_incluye ?? ''} style={{ minHeight: 70 }} /></div>
                 <div className="campo ancho"><label>Qué llevar</label><input name="que_llevar" defaultValue={t.que_llevar ?? ''} /></div>
+                {/* La letra chica del precio. La ficha muestra «$101» a secas,
+                    y un precio de verdad casi nunca es un número solo: el
+                    tarifario de Outback va +13% de IVA, y un cuadraciclo se
+                    cobra POR VEHÍCULO, no por persona. Sin esta nota el sitio
+                    muestra una cifra que no es la que se paga. */}
+                <div className="campo ancho"><label>Letra chica del precio</label>
+                  <textarea name="precio_nota" defaultValue={t.precio_nota ?? ''} style={{ minHeight: 90 }}
+                            placeholder={'+13% de IVA · Precio por persona · Salidas: 8:00 y 10:00 a. m.'} />
+                  <small>Sale debajo del precio en la ficha. Impuestos, si es por persona o por vehículo, otras tarifas, horarios. Una línea por renglón.</small>
+                </div>
               </div>
             </div>
             {/* La GALERÍA del tour.

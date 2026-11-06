@@ -65,6 +65,7 @@ export async function editarTour(datos: FormData) {
     comision_pct: numero(datos, 'comision_pct'),
     cancelacion_libre_horas: numero(datos, 'cancelacion_libre_horas'),
     imagen_url: texto(datos, 'imagen_url') || null,
+    precio_nota: texto(datos, 'precio_nota') || null,
     /* El video del tour. Hasta noviembre de 2026 solo los negocios tenian uno;
        la pagina del tour ahora lo muestra con el mismo componente. */
     video_url: texto(datos, 'video_url') || null,

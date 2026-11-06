@@ -541,6 +541,7 @@ export type TourPublico = TourDeNegocio & {
   idiomas_guia: string[];
   cancelacion_libre_horas: number;
   precio_nino_usd: number | null;
+  precio_nota: string | null;
   /* La galeria. `imagen_url` sigue existiendo como respaldo: la foto vieja se
      copio a la galeria como portada, asi que lo normal es que `fotos[0]` sea
      la misma. */
@@ -577,7 +578,7 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
     .select(`id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
-             precio_adulto_usd, precio_nino_usd, imagen_url, video_url, video_portada_url,
+             precio_adulto_usd, precio_nino_usd, precio_nota, imagen_url, video_url, video_portada_url,
              fotos:dst_tour_foto(id, url, texto_alternativo_es, texto_alternativo_en, credito, licencia, fuente_url, es_portada, orden),
              negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
     .eq('destino_id', destino.id)

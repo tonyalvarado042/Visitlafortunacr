@@ -254,6 +254,14 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                           </li>
                         )}
                       </ul>
+                      {/* La letra chica. Sin esto la ficha muestra «$101» y
+                          el viajero paga $114 (+13% de IVA), o cree que es
+                          por persona cuando el cuadraciclo se cobra por
+                          vehículo. Un precio que no es el precio es peor que
+                          no mostrar precio. */}
+                      {tour.precio_nota && (
+                        <p className="reservar-nota">{tour.precio_nota}</p>
+                      )}
                     </div>
                   </div>
 

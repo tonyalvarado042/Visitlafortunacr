@@ -3247,3 +3247,15 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 @media (prefers-reduced-motion: reduce) {
   .reservar .boton[type="submit"], .reservar button.boton { animation: none; }
 }
+
+/* La letra chica del precio de un tour: impuestos, si es por persona o por
+   vehículo, otras tarifas. `white-space: pre-line` para que cada renglón que
+   escriba el equipo salga en su línea — si no, se pega todo en un párrafo y
+   deja de leerse. */
+.reservar-nota {
+  white-space: pre-line;
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--humo);
+}
