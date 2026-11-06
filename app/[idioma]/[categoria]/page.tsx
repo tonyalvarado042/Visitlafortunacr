@@ -2,6 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, negociosDe , categoriaEnCualquierIdioma } from '@/lib/destino';
+import { fichasDelDirectorio } from '@/lib/directorio';
 import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -55,7 +56,11 @@ export default async function Listado({ params }: { params: Parametros }) {
     notFound();
   }
 
-  const negocios = (await negociosDe(destino, idioma))
+  /* Negocios Y TOURS. Antes solo negocios, así que un tour existía en su
+     ficha y en ningún otro lado — y un OPERADOR, que no tiene ficha propia,
+     no aportaba nada visible al directorio. Lo encontró Tony buscando sus
+     propios tours y no encontrándolos. */
+  const negocios = (await fichasDelDirectorio(destino, idioma, categorias))
     .filter((n) => n.categoria_id === actual.categoria_id)
     .sort((a, b) =>
       Number(b.es_destacado) - Number(a.es_destacado) ||

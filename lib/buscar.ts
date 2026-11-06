@@ -63,7 +63,11 @@ function comparar(a: Negocio, b: Negocio): number {
  * Los negocios que coinciden, ordenados por relevancia. Una consulta vacía
  * devuelve todos: es lo que usa la vista de "ver todo".
  */
-export function buscarNegocios(negocios: Negocio[], consulta: string): Negocio[] {
+/* Genérica para no perder el tipo por el camino: entra `EnElDirectorio[]` y
+   sale `EnElDirectorio[]`, con su `tipo` intacto. Si devolviera `Negocio[]`,
+   la tarjeta dejaría de saber si es un tour y armaría la dirección de un
+   negocio — un 404 por cada tour encontrado. */
+export function buscarNegocios<T extends Negocio>(negocios: T[], consulta: string): T[] {
   const palabras = normalizar(consulta).split(/\s+/).filter(Boolean);
   if (!palabras.length) return [...negocios].sort(comparar);
 

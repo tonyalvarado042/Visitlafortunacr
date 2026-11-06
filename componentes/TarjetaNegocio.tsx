@@ -4,6 +4,7 @@ import { Volcanes } from './Volcanes';
 import { resenas, t, type Idioma } from '@/lib/idiomas';
 import { nota } from '@/lib/resenas';
 import { SIMBOLO_PRECIO, type Negocio } from '@/lib/destino';
+import { rutaDe, type EnElDirectorio } from '@/lib/directorio';
 
 /* El color del marcador sale de la sección, para que la retícula tenga ritmo
    sin necesitar una foto por ficha. Es lo que hará el sitio real hasta que
@@ -17,7 +18,21 @@ const COLOR_SECCION: Record<string, string> = {
   transporte: '#6BC9C0',
 };
 
-export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: Idioma }) {
+/**
+ * La tarjeta del directorio. Sirve para un NEGOCIO y para un TOUR.
+ *
+ * ⚠️ UNA SOLA tarjeta a propósito. Tony lo pidió así —«los tours y los
+ * negocios tienen que salir igualmente en el directorio»— y además es lo
+ * único que lo sostiene en el tiempo: con dos tarjetas, a la segunda semana
+ * una tiene algo que la otra no y dejan de verse iguales.
+ *
+ * Lo único que cambia entre los dos es la DIRECCIÓN, y eso lo resuelve
+ * `rutaDe`. Todo lo demás —el color por sección, el destacado, la foto, el
+ * velo— es idéntico porque es la misma retícula.
+ */
+export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio | EnElDirectorio; idioma: Idioma }) {
+  /* Sin `tipo` es un negocio: así las llamadas viejas siguen andando. */
+  const ficha: EnElDirectorio = 'tipo' in negocio ? negocio : { ...negocio, tipo: 'negocio' };
   const color = COLOR_SECCION[negocio.seccion] ?? '#8B8B87';
   const verificado = negocio.estado_verificacion === 'verificado' || negocio.estado_verificacion === 'reclamado';
 
@@ -26,7 +41,7 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
        la foto. Es lo que se compra con el plan premium; si se viera igual que
        los demas, no habria que pagarlo. */
     <article className={negocio.es_destacado ? 'tarjeta tarjeta-destacada' : 'tarjeta'}>
-      <Link href={`/${idioma}/${negocio.categoria_babosa}/${negocio.babosa}`}>
+      <Link href={rutaDe(ficha, idioma)}>
         <div className="imagen" style={{ background: `linear-gradient(150deg, ${color}1F, var(--negro) 72%)` }}>
           {negocio.foto_portada_url && (
             <img className="foto" src={negocio.foto_portada_url} alt=""
@@ -62,7 +77,11 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio; idioma: 
             : <span className="sello sello-tenue">{t('por_confirmar', idioma)}</span>}
         </div>
 
-        <h3><Link href={`/${idioma}/${negocio.categoria_babosa}/${negocio.babosa}`}>{negocio.nombre}</Link></h3>
+        {/* El título es el SEGUNDO enlace de la tarjeta a la misma ficha, así
+            que también tiene que usar `rutaDe`. Se escapó en el primer intento
+            y habría mandado cada tour a `/es/<categoria>/<babosa>`, que no
+            existe: la tarjeta entera hubiera llevado a un 404 desde el título. */}
+        <h3><Link href={rutaDe(ficha, idioma)}>{negocio.nombre}</Link></h3>
         <p>{negocio.resumen}</p>
 
         {/* Sin calificación no se anuncia el vacío: se muestran los cinco

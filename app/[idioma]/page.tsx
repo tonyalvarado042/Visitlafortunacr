@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { destinoActual, categoriasDe, negociosDe, destacadosDe, lemaDe, type Negocio, type Categoria } from '@/lib/destino';
+import { fichasDelDirectorio } from '@/lib/directorio';
 import { t, lugares, esIdioma, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -50,12 +51,17 @@ export default async function Portada({ params, searchParams }: {
 
   const { q, cat, ver } = await searchParams;
   const destino = await destinoActual();
-  const [categorias, negocios, destacados, sorteo] = await Promise.all([
+  const [categorias, destacados, sorteo] = await Promise.all([
     categoriasDe(destino, idioma),
-    negociosDe(destino, idioma),
     destacadosDe(destino, idioma, 10),
     sorteoDe(destino, false, idioma),
   ]);
+  /* Negocios Y TOURS. Va después y no dentro del Promise.all porque necesita
+     las categorías ya resueltas al idioma: de ahí saca el nombre y la babosa
+     de la categoría de cada tour, en vez de pedirlas otra vez.
+     Antes el buscador solo miraba negocios, así que buscar un tour por su
+     nombre no devolvía nada — y es justo lo que probó Tony. */
+  const negocios = await fichasDelDirectorio(destino, idioma, categorias);
 
   /* El buscador vive en el hero y los resultados salen aquí mismo: cuando hay
      búsqueda, en vez de la portada se muestran las coincidencias. Sin ?q= ni
