@@ -42,6 +42,10 @@ export type Destino = {
   /* Si la burbuja del concierge sale en el sitio. Por destino: uno puede
      querer chat y el de al lado no. */
   chat_activo: boolean;
+  /* El ID del pixel de Meta. En la fila y no en el codigo: se cambia desde
+     Ajustes sin desplegar, y cada destino lleva el suyo. Vacio = no se carga
+     nada. */
+  pixel_meta: string | null;
   /* El tema del sitio publico y si la barra de arriba se queda oscura
      aunque el resto sea claro. Salen de Ajustes. */
   tema: 'claro' | 'oscuro';

@@ -198,6 +198,38 @@ cargadas las variables de entorno. Medir ahí da "falta `SUPABASE_SECRET_KEY`"
 cuando en el proyecto bueno está puesta. Si algún día sobra un proyecto, este es
 el que hay que borrar; mientras exista, es una trampa.
 
+### El píxel de Meta
+
+Montado en `app/[idioma]/layout.tsx` — **el layout del sitio público, no
+`app/layout.tsx`**. Ponerlo en la raíz lo encendería dentro de `/admin` y de
+`/negocio`, o sea mediría a Tony y a los dueños trabajando en su propio panel, y
+esas visitas entrarían a las audiencias de las campañas. Tampoco cubre `/baja`,
+que es donde la gente se da de baja.
+
+El ID vive en `destinos.dst_destino.pixel_meta` y **se edita desde Ajustes**, no
+en el código: se cambia sin desplegar y cada destino lleva el suyo. Vacío = el
+componente no se monta y no se carga nada. La columna tiene un CHECK de solo
+dígitos, y el panel acepta además el `<script>` pegado de Meta y le saca el
+número: ese valor se inyecta en el `fbq('init')` de todas las páginas públicas y
+basta una comilla para romper el JavaScript del sitio entero.
+
+⚠️ **El snippet que da Meta cuenta UNA vista y se calla.** Está escrito para un
+sitio donde cada clic recarga la página; este no recarga. Pegado tal cual, Meta
+solo vería la página de entrada de cada visita. Por eso existe
+`componentes/PixelMeta.tsx`: el bloque en línea hace `init` y manda la primera
+vista, y de ahí en adelante un efecto manda una `PageView` por cada cambio de
+ruta. La guarda `ultimaRuta` es lo que evita contar doble — **vive fuera del
+componente a propósito**, porque un `useRef` se reinicia al cambiar de idioma y
+esa vista se perdería. Si alguien quita esa guarda tiene que sacar también el
+`fbq('track','PageView')` del bloque en línea, o la página de entrada empieza a
+contar doble.
+
+Mira la ruta, no la query: acá la query son filtros (`?operador=…`) y contar
+cada filtro como vista infla el número.
+
+**Pendiente, decisión de Tony:** el sitio no tiene aviso de cookies y se sirve
+en alemán y francés.
+
 **Ojo con el entorno de Claude Code**: en el **contenedor**, el proxy de
 egress deniega `*.supabase.co` y `*.vercel.app`, así que ahí no se puede
 llamar a la API REST ni abrir el sitio; la base se trabaja por el conector de

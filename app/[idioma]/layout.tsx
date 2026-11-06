@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import { Concierge } from '@/componentes/Concierge';
 import { AvisoSorteo } from '@/componentes/AvisoSorteo';
 import { sorteoDe } from '@/lib/sorteo';
+import { PixelMeta } from '@/componentes/PixelMeta';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,6 +85,14 @@ export default async function LayoutIdioma({
       {/* El aviso decide solo cuando salir y cuando callarse: ver el
           componente. Aca solo se le pasa la configuracion del panel. */}
       {sorteo && sorteo.aviso_activo && <AvisoSorteo sorteo={sorteo} idioma={idioma} />}
+      {/* El pixel de Meta va SOLO aquí, en el layout del sitio público.
+          Ponerlo en app/layout.tsx lo encendería también dentro de /admin y de
+          /negocio: estaría midiendo a Tony y a los dueños trabajando en su
+          propio panel, y esas visitas entrarían a las audiencias de las
+          campañas. Tampoco cubre /baja, que es donde la gente se da de baja:
+          rastrear a alguien en el acto de salirse es justo lo que no se hace.
+          Sin ID en Ajustes no se monta nada. */}
+      {destino.pixel_meta && <PixelMeta id={destino.pixel_meta} />}
       {/* Se apaga desde Ajustes. Ni se monta: apagado no deja ni el botón. */}
       {destino.chat_activo && (
         <Concierge idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio} />

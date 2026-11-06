@@ -11,6 +11,27 @@ const numero = (d: FormData, k: string) => { const v = texto(d, k); return v ===
 const color = (d: FormData, k: string) => (/^#[0-9a-f]{6}$/i.test(texto(d, k)) ? texto(d, k).toUpperCase() : undefined);
 
 /**
+ * El ID de un pixel: solo digitos.
+ *
+ * Acepta el numero pelado —lo normal— y tambien el <script> entero pegado de
+ * Meta, de donde saca el numero del `fbq('init', '…')`. Lo que no se reconozca
+ * se guarda vacio en vez de pasar tal cual: ese valor se inyecta en el
+ * `fbq('init')` de TODAS las paginas publicas, y basta una comilla para
+ * romperle el javascript al sitio completo. La base tiene el mismo check, asi
+ * que aqui es cinturon y tirantes.
+ *
+ * Que entro de verdad se ve en el campo al recargar: ahi esta lo guardado, no
+ * lo escrito.
+ */
+const pixel = (d: FormData, k: string) => {
+  const bruto = texto(d, k);
+  if (!bruto) return null;
+  if (/^[0-9]{10,20}$/.test(bruto)) return bruto;
+  const init = bruto.match(/init['"\s,]+([0-9]{10,20})/);
+  return init ? init[1] : null;
+};
+
+/**
  * Guarda una parte de la fila del destino.
  *
  * Ajustes tiene TRES formularios que llaman a esta misma accion, y una casilla
@@ -101,6 +122,7 @@ export async function editarDestino(datos: FormData) {
         ? texto(datos, 'pie_credito_url')
         : null,
       chat_activo: texto(datos, 'chat_activo') === '1',
+      pixel_meta: pixel(datos, 'pixel_meta'),
       /* El tema pinta TODO el sitio publico. Lo que no sea uno de los dos se
          cae a claro en vez de guardarse: la base tiene un check y rebotaria
          sin explicacion. */

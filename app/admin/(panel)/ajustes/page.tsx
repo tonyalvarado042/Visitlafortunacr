@@ -80,6 +80,19 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label><input type="checkbox" name="chat_activo" value="1" defaultChecked={d.chat_activo} disabled={!esAdmin} /> Burbuja de chat en el sitio</label>
                   <small>Apagada, la burbuja no se pinta y el chat deja de atender. Lo que ya estaba conversado no se borra.</small>
                 </div>
+                <div className="campo ancho"><label>Pixel de Meta (Facebook e Instagram)</label>
+                  <input name="pixel_meta" defaultValue={d.pixel_meta ?? ''} inputMode="numeric" placeholder="solo el numero, ej. 1891686211995591" disabled={!esAdmin} />
+                  <small>
+                    {d.pixel_meta
+                      ? `Encendido: el pixel ${d.pixel_meta} cuenta las vistas de todas las paginas publicas.`
+                      : 'Vacio: no se carga ningun pixel y Meta no mide nada de este sitio.'}
+                    {' '}Pegue solo el numero (lo saca de Meta Business en Administrador de eventos). Si pega el
+                    &lt;script&gt; completo tambien sirve: se le saca el numero. Lo que no se reconozca se guarda
+                    vacio — al recargar ve lo que quedo de verdad.
+                    {' '}<strong>No mide el panel ni el portal de los negocios</strong>, a proposito: esas visitas
+                    ensuciarian las audiencias de las campanas.
+                  </small>
+                </div>
                 <div className="campo"><label><input type="checkbox" name="combina_automatico" value="1" defaultChecked={d.combina_automatico} disabled={!esAdmin} /> Rellenar &quot;Combinalo con&quot; solo</label>
                   <small>
                     En la ficha que no tiene combinaciones a mano, se rellena con tres de <strong>otras</strong>
