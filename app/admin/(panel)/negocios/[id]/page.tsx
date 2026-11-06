@@ -311,11 +311,18 @@ export default async function PaginaNegocio({ params, searchParams }: {
                 algo que de verdad no cumplía— y borrar es definitivo, para
                 lo que nunca tuvo que existir.
 
-                Van en un <details> cerrado a propósito: no son botones de
-                todos los días, y un «Borrar» suelto al lado de «Publicar» se
-                toca por accidente. */}
+                Nacieron en un <details> CERRADO para que un «Borrar» no
+                quedara pegado a «Publicar». El resultado fue que Tony lo buscó
+                y concluyó que no existía, así que ahora nace ABIERTO: plegar
+                esconde. La seguridad la dan las dos confirmaciones, no el
+                pliegue.
+
+                ⚠️ Y el comentario va ACÁ ARRIBA y no dentro del `&& (`. Un
+                comentario JSX ahí adentro no es JSX todavía —es una expresión
+                de JavaScript— y revienta el archivo entero. Ya había pasado
+                una vez. */}
             {n.estado_publicacion !== 'archivado' && (
-              <details className="tarjeta plegable-bloque">
+              <details className="tarjeta plegable-bloque" open>
                 <summary><h2>Rechazar o borrar <small>no es lo mismo</small></h2></summary>
                 <div style={{ paddingTop: 4 }}>
                   <form action={rechazarNegocio}>

@@ -77,3 +77,175 @@ export async function editarTour(datos: FormData) {
   revalidatePath(`/admin/tours/${id}`);
   revalidatePath('/admin/tours');
 }
+
+/* ---- Las fotos del tour ---------------------------------------------------
+ *
+ * Calco de las de `negocios/acciones.ts`, a propósito. Un tour tenía UNA foto
+ * (`dst_tour.imagen_url`) y nada más, cuando el tour es justo lo que se vende
+ * —y lo único que publica un operador—. Quien está decidiendo si paga $99 por
+ * una clase de cocina quiere ver más de una.
+ *
+ * Suben con la sesión del usuario y no con la clave de servicio: la política
+ * de storage mira el PRIMER segmento de la ruta —la babosa del destino— y con
+ * eso decide. Por eso la ruta es <destino>/<negocio>/tours/<archivo>, la misma
+ * carpeta donde ya subía el dueño desde su portal.
+ */
+
+const BUCKET_TOURS = 'negocios';
+const ANCHO_MAX_TOUR = 1600;
+
+/**
+ * El tour, si es de este destino. Devuelve también la babosa del operador,
+ * que es la que arma la carpeta donde van las fotos.
+ */
+async function tourConOperador(
+  db: Awaited<ReturnType<typeof contextoPanel>>['db'],
+  destinoId: string,
+  tourId: string,
+) {
+  const { data: t } = await db.from('dst_tour')
+    .select('id, nombre, negocio_id').eq('id', tourId).eq('destino_id', destinoId).maybeSingle();
+  if (!t?.negocio_id) return null;
+  const { data: n } = await db.from('dst_negocio')
+    .select('babosa').eq('id', t.negocio_id).maybeSingle();
+  if (!n?.babosa) return null;
+  return { id: t.id as string, nombre: t.nombre as string, operadorBabosa: n.babosa as string };
+}
+
+function refrescarTour(id: string) {
+  revalidatePath(`/admin/tours/${id}`);
+  revalidatePath('/admin/tours');
+}
+
+/** Sube UNA O VARIAS de un saque. No se corta en la primera que falle. */
+export async function subirFotoTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  const archivos = datos.getAll('archivo').filter((a): a is File => a instanceof File && a.size > 0);
+  if (!archivos.length) return;
+
+  const t = await tourConOperador(db, destino.id, id);
+  /* Sin operador no hay carpeta donde ponerlas: la ruta se arma con su babosa.
+     La pantalla ya lo dice y no ofrece el botón, pero un formulario se puede
+     mandar a mano. */
+  if (!t) return;
+
+  const credito = texto(datos, 'credito') || null;
+  const licencia = texto(datos, 'licencia') || null;
+  const fuente = texto(datos, 'fuente_url') || null;
+  /* Una foto ajena tiene que decir de quién es y bajo qué licencia. */
+  if (fuente && (!credito || !licencia)) return;
+
+  const alternativo = texto(datos, 'texto_alternativo') || t.nombre;
+
+  /* El contador arranca del total que YA hay: si no, las de la misma tanda
+     nacerían todas con el mismo `orden` y la galería las mostraría en
+     cualquier lado. */
+  const { count } = await db.from('dst_tour_foto')
+    .select('id', { count: 'exact', head: true }).eq('tour_id', id);
+  let siguiente = count ?? 0;
+
+  const sharp = (await import('sharp')).default;
+
+  for (const archivo of archivos) {
+    try {
+      const webp = await sharp(Buffer.from(await archivo.arrayBuffer()))
+        .rotate()
+        .resize({ width: ANCHO_MAX_TOUR, withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+
+      const base = archivo.name.replace(/\.[^.]+$/, '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').slice(0, 60) || 'foto';
+      const ruta = `${destino.babosa}/${t.operadorBabosa}/tours/${base}-${Date.now().toString(36)}-${siguiente}.webp`;
+
+      const { error: eSubida } = await db.storage.from(BUCKET_TOURS)
+        .upload(ruta, webp, { contentType: 'image/webp' });
+      if (eSubida) throw new Error(eSubida.message);
+
+      const { data: publica } = db.storage.from(BUCKET_TOURS).getPublicUrl(ruta);
+      const { error } = await db.from('dst_tour_foto').insert({
+        tour_id: id,
+        url: publica.publicUrl,
+        orden: siguiente,
+        es_portada: siguiente === 0,
+        credito, licencia, fuente_url: fuente,
+        texto_alternativo_es: alternativo,
+        texto_alternativo_en: alternativo,
+      });
+      if (error) throw new Error(error.message);
+
+      siguiente += 1;
+    } catch (fallo) {
+      /* La que falle no se lleva a las demás. */
+      console.error('subirFotoTour:', archivo.name, fallo instanceof Error ? fallo.message : fallo);
+    }
+  }
+
+  refrescarTour(id);
+}
+
+export async function marcarPortadaTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(id) || !esUuid(fotoId)) return;
+  if (!(await tourConOperador(db, destino.id, id))) return;
+
+  /* Primero se apaga la anterior: `uq_dst_tour_foto_portada` no deja dos. */
+  await db.from('dst_tour_foto').update({ es_portada: false }).eq('tour_id', id).eq('es_portada', true);
+  const { error } = await db.from('dst_tour_foto').update({ es_portada: true }).eq('id', fotoId).eq('tour_id', id);
+  if (error) console.error('marcarPortadaTour:', error.message);
+  refrescarTour(id);
+}
+
+export async function moverFotoTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  /* El id y el paso viajan JUNTOS en el value del botón: un botón manda un
+     solo par nombre/valor, así que un campo `paso` suelto valdría lo mismo
+     para subir que para bajar. */
+  const [fotoId, pasoTexto] = texto(datos, 'foto_mover').split('|');
+  const paso = Number(pasoTexto);
+  if (!esUuid(id) || !esUuid(fotoId) || (paso !== 1 && paso !== -1)) return;
+  if (!(await tourConOperador(db, destino.id, id))) return;
+
+  const { data: todas } = await db.from('dst_tour_foto')
+    .select('id, orden').eq('tour_id', id).order('orden');
+  const lista = todas ?? [];
+  const i = lista.findIndex((f) => f.id === fotoId);
+  if (i < 0) return;
+  const j = i + paso;
+  if (j < 0 || j >= lista.length) return;
+
+  /* Se reescriben los dos órdenes y no se intercambian: si dos filas quedaron
+     con el mismo `orden` —y pueden— intercambiar no mueve nada y el botón
+     parece roto. */
+  await db.from('dst_tour_foto').update({ orden: j }).eq('id', lista[i].id).eq('tour_id', id);
+  await db.from('dst_tour_foto').update({ orden: i }).eq('id', lista[j].id).eq('tour_id', id);
+  refrescarTour(id);
+}
+
+export async function borrarFotoTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(id) || !esUuid(fotoId)) return;
+  if (!(await tourConOperador(db, destino.id, id))) return;
+
+  const { data: foto } = await db.from('dst_tour_foto')
+    .select('id, url').eq('id', fotoId).eq('tour_id', id).maybeSingle();
+  if (!foto) return;
+
+  /* Se borra también del almacén. Dejarla ahí es pagar por una foto que ya
+     nadie muestra, y a los seis meses nadie sabe cuáles sobran. */
+  const marca = `/object/public/${BUCKET_TOURS}/`;
+  const corte = (foto.url as string).indexOf(marca);
+  if (corte !== -1) await db.storage.from(BUCKET_TOURS).remove([(foto.url as string).slice(corte + marca.length)]);
+
+  const { error } = await db.from('dst_tour_foto').delete().eq('id', fotoId).eq('tour_id', id);
+  if (error) console.error('borrarFotoTour:', error.message);
+  refrescarTour(id);
+}

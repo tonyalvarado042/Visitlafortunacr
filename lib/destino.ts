@@ -541,6 +541,10 @@ export type TourPublico = TourDeNegocio & {
   idiomas_guia: string[];
   cancelacion_libre_horas: number;
   precio_nino_usd: number | null;
+  /* La galeria. `imagen_url` sigue existiendo como respaldo: la foto vieja se
+     copio a la galeria como portada, asi que lo normal es que `fotos[0]` sea
+     la misma. */
+  fotos: FotoDeTour[];
   /* `es_operador`: vende tours pero no tiene ficha. Su nombre sale como TEXTO,
      nunca como enlace — la pagina no existe y el enlace daria 404. */
   negocio: {
@@ -555,6 +559,18 @@ export type TourPublico = TourDeNegocio & {
  * el operador porque una tour sin saber quién la lleva no se puede vender —
  * ni reservar, ni reclamar.
  */
+export type FotoDeTour = {
+  id: string;
+  url: string;
+  texto_alternativo_es: string | null;
+  texto_alternativo_en: string | null;
+  credito: string | null;
+  licencia: string | null;
+  fuente_url: string | null;
+  es_portada: boolean;
+  orden: number;
+};
+
 export async function tourPorBabosa(destino: Destino, babosa: string): Promise<TourPublico | null> {
   const { data, error } = await supabase
     .from('dst_tour')
@@ -562,19 +578,36 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
              precio_adulto_usd, precio_nino_usd, imagen_url, video_url, video_portada_url,
+             fotos:dst_tour_foto(id, url, texto_alternativo_es, texto_alternativo_en, credito, licencia, fuente_url, es_portada, orden),
              negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
     .eq('destino_id', destino.id)
     .eq('babosa', babosa)
     .eq('estado', 'publicado')
     .maybeSingle();
-  if (error || !data) return null;
+  /* El motivo al registro. Devolver null a secas convierte CUALQUIER fallo
+     —una columna mal escrita, una tabla que PostgREST todavía no conoce— en
+     un 404 idéntico al de una tour que no existe, y buscar la diferencia a
+     ciegas cuesta una tarde. */
+  if (error) {
+    console.error('tourPorBabosa:', babosa, error.message);
+    return null;
+  }
+  if (!data) return null;
 
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const n = uno(data.negocio as never) as { nombre: string; babosa: string; es_operador: boolean; categoria: unknown } | null;
   const cat = n ? uno(n.categoria as never) as { babosa: string } | null : null;
 
+  /* La galeria, ordenada con la PORTADA primero y el resto por su `orden`.
+     Postgres no garantiza el orden de una relacion anidada, asi que si no se
+     ordena aca la cabecera de la ficha podria mostrar cualquiera. */
+  const fotos = ((data.fotos ?? []) as FotoDeTour[])
+    .slice()
+    .sort((a, b) => (Number(b.es_portada) - Number(a.es_portada)) || (a.orden - b.orden));
+
   return {
     ...(data as unknown as TourPublico),
+    fotos,
     negocio: n
       ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null, es_operador: Boolean(n.es_operador) }
       : null,

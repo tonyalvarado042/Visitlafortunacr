@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, tourPorBabosa } from '@/lib/destino';
+import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
@@ -54,6 +55,25 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
   const { idioma, babosa } = await params;
   const destino = await destinoActual();
   const tour = await tourPorBabosa(destino, babosa);
+  /* Las fotos del tour se mapean al tipo de las fichas para poder reusar la
+     MISMA galería: tres grandes arriba, la tira con el «+N» más abajo y el
+     visor a pantalla completa, todo sin una línea de JavaScript en el cliente.
+     Escribir una galería aparte para tours sería mantener dos. */
+  const fotos = (tour?.fotos ?? []).map((f) => ({
+    url: f.url,
+    texto_alternativo: (idioma === 'es' ? f.texto_alternativo_es : f.texto_alternativo_en)
+      ?? f.texto_alternativo_es,
+    credito: f.credito,
+    licencia: f.licencia,
+    fuente_url: f.fuente_url,
+    /* Un tour no tiene fotos genéricas de categoría: las suyas son suyas. */
+    es_generica: false,
+    es_portada: f.es_portada,
+  }));
+  /* La portada: la primera de la galería, y si no hay galería la foto vieja.
+     Ese respaldo importa mientras quede algún tour cargado antes de que
+     existiera la galería. */
+  const portada = fotos[0]?.url ?? tour?.imagen_url ?? null;
   if (!tour) notFound();
 
   const categorias = await categoriasDe(destino, idioma);
@@ -80,14 +100,14 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
             SIN foto NO se puede reusar `.ficha-hero-texto`: esa clase pinta de
             blanco porque da por hecho que hay una foto oscura debajo, y sin
             ella el título queda blanco sobre blanco — invisible, no feo. */}
-        <section className={tour.imagen_url ? 'ficha-hero' : 'tour-cabecera'}>
-          {tour.imagen_url && (
+        <section className={portada ? 'ficha-hero' : 'tour-cabecera'}>
+          {portada && (
             <>
-              <img className="ficha-hero-foto" src={tour.imagen_url} alt="" />
+              <img className="ficha-hero-foto" src={portada} alt="" />
               <div className="ficha-hero-velo" />
             </>
           )}
-          <div className={`caja ${tour.imagen_url ? 'ficha-hero-texto' : 'tour-cabecera-texto'}`}>
+          <div className={`caja ${portada ? 'ficha-hero-texto' : 'tour-cabecera-texto'}`}>
             <div className="migas">
               <Link href={`/${idioma}`}>{t('inicio', idioma)}</Link>
               <span>/</span>
@@ -116,6 +136,10 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
         <div className="caja">
           <div className="ficha-cuerpo">
             <div className="ficha-principal">
+
+              {/* Las tres grandes. La misma galería de las fichas de negocio:
+                  no hay una segunda escrita para tours. */}
+              <FotosArriba fotos={fotos} idioma={idioma} />
 
               {datos.length > 0 && (
                 <ul className="tour-ficha-datos">
@@ -199,6 +223,10 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6 }}>{tour.que_llevar}</p>
                 </div>
               )}
+
+              {/* La tira con el «+N». Arriba van las tres que venden; esta
+                  dice «hay más, mirá». Se calla sola si no sobran fotos. */}
+              <GaleriaAbajo fotos={fotos} idioma={idioma} />
             </div>
 
             <aside className="ficha-lado">
@@ -257,6 +285,11 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
           </div>
         </div>
       </main>
+
+      {/* El visor va FUERA de las dos columnas y al final del documento: se
+          abre con `:target`, y dentro de un contenedor con `overflow` o
+          `transform` el pantalla-completa queda recortado por el padre. */}
+      <VisoresFotos fotos={fotos} idioma={idioma} />
 
       <Pie destino={destino} />
     </>
