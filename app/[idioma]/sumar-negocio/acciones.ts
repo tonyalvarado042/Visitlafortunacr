@@ -5,7 +5,7 @@ import { sesion } from '@/lib/supabase-sesion';
 import { destinoActual, negociosDe } from '@/lib/destino';
 import type { Idioma } from '@/lib/idiomas';
 import { origen, pedirEnlaceDeClave } from '@/lib/recuperacion';
-import { correoNegocioRecibido } from '@/lib/correo/cartas';
+import { correoNegocioRecibido, correoNegocioNuevoAlEquipo } from '@/lib/correo/cartas';
 import { categoriasDe } from '@/lib/destino';
 import { after } from 'next/server';
 
@@ -168,9 +168,10 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
      try: que Resend esté caído o falte la llave no puede impedir que alguien
      registre su negocio. Si no sale, queda en el registro del servidor. */
   const correo = texto(datos, 'email').toLowerCase() || user.email || null;
+  const categoria = (await categoriasDe(destino, idioma))
+    .find((c) => c.categoria_id === categoriaId)?.nombre ?? null;
+
   if (correo) {
-    const categoria = (await categoriasDe(destino, idioma))
-      .find((c) => c.categoria_id === categoriaId)?.nombre ?? null;
     after(async () => {
       try {
         const envio = await correoNegocioRecibido({
@@ -183,6 +184,33 @@ export async function sumarNegocio(_previo: EstadoNegocio, datos: FormData): Pro
       }
     });
   }
+
+  /* El aviso al equipo.
+   *
+   * ⚠️ VA FUERA del `if (correo)` de arriba, y no es un detalle: ese `if` es
+   * sobre el correo DEL NEGOCIO. Un negocio puede inscribirse sin dejar
+   * correo —entonces no recibe confirmacion— y justamente ese es el que mas
+   * urge mirar a mano. Colgar el aviso interno de ahi lo habria dejado mudo
+   * en el peor caso. */
+  after(async () => {
+    try {
+      const equipo = destino.email_avisos?.trim() || destino.email_contacto?.trim();
+      if (!equipo) return;
+      const envio = await correoNegocioNuevoAlEquipo({
+        destino, para: equipo, negocioId,
+        nombreNegocio: nombre,
+        categoria,
+        esOperador: texto(datos, 'es_operador') === '1',
+        email: correo,
+        telefono: telefono(texto(datos, 'mi_telefono')) || texto(datos, 'telefono') || null,
+        quien: texto(datos, 'mi_nombre') || null,
+        nota,
+      });
+      if (!envio.ok) console.error('aviso de negocio al equipo no salió:', envio.error);
+    } catch (fallo) {
+      console.error('aviso de negocio al equipo:', fallo instanceof Error ? fallo.message : fallo);
+    }
+  });
 
   return {
     creado: {

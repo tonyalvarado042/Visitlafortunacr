@@ -6,7 +6,7 @@ import { hayClaveDeIA } from '@/lib/ia/cliente';
 import { enSegundoPlano } from '@/lib/segundo-plano';
 import { destinoActual } from '@/lib/destino';
 import { experienciaPorBabosa } from '@/lib/experiencias';
-import { correoConsultaRecibida } from '@/lib/correo/cartas';
+import { correoConsultaRecibida, correoLeadNuevoAlEquipo } from '@/lib/correo/cartas';
 import { esIdioma } from '@/lib/idiomas';
 
 /**
@@ -111,6 +111,39 @@ export async function POST(peticion: NextRequest) {
       }
     });
   }
+
+  /* El aviso al equipo.
+   *
+   * ⚠️ VA SIEMPRE, no solo cuando hay correo del viajero ni solo cuando el
+   * lead viene de una experiencia. El correo de ARRIBA —la confirmacion al
+   * viajero— solo sale para las experiencias, y esta bien que asi sea. Pero
+   * el aviso interno tiene que salir por TODOS: un lead que nadie ve es un
+   * lead perdido, y el que entro por el planificador o por una ficha vale
+   * igual que el que entro por una experiencia.
+   *
+   * Tambien va envuelto y despues de responder: la solicitud ya quedo
+   * guardada, y que Resend este caido no puede devolverle un error a alguien
+   * que si dejo sus datos. */
+  after(async () => {
+    try {
+      const destino = await destinoActual();
+      const equipo = destino.email_avisos?.trim() || destino.email_contacto?.trim();
+      if (!equipo) return;
+      const envio = await correoLeadNuevoAlEquipo({
+        destino, para: equipo, solicitudId, tipo,
+        nombre: typeof cuerpo.nombre === 'string' ? cuerpo.nombre : null,
+        email, whatsapp,
+        llegaEl: typeof cuerpo.llega_el === 'string' ? cuerpo.llega_el : null,
+        personas: typeof cuerpo.personas === 'number' ? cuerpo.personas : null,
+        mensaje: typeof cuerpo.mensaje === 'string' ? cuerpo.mensaje : null,
+        origen: typeof cuerpo.origen === 'string' ? cuerpo.origen : null,
+        idiomaDelViajero: idiomaCarta,
+      });
+      if (!envio.ok) console.error('aviso de lead al equipo no salio:', envio.error);
+    } catch (fallo) {
+      console.error('aviso de lead al equipo:', fallo instanceof Error ? fallo.message : fallo);
+    }
+  });
 
   return NextResponse.json({ solicitud_id: solicitudId, plan_en_camino: generaPlan }, { status: 201 });
 }

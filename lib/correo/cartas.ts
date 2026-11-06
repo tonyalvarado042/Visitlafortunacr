@@ -1,6 +1,6 @@
 import 'server-only';
 import type { Destino } from '@/lib/destino';
-import type { Idioma } from '@/lib/idiomas';
+import { NOMBRE_PROPIO, type Idioma } from '@/lib/idiomas';
 import { enviarCorreo, type Envio } from './enviar';
 
 /*
@@ -674,4 +674,120 @@ export async function correoFaltaCompletarFicha(opciones: {
 }): Promise<Envio> {
   const { destino, idioma, para } = opciones;
   return enviarCorreo({ destino, idioma, para, ...piezasFaltaCompletarFicha(opciones) });
+}
+
+/* ---- Avisos INTERNOS al equipo -----------------------------------------
+ *
+ * Van en castellano siempre: los lee quien opera, no el viajero.
+ *
+ * EL AGUJERO QUE TAPAN: hasta hoy el unico aviso al equipo era el de
+ * solicitud de reserva. Un lead entraba, el viajero recibia su confirmacion
+ * y en el panel aparecia una fila... que nadie veia hasta que alguien se
+ * acordara de entrar a mirar. **Un lead que nadie ve es un lead perdido.** Lo
+ * mismo con los negocios nuevos: se inscribian, recibian su correo, y se
+ * quedaban ahi.
+ *
+ * Son cortos a proposito. Un aviso interno no se lee, se escanea: quien es,
+ * como se le contesta, y un boton para abrirlo. Todo lo demas esta en el
+ * panel y repetirlo aca solo hace que la proxima vez no se mire.
+ */
+
+type PiezasLead = {
+  destino: Destino;
+  solicitudId: string;
+  tipo: string;
+  nombre: string | null;
+  email: string | null;
+  whatsapp: string | null;
+  llegaEl: string | null;
+  personas: number | null;
+  mensaje: string | null;
+  origen: string | null;
+  idiomaDelViajero: string | null;
+};
+
+export function piezasLeadNuevoAlEquipo(o: PiezasLead) {
+  const quien = o.nombre?.trim() || 'sin nombre';
+
+  return {
+    asunto: `Lead nuevo: ${quien}${o.origen ? ` · ${o.origen}` : ''}`,
+    motivo: 'lead_al_equipo',
+    titulo: 'Entró un lead',
+    parrafos: [
+      o.mensaje?.trim()
+        ? `Escribió: «${o.mensaje.trim()}»`
+        : 'No dejó mensaje, solo sus datos.',
+    ],
+    datos: [
+      { rotulo: 'Quién', valor: quien },
+      ...(o.email ? [{ rotulo: 'Correo', valor: o.email }] : []),
+      ...(o.whatsapp ? [{ rotulo: 'WhatsApp', valor: o.whatsapp }] : []),
+      { rotulo: 'Tipo', valor: o.tipo },
+      ...(o.origen ? [{ rotulo: 'De dónde', valor: o.origen }] : []),
+      ...(o.llegaEl ? [{ rotulo: 'Llega', valor: o.llegaEl }] : []),
+      ...(o.personas ? [{ rotulo: 'Personas', valor: String(o.personas) }] : []),
+      /* El idioma importa para contestarle: si escribio en ingles y se le
+         responde en castellano, el lead se enfria ahi mismo. Con el nombre y
+         no con el codigo: «Escribe en: en» hace dudar dos segundos cada vez,
+         y esto se escanea, no se lee. */
+      ...(o.idiomaDelViajero
+        ? [{ rotulo: 'Escribe en', valor: NOMBRE_PROPIO[o.idiomaDelViajero as Idioma] ?? o.idiomaDelViajero }]
+        : []),
+    ],
+    boton: { texto: 'Abrir el lead', url: `https://${o.destino.dominio}/admin/leads/${o.solicitudId}` },
+    nota: 'Aviso interno. Nadie más lo recibió.',
+    /* El pie por omision dice «recibís este correo porque escribiste a…», que
+       en un aviso interno es falso: nadie escribio a ningun lado, lo disparo
+       el sitio. Un correo que explica mal por que llego entrena a no creerle
+       al pie de los demas. */
+    pie: 'Aviso automático del panel de',
+  };
+}
+
+export async function correoLeadNuevoAlEquipo(o: PiezasLead & { para: string }): Promise<Envio> {
+  return enviarCorreo({ destino: o.destino, idioma: 'es', para: o.para, ...piezasLeadNuevoAlEquipo(o) });
+}
+
+type PiezasNegocioNuevo = {
+  destino: Destino;
+  negocioId: string;
+  nombreNegocio: string;
+  categoria: string | null;
+  esOperador: boolean;
+  email: string | null;
+  telefono: string | null;
+  quien: string | null;
+  nota: string | null;
+};
+
+export function piezasNegocioNuevoAlEquipo(o: PiezasNegocioNuevo) {
+  return {
+    asunto: `Negocio nuevo: ${o.nombreNegocio}`,
+    motivo: 'negocio_nuevo_al_equipo',
+    titulo: o.esOperador ? 'Se inscribió un operador' : 'Se inscribió un negocio',
+    parrafos: [
+      o.esOperador
+        ? 'Es un operador de tours: no lleva ficha propia, lo que se publica son sus tours.'
+        : 'Entra como pendiente. Nace sin descripción ni fotos: desde su ficha en el panel se le pueden pedir.',
+      ...(o.nota?.trim() ? [`Dejó esta nota: «${o.nota.trim()}»`] : []),
+    ],
+    datos: [
+      { rotulo: 'Negocio', valor: o.nombreNegocio },
+      ...(o.categoria ? [{ rotulo: 'Categoría', valor: o.categoria }] : []),
+      ...(o.quien ? [{ rotulo: 'Lo inscribió', valor: o.quien }] : []),
+      ...(o.email ? [{ rotulo: 'Correo', valor: o.email }] : []),
+      ...(o.telefono ? [{ rotulo: 'Teléfono', valor: o.telefono }] : []),
+    ],
+    boton: { texto: 'Abrir la ficha', url: `https://${o.destino.dominio}/admin/negocios/${o.negocioId}` },
+    nota: 'Aviso interno. Nadie más lo recibió.',
+    /* El pie por omision dice «recibís este correo porque escribiste a…», que
+       en un aviso interno es falso: nadie escribio a ningun lado, lo disparo
+       el sitio. Un correo que explica mal por que llego entrena a no creerle
+       al pie de los demas. */
+    pie: 'Aviso automático del panel de',
+  };
+}
+
+export async function correoNegocioNuevoAlEquipo(o: PiezasNegocioNuevo & { para: string }): Promise<Envio> {
+  return enviarCorreo({ destino: o.destino, idioma: 'es', para: o.para, ...piezasNegocioNuevoAlEquipo(o) });
 }
