@@ -446,14 +446,21 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
    Los idiomas del sitio, en Ajustes.
 
    Cada fila es una etiqueta entera, así que se prende tocando cualquier parte
-   —el nombre, el avance— y no solo el cuadrito de 14px. En el teléfono eso es
+   —el nombre, el avance— y no solo el cuadrito de 16px. En el teléfono eso es
    la diferencia entre poder y no poder.
 
-   ⚠️ Las variables son las de `globales.css` y nada más: `--borde-3`,
-   `--borde-4`, `--naranja`, `--humo`, `--aviso`, `--sup-2`. Inventarse una
-   (`--violeta`, `--linea`, `--texto-suave`) NO da error: la declaración
-   entera se descarta en silencio y la fila sale sin borde y sin color. Si
-   hace falta un tono nuevo, se define arriba en los dos temas primero.
+   ⚠️⚠️ LOS COLORES VAN EN HEX FIJO, no en variables de `globales.css`, y es a
+   propósito. El panel comparte el `<html>` con el sitio público, así que
+   hereda su `data-tema`. Hoy el destino está en claro y `var(--sup-2)` vale
+   #F5F3EF; el día que alguien ponga el sitio en oscuro desde Ajustes, esa
+   misma variable vale **#151515** y esta fila quedaría casi negra sobre una
+   tarjeta blanca. Por eso todo el resto de este archivo hardcodea claro
+   (`.tarjeta { background: #fff }`). La única variable segura es `--naranja`,
+   que es el mismo naranja en los dos temas.
+
+   Y ojo con el otro lado del mismo filo: inventarse una variable
+   (`--violeta`, `--linea`, `--texto-suave`) tampoco da error — la declaración
+   entera se descarta en silencio y la fila sale sin borde y sin color.
 
    La columna del avance es `1fr` para que el texto largo —«64 de 65 fichas
    (98%) · 24 de 24 categorías · 5 guías»— no empuje nada.
@@ -466,25 +473,28 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
   align-items: center;
   gap: 12px;
   padding: 11px 13px;
-  border: 1px solid var(--borde-3);
+  border: 1px solid #E6E6E2;
   border-radius: 10px;
+  background: #fff;
   cursor: pointer;
   transition: border-color .15s, background .15s;
 }
 .idioma-fila:hover { border-color: var(--naranja); }
-.idioma-fila.prendido { background: var(--sup-2); border-color: var(--borde-5); }
+.idioma-fila.prendido { background: #FBFAF7; border-color: #D5D5CF; }
 /* El principal va con la casilla desactivada. Sin esto parece que la fila
    está deshabilitada entera, y es justo la que SÍ está sirviendo. */
 .idioma-fila:has(input:disabled) { cursor: default; }
-.idioma-fila:has(input:disabled):hover { border-color: var(--borde-3); }
-.idioma-fila.prendido:has(input:disabled):hover { border-color: var(--borde-5); }
+.idioma-fila:has(input:disabled):hover { border-color: #E6E6E2; }
+.idioma-fila.prendido:has(input:disabled):hover { border-color: #D5D5CF; }
 
 .idioma-fila input { width: 16px; height: 16px; margin: 0; accent-color: var(--naranja); }
 .idioma-nombre { font-weight: 600; display: flex; align-items: center; gap: 7px; }
-.idioma-nombre code { font-weight: 400; font-size: 12px; color: var(--humo); }
-.idioma-avance { font-size: 12.5px; line-height: 1.5; color: var(--humo); }
-/* Que un idioma esté en cero es LO que hay que ver antes de prenderlo. */
-.idioma-cero { color: var(--aviso); font-weight: 600; }
+.idioma-nombre code { font-weight: 400; font-size: 12px; color: #8B8B87; }
+.idioma-avance { font-size: 12.5px; line-height: 1.5; color: #6F6B63; }
+/* Que un idioma esté en cero es LO que hay que ver antes de prenderlo. El
+   tono es el mismo de `.aviso-panel span`, para que el panel avise siempre
+   del mismo color. */
+.idioma-cero { color: #9A6238; font-weight: 600; }
 
 @media (max-width: 720px) {
   .idioma-fila { grid-template-columns: auto 1fr; }
