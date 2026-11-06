@@ -89,7 +89,17 @@ export const T: Record<string, Diccionario> = {
   tour_no_incluye:   { es: 'Qué no incluye', en: "What's not included", pt: 'O que não inclui', fr: 'Ce qui n’est pas inclus', de: 'Was nicht enthalten ist' },
   tour_llevar:       { es: 'Qué llevar', en: 'What to bring', pt: 'O que levar', fr: 'À apporter', de: 'Was mitbringen' },
   tour_precio:       { es: 'Precio', en: 'Price', pt: 'Preço', fr: 'Prix', de: 'Preis' },
-  tour_consultar:    { es: 'Consultar con el operador', en: 'Ask the operator', pt: 'Consultar o operador', fr: 'Demander à l’opérateur', de: 'Beim Anbieter anfragen' },
+  tour_consultar:    { es: 'Consultar disponibilidad', en: 'Check availability', pt: 'Consultar disponibilidade', fr: 'Vérifier la disponibilité', de: 'Verfügbarkeit anfragen' },
+  /* ⚠️ EL OPERADOR NO SE NOMBRA en la ficha de una tour. Decía «Servicio
+     ofrecido por: <nombre>» y eso es regalarle el cliente: quien lee el
+     nombre lo busca en Google y reserva directo con él. Se dice QUÉ es
+     —una empresa local— y no CUÁL, y se promete decirlo al confirmar, que
+     es lo que vuelve honesta la reserva. La ficha de un NEGOCIO sí lleva
+     nombre: ahí el negocio ES lo que se busca. */
+  tour_quien_opera:  { es: 'Lo opera una empresa local de La Fortuna', en: 'Run by a local La Fortuna company', pt: 'Operado por uma empresa local de La Fortuna', fr: 'Opéré par une entreprise locale de La Fortuna', de: 'Durchgeführt von einem lokalen Anbieter aus La Fortuna' },
+  tour_quien_confirma: { es: 'Te decimos cuál al confirmar tu reserva.', en: 'We tell you which one when we confirm your booking.', pt: 'Dizemos qual ao confirmar a sua reserva.', fr: 'Nous vous dirons laquelle à la confirmation.', de: 'Welcher genau, sagen wir dir bei der Bestätigung.' },
+  tour_otras:        { es: 'Otros tours', en: 'Other tours', pt: 'Outros tours', fr: 'Autres excursions', de: 'Weitere Touren' },
+  tour_desde:        { es: 'desde', en: 'from', pt: 'desde', fr: 'à partir de', de: 'ab' },
   tour_cancelacion:  { es: 'Cancelación libre hasta', en: 'Free cancellation up to', pt: 'Cancelamento livre até', fr: 'Annulation gratuite jusqu’à', de: 'Kostenlose Stornierung bis' },
   reserva_lanzamiento:{ es: 'de lanzamiento', en: 'launch discount', pt: 'de lançamento', fr: 'de lancement', de: 'Einführungsrabatt' },
   reserva_total:     { es: 'Total', en: 'Total', pt: 'Total', fr: 'Total', de: 'Gesamt' },

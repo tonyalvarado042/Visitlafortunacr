@@ -542,6 +542,7 @@ export type TourPublico = TourDeNegocio & {
   cancelacion_libre_horas: number;
   precio_nino_usd: number | null;
   precio_nota: string | null;
+  categoria_id: string | null;
   /* La galeria. `imagen_url` sigue existiendo como respaldo: la foto vieja se
      copio a la galeria como portada, asi que lo normal es que `fotos[0]` sea
      la misma. */
@@ -575,7 +576,7 @@ export type FotoDeTour = {
 export async function tourPorBabosa(destino: Destino, babosa: string): Promise<TourPublico | null> {
   const { data, error } = await supabase
     .from('dst_tour')
-    .select(`id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
+    .select(`id, categoria_id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
              precio_adulto_usd, precio_nino_usd, precio_nota, imagen_url, video_url, video_portada_url,
@@ -716,4 +717,55 @@ export async function lemaDe(destino: Destino, idioma: Idioma): Promise<string |
     .maybeSingle();
 
   return (data?.texto as string | undefined)?.trim() || destino.lema;
+}
+
+/**
+ * Otras tours para ofrecer al lado de la que se está mirando.
+ *
+ * POR QUE: la ficha de una tour terminaba en un callejón. La de un negocio
+ * tiene su columna con contacto y «combinalo con»; la de una tour no tenía
+ * nada: quien llegaba y no se decidía, se iba del sitio.
+ *
+ * Primero las de la MISMA categoría —quien mira cuadraciclos quiere ver
+ * cuadraciclos— y después el resto, para no dejar la columna vacía cuando la
+ * categoría tiene una sola.
+ *
+ * ⚠️ No dice de quién es cada tour, a propósito: el operador no se nombra en
+ * la ficha pública. Ver la nota en `app/[idioma]/tour/[babosa]/page.tsx`.
+ */
+export async function otrasTours(
+  destino: Destino,
+  excluirId: string,
+  categoriaId: string | null,
+  limite = 4,
+): Promise<TourDeNegocio[]> {
+  const base = () => supabase
+    .from('dst_tour')
+    .select('id, babosa, nombre, resumen, duracion_horas, hora_inicio, dificultad, precio_adulto_usd, recoge_en_hotel, imagen_url, fotos:dst_tour_foto(url, es_portada, orden)')
+    .eq('destino_id', destino.id)
+    .eq('estado', 'publicado')
+    .neq('id', excluirId);
+
+  const mismas = categoriaId
+    ? (await base().eq('categoria_id', categoriaId).limit(limite)).data ?? []
+    : [];
+
+  /* Solo se completa si faltan: una segunda consulta por gusto es una ida y
+     vuelta a la base en cada visita a la ficha. */
+  let resto: unknown[] = [];
+  if (mismas.length < limite) {
+    const { data } = await base()
+      .not('id', 'in', `(${[excluirId, ...mismas.map((m) => m.id)].join(',')})`)
+      .limit(limite - mismas.length);
+    resto = data ?? [];
+  }
+
+  /* La portada de la galería, con la foto vieja de respaldo. */
+  return [...mismas, ...resto].map((t) => {
+    const fila = t as TourDeNegocio & { fotos?: { url: string; es_portada: boolean; orden: number }[] };
+    const portada = (fila.fotos ?? [])
+      .slice()
+      .sort((a, b) => (Number(b.es_portada) - Number(a.es_portada)) || (a.orden - b.orden))[0];
+    return { ...fila, imagen_url: portada?.url ?? fila.imagen_url };
+  }) as TourDeNegocio[];
 }

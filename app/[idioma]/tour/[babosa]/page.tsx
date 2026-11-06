@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, tourPorBabosa } from '@/lib/destino';
+import { destinoActual, categoriasDe, tourPorBabosa, otrasTours } from '@/lib/destino';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
@@ -78,6 +78,10 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
 
   const categorias = await categoriasDe(destino, idioma);
   const vendible = await tourReservable(destino, babosa, idioma);
+  /* Otras tours para la columna de al lado. La ficha de un negocio tiene su
+     columna con contacto y «combinalo con»; la de una tour no tenía nada, y
+     quien llegaba sin decidirse se iba del sitio. */
+  const otras = await otrasTours(destino, tour.id, tour.categoria_id);
   const incluye = enLineas(tour.incluye);
   const noIncluye = enLineas(tour.no_incluye);
   const cuerpo = textoRicoAHtml(tour.descripcion);
@@ -111,18 +115,18 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
             <div className="migas">
               <Link href={`/${idioma}`}>{t('inicio', idioma)}</Link>
               <span>/</span>
-              {/* Un OPERADOR no tiene ficha: su nombre va como texto. Enlazarlo
-                  seria mandar a un 404, y mostrarlo igual importa — la gente
-                  quiere saber quien lleva la tour. */}
-              {tour.negocio ? (
+              {/* ⚠️ Un OPERADOR no se nombra acá tampoco. Antes salía como
+                  texto suelto —no tiene ficha, así que enlazarlo daría 404— y
+                  el comentario viejo decía que mostrarlo «importa». Importa lo
+                  contrario: quien lee el nombre lo busca y reserva directo.
+                  Un NEGOCIO con ficha sí va, y enlazado: ahí el negocio es lo
+                  que la persona está buscando, y ya está listado entero con su
+                  teléfono. */}
+              {tour.negocio && !tour.negocio.es_operador ? (
                 <>
-                  {tour.negocio.es_operador ? (
-                    <span>{tour.negocio.nombre}</span>
-                  ) : (
-                    <Link href={`/${idioma}/${tour.negocio.categoria_babosa ?? 'tours'}/${tour.negocio.babosa}`}>
-                      {tour.negocio.nombre}
-                    </Link>
-                  )}
+                  <Link href={`/${idioma}/${tour.negocio.categoria_babosa ?? 'tours'}/${tour.negocio.babosa}`}>
+                    {tour.negocio.nombre}
+                  </Link>
                   <span>/</span>
                 </>
               ) : null}
@@ -134,7 +138,12 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
         </section>
 
         <div className="caja">
-          <div className="ficha-cuerpo">
+          {/* `ficha-con-hero` es lo que sube la columna derecha -132px sobre
+              la foto a sangre, igual que en la ficha de un negocio. Sin esta
+              clase la caja del precio arrancaba EXACTAMENTE donde terminaba
+              la imagen —medido: hero hasta 572px, caja desde 572px— y se veía
+              pegada. Solo con foto: sin hero no hay sobre qué montarse. */}
+          <div className={`ficha-cuerpo${portada ? ' ficha-con-hero' : ''}`}>
             <div className="ficha-principal">
 
               {/* Las tres grandes. La misma galería de las fichas de negocio:
@@ -239,7 +248,12 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   <div className="reservar-cabeza">
                     <div>
                       <h2>{t('tour_precio', idioma)}</h2>
-                      {tour.negocio && <p className="reservar-que">{tour.negocio.nombre}</p>}
+                      {/* ⚠️ NO VA EL NOMBRE DEL OPERADOR. Decía el nombre, y
+                          eso es regalarle el cliente: quien lo lee lo busca en
+                          Google y reserva directo con él. Se dice QUÉ es y no
+                          CUÁL. La ficha de un NEGOCIO sí lleva nombre — ahí el
+                          negocio ES lo que la persona está buscando. */}
+                      <p className="reservar-que">{t('tour_quien_opera', idioma)}</p>
                     </div>
                     <div className="reservar-precio">
                       <ul className="reservar-tarifas">
@@ -280,15 +294,45 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   <small className="reservar-letra" style={{ marginTop: 12, display: 'block' }}>
                     {t('tour_cancelacion', idioma)} {tour.cancelacion_libre_horas} h.
                   </small>
-                  {tour.negocio && (
-                    <small className="reservar-presta">
-                      {t('reserva_quien_presta', idioma)}:{' '}
-                      <strong>{tour.negocio.nombre}</strong>
-                    </small>
-                  )}
+                  {/* Mismo motivo: qué, no cuál. Y se promete decir cuál al
+                      confirmar, que es lo que vuelve honesta la reserva en vez
+                      de solo opaca. */}
+                  <small className="reservar-presta">
+                    {t('tour_quien_confirma', idioma)}
+                  </small>
                 </div>
                 )}
               </div>
+
+              {/* Otras tours, al lado — igual que la ficha de un negocio, que
+                  lleva contacto y «combinalo con» en su columna. La de una
+                  tour terminaba en un callejón: quien no se decidía, se iba.
+
+                  ⚠️ NO dice de quién es cada una. Mismo motivo que arriba: el
+                  operador no se nombra en la ficha pública. */}
+              {otras.length > 0 && (
+                <div className="bloque tour-otras">
+                  <div className="titulo">{t('tour_otras', idioma)}</div>
+                  <ul className="tour-otras-lista">
+                    {otras.map((o) => (
+                      <li key={o.id}>
+                        <Link href={`/${idioma}/tour/${o.babosa}`}>
+                          {o.imagen_url
+                            ? <img src={o.imagen_url} alt="" loading="lazy" decoding="async" />
+                            : <span className="tour-otras-sin-foto" aria-hidden="true" />}
+                          <span className="tour-otras-texto">
+                            <span className="tour-otras-nombre">{o.nombre}</span>
+                            <span className="tour-otras-dato">
+                              {o.duracion_horas ? `${o.duracion_horas} h · ` : ''}
+                              {t('tour_desde', idioma)} ${Number(o.precio_adulto_usd).toFixed(0)}
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </aside>
           </div>
         </div>

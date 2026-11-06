@@ -3259,3 +3259,42 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   line-height: 1.55;
   color: var(--humo);
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Otras tours, en la columna de la ficha de una tour.
+
+   La ficha de un negocio lleva contacto y «combinalo con» al lado; la de una
+   tour no llevaba nada y terminaba en un callejón: quien llegaba y no se
+   decidía, se iba del sitio.
+
+   Filas chicas y no tarjetas: esto compite con la caja de reservar que está
+   justo arriba, y si pesa igual le roba la atención a lo que de verdad
+   convierte.
+   ─────────────────────────────────────────────────────────────────────────── */
+.tour-otras-lista { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
+.tour-otras-lista a {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 11px;
+  align-items: center;
+  padding: 7px;
+  margin: 0 -7px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background .15s;
+}
+.tour-otras-lista a:hover { background: var(--sup-2); }
+.tour-otras-lista img,
+.tour-otras-sin-foto {
+  width: 56px; height: 56px; border-radius: 8px; object-fit: cover; display: block;
+  background: var(--sup-3);
+}
+.tour-otras-texto { display: grid; gap: 2px; min-width: 0; }
+/* Dos líneas y corta: un nombre largo empujaba la foto y descuadraba la fila. */
+.tour-otras-nombre {
+  font-size: 13.5px; font-weight: 600; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tour-otras-dato { font-size: 12px; color: var(--humo); }
