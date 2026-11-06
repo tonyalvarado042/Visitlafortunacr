@@ -190,7 +190,17 @@ Next.js 15 (App Router) en la raíz del repo. Rutas:
 El destino se resuelve por el `Host` de cada petición contra
 `dst_destino.dominio`. Un solo despliegue sirve todos los destinos.
 
-**La URL de producción es `https://visit-la-fortuna.vercel.app`.** Queda escrita
+> ⚠️ **ESTO YA NO ES CIERTO (6 de noviembre de 2026).** El dominio
+> `visitlafortunacr.com` lo sirve el **Worker de Cloudflare**, no Vercel.
+> Comprobado: `visit-la-fortuna.vercel.app` responde con `Server: Vercel` y
+> `X-Vercel-Id`; el dominio responde `Server: cloudflare` y **ningún header de
+> Vercel**. Si Cloudflare solo estuviera haciendo de proxy, el `X-Vercel-Id`
+> pasaría igual. Lo que sigue abajo describe cómo era antes y se deja por
+> historia. **Un `git push` ya NO publica nada en el sitio en vivo: hay que
+> correr `npx cf deploy`.** Cómo se descubrió: el píxel de Meta quedó
+> funcionando en `visit-la-fortuna.vercel.app` y en el dominio no aparecía.
+
+**La URL de producción era `https://visit-la-fortuna.vercel.app`.** Queda escrita
 porque no estaba en ningún lado y eso costó una tarde: adivinando el nombre se
 llega a **`visitlafortunacr.vercel.app`, que también responde 200 y también
 despliega este repo y esta rama** — pero es OTRO proyecto de Vercel, y no tiene
@@ -248,11 +258,24 @@ A del apex, CNAME de www, MX, NS y TXT. Cambiarlo no; leerlo sí.
 
 ### El sitio también compila para Cloudflare Workers (14 de octubre de 2026)
 
-Pedido por Tony. **La decisión es migrar, pero Vercel sigue siendo producción
-hasta que el Worker pase TODA la lista de "Cloudflare · desplegar el Worker"**
-(Trabajo a mano). Mientras tanto no se apaga nada en Vercel, no se borra
-`vercel.json` y el dominio no se mueve. La migración es aditiva: el mismo código
-compila para los dos lados.
+Pedido por Tony. **Esto ya pasó: desde que se pusieron las rutas
+(`triggers.fetch({pattern: "visitlafortunacr.com/*"})`) el dominio lo sirve el
+Worker.** La regla de abajo era la de la etapa de prueba y se deja por historia.
+
+⚠️ **Lo que hay que tener presente ahora:** el sitio en vivo es el Worker, así
+que **un `git push` no publica nada**. Vercel sigue construyendo la rama y queda
+como respaldo —y como banco de pruebas, porque ahí se ve el cambio antes que en
+el dominio— pero el visitante ve el Worker. Después de cada commit que deba
+salir al aire: `npx cf deploy`, y **se comprueba en el dominio, no en Vercel**.
+Si `cf deploy` falla con 401, Tony tiene que correr `cf auth login` (es
+interactivo, no se puede hacer desde acá) y el sitio se queda con el build
+viejo en silencio — nada avisa.
+
+_La regla original, de la etapa de prueba:_ «La decisión es migrar, pero Vercel
+sigue siendo producción hasta que el Worker pase TODA la lista de "Cloudflare ·
+desplegar el Worker"». Mientras tanto no se apagaba nada en Vercel, no se
+borraba `vercel.json` y el dominio no se movía. La migración es aditiva: el
+mismo código compila para los dos lados.
 `npm run build` arma para Vercel, como siempre; `npm run build:vinext` arma
 para Workers con **vinext** (lo que Cloudflare recomienda hoy para Next.js en
 vez de OpenNext). `vinext check` dio 94% compatible y cero bloqueos.
