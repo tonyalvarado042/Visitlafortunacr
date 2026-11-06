@@ -502,3 +502,27 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
      casilla: así se lee como pie del idioma y no como otra opción. */
   .idioma-avance { grid-column: 2; }
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   La foto de un tour dentro del panel.
+
+   El componente viene del portal del dueño y trae `className="boton tenue"`.
+   ⚠️ `.tenue` NO EXISTE en ningún archivo: ni en globales.css ni acá. Es una
+   clase muerta, así que sin esto los botones «Subir una foto» y «Quitarla»
+   caían en `.admin .boton` y salían naranja sólido, peleando por la atención
+   con «Guardar», que es el único que debería gritar.
+
+   El resto del componente sí está estilado en globales.css (`.foto-tour`),
+   que carga en todo el sitio porque lo importa el layout raíz — el panel
+   incluido.
+   ─────────────────────────────────────────────────────────────────────────── */
+.admin .foto-tour-botones .boton {
+  background: #fff;
+  border-color: #D8D8D3;
+  color: #0B0B0B;
+  font-weight: 600;
+}
+.admin .foto-tour-botones .boton:hover { border-color: var(--naranja); filter: none; }
+/* La caja de la vista previa es oscura en el sitio público; acá va clara, que
+   es el fondo de la tarjeta. */
+.admin .foto-tour-caja { background: #FBFAF7; border: 1px solid #E6E6E2; }

@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
-import { Cabecera, Etiqueta } from '@/componentes/admin/ui';
+import { Aviso, Cabecera, Etiqueta } from '@/componentes/admin/ui';
+import { FotoTour } from '@/app/negocio/[id]/tours/FotoTour';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { editarTour } from '../acciones';
 
@@ -13,6 +14,12 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
   const { destino, db } = await contextoPanel('tours');
   const { data: t } = await db.from('dst_tour').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!t) notFound();
+  /* La babosa del operador. La necesita el subidor de fotos: la ruta en el
+     almacén es <destino>/<negocio>/tours/… y la política de storage solo deja
+     escribir dentro de la carpeta del destino al que uno tiene acceso. */
+  const { data: operador } = t.negocio_id
+    ? await db.from('dst_negocio').select('babosa').eq('id', t.negocio_id).maybeSingle()
+    : { data: null };
   /* Solo los contratos DEL OPERADOR de esta tour. La base tiene un disparador
      que rechaza un contrato de otro negocio, asi que ofrecer los demas seria
      ofrecer un error: la lista se arma con los que de verdad se pueden pegar. */
@@ -30,7 +37,19 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <Cabecera titulo={t.nombre} migas={[{ ruta: '/admin/tours', nombre: 'Tours' }]} sub={<><Etiqueta suave>{t.estado}</Etiqueta> · {t.total_reservas} reservas</>} />
+      <Cabecera titulo={t.nombre} migas={[{ ruta: '/admin/tours', nombre: 'Tours' }]} sub={<><Etiqueta suave>{t.estado}</Etiqueta> · {t.total_reservas} reservas</>}>
+        {/* Ver el tour en el sitio. Regla de Tony: toda ficha lleva su enlace
+            para mirarla directamente — si no, revisar lo que uno acaba de
+            escribir obliga a adivinar la dirección. Solo si está publicado:
+            un enlace a algo que no se sirve lleva a un 404 y hace dudar de si
+            el tour existe. */}
+        {t.estado === 'publicado' && t.babosa && (
+          <a className="boton secundario" target="_blank" rel="noreferrer"
+             href={`https://${destino.dominio}/${destino.idioma_principal}/tour/${t.babosa}`}>
+            Ver el tour ↗
+          </a>
+        )}
+      </Cabecera>
       <form action={editarTour}>
         <input type="hidden" name="id" value={id} />
         <div className="lado">
@@ -56,6 +75,33 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo ancho"><label>Qué llevar</label><input name="que_llevar" defaultValue={t.que_llevar ?? ''} /></div>
               </div>
             </div>
+            {/* La foto del tour, con su botón.
+                ANTES ERA UNA CAJA DE TEXTO pidiendo una URL, y encima enterrada
+                dentro de «Logística» — una foto no es logística, así que ni se
+                encontraba. Tony la buscó y concluyó que los tours no tenían
+                fotos. Regla de la casa: un campo que pide una foto lleva su
+                botón; nadie tiene a mano la dirección de una imagen, tiene la
+                foto en el teléfono.
+                Es el MISMO componente que usa el dueño en su portal, subiendo
+                a la misma carpeta: `<destino>/<negocio>/tours/`. La política
+                «el equipo sube fotos de sus destinos» deja escribir ahí a
+                quien tiene acceso al destino. */}
+            <div className="tarjeta">
+              <h2>La foto <small>es lo primero que se ve del tour</small></h2>
+              {operador?.babosa ? (
+                <FotoTour destinoBabosa={destino.babosa} negocioBabosa={operador.babosa}
+                          valor={t.imagen_url} />
+              ) : (
+                <>
+                  <Aviso tipo="info">
+                    Para subir una foto hay que elegir primero el <strong>operador</strong> arriba y guardar.
+                    La foto se guarda en la carpeta de ese operador.
+                  </Aviso>
+                  <input type="hidden" name="imagen_url" value={t.imagen_url ?? ''} />
+                </>
+              )}
+            </div>
+
             <div className="tarjeta">
               <h2>Logística</h2>
               <div className="campos">
@@ -66,7 +112,6 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo"><label>Cupo máximo</label><input type="number" name="cupo_maximo" defaultValue={t.cupo_maximo ?? ''} /></div>
                 <div className="campo"><label>Idiomas del guía (coma)</label><input name="idiomas_guia" defaultValue={(t.idiomas_guia ?? []).join(', ')} placeholder="es, en" /></div>
                 <div className="campo"><label>Cancelación libre (horas antes)</label><input type="number" name="cancelacion_libre_horas" defaultValue={t.cancelacion_libre_horas ?? ''} /></div>
-                <div className="campo"><label>Imagen (URL)</label><input name="imagen_url" defaultValue={t.imagen_url ?? ''} /></div>
                 <div className="campo"><label>Video (URL) <small style={{ fontWeight: 400, color: '#8B8B87' }}>YouTube, Vimeo o un archivo</small></label><input name="video_url" defaultValue={t.video_url ?? ''} placeholder="https://www.youtube.com/watch?v=…" /></div>
                 <div className="campo"><label>Portada del video (URL) <small style={{ fontWeight: 400, color: '#8B8B87' }}>opcional</small></label><input name="video_portada_url" defaultValue={t.video_portada_url ?? ''} placeholder="https://" /></div>
                 <div className="campo ancho"><label><input type="checkbox" name="recoge_en_hotel" value="1" defaultChecked={!!t.recoge_en_hotel} /> Recoge en el hotel</label></div>
