@@ -258,7 +258,7 @@ declaración entera se descarta en silencio y el elemento sale sin borde y sin
 color. Para cruzarlas:
 
 ```bash
-comm -23 <(grep -rhoE "var\(--[a-z0-9-]+" app/admin/admin.css | sed 's/var(//' | sort -u)          <(grep -rhoE "^\s+--[a-z0-9-]+\s*:" app/globales.css | sed 's/[ :]//g' | sort -u)
+comm -23 <(grep -rhoE 'var\(--[a-z0-9-]+' app/admin/admin.css | sed 's/var(//' | sort -u) <(grep -rhoE '^ +--[a-z0-9-]+ *:' app/globales.css | tr -d ' :' | sort -u)
 ```
 
 ### El píxel de Meta
