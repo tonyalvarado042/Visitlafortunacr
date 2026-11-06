@@ -77,15 +77,36 @@ function enColumnas(grupos: Grupo[]): Grupo[][] {
 }
 
 export async function Barra({
-  destino, idioma, categorias, rutaActual, sobreHero = false,
+  destino, idioma, categorias, rutaActual, rutas, sobreHero = false,
 }: {
   destino: Destino;
   idioma: Idioma;
   categorias: Categoria[];
   rutaActual: string;
+  /**
+   * Las rutas de ESTA página en cada idioma — las mismas que la página ya
+   * calcula para el hreflang.
+   *
+   * ⚠️ POR QUE HACE FALTA: sin esto el selector de idiomas armaba el enlace
+   * pegando el idioma nuevo delante de la ruta actual. Pero la babosa CAMBIA
+   * por idioma: en `/es/tours-aventura`, tocar EN daba `/en/tours-aventura`
+   * —que no existe, porque en inglés es `adventure-tours`— y el visitante
+   * caía en un 404. Lo mismo con cada ficha de negocio.
+   *
+   * La página ya tiene las rutas buenas: son las que le declara a Google en
+   * `alternates`. Que el enlace que ve la persona use OTRA cosa que el que
+   * ve Google es justo cómo se llega a un 404 que nadie nota.
+   *
+   * Sin `rutas` se cae al comportamiento viejo, que es correcto donde la
+   * dirección no cambia de idioma: la portada, /blog, /premium.
+   */
+  rutas?: { idioma: Idioma; ruta: string }[];
   /** En la portada la barra flota sobre el hero y se vuelve sólida al bajar. */
   sobreHero?: boolean;
 }) {
+  /** El enlace de un idioma: la ruta de verdad si se conoce, si no el prefijo. */
+  const aIdioma = (codigo: Idioma) =>
+    rutas?.find((r) => r.idioma === codigo)?.ruta ?? `/${codigo}${rutaActual}`;
   /* Si hay sesión se mira por la cookie y no contra Supabase: la barra se
      pinta en TODAS las páginas y validar el token aquí le agregaría una
      llamada de red a cada carga del sitio. Ver lib/sesion-ligera.ts. */
@@ -214,7 +235,7 @@ export async function Barra({
           </summary>
           <div className="lista">
             {destino.idiomas.map((codigo) => (
-              <Link key={codigo} href={`/${codigo}${rutaActual}`} hrefLang={codigo}
+              <Link key={codigo} href={aIdioma(codigo)} hrefLang={codigo}
                     aria-current={codigo === idioma}>
                 {NOMBRE_PROPIO[codigo]}
               </Link>
@@ -287,7 +308,7 @@ export async function Barra({
 
             <div className="plegado-idiomas">
               {destino.idiomas.map((codigo) => (
-                <Link key={codigo} href={`/${codigo}${rutaActual}`} hrefLang={codigo}
+                <Link key={codigo} href={aIdioma(codigo)} hrefLang={codigo}
                       className={codigo === idioma ? 'on' : undefined}>
                   {codigo.toUpperCase()}
                 </Link>

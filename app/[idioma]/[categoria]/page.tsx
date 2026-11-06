@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negociosDe } from '@/lib/destino';
+import { destinoActual, categoriasDe, negociosDe , categoriaEnCualquierIdioma } from '@/lib/destino';
 import { t, lugares, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -35,7 +35,25 @@ export default async function Listado({ params }: { params: Parametros }) {
   const categorias = await categoriasDe(destino, idioma);
 
   const actual = categorias.find((c) => c.babosa === categoria);
-  if (!actual) notFound();
+  /* La babosa de OTRO idioma no da 404: redirige a la de este.
+   *
+   * El selector de idiomas estuvo armando `/en/tours-aventura` —la babosa
+   * española sobre el sitio inglés— durante quién sabe cuánto, así que esas
+   * direcciones andan sueltas por ahí: compartidas, guardadas, y puede que
+   * rastreadas por Google. Arreglar el selector evita que se generen MÁS;
+   * esto cura las que ya existen.
+   *
+   * Es 308 (permanente) a propósito, al revés que el de los idiomas
+   * apagados: una babosa en el idioma equivocado nunca va a ser la correcta,
+   * y acá sí conviene que Google la reemplace de una. */
+  if (!actual) {
+    const enOtroIdioma = await categoriaEnCualquierIdioma(destino, categoria);
+    const aqui = enOtroIdioma
+      ? categorias.find((c) => c.categoria_id === enOtroIdioma)
+      : null;
+    if (aqui) permanentRedirect(`/${idioma}/${aqui.babosa}`);
+    notFound();
+  }
 
   const negocios = (await negociosDe(destino, idioma))
     .filter((n) => n.categoria_id === actual.categoria_id)
@@ -48,7 +66,12 @@ export default async function Listado({ params }: { params: Parametros }) {
 
   return (
     <>
-      <Barra destino={destino} idioma={idioma} categorias={categorias} rutaActual={`/${categoria}`} />
+      {/* Las rutas de ESTA categoría en cada idioma — las mismas que se le
+          declaran a Google. Sin esto el selector armaba `/en/tours-aventura`,
+          que no existe: en inglés la categoría es `adventure-tours`. */}
+      <Barra destino={destino} idioma={idioma} categorias={categorias}
+             rutaActual={`/${categoria}`}
+             rutas={await rutasDeCategoria(destino.id, actual.categoria_id)} />
 
       <div className="caja">
         <div className="migas">

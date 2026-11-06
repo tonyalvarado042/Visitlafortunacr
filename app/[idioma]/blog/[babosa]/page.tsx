@@ -78,7 +78,12 @@ export default async function Articulo({ params }: { params: Parametros }) {
 
   return (
     <>
-      <Barra destino={destino} idioma={idioma} categorias={categorias} rutaActual="/blog" />
+      {/* Las hermanas del artículo. Antes mandaba `/blog` a secas: cambiar de
+          idioma te sacaba del artículo y te dejaba en el índice. Y si el
+          artículo no existe en ese idioma, `rutasDeGuia` no lo devuelve y el
+          enlace cae al índice — que ahí sí es lo correcto. */}
+      <Barra destino={destino} idioma={idioma} categorias={categorias}
+             rutaActual="/blog" rutas={await rutasDeGuia(guia.grupo)} />
 
       <script type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(marcado) }} />

@@ -143,7 +143,8 @@ export default async function Ficha({ params }: { params: Parametros }) {
   return (
     <>
       <Barra destino={destino} idioma={idioma} categorias={categorias}
-             rutaActual={`/${negocio.categoria_babosa}/${negocio.babosa}`} />
+             rutaActual={`/${negocio.categoria_babosa}/${negocio.babosa}`}
+             rutas={await rutasDeNegocio(negocio.id)} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(marcado) }} />
 
       <div className="caja">

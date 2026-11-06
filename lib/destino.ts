@@ -769,3 +769,31 @@ export async function otrasTours(
     return { ...fila, imagen_url: portada?.url ?? fila.imagen_url };
   }) as TourDeNegocio[];
 }
+
+/**
+ * El id de una categoría a partir de una babosa EN CUALQUIER IDIOMA.
+ *
+ * Para qué: `/en/tours-aventura` daba 404 — es la babosa española sobre el
+ * sitio inglés, donde la categoría se llama `adventure-tours`. El selector de
+ * idiomas estuvo armando esas direcciones, así que andan sueltas: compartidas,
+ * guardadas y puede que rastreadas. Con esto la página las redirige a la
+ * babosa correcta en vez de darles un 404.
+ *
+ * Devuelve null si no es babosa de ninguna categoría en ningún idioma, que es
+ * cuando el 404 sí corresponde.
+ */
+export async function categoriaEnCualquierIdioma(
+  destino: Destino,
+  babosa: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from('dst_ruta')
+    .select('entidad_id')
+    .eq('destino_id', destino.id)
+    .eq('entidad', 'categoria')
+    .eq('babosa', babosa)
+    .eq('es_vigente', true)
+    .limit(1)
+    .maybeSingle();
+  return (data?.entidad_id as string | undefined) ?? null;
+}

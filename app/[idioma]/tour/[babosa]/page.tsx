@@ -97,7 +97,11 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
 
   return (
     <>
-      <Barra destino={destino} idioma={idioma} categorias={categorias} rutaActual="" />
+      {/* La babosa de una tour es UNA sola para todos los idiomas, así que
+          acá el prefijo alcanza. Lo que estaba mal era mandar `""`: cambiar
+          de idioma te sacaba de la tour y te dejaba en la portada. */}
+      <Barra destino={destino} idioma={idioma} categorias={categorias}
+             rutaActual={`/tour/${tour.babosa}`} />
 
       <main>
         {/* Con foto, la cabecera va a sangre y el texto en blanco encima.
