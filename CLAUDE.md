@@ -208,6 +208,59 @@ cargadas las variables de entorno. Medir ahí da "falta `SUPABASE_SECRET_KEY`"
 cuando en el proyecto bueno está puesta. Si algún día sobra un proyecto, este es
 el que hay que borrar; mientras exista, es una trampa.
 
+### Los idiomas del sitio se prenden y apagan desde Ajustes
+
+`dst_destino.idiomas` decide qué idiomas se sirven. **Hasta el 6 de noviembre
+de 2026 solo se podían elegir al CREAR un destino** (`LanzarDestino`) y después
+no había forma de tocarlos; ahora hay un bloque en **Ajustes → Idiomas del
+sitio**, cada uno con cuánto tiene traducido (RPC `avance_de_traduccion`).
+Prender un idioma a ciegas es publicar páginas que repiten el principal con
+otra dirección: contenido duplicado, y Google lo castiga.
+
+**Apagar no borra nada.** Las traducciones, las rutas de `dst_ruta` y las guías
+quedan donde están. Prenderlo de nuevo lo devuelve tal cual.
+
+**El principal no se puede apagar.** La casilla va desactivada y la acción lo
+vuelve a agregar igual: la base tiene `CHECK (idioma_principal = ANY(idiomas))`
+y si no, el guardado revienta con un error de Postgres que el panel no sabe
+explicar.
+
+⚠️ **Un idioma apagado NO da 404: redirige al principal conservando la página.**
+Esto no es un adorno. El middleware manda a un alemán a `/de` según su
+`Accept-Language` **sin mirar si ese idioma está encendido**, así que con un
+404 un alemán entrando a la raíz caía en una página de error. La ruta completa
+viaja en la cabecera `x-ruta` que pone el middleware, porque un layout de Next
+no recibe el pathname — el mismo truco que ya se usaba para `x-idioma`.
+
+⚠️ **Y es 307, no 308.** Esto se prende y se apaga desde Ajustes: un permanente
+lo cachean el navegador y Google sin vuelta atrás, y el día que se prenda el
+idioma traducido la gente seguiría yendo al principal.
+
+Lo que NO cambió: `esIdioma` rechaza antes cualquier cosa que no sea uno de los
+cinco códigos, así que `/zz/` sigue dando 404.
+
+**El estado al 6 de noviembre de 2026:** `['es','en','pt']`. Inglés está real
+(64 de 65 fichas); **portugués quedó encendido y en 0 de 65** porque Tony pidió
+apagar alemán y francés, no portugués.
+
+### ⚠️ El CSS del panel va en hex fijo, no en variables del tema
+
+El panel comparte el `<html>` con el sitio público, así que hereda su
+`data-tema`, y las variables de `globales.css` cambian de valor entre temas:
+`var(--sup-2)` vale `#F5F3EF` en claro y **`#151515` en oscuro**. Una fila con
+ese fondo queda casi negra sobre una tarjeta blanca el día que alguien ponga el
+sitio en oscuro desde Ajustes. Por eso todo `admin.css` hardcodea claro
+(`.tarjeta { background: #fff }`). **La única variable segura es `--naranja`**,
+que es el mismo en los dos temas.
+
+Y el otro lado del mismo filo: **inventarse una variable no da error**. La
+declaración entera se descarta en silencio y el elemento sale sin borde y sin
+color. Para cruzarlas:
+
+```bash
+comm -23 <(grep -rhoE "var\(--[a-z0-9-]+" app/admin/admin.css | sed 's/var(//' | sort -u)          <(grep -rhoE "^\s+--[a-z0-9-]+\s*:" app/globales.css | sed 's/[ :]//g' | sort -u)
+```
+
 ### El píxel de Meta
 
 Montado en `app/[idioma]/layout.tsx` — **el layout del sitio público, no
