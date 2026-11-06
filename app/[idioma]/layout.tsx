@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { destinoActual } from '@/lib/destino';
 import { esIdioma, type Idioma } from '@/lib/idiomas';
@@ -50,12 +50,38 @@ export default async function LayoutIdioma({
   if (!esIdioma(idioma)) notFound();
 
   const destino = await destinoActual();
-  if (!destino.idiomas.includes(idioma)) notFound();
+  const cabeceras = await headers();
+
+  /* Un idioma que se apago en Ajustes.
+   *
+   * ANTES ERA UN 404, y estaba mal: apagar el aleman convertia en «no existe»
+   * un monton de direcciones que el dia anterior respondian 200 —las que
+   * tiene guardadas Google, las que alguien marco como favorita, y la propia
+   * portada, porque el middleware manda al aleman a /de segun su navegador
+   * SIN mirar si ese idioma esta encendido. Un aleman entraba a la raiz y
+   * caia en un 404.
+   *
+   * Ahora va al idioma principal conservando la pagina. La ruta viene en la
+   * cabecera `x-ruta` que pone el middleware, porque un layout no recibe el
+   * pathname.
+   *
+   * ⚠️ Y es 307 (`redirect`), NO 308 (`permanentRedirect`). Esto se apaga y se
+   * prende desde Ajustes: un permanente lo cachean el navegador y Google de
+   * una forma que despues no hay como deshacer, y el dia que Tony prenda el
+   * aleman traducido la gente seguiria yendo al espanol. Temporal es lo
+   * correcto justamente porque es reversible.
+   *
+   * Lo que NO se toca: `esIdioma` ya rechazo arriba cualquier cosa que no sea
+   * uno de los cinco codigos, asi que /zz/ sigue dando 404 como siempre. */
+  if (!destino.idiomas.includes(idioma)) {
+    const ruta = cabeceras.get('x-ruta') ?? `/${idioma}`;
+    const resto = ruta.startsWith(`/${idioma}`) ? ruta.slice(idioma.length + 1) : '';
+    redirect(`/${destino.idioma_principal}${resto}`);
+  }
 
   /* El aviso de la rifa vive aca y no en la portada: el que entra por una
      ficha o por el blog cuenta igual, y son la mayoria. Si no hay sorteo
      encendido, `sorteoDe` vuelve null y no se monta nada. */
-  const cabeceras = await headers();
   const vistaPrevia = cabeceras.get('x-vista') === '1';
   const sorteo = await sorteoDe(destino, vistaPrevia, idioma);
 

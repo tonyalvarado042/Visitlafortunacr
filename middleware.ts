@@ -59,6 +59,12 @@ export async function middleware(peticion: NextRequest) {
        de la pagina y tira abajo el hreflang que si esta bien puesto. */
     const cabeceras = new Headers(peticion.headers);
     cabeceras.set('x-idioma', deLaRuta);
+    /* Y la ruta COMPLETA, por el mismo motivo: un layout no recibe el
+       pathname. La usa `app/[idioma]/layout.tsx` para mandar las direcciones
+       de un idioma APAGADO al idioma principal conservando la pagina —
+       /de/restaurantes/x termina en /es/restaurantes/x y no en un 404. Sin
+       esto, lo unico que podria hacer el layout es mandar todo a la portada. */
+    cabeceras.set('x-ruta', `${peticion.nextUrl.pathname}${peticion.nextUrl.search}`);
     /* ?vista=1 enciende la vista previa de lo que todavia no se publico (hoy,
        la rifa). Va por cabecera porque los LAYOUTS no reciben searchParams, y
        el aviso de la rifa se monta en el layout: sin esto no habria forma de

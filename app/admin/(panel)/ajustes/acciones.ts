@@ -132,6 +132,30 @@ export async function editarDestino(datos: FormData) {
       combina_automatico: texto(datos, 'combina_automatico') === '1',
       esta_activo: texto(datos, 'esta_activo') === '1',
     };
+  } else if (grupo === 'idiomas') {
+    /* Que idiomas sirve el sitio.
+     *
+     * APAGAR UN IDIOMA NO BORRA NADA. Las traducciones, las rutas de
+     * `dst_ruta` y las guias quedan donde estan; lo unico que cambia es que
+     * `/<idioma>/…` deja de servirse y el idioma sale del hreflang y del mapa
+     * del sitio. Prenderlo de nuevo lo devuelve tal cual estaba. Por eso es un
+     * ajuste y no una operacion peligrosa.
+     *
+     * ⚠️ El PRINCIPAL se agrega siempre, aunque no venga marcado. La base
+     * tiene un CHECK (`idioma_principal = ANY(idiomas)`) y sin esto el guardado
+     * reventaria con un error de Postgres que el panel no sabe explicar. En la
+     * pantalla la casilla del principal va desactivada, asi que normalmente ni
+     * llega — pero un formulario se puede mandar a mano.
+     *
+     * El orden importa: el selector de idiomas del sitio los pinta en el orden
+     * del arreglo. Se guarda en un orden fijo y no en el que vengan las
+     * casillas, que depende del navegador. */
+    const ORDEN = ['es', 'en', 'pt', 'fr', 'de'];
+    const pedidos = datos.getAll('idiomas').map(String).filter((i) => ORDEN.includes(i));
+    const idiomas = ORDEN.filter(
+      (i) => i === destino.idioma_principal || pedidos.includes(i),
+    );
+    campos = { idiomas };
   } else {
     /* Un formulario sin grupo no se guarda a medias: se cae a la vista. */
     console.error('editarDestino: formulario sin grupo');
@@ -141,6 +165,11 @@ export async function editarDestino(datos: FormData) {
   const { error } = await db.from('dst_destino').update(campos).eq('id', destino.id);
   if (error) console.error('editarDestino:', error.message);
   revalidatePath('/admin', 'layout');
+  /* El sitio publico tambien: los colores, el tema y sobre todo los IDIOMAS
+     cambian lo que se sirve al visitante. Sin esto, apagar un idioma se
+     guardaba bien y el sitio seguia sirviendolo hasta que caducara el cache,
+     que es exactamente el tipo de cosa que hace dudar de si el boton funciono. */
+  revalidatePath('/[idioma]', 'layout');
 }
 
 export async function guardarCanal(datos: FormData) {

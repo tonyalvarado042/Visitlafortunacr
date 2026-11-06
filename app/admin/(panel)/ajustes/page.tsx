@@ -5,6 +5,7 @@ import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { editarDestino, eliminarCanal, guardarCanal, crearCupon, prenderCupon, cuponDeSalida, guardarGanchoCupon } from './acciones';
 import { LanzarDestino } from './LanzarDestino';
+import { NOMBRE_PROPIO } from '@/lib/idiomas';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,7 @@ export default async function PaginaAjustes() {
   /* Las candidatas al destacado del menu. Se ofrecen en una lista y no en un
      campo de texto: una babosa mal escrita no da error, simplemente deja el
      menu sin tarjeta — y eso se descubre semanas despues. */
-  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }, { data: cupones }] = await Promise.all([
+  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }, { data: cupones }, { data: avance }] = await Promise.all([
     db.from('dst_destino').select('*').eq('id', destino.id).single(),
     db.from('dst_canal').select('*').eq('destino_id', destino.id).order('tipo'),
     db.from('dst_itinerario').select('babosa, titulo')
@@ -39,7 +40,11 @@ export default async function PaginaAjustes() {
     db.from('dst_negocio').select('babosa, nombre, es_destacado')
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
       .order('es_destacado', { ascending: false }).order('nombre'),
-    db.from('dst_cupon').select('*').eq('destino_id', destino.id).order('creado_en', { ascending: false })
+    db.from('dst_cupon').select('*').eq('destino_id', destino.id).order('creado_en', { ascending: false }),
+    /* Cuanto hay traducido en cada idioma. Devuelve los CINCO, encendidos o
+       no: la gracia del bloque de idiomas es poder mirar lo que hay en uno
+       apagado ANTES de prenderlo. */
+    db.rpc('avance_de_traduccion', { p_destino_id: destino.id }),
   ]);
   if (!d) return <Vacio texto="Sin destino." />;
   /* Un tipo de cambio de hace tres días sigue sirviendo; uno de hace tres
@@ -159,6 +164,75 @@ export default async function PaginaAjustes() {
                 Administrar llaves
               </Link>
             </div>
+          </div>
+        </div>
+      </form>
+
+      <form action={editarDestino}>
+        <input type="hidden" name="grupo" value="idiomas" />
+        <div className="tarjeta">
+          <h2>Idiomas del sitio <small>apagar uno no borra nada</small></h2>
+          <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+            Un idioma encendido se sirve en <code>/{'{idioma}'}/…</code>, entra al mapa del
+            sitio y se le declara a Google como versión hermana de las demás. Apagado,
+            esas direcciones mandan al idioma principal y el idioma desaparece del
+            hreflang. <strong>Las traducciones no se borran:</strong> prenderlo de nuevo
+            lo devuelve tal cual estaba.
+          </p>
+          <Aviso tipo="info">
+            Encender un idioma <strong>sin traducir</strong> es peor que no tenerlo: el
+            visitante ve el texto en el idioma principal con otra dirección, y para Google
+            eso es contenido duplicado. Mirá los números antes de prender.
+          </Aviso>
+          <div className="idiomas-rejilla">
+            {(['es', 'en', 'pt', 'fr', 'de'] as const).map((cod) => {
+              const a = (avance ?? []).find((x: { idioma: string }) => x.idioma.trim() === cod);
+              const encendido = (d.idiomas ?? []).includes(cod);
+              const principal = cod === d.idioma_principal;
+              const fichas = Number(a?.fichas_traducidas ?? 0);
+              const totales = Number(a?.fichas_totales ?? 0);
+              const pct = totales ? Math.round((fichas / totales) * 100) : 0;
+              return (
+                <label key={cod} className={encendido ? 'idioma-fila prendido' : 'idioma-fila'}>
+                  <input
+                    type="checkbox"
+                    name="idiomas"
+                    value={cod}
+                    defaultChecked={encendido}
+                    disabled={!esAdmin || principal}
+                  />
+                  <span className="idioma-nombre">
+                    {NOMBRE_PROPIO[cod]} <code>/{cod}</code>
+                    {principal && <Etiqueta suave>principal</Etiqueta>}
+                  </span>
+                  <span className="idioma-avance">
+                    {principal ? (
+                      /* El principal no vive en la tabla de traducciones: ES el
+                         original. Mostrar "0 de 65" ahí sería una mentira que
+                         asusta. */
+                      <>Es el original — todo el contenido nace en este idioma.</>
+                    ) : fichas === 0 ? (
+                      <strong className="idioma-cero">Sin traducir: 0 de {totales} fichas.</strong>
+                    ) : (
+                      <>
+                        <strong>{fichas} de {totales} fichas</strong> ({pct}%) ·{' '}
+                        {Number(a?.categorias_traducidas ?? 0)} de {Number(a?.categorias_totales ?? 0)} categorías
+                        {Number(a?.guias ?? 0) > 0 && <> · {Number(a?.guias)} guías</>}
+                      </>
+                    )}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="gris" style={{ fontSize: 12, lineHeight: 1.6 }}>
+            El principal no se puede apagar: es el idioma al que van a dar las direcciones
+            de los apagados, y el que usa Google cuando no sabe qué versión mostrar.
+            Para cambiar cuál es el principal hay que traducir todo primero — pedilo y se
+            hace, no es un botón.
+          </p>
+          <div className="acciones-fila" style={{ marginTop: 14 }}>
+            <button type="submit" className="boton" disabled={!esAdmin}>Guardar idiomas</button>
           </div>
         </div>
       </form>
