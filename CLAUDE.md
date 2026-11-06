@@ -223,6 +223,26 @@ dígitos, y el panel acepta además el `<script>` pegado de Meta y le saca el
 número: ese valor se inyecta en el `fbq('init')` de todas las páginas públicas y
 basta una comilla para romper el JavaScript del sitio entero.
 
+⚠️⚠️ **Y la `PageView` de cada ruta va con `trackSingle`, NO con `track`.** La
+librería de Meta **descarta los `fbq('track','PageView')` repetidos dentro de un
+mismo documento**: el segundo y los siguientes no salen al cable, y no avisa —
+ni error, ni consola, nada. Así que el consejo que anda por todas partes
+—«llamá a `fbq('track','PageView')` al cambiar de ruta»— **no funciona**, y
+falla callado, que es lo peor. Medido en producción con el Resource Timing del
+navegador, pestaña limpia:
+
+| Llamada | ¿Sale? |
+|---|---|
+| `fbq('track','PageView')` 2ª vez | ❌ |
+| …con `eventID` distinto | ❌ |
+| …con parámetros distintos | ❌ |
+| `fbq('track','ViewContent')` | ✅ (la librería funciona) |
+| `<img>` crudo a `facebook.com/tr` | ✅ (la red está libre) |
+| **`fbq('trackSingle', id, 'PageView')`** | ✅ **siempre** |
+
+Si alguien lo "ordena" volviéndolo `track`, el sitio sigue sin errores y las
+campañas se quedan ciegas. **Antes de tocarlo, repetir la medición de arriba.**
+
 ⚠️ **El snippet que da Meta cuenta UNA vista y se calla.** Está escrito para un
 sitio donde cada clic recarga la página; este no recarga. Pegado tal cual, Meta
 solo vería la página de entrada de cada visita. Por eso existe
@@ -236,6 +256,15 @@ contar doble.
 
 Mira la ruta, no la query: acá la query son filtros (`?operador=…`) y contar
 cada filtro como vista infla el número.
+
+**Cómo se comprueba que quedó bien:** en un navegador de verdad, **nunca con
+`curl`** — `next/script` con `afterInteractive` no va en el HTML del servidor,
+lo inyecta el navegador, así que un `curl | grep` no lo encuentra nunca aunque
+esté perfecto. Y **la comprobación se hace en el dominio, no en Vercel**: el
+dominio lo sirve el Worker. Lo que se mide es el Resource Timing:
+`performance.getEntriesByType('resource')` filtrando `facebook.com/tr`. Un
+recorrido de 3 páginas sin recargar tiene que dar exactamente 3 `PageView`, cada
+una con su propia URL en el parámetro `dl`.
 
 **Pendiente, decisión de Tony:** el sitio no tiene aviso de cookies y se sirve
 en alemán y francés.
