@@ -7,7 +7,7 @@ import type { Rol } from '@/lib/supabase-sesion';
  */
 export type Seccion =
   | 'tablero' | 'leads' | 'conversaciones' | 'viajeros' | 'reservas' | 'tareas'
-  | 'negocios' | 'tours' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'cadenas' | 'operadores' | 'reportes' | 'equipo' | 'ajustes';
+  | 'negocios' | 'tours' | 'categorias' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'cadenas' | 'operadores' | 'reportes' | 'equipo' | 'ajustes';
 
 export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: string }[] = [
   { seccion: 'tablero',        ruta: '/admin',                nombre: 'Tablero',        grupo: '' },
@@ -19,6 +19,7 @@ export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: stri
   { seccion: 'tareas',         ruta: '/admin/tareas',         nombre: 'Tareas',         grupo: 'Ventas' },
   { seccion: 'negocios',       ruta: '/admin/negocios',       nombre: 'Negocios',       grupo: 'Contenido' },
   { seccion: 'tours',          ruta: '/admin/tours',          nombre: 'Tours',          grupo: 'Contenido' },
+  { seccion: 'categorias',     ruta: '/admin/categorias',     nombre: 'Categorías',     grupo: 'Contenido' },
   { seccion: 'experiencias',   ruta: '/admin/experiencias',   nombre: 'Experiencias',   grupo: 'Contenido' },
   { seccion: 'guias',          ruta: '/admin/guias',          nombre: 'Guías',          grupo: 'Contenido' },
   { seccion: 'resenas',        ruta: '/admin/resenas',        nombre: 'Reseñas',        grupo: 'Contenido' },
@@ -35,7 +36,7 @@ const TODAS = MENU.map((m) => m.seccion);
 export const PERMISOS: Record<Rol, Seccion[]> = {
   admin:     TODAS,
   vendedor:  ['tablero', 'leads', 'conversaciones', 'viajeros', 'reservas', 'tareas', 'ia', 'reportes'],
-  editor:    ['tablero', 'negocios', 'tours', 'experiencias', 'guias', 'resenas', 'ia'],
+  editor:    ['tablero', 'negocios', 'tours', 'categorias', 'experiencias', 'guias', 'resenas', 'ia'],
   moderador: ['tablero', 'conversaciones', 'negocios', 'resenas', 'ia'],
   socio:     ['tablero', 'reportes'],
 };

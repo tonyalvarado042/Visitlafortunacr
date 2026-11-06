@@ -526,3 +526,13 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 /* La caja de la vista previa es oscura en el sitio público; acá va clara, que
    es el fondo de la tarjeta. */
 .admin .foto-tour-caja { background: #FBFAF7; border: 1px solid #E6E6E2; }
+
+/* La fila de edición de una categoría: nombre local, orden y si se ve, en
+   línea dentro de la tabla. En una tabla el espacio es el que es, así que
+   estos campos van chicos — no son para escribir párrafos. */
+.categoria-fila { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.categoria-fila input[type="text"],
+.categoria-fila input:not([type]) { width: 150px; }
+.categoria-fila input[type="number"] { width: 64px; }
+.categoria-fila label { display: flex; align-items: center; gap: 5px; font-size: 12.5px; white-space: nowrap; margin: 0; }
+.categoria-fila input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--naranja); }
