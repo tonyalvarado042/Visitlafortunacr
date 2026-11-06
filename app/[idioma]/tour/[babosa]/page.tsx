@@ -77,7 +77,14 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
   if (!tour) notFound();
 
   const categorias = await categoriasDe(destino, idioma);
-  const vendible = await tourReservable(destino, babosa, idioma);
+  const vendibleCrudo = await tourReservable(destino, babosa, idioma);
+  /* ⚠️ El nombre del operador NO VIAJA AL NAVEGADOR. No alcanzaba con no
+     pintarlo: `ReservarProducto` corre en el cliente, así que todo lo que se
+     le pasa termina serializado en el HTML. El nombre se leía con ver-código
+     aunque en pantalla no estuviera. Lo que no se debe revelar no se manda. */
+  const vendible = vendibleCrudo
+    ? { ...vendibleCrudo, negocio_nombre: '' }
+    : null;
   /* Otras tours para la columna de al lado. La ficha de un negocio tiene su
      columna con contacto y «combinalo con»; la de una tour no tenía nada, y
      quien llegaba sin decidirse se iba del sitio. */

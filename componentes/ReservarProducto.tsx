@@ -48,7 +48,13 @@ export type Residencia = 'todos' | 'nacional';
 export function tarifasDe(
   tarifas: ProductoReservable['tarifas'], residencia: Residencia,
 ) {
-  return tarifas.filter((x) => x.residencia === residencia);
+  /* ⚠️ Una tarifa SIN residencia cuenta como 'todos', no se descarta.
+     Asi estaba y asi fallo: el RPC de tours armaba las tarifas sin ese campo,
+     ninguna pasaba el filtro, la lista quedaba vacia y la caja mostraba
+     «Consultar precio» teniendo el precio cargado. Sin error y sin aviso.
+     El RPC ya quedo arreglado; esto es para que el proximo que arme tarifas y
+     se olvide del campo no haga desaparecer un precio en silencio. */
+  return tarifas.filter((x) => (x.residencia ?? 'todos') === residencia);
 }
 
 export function totalEstimado(
