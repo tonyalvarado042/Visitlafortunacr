@@ -86,92 +86,6 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 </div>
               </div>
             </div>
-            {/* La GALERÍA del tour.
-                Antes el tour tenía UNA foto y nada más, cuando el tour es
-                justo lo que se vende —y lo único que publica un operador—.
-                Quien está decidiendo si paga $99 por una clase de cocina
-                quiere ver más de una.
-                Es el mismo bloque que el de un negocio a propósito: quien ya
-                sabe mover las fotos de una ficha no tiene que aprender otra
-                cosa. */}
-            <div className="tarjeta">
-              <h2>Fotos <small>la primera manda: es la que se ve en las tarjetas</small></h2>
-              {!operador?.babosa ? (
-                <Aviso tipo="info">
-                  Para subir fotos hay que elegir primero el <strong>operador</strong> arriba y guardar.
-                  Las fotos se guardan en la carpeta de ese operador.
-                </Aviso>
-              ) : (
-                <>
-                  {!fotos?.length ? <Vacio texto="Sin fotos todavía." /> : (
-                    <div className="rejilla-fotos">
-                      {fotos.map((f, i) => (
-                        <div key={f.id} className="foto-admin">
-                          <a href={f.url} target="_blank" rel="noreferrer">
-                            <img src={f.url} alt="" className={f.es_portada ? 'es-portada' : ''} />
-                          </a>
-                          <div className="foto-pie">
-                            {f.es_portada && <span className="marca-portada">Portada</span>}
-                          </div>
-                          {(f.credito || f.licencia) && (
-                            <p className="gris foto-credito">
-                              {f.credito}{f.licencia ? ` · ${f.licencia}` : ''}
-                            </p>
-                          )}
-                          <div className="acciones-fila">
-                            {/* El id y el paso viajan JUNTOS en el value: un
-                                botón manda un solo par nombre/valor, así que
-                                un campo `paso` suelto valdría lo mismo para
-                                subir que para bajar. */}
-                            <form action={moverFotoTour}>
-                              <input type="hidden" name="id" value={id} />
-                              <button type="submit" name="foto_mover" value={`${f.id}|-1`}
-                                      className="boton tenue" disabled={i === 0}
-                                      aria-label="Mover antes">&#9664;</button>
-                              <button type="submit" name="foto_mover" value={`${f.id}|1`}
-                                      className="boton tenue" disabled={i === (fotos?.length ?? 0) - 1}
-                                      aria-label="Mover después">&#9654;</button>
-                            </form>
-                            {!f.es_portada && (
-                              <form action={marcarPortadaTour}>
-                                <input type="hidden" name="id" value={id} />
-                                <input type="hidden" name="foto_id" value={f.id} />
-                                <BotonAccion clase="boton tenue">Portada</BotonAccion>
-                              </form>
-                            )}
-                            <form action={borrarFotoTour}>
-                              <input type="hidden" name="id" value={id} />
-                              <input type="hidden" name="foto_id" value={f.id} />
-                              <BotonAccion clase="boton tenue" confirmar="Se borra la foto y su archivo. No se puede deshacer.">Borrar</BotonAccion>
-                            </form>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* El crédito y la licencia se piden ACÁ y no después, que
-                      es cuando ya nadie se acuerda de dónde salió la imagen. */}
-                  <form action={subirFotoTour} className="subir-foto">
-                    <input type="hidden" name="id" value={id} />
-                    <div className="campo">
-                      <label>Agregar fotos <small style={{ fontWeight: 400, color: '#8B8B87' }}>podés elegir varias de un solo</small></label>
-                      <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
-                    </div>
-                    <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={t.nombre} /></div>
-                    <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra o del operador" /></div>
-                    <div className="campo"><label>Licencia</label><input name="licencia" placeholder="Cedida por el operador…" /></div>
-                    <div className="campo"><label>Enlace de origen</label><input name="fuente_url" placeholder="https://…" /></div>
-                    <p className="gris" style={{ fontSize: 12, margin: '6px 0 10px' }}>
-                      Si ponés enlace de origen, el autor y la licencia son obligatorios, y se
-                      aplican a TODAS las que subas de un saque. Cada una se redimensiona a
-                      1600 px y se convierte a webp. Si alguna falla, las demás entran igual.
-                    </p>
-                    <BotonAccion>Subir fotos</BotonAccion>
-                  </form>
-                </>
-              )}
-            </div>
 
             <div className="tarjeta">
               <h2>Logística</h2>
@@ -254,6 +168,102 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </form>
+
+      {/* ⚠️ LA GALERÍA VIVE FUERA DEL FORMULARIO GRANDE, y no es cosmético:
+          HTML NO PERMITE FORMULARIOS ANIDADOS. Estaba dentro del <form> de
+          editar, el navegador se comía los de adentro al parsear, y cada
+          botón de foto —subir, mover, portada, borrar— terminaba mandando
+          el formulario de afuera. O sea GUARDABA el tour en vez de tocar la
+          foto. Sin error y sin aviso: simplemente no hacía nada.
+
+          Mismo motivo por el que las fotos de un negocio viven fuera de su
+          formulario. Si algún día esto vuelve adentro, vuelve a romperse. */}
+        {/* La GALERÍA del tour.
+            Antes el tour tenía UNA foto y nada más, cuando el tour es
+            justo lo que se vende —y lo único que publica un operador—.
+            Quien está decidiendo si paga $99 por una clase de cocina
+            quiere ver más de una.
+            Es el mismo bloque que el de un negocio a propósito: quien ya
+            sabe mover las fotos de una ficha no tiene que aprender otra
+            cosa. */}
+        <div className="tarjeta">
+          <h2>Fotos <small>la primera manda: es la que se ve en las tarjetas</small></h2>
+          {!operador?.babosa ? (
+            <Aviso tipo="info">
+              Para subir fotos hay que elegir primero el <strong>operador</strong> arriba y guardar.
+              Las fotos se guardan en la carpeta de ese operador.
+            </Aviso>
+          ) : (
+            <>
+              {!fotos?.length ? <Vacio texto="Sin fotos todavía." /> : (
+                <div className="rejilla-fotos">
+                  {fotos.map((f, i) => (
+                    <div key={f.id} className="foto-admin">
+                      <a href={f.url} target="_blank" rel="noreferrer">
+                        <img src={f.url} alt="" className={f.es_portada ? 'es-portada' : ''} />
+                      </a>
+                      <div className="foto-pie">
+                        {f.es_portada && <span className="marca-portada">Portada</span>}
+                      </div>
+                      {(f.credito || f.licencia) && (
+                        <p className="gris foto-credito">
+                          {f.credito}{f.licencia ? ` · ${f.licencia}` : ''}
+                        </p>
+                      )}
+                      <div className="acciones-fila">
+                        {/* El id y el paso viajan JUNTOS en el value: un
+                            botón manda un solo par nombre/valor, así que
+                            un campo `paso` suelto valdría lo mismo para
+                            subir que para bajar. */}
+                        <form action={moverFotoTour}>
+                          <input type="hidden" name="id" value={id} />
+                          <button type="submit" name="foto_mover" value={`${f.id}|-1`}
+                                  className="boton tenue" disabled={i === 0}
+                                  aria-label="Mover antes">&#9664;</button>
+                          <button type="submit" name="foto_mover" value={`${f.id}|1`}
+                                  className="boton tenue" disabled={i === (fotos?.length ?? 0) - 1}
+                                  aria-label="Mover después">&#9654;</button>
+                        </form>
+                        {!f.es_portada && (
+                          <form action={marcarPortadaTour}>
+                            <input type="hidden" name="id" value={id} />
+                            <input type="hidden" name="foto_id" value={f.id} />
+                            <BotonAccion clase="boton tenue">Portada</BotonAccion>
+                          </form>
+                        )}
+                        <form action={borrarFotoTour}>
+                          <input type="hidden" name="id" value={id} />
+                          <input type="hidden" name="foto_id" value={f.id} />
+                          <BotonAccion clase="boton tenue" confirmar="Se borra la foto y su archivo. No se puede deshacer.">Borrar</BotonAccion>
+                        </form>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* El crédito y la licencia se piden ACÁ y no después, que
+                  es cuando ya nadie se acuerda de dónde salió la imagen. */}
+              <form action={subirFotoTour} className="subir-foto">
+                <input type="hidden" name="id" value={id} />
+                <div className="campo">
+                  <label>Agregar fotos <small style={{ fontWeight: 400, color: '#8B8B87' }}>podés elegir varias de un solo</small></label>
+                  <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
+                </div>
+                <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={t.nombre} /></div>
+                <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra o del operador" /></div>
+                <div className="campo"><label>Licencia</label><input name="licencia" placeholder="Cedida por el operador…" /></div>
+                <div className="campo"><label>Enlace de origen</label><input name="fuente_url" placeholder="https://…" /></div>
+                <p className="gris" style={{ fontSize: 12, margin: '6px 0 10px' }}>
+                  Si ponés enlace de origen, el autor y la licencia son obligatorios, y se
+                  aplican a TODAS las que subas de un saque. Cada una se redimensiona a
+                  1600 px y se convierte a webp. Si alguna falla, las demás entran igual.
+                </p>
+                <BotonAccion>Subir fotos</BotonAccion>
+              </form>
+            </>
+          )}
+        </div>
     </>
   );
 }

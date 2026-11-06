@@ -305,61 +305,6 @@ export default async function PaginaNegocio({ params, searchParams }: {
               )}
             </div>
 
-            {/* Sacar una ficha de encima. Dos caminos, y la diferencia
-                importa: rechazar ARCHIVA y deja escrito por qué —seis meses
-                después nadie se acuerda si fue un duplicado, una prueba o
-                algo que de verdad no cumplía— y borrar es definitivo, para
-                lo que nunca tuvo que existir.
-
-                Nacieron en un <details> CERRADO para que un «Borrar» no
-                quedara pegado a «Publicar». El resultado fue que Tony lo buscó
-                y concluyó que no existía, así que ahora nace ABIERTO: plegar
-                esconde. La seguridad la dan las dos confirmaciones, no el
-                pliegue.
-
-                ⚠️ Y el comentario va ACÁ ARRIBA y no dentro del `&& (`. Un
-                comentario JSX ahí adentro no es JSX todavía —es una expresión
-                de JavaScript— y revienta el archivo entero. Ya había pasado
-                una vez. */}
-            {n.estado_publicacion !== 'archivado' && (
-              <details className="tarjeta plegable-bloque" open>
-                <summary><h2>Rechazar o borrar <small>no es lo mismo</small></h2></summary>
-                <div style={{ paddingTop: 4 }}>
-                  <form action={rechazarNegocio}>
-                    <input type="hidden" name="id" value={n.id} />
-                    <div className="campo ancho">
-                      <label>Motivo del rechazo</label>
-                      <textarea name="motivo" rows={3} placeholder="Por ejemplo: no es un negocio de La Fortuna · es una prueba · no responde desde hace dos meses" />
-                      <small>Queda escrito en la ficha. Si avisás al dueño, lee esto tal cual: escribilo como se lo dirías.</small>
-                    </div>
-                    {n.email && (
-                      <div className="campo"><label>
-                        <input type="checkbox" name="avisar" value="1" /> Avisarle al dueño ({n.email})
-                      </label>
-                      <small>Apagado no se le escribe a nadie — que es lo correcto para una prueba o un duplicado. Sin motivo escrito tampoco se manda.</small>
-                      </div>
-                    )}
-                    <div className="acciones-fila" style={{ marginTop: 10 }}>
-                      <BotonAccion confirmar={`Se archiva «${n.nombre}». Sale del directorio y de pendientes, pero NO se borra: se puede volver atrás.`}>
-                        Rechazar y archivar
-                      </BotonAccion>
-                    </div>
-                  </form>
-
-                  <form action={borrarNegocio} style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #E6E6E2' }}>
-                    <input type="hidden" name="id" value={n.id} />
-                    <p className="gris" style={{ fontSize: 12.5, lineHeight: 1.55, margin: '0 0 10px' }}>
-                      <strong>Borrar definitivamente.</strong> No avisa a nadie y <strong>no se puede deshacer</strong>.
-                      Se lleva también sus rutas y traducciones. Es para pruebas y duplicados, no para un negocio
-                      de verdad que no cumple — para eso está rechazar.
-                    </p>
-                    <BotonAccion confirmar={`BORRAR «${n.nombre}» para siempre. Esto no se deshace y no se le avisa a nadie. ¿Seguro?`}>
-                      Borrar definitivamente
-                    </BotonAccion>
-                  </form>
-                </div>
-              </details>
-            )}
 
             {/* El hueco explicado. Si se esconden cinco bloques sin decir
                 por que, el que entra cree que la pantalla esta rota. */}
@@ -537,6 +482,71 @@ export default async function PaginaNegocio({ params, searchParams }: {
           <BotonAccion>Guardar todo</BotonAccion>
         </div>
       </form>
+
+      {/* ⚠️ RECHAZAR Y BORRAR VIVEN FUERA DEL FORMULARIO GRANDE, y no es
+          cosmético: HTML NO PERMITE FORMULARIOS ANIDADOS. Estaban dentro
+          del <form> de editar, el navegador se comía los de adentro al
+          parsear, y los botones terminaban mandando el formulario de
+          afuera. O sea «Borrar definitivamente» GUARDABA el negocio. No
+          daba error, no avisaba: simplemente no borraba.
+
+          Es la misma razón por la que las fotos y los leads viven acá
+          abajo, y ya estaba escrita dos líneas más adelante. */}
+      {/* Sacar una ficha de encima. Dos caminos, y la diferencia
+          importa: rechazar ARCHIVA y deja escrito por qué —seis meses
+          después nadie se acuerda si fue un duplicado, una prueba o
+          algo que de verdad no cumplía— y borrar es definitivo, para
+          lo que nunca tuvo que existir.
+
+          Nacieron en un <details> CERRADO para que un «Borrar» no
+          quedara pegado a «Publicar». El resultado fue que Tony lo buscó
+          y concluyó que no existía, así que ahora nace ABIERTO: plegar
+          esconde. La seguridad la dan las dos confirmaciones, no el
+          pliegue.
+
+          ⚠️ Y el comentario va ACÁ ARRIBA y no dentro del `&& (`. Un
+          comentario JSX ahí adentro no es JSX todavía —es una expresión
+          de JavaScript— y revienta el archivo entero. Ya había pasado
+          una vez. */}
+      {n.estado_publicacion !== 'archivado' && (
+        <details className="tarjeta plegable-bloque" open>
+          <summary><h2>Rechazar o borrar <small>no es lo mismo</small></h2></summary>
+          <div style={{ paddingTop: 4 }}>
+            <form action={rechazarNegocio}>
+              <input type="hidden" name="id" value={n.id} />
+              <div className="campo ancho">
+                <label>Motivo del rechazo</label>
+                <textarea name="motivo" rows={3} placeholder="Por ejemplo: no es un negocio de La Fortuna · es una prueba · no responde desde hace dos meses" />
+                <small>Queda escrito en la ficha. Si avisás al dueño, lee esto tal cual: escribilo como se lo dirías.</small>
+              </div>
+              {n.email && (
+                <div className="campo"><label>
+                  <input type="checkbox" name="avisar" value="1" /> Avisarle al dueño ({n.email})
+                </label>
+                <small>Apagado no se le escribe a nadie — que es lo correcto para una prueba o un duplicado. Sin motivo escrito tampoco se manda.</small>
+                </div>
+              )}
+              <div className="acciones-fila" style={{ marginTop: 10 }}>
+                <BotonAccion confirmar={`Se archiva «${n.nombre}». Sale del directorio y de pendientes, pero NO se borra: se puede volver atrás.`}>
+                  Rechazar y archivar
+                </BotonAccion>
+              </div>
+            </form>
+
+            <form action={borrarNegocio} style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #E6E6E2' }}>
+              <input type="hidden" name="id" value={n.id} />
+              <p className="gris" style={{ fontSize: 12.5, lineHeight: 1.55, margin: '0 0 10px' }}>
+                <strong>Borrar definitivamente.</strong> No avisa a nadie y <strong>no se puede deshacer</strong>.
+                Se lleva también sus rutas y traducciones. Es para pruebas y duplicados, no para un negocio
+                de verdad que no cumple — para eso está rechazar.
+              </p>
+              <BotonAccion confirmar={`BORRAR «${n.nombre}» para siempre. Esto no se deshace y no se le avisa a nadie. ¿Seguro?`}>
+                Borrar definitivamente
+              </BotonAccion>
+            </form>
+          </div>
+        </details>
+      )}
 
       {/* Fotos y leads viven FUERA del formulario grande, y no es cosmetico:
           adentro llevaban cuatro <form> anidados —portada, borrar, subir,
