@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { destinoActual } from '@/lib/destino';
+import { destinoActual, lemaDe } from '@/lib/destino';
 import { esIdioma, type Idioma } from '@/lib/idiomas';
 import { alternativas, mismasRutas } from '@/lib/seo';
 import type { Metadata } from 'next';
@@ -17,9 +17,13 @@ export async function generateMetadata({
   const { idioma } = await params;
   try {
     const destino = await destinoActual();
+    /* En el idioma de quien mira. Esta es la descripcion de TODAS las paginas
+       del sitio —el renglon que sale debajo del titulo en Google— y salia en
+       castellano aunque la pagina fuera la inglesa. */
+    const lema = await lemaDe(destino, idioma as Idioma);
     return {
       title: { default: destino.marca_nombre, template: `%s · ${destino.marca_nombre}` },
-      description: destino.lema ?? undefined,
+      description: lema ?? undefined,
       /* metadataBase convierte las rutas relativas de abajo en direcciones
          completas. Sin el, hreflang sale con "/en" y Google lo ignora. */
       metadataBase: new URL(`https://${destino.dominio}`),

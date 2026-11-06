@@ -652,3 +652,34 @@ export async function combinaCon(negocioId: string, idioma: Idioma): Promise<Neg
   if (error) return [];
   return (data ?? []) as NegocioCombina[];
 }
+
+/**
+ * El lema del destino, en el idioma de quien mira.
+ *
+ * EL BICHO QUE ARREGLA: el lema se leía de `dst_destino.lema` a secas, que
+ * está en el idioma principal. O sea **la portada en inglés mostraba el lema
+ * en español**, y la etiqueta `<meta description>` de TODAS las páginas del
+ * sitio también — que es el renglón que sale debajo del título en Google. Lo
+ * peor es que la traducción al inglés estaba guardada en `dst_traduccion`
+ * desde siempre: existía y nadie la leía.
+ *
+ * Es la línea más visible del sitio y la primera que ve un extranjero. Y el
+ * inglés es justo la versión que sí está traducida (64 de 65 fichas).
+ *
+ * Si falta la traducción, cae al lema base. Un lema en español se entiende a
+ * medias; ninguno deja la página sin descripción en Google.
+ */
+export async function lemaDe(destino: Destino, idioma: Idioma): Promise<string | null> {
+  if (idioma === destino.idioma_principal) return destino.lema;
+
+  const { data } = await supabase
+    .from('dst_traduccion')
+    .select('texto')
+    .eq('entidad', 'destino')
+    .eq('entidad_id', destino.id)
+    .eq('campo', 'lema')
+    .eq('idioma', idioma)
+    .maybeSingle();
+
+  return (data?.texto as string | undefined)?.trim() || destino.lema;
+}

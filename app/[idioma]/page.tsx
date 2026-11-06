@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { destinoActual, categoriasDe, negociosDe, destacadosDe, type Negocio, type Categoria } from '@/lib/destino';
+import { destinoActual, categoriasDe, negociosDe, destacadosDe, lemaDe, type Negocio, type Categoria } from '@/lib/destino';
 import { t, lugares, esIdioma, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -128,7 +128,7 @@ export default async function Portada({ params, searchParams }: {
         nombre={destino.nombre}
         region={destino.region}
         pais={destino.pais_nombre}
-        lema={destino.lema}
+        lema={await lemaDe(destino, idioma)}
         colorAcento={destino.color_acento}
         colorVerde={destino.color_naturaleza}
         videoUrl={destino.video_portada_url}
