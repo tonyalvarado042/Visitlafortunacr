@@ -2,9 +2,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
-import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
+import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarNegocio, publicarNegocio, pedirCompletarFicha, publicarYPedirFicha, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
+import { editarNegocio, publicarNegocio, pedirCompletarFicha, publicarYPedirFicha, rechazarNegocio, borrarNegocio, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
@@ -22,15 +22,21 @@ const ROTULO_CEDULA: Record<string, string> = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function PaginaNegocio({ params }: { params: Promise<{ id: string }> }) {
+export default async function PaginaNegocio({ params, searchParams }: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ fallo?: string }>;
+}) {
   const { id } = await params;
+  /* El motivo por el que no se pudo publicar, si la acción rebotó. Viaja por
+     la dirección porque este formulario no lleva estado: ver `publicarNegocio`. */
+  const { fallo } = await searchParams;
   const { destino, db } = await contextoPanel('negocios');
   const conPlaces = await hayClaveDePlaces();
 
   const { data: n } = await db.from('dst_negocio').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n) notFound();
 
-  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: tradHijas }, { data: otrosNegocios }, { data: fiscal }] = await Promise.all([
+  const [{ data: categorias }, { data: traducciones }, { data: externas }, { data: fotos }, { data: leads }, { data: razones }, { data: combina }, { data: tradHijas }, { data: otrosNegocios }, { data: fiscal }, { count: totalTours }] = await Promise.all([
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion, babosa)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_traduccion').select('campo, idioma, texto, esta_revisada, origen').eq('entidad', 'negocio').eq('entidad_id', id),
     db.from('dst_resena_externa').select('plataforma, calificacion, total_resenas, url_fuente, obtenida_en, expira_en, extractos:dst_resena_externa_extracto(id, autor_nombre, calificacion, texto, publicada_en, destacado)').eq('negocio_id', id),
@@ -41,6 +47,9 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     db.from('dst_traduccion').select('entidad, entidad_id, campo, idioma, texto, esta_revisada, origen').in('entidad', ['razon', 'combina']),
     db.from('dst_negocio').select('id, nombre').eq('destino_id', destino.id).neq('id', id).eq('estado_publicacion', 'publicado').order('nombre'),
     db.from('dst_negocio_fiscal').select('*').eq('negocio_id', id).maybeSingle(),
+    /* Los tours. A un operador no le faltan fotos —no tiene ficha— le faltan
+       tours, que es lo unico suyo que se publica. */
+    db.from('dst_tour').select('id', { count: 'exact', head: true }).eq('negocio_id', id),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string; babosa: string } | null).filter((c): c is { id: string; nombre: string; seccion: string; babosa: string } => !!c);
@@ -53,11 +62,33 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
     tradHijas?.find((t) => t.entidad === entidad && t.entidad_id === entidadId
                         && t.campo === campo && t.idioma === idioma);
 
-  /* Lo que le falta para ser una ficha presentable. NO bloquea publicar: se
-     avisa y decide la persona. Pero decidirlo A CIEGAS era el problema. */
+  /* Lo que le falta para ser una ficha presentable.
+   *
+   * ⚠️ NO SON LO MISMO, y tratarlas igual costo un bug que fallaba callado.
+   * La base tiene este check:
+   *
+   *   ck_dst_negocio_publicado:
+   *   CHECK (estado_publicacion <> 'publicado' OR descripcion IS NOT NULL
+   *          OR es_operador)
+   *
+   * O sea **sin descripcion la base se NIEGA a publicar**. Las fotos no: una
+   * ficha sin fotos se publica, solo se ve mal.
+   *
+   * El boton decia «Publicar igual» para las dos cosas. Con la descripcion
+   * vacia prometia algo imposible: el UPDATE rebotaba contra el check, el
+   * error se iba a `console.error` y la pantalla quedaba igualita. Tony hizo
+   * clic, el correo al duenno salio, y publicar se cayo sin decir nada.
+   *
+   * Un operador SI se puede publicar sin descripcion: el check lo exceptua
+   * porque un operador no tiene ficha publica. */
+  const sinDescripcion = !String(n.descripcion ?? '').trim();
+  const noSePuedePublicar = sinDescripcion && !n.es_operador;
   const faltantes = [
-    !String(n.descripcion ?? '').trim() && 'la descripción',
-    !fotos?.length && 'fotos',
+    sinDescripcion && 'la descripción',
+    /* Un operador no tiene ficha: no sale en el directorio, lo que se publica
+       son sus tours. Pedirle fotos es pedirle algo que no existe. */
+    !n.es_operador && !fotos?.length && 'fotos',
+    n.es_operador && !totalTours && 'tours',
   ].filter(Boolean) as string[];
 
   return (
@@ -78,7 +109,11 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
           </form>
         )}
 
-        {n.estado_publicacion !== 'publicado' && (
+        {/* Sin descripción NO se ofrece publicar, porque la base lo va a
+            rechazar. Ofrecer un botón que no puede funcionar es peor que no
+            tenerlo: se hace clic, no pasa nada, y uno se queda sin saber si
+            el problema es el botón, la sesión o la ficha. */}
+        {n.estado_publicacion !== 'publicado' && !noSePuedePublicar && (
           <form action={faltantes.length && n.email ? publicarYPedirFicha : publicarNegocio}>
             <input type="hidden" name="id" value={n.id} />
             <BotonAccion
@@ -106,6 +141,25 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
           </a>
         )}
       </Cabecera>
+
+      {fallo && (
+        <Aviso tipo="mal">
+          <strong>No se pudo publicar.</strong> La base lo rechazó así: <code>{fallo}</code>
+        </Aviso>
+      )}
+
+      {/* Por qué no hay botón de publicar. Sin esto, el botón desaparecido es
+          otro misterio: la pantalla tiene que decir qué falta y cómo se
+          arregla, no solo esconder lo que no funciona. */}
+      {n.estado_publicacion !== 'publicado' && noSePuedePublicar && (
+        <Aviso tipo="mal">
+          <strong>Esta ficha no se puede publicar todavía: le falta la descripción.</strong>
+          {' '}No es una regla del panel, es de la base de datos — un negocio sin descripción
+          no se publica, punto. {!fotos?.length && <>Tampoco tiene fotos, aunque eso sí se puede publicar.{' '}</>}
+          Escribila en el campo de abajo y guardá, o pedísela al dueño con el botón de arriba
+          {n.email ? <> (le llega a <strong>{n.email}</strong>)</> : null}.
+        </Aviso>
+      )}
 
       <form action={editarNegocio}>
         <input type="hidden" name="id" value={id} />
@@ -242,8 +296,63 @@ export default async function PaginaNegocio({ params }: { params: Promise<{ id: 
                 <dt>Verificado</dt><dd>{n.verificado_en ? fecha(n.verificado_en, destino.zona_horaria) : '—'}</dd>
                 <dt>Reseñas</dt><dd>{n.promedio_calificacion ?? '—'} ({n.total_resenas}) · {n.total_vistas} vistas</dd>
                 <dt>Babosa</dt><dd>{n.babosa}</dd>
+                {n.rechazado_en && <><dt>Rechazado</dt><dd>{fecha(n.rechazado_en, destino.zona_horaria)}</dd></>}
               </dl>
+              {n.rechazo_motivo && (
+                <p className="gris" style={{ fontSize: 12.5, lineHeight: 1.55, marginBottom: 0 }}>
+                  <strong>Motivo del rechazo:</strong> {n.rechazo_motivo}
+                </p>
+              )}
             </div>
+
+            {/* Sacar una ficha de encima. Dos caminos, y la diferencia
+                importa: rechazar ARCHIVA y deja escrito por qué —seis meses
+                después nadie se acuerda si fue un duplicado, una prueba o
+                algo que de verdad no cumplía— y borrar es definitivo, para
+                lo que nunca tuvo que existir.
+
+                Van en un <details> cerrado a propósito: no son botones de
+                todos los días, y un «Borrar» suelto al lado de «Publicar» se
+                toca por accidente. */}
+            {n.estado_publicacion !== 'archivado' && (
+              <details className="tarjeta plegable-bloque">
+                <summary><h2>Rechazar o borrar <small>no es lo mismo</small></h2></summary>
+                <div style={{ paddingTop: 4 }}>
+                  <form action={rechazarNegocio}>
+                    <input type="hidden" name="id" value={n.id} />
+                    <div className="campo ancho">
+                      <label>Motivo del rechazo</label>
+                      <textarea name="motivo" rows={3} placeholder="Por ejemplo: no es un negocio de La Fortuna · es una prueba · no responde desde hace dos meses" />
+                      <small>Queda escrito en la ficha. Si avisás al dueño, lee esto tal cual: escribilo como se lo dirías.</small>
+                    </div>
+                    {n.email && (
+                      <div className="campo"><label>
+                        <input type="checkbox" name="avisar" value="1" /> Avisarle al dueño ({n.email})
+                      </label>
+                      <small>Apagado no se le escribe a nadie — que es lo correcto para una prueba o un duplicado. Sin motivo escrito tampoco se manda.</small>
+                      </div>
+                    )}
+                    <div className="acciones-fila" style={{ marginTop: 10 }}>
+                      <BotonAccion confirmar={`Se archiva «${n.nombre}». Sale del directorio y de pendientes, pero NO se borra: se puede volver atrás.`}>
+                        Rechazar y archivar
+                      </BotonAccion>
+                    </div>
+                  </form>
+
+                  <form action={borrarNegocio} style={{ marginTop: 18, paddingTop: 14, borderTop: '1px solid #E6E6E2' }}>
+                    <input type="hidden" name="id" value={n.id} />
+                    <p className="gris" style={{ fontSize: 12.5, lineHeight: 1.55, margin: '0 0 10px' }}>
+                      <strong>Borrar definitivamente.</strong> No avisa a nadie y <strong>no se puede deshacer</strong>.
+                      Se lleva también sus rutas y traducciones. Es para pruebas y duplicados, no para un negocio
+                      de verdad que no cumple — para eso está rechazar.
+                    </p>
+                    <BotonAccion confirmar={`BORRAR «${n.nombre}» para siempre. Esto no se deshace y no se le avisa a nadie. ¿Seguro?`}>
+                      Borrar definitivamente
+                    </BotonAccion>
+                  </form>
+                </div>
+              </details>
+            )}
 
             {/* El hueco explicado. Si se esconden cinco bloques sin decir
                 por que, el que entra cree que la pantalla esta rota. */}

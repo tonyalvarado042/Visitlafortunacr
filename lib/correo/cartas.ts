@@ -550,6 +550,28 @@ const FAL_ASUNTO_DESC: Texto = {
   fr: 'Il manque la description de votre fiche',
   de: 'Deinem Eintrag fehlt die Beschreibung',
 };
+const FAL_ASUNTO_TOURS: Texto = {
+  es: 'Te faltan los tours',
+  en: 'Your tours are missing',
+  pt: 'Faltam os seus tours',
+  fr: 'Il manque vos excursions',
+  de: 'Deine Touren fehlen',
+};
+const FAL_P2_TOURS: Texto = {
+  es: 'Como operador no llevás ficha propia en el directorio: lo que se publica son tus tours, cada uno con su foto, su precio y qué incluye. Sin tours cargados no hay nada que mostrar.',
+  en: 'As an operator you do not get your own listing in the directory: what gets published are your tours, each with its photo, price and what is included. With no tours loaded there is nothing to show.',
+  pt: 'Como operador não tem ficha própria no diretório: o que se publica são os seus tours, cada um com a sua foto, o preço e o que inclui. Sem tours carregados não há nada para mostrar.',
+  fr: 'En tant que prestataire vous n’avez pas de fiche propre dans l’annuaire : ce qui est publié, ce sont vos excursions, chacune avec sa photo, son prix et ce qu’elle comprend. Sans excursions, il n’y a rien à montrer.',
+  de: 'Als Anbieter hast du keinen eigenen Eintrag im Verzeichnis: veröffentlicht werden deine Touren, jede mit Foto, Preis und Leistungen. Ohne Touren gibt es nichts zu zeigen.',
+};
+const FAL_TOURS: Texto = {
+  es: 'los tours', en: 'the tours', pt: 'os tours', fr: 'les excursions', de: 'die Touren',
+};
+const FAL_BOTON_TOURS: Texto = {
+  es: 'Cargar mis tours', en: 'Add my tours', pt: 'Carregar os meus tours',
+  fr: 'Ajouter mes excursions', de: 'Touren hinzufügen',
+};
+
 const FAL_ASUNTO_AMBOS: Texto = {
   es: 'Te falta poco para que tu ficha salga',
   en: 'Your listing is almost ready',
@@ -628,16 +650,29 @@ export function piezasFaltaCompletarFicha(opciones: {
   nombreNegocio: string;
   faltaDescripcion: boolean;
   faltanFotos: boolean;
+  /* ⚠️ UN OPERADOR NO TIENE FICHA. No sale en el directorio: lo que se publica
+     son sus tours. Pedirle «las fotos de tu ficha» a un operador es pedirle
+     algo que no existe, y el que lo recibe entra al portal, no encuentra
+     dónde ponerlas y se va. Lo que le falta a un operador son TOURS. */
+  faltanTours?: boolean;
+  esOperador?: boolean;
 }) {
-  const { destino, idioma, negocioId, nombreNegocio, faltaDescripcion, faltanFotos } = opciones;
+  const {
+    destino, idioma, negocioId, nombreNegocio,
+    faltaDescripcion, faltanFotos, faltanTours = false, esOperador = false,
+  } = opciones;
 
   /* El asunto dice QUÉ falta. «Completá tu perfil» se ignora; «le faltan las
      fotos a tu ficha» se abre, porque ya dice qué hay que hacer. */
-  const asunto = faltaDescripcion && faltanFotos
+  const cuantas = [faltaDescripcion, faltanFotos, faltanTours].filter(Boolean).length;
+  const asunto = cuantas > 1
     ? d(FAL_ASUNTO_AMBOS, idioma)
-    : faltanFotos ? d(FAL_ASUNTO, idioma) : d(FAL_ASUNTO_DESC, idioma);
+    : faltanTours ? d(FAL_ASUNTO_TOURS, idioma)
+    : faltanFotos ? d(FAL_ASUNTO, idioma)
+    : d(FAL_ASUNTO_DESC, idioma);
 
   const lista = [
+    faltanTours ? d(FAL_TOURS, idioma) : null,
     faltanFotos ? d(FAL_FOTOS, idioma) : null,
     faltaDescripcion ? d(FAL_DESC, idioma) : null,
   ].filter(Boolean).join(` ${d(FAL_Y, idioma)} `);
@@ -648,6 +683,7 @@ export function piezasFaltaCompletarFicha(opciones: {
      próximo correo no se abra. */
   const parrafos = [
     d(FAL_P1, idioma),
+    ...(faltanTours ? [d(FAL_P2_TOURS, idioma)] : []),
     ...(faltanFotos ? [d(FAL_P2_FOTOS, idioma)] : []),
     ...(faltaDescripcion ? [d(FAL_P2_DESC, idioma)] : []),
   ];
@@ -658,20 +694,21 @@ export function piezasFaltaCompletarFicha(opciones: {
     titulo: d(FAL_TITULO, idioma),
     parrafos,
     datos: [{ rotulo: d(FAL_ROT_FALTA, idioma), valor: queFalta }],
-    boton: { texto: d(FAL_BOTON, idioma), url: `https://${destino.dominio}/negocio/${negocioId}` },
+    /* El boton lleva adonde se arregla. A un operador al que le faltan tours
+       mandarlo a la pantalla de su ficha es mandarlo al lugar equivocado. */
+    boton: esOperador && faltanTours
+      ? { texto: d(FAL_BOTON_TOURS, idioma), url: `https://${destino.dominio}/negocio/${negocioId}/tours` }
+      : { texto: d(FAL_BOTON, idioma), url: `https://${destino.dominio}/negocio/${negocioId}` },
     nota: d(FAL_NOTA, idioma),
   };
 }
 
-export async function correoFaltaCompletarFicha(opciones: {
-  destino: Destino;
-  idioma: Idioma;
-  para: string;
-  negocioId: string;
-  nombreNegocio: string;
-  faltaDescripcion: boolean;
-  faltanFotos: boolean;
-}): Promise<Envio> {
+/* El tipo sale de la funcion que arma las piezas, no copiado a mano. Copiarlo
+   fue justo lo que rompio: se le agregaron `faltanTours` y `esOperador` a las
+   piezas y esta firma se quedo vieja. */
+export async function correoFaltaCompletarFicha(
+  opciones: Parameters<typeof piezasFaltaCompletarFicha>[0] & { para: string },
+): Promise<Envio> {
   const { destino, idioma, para } = opciones;
   return enviarCorreo({ destino, idioma, para, ...piezasFaltaCompletarFicha(opciones) });
 }
@@ -790,4 +827,67 @@ export function piezasNegocioNuevoAlEquipo(o: PiezasNegocioNuevo) {
 
 export async function correoNegocioNuevoAlEquipo(o: PiezasNegocioNuevo & { para: string }): Promise<Envio> {
   return enviarCorreo({ destino: o.destino, idioma: 'es', para: o.para, ...piezasNegocioNuevoAlEquipo(o) });
+}
+
+/* ---- Se rechazó un negocio ---------------------------------------------
+ *
+ * Solo sale si alguien del equipo marca la casilla Y escribió un motivo. No
+ * se manda por archivar: a una prueba o a un duplicado no se le escribe a
+ * nadie.
+ *
+ * Lleva el motivo TAL CUAL lo escribió el equipo, sin suavizarlo. Un rechazo
+ * con el motivo envuelto en algodón obliga al dueño a escribir preguntando
+ * qué pasó, y eso es trabajo para los dos. Y deja la puerta abierta: casi
+ * siempre lo que falta se arregla.
+ */
+
+const RECH_ASUNTO: Texto = {
+  es: 'Sobre tu ficha en', en: 'About your listing on', pt: 'Sobre a sua ficha em',
+  fr: 'À propos de votre fiche sur', de: 'Zu deinem Eintrag auf',
+};
+const RECH_TITULO: Texto = {
+  es: 'Por ahora no vamos a publicar tu ficha',
+  en: 'We are not publishing your listing for now',
+  pt: 'Por agora não vamos publicar a sua ficha',
+  fr: 'Nous ne publions pas votre fiche pour le moment',
+  de: 'Wir veröffentlichen deinen Eintrag vorerst nicht',
+};
+const RECH_P1: Texto = {
+  es: 'Revisamos lo que cargaste y por ahora no la vamos a publicar. Te contamos por qué, para que sepas a qué atenerte y no quedes esperando.',
+  en: 'We reviewed what you uploaded and we are not going to publish it for now. Here is why, so you are not left waiting.',
+  pt: 'Revisámos o que carregou e por agora não vamos publicar. Dizemos-lhe porquê, para não ficar à espera.',
+  fr: 'Nous avons examiné ce que vous avez déposé et nous ne le publierons pas pour le moment. Voici pourquoi, pour que vous ne restiez pas à attendre.',
+  de: 'Wir haben uns angesehen, was du hochgeladen hast, und veröffentlichen es vorerst nicht. Hier der Grund, damit du nicht im Ungewissen bleibst.',
+};
+const RECH_P2: Texto = {
+  es: 'Esto no es definitivo. Si lo que falta se puede arreglar, escribinos respondiendo este correo y lo vemos — la mayoría de las veces se resuelve rápido.',
+  en: 'This is not final. If what is missing can be sorted out, reply to this email and we will look at it — most of the time it is quick to fix.',
+  pt: 'Isto não é definitivo. Se o que falta tiver arranjo, responda a este e-mail e vemos — na maioria das vezes resolve-se rápido.',
+  fr: 'Ce n’est pas définitif. Si ce qui manque peut être corrigé, répondez à cet e-mail et nous verrons — le plus souvent cela se règle vite.',
+  de: 'Das ist nicht endgültig. Wenn sich das Fehlende beheben lässt, antworte auf diese E-Mail und wir schauen es uns an — meist ist es schnell gelöst.',
+};
+const RECH_ROT_MOTIVO: Texto = {
+  es: 'El motivo', en: 'The reason', pt: 'O motivo', fr: 'La raison', de: 'Der Grund',
+};
+
+export function piezasNegocioRechazado(o: {
+  destino: Destino;
+  idioma: Idioma;
+  nombreNegocio: string;
+  motivo: string;
+}) {
+  return {
+    asunto: `${d(RECH_ASUNTO, o.idioma)} ${o.destino.marca_nombre}: ${o.nombreNegocio}`,
+    motivo: 'negocio_rechazado',
+    titulo: d(RECH_TITULO, o.idioma),
+    parrafos: [d(RECH_P1, o.idioma), d(RECH_P2, o.idioma)],
+    /* El motivo tal cual lo escribió el equipo. */
+    datos: [{ rotulo: d(RECH_ROT_MOTIVO, o.idioma), valor: o.motivo }],
+  };
+}
+
+export async function correoNegocioRechazado(
+  o: Parameters<typeof piezasNegocioRechazado>[0] & { para: string },
+): Promise<Envio> {
+  return enviarCorreo({ destino: o.destino, idioma: o.idioma, para: o.para, ...piezasNegocioRechazado(o) });
 }

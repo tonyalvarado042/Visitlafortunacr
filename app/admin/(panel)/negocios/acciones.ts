@@ -120,7 +120,24 @@ export async function publicarNegocio(datos: FormData) {
     publicado_en: antes.publicado_en ?? new Date().toISOString(),
   }).eq('id', id).eq('destino_id', destino.id);
 
-  if (error) console.error('publicarNegocio:', error.message);
+  /* ⚠️ UN FALLO AQUI NO PUEDE QUEDAR EN LA CONSOLA.
+   *
+   * Asi estaba y asi fallo: la base tiene
+   * `CHECK (estado_publicacion <> 'publicado' OR descripcion IS NOT NULL OR
+   * es_operador)`, el UPDATE reboto, el error se escribio en un log que nadie
+   * mira, y la pantalla quedo EXACTAMENTE IGUAL. Tony hizo clic en «Publicar
+   * igual», el correo al duenno salio, y publicar no paso — sin un solo
+   * indicio. Pasarse quince minutos buscando si el problema es el boton, la
+   * sesion o la ficha es carisimo, y es culpa de esta linea.
+   *
+   * Ahora el motivo viaja en la direccion y la pantalla lo pinta. La pagina
+   * tampoco ofrece el boton cuando sabe de antemano que va a rebotar, pero
+   * esto cubre lo que no se vio venir: una politica de RLS, una columna nueva
+   * con un check, lo que sea. */
+  if (error) {
+    console.error('publicarNegocio:', error.message);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+  }
   refrescar(id);
 }
 
@@ -148,18 +165,27 @@ export async function pedirCompletarFicha(datos: FormData) {
   if (!esUuid(id)) return;
 
   const { data: n } = await db.from('dst_negocio')
-    .select('id, nombre, email, descripcion')
+    .select('id, nombre, email, descripcion, es_operador')
     .eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!n?.email) return;
 
-  const { count } = await db.from('dst_negocio_foto')
-    .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
+  const [{ count: fotos }, { count: tours }] = await Promise.all([
+    db.from('dst_negocio_foto').select('id', { count: 'exact', head: true }).eq('negocio_id', id),
+    db.from('dst_tour').select('id', { count: 'exact', head: true }).eq('negocio_id', id),
+  ]);
 
+  /* ⚠️ UN OPERADOR NO TIENE FICHA. No sale en el directorio: lo que se publica
+     son sus tours. Pedirle «las fotos de tu ficha» es pedirle algo que no
+     existe — entra al portal, no encuentra donde ponerlas, y se va. A un
+     operador se le piden TOURS. Lo noto Tony mirando Jacamar.
+     La descripcion si le sirve a los dos: en un operador acompanna a sus
+     tours. */
   const faltaDescripcion = !String(n.descripcion ?? '').trim();
-  const faltanFotos = !count;
+  const faltanFotos = !n.es_operador && !fotos;
+  const faltanTours = !!n.es_operador && !tours;
   /* Si no falta nada, no se manda: un correo que dice «te falta» cuando no
      falta nada quema la confianza del duenno en todos los que vengan. */
-  if (!faltaDescripcion && !faltanFotos) return;
+  if (!faltaDescripcion && !faltanFotos && !faltanTours) return;
 
   /* El correo necesita la fila ENTERA del destino —marca, dominio, colores de
      la plantilla, el remitente—, y `contextoPanel` solo devuelve el resumen que
@@ -191,6 +217,8 @@ export async function pedirCompletarFicha(datos: FormData) {
     nombreNegocio: n.nombre,
     faltaDescripcion,
     faltanFotos,
+    faltanTours,
+    esOperador: !!n.es_operador,
   });
 
   /* La fecha se anota SOLO si el correo salio. Anotarla igual haria que la
@@ -204,6 +232,107 @@ export async function pedirCompletarFicha(datos: FormData) {
     console.error('pedirCompletarFicha:', envio.error);
   }
   refrescar(id);
+}
+
+/**
+ * Rechazar un negocio: lo archiva diciendo POR QUE, y avisa al duenno si se
+ * marca la casilla.
+ *
+ * ES REVERSIBLE: no borra nada. El negocio sale del directorio y de la lista
+ * de pendientes, y el motivo queda escrito. Seis meses despues alguien va a
+ * abrir esa fila y va a querer saber si fue un duplicado, una prueba, o algo
+ * que de verdad no cumplia — sin el motivo, «archivado» no dice nada y se
+ * termina adivinando.
+ *
+ * Avisar al duenno es OPCIONAL y por eso va aparte, sin valor por omision:
+ * a una prueba o a un duplicado no se le escribe a nadie; a un negocio de
+ * verdad que no cumple, si — y merece saber por que.
+ */
+export async function rechazarNegocio(datos: FormData) {
+  const { db, destino } = await contextoPanel('negocios');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  const motivo = texto(datos, 'motivo');
+  const avisar = texto(datos, 'avisar') === '1';
+
+  const { data: n } = await db.from('dst_negocio')
+    .select('id, nombre, email, es_operador')
+    .eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!n) return;
+
+  const { error } = await db.from('dst_negocio').update({
+    estado_publicacion: 'archivado',
+    rechazo_motivo: motivo || null,
+    rechazado_en: new Date().toISOString(),
+  }).eq('id', id).eq('destino_id', destino.id);
+
+  if (error) {
+    console.error('rechazarNegocio:', error.message);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+  }
+
+  /* El aviso va DESPUES de archivar y envuelto: si el correo falla, el
+     negocio ya quedo archivado y eso es lo que importaba. Al reves seria
+     peor — un duenno enterandose de un rechazo que no ocurrio. */
+  if (avisar && n.email && motivo) {
+    try {
+      const { destinoActual } = await import('@/lib/destino');
+      const completo = await destinoActual();
+      if (completo.id === destino.id) {
+        const { correoNegocioRechazado } = await import('@/lib/correo/cartas');
+        const envio = await correoNegocioRechazado({
+          destino: completo, idioma: completo.idioma_principal,
+          para: n.email, nombreNegocio: n.nombre, motivo,
+        });
+        if (!envio.ok) console.error('aviso de rechazo no salio:', envio.error);
+      }
+    } catch (fallo) {
+      console.error('aviso de rechazo:', fallo instanceof Error ? fallo.message : fallo);
+    }
+  }
+
+  refrescar(id);
+  redirect('/admin/negocios');
+}
+
+/**
+ * Borrar un negocio DE VERDAD. No avisa a nadie.
+ *
+ * ⚠️ ESTO NO SE DESHACE. Es para lo que nunca tuvo que existir: pruebas,
+ * duplicados, basura. Para un negocio de verdad que no cumple esta
+ * `rechazarNegocio`, que archiva y deja el motivo escrito.
+ *
+ * ⚠️ Y HAY QUE BORRAR LAS RUTAS A MANO. `dst_ruta` no apunta al negocio con
+ * una clave foranea sino con un par (entidad, entidad_id), asi que Postgres
+ * NO las arrastra. Dejarlas seria dejar cinco direcciones publicas —una por
+ * idioma— resolviendo a una fila que ya no existe.
+ */
+export async function borrarNegocio(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('negocios');
+  /* Borrar sin vuelta atras es solo de un administrador. */
+  if (usuario.rol !== 'admin') return;
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  /* Se comprueba que la fila sea de ESTE destino antes de tocar nada que no
+     lleve `destino_id`, como las rutas. */
+  const { data: n } = await db.from('dst_negocio')
+    .select('id').eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!n) return;
+
+  await db.from('dst_ruta').delete()
+    .eq('destino_id', destino.id).eq('entidad', 'negocio').eq('entidad_id', id);
+  await db.from('dst_traduccion').delete().eq('entidad', 'negocio').eq('entidad_id', id);
+
+  const { error } = await db.from('dst_negocio').delete()
+    .eq('id', id).eq('destino_id', destino.id);
+  if (error) {
+    console.error('borrarNegocio:', error.message);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+  }
+
+  refrescar();
+  redirect('/admin/negocios');
 }
 
 /** Publicar y, en el mismo gesto, pedirle lo que falte. */
