@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, tourPorBabosa, otrasTours } from '@/lib/destino';
+import { destinoActual, categoriasDe, tourPorBabosa } from '@/lib/destino';
+import { fichasDelDirectorio } from '@/lib/directorio';
+import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
@@ -85,10 +87,20 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
   const vendible = vendibleCrudo
     ? { ...vendibleCrudo, negocio_nombre: '' }
     : null;
-  /* Otras tours para la columna de al lado. La ficha de un negocio tiene su
-     columna con contacto y «combinalo con»; la de una tour no tenía nada, y
-     quien llegaba sin decidirse se iba del sitio. */
-  const otras = await otrasTours(destino, tour.id, tour.categoria_id);
+  /* Lo que se ofrece abajo. Sale del directorio UNIFICADO, así que mezcla
+     tours y negocios: quien mira una clase de cocina puede querer otro tour,
+     pero también el restaurante de al lado.
+
+     Primero los de la misma categoría —quien mira cuadraciclos quiere ver
+     cuadraciclos— y el resto detrás, para no dejar la sección vacía cuando la
+     categoría tiene una sola cosa. */
+  const relacionadas = (await fichasDelDirectorio(destino, idioma, categorias))
+    .filter((f) => !(f.tipo === 'tour' && f.id === tour.id))
+    .sort((a, b) =>
+      Number(b.categoria_id === tour.categoria_id) - Number(a.categoria_id === tour.categoria_id)
+      || Number(b.es_destacado) - Number(a.es_destacado)
+      || (b.promedio_calificacion ?? 0) - (a.promedio_calificacion ?? 0))
+    .slice(0, 4);
   const incluye = enLineas(tour.incluye);
   const noIncluye = enLineas(tour.no_incluye);
   const cuerpo = textoRicoAHtml(tour.descripcion);
@@ -315,37 +327,30 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                 )}
               </div>
 
-              {/* Otras tours, al lado — igual que la ficha de un negocio, que
-                  lleva contacto y «combinalo con» en su columna. La de una
-                  tour terminaba en un callejón: quien no se decidía, se iba.
-
-                  ⚠️ NO dice de quién es cada una. Mismo motivo que arriba: el
-                  operador no se nombra en la ficha pública. */}
-              {otras.length > 0 && (
-                <div className="bloque tour-otras">
-                  <div className="titulo">{t('tour_otras', idioma)}</div>
-                  <ul className="tour-otras-lista">
-                    {otras.map((o) => (
-                      <li key={o.id}>
-                        <Link href={`/${idioma}/tour/${o.babosa}`}>
-                          {o.imagen_url
-                            ? <img src={o.imagen_url} alt="" loading="lazy" decoding="async" />
-                            : <span className="tour-otras-sin-foto" aria-hidden="true" />}
-                          <span className="tour-otras-texto">
-                            <span className="tour-otras-nombre">{o.nombre}</span>
-                            <span className="tour-otras-dato">
-                              {o.duracion_horas ? `${o.duracion_horas} h · ` : ''}
-                              {t('tour_desde', idioma)} ${Number(o.precio_adulto_usd).toFixed(0)}
-                            </span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </aside>
           </div>
+
+          {/* RECOMENDADAS, abajo y a lo ancho — como el «combinalo con» de la
+              ficha de un negocio. Empezó en la columna de al lado, y Tony
+              pidió abajo: ahí caben las tarjetas de verdad, las mismas del
+              directorio, en vez de filas chicas.
+
+              Mezcla tours Y negocios a propósito. Quien está mirando una
+              clase de cocina puede querer otro tour, pero también el
+              restaurante de al lado: el directorio es uno solo.
+
+              ⚠️ NO dice de quién es cada tour. El operador no se nombra en la
+              ficha pública — ver la nota de la caja de precio. */}
+          {relacionadas.length > 0 && (
+            <section className="combina" style={{ marginTop: 8 }}>
+              <h2>{t('tour_otras', idioma)}</h2>
+              <div className="rejilla" style={{ marginTop: 18 }}>
+                {relacionadas.map((r) => (
+                  <TarjetaNegocio key={`${r.tipo}-${r.id}`} negocio={r} idioma={idioma} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
 
