@@ -132,3 +132,45 @@ export async function fichasDelDirectorio(
 
   return [...negocios.map((n) => ({ ...n, tipo: 'negocio' as const })), ...tours];
 }
+
+/**
+ * Unas pocas fichas AL AZAR, mezclando negocios y tours.
+ *
+ * Tony la pidió así: «debe ser random de negocios y tours». Es para
+ * descubrir, no para recomendar algo parecido — quien ya está mirando un tour
+ * de cuadraciclos no necesita ver cuatro casi iguales.
+ *
+ * ⚠️ POR QUE NO ES UN SHUFFLE A SECAS. Hay 65 negocios y 2 tours: barajar
+ * todo junto y cortar en cuatro casi nunca sacaría un tour, y entonces «random
+ * de negocios y tours» sería random de negocios nomás. Se reserva hasta la
+ * mitad de los lugares para tours cuando los hay, se llena el resto con
+ * negocios, y recién ahí se barajan juntos para que no salgan agrupados por
+ * tipo.
+ *
+ * Barajado de Fisher-Yates, que es el único que reparte parejo. `sort(() =>
+ * Math.random() - 0.5)` parece lo mismo y no lo es: sesga el resultado según
+ * cómo ordene el motor, y el sesgo no se ve mirando.
+ */
+export function alAzarDelDirectorio(fichas: EnElDirectorio[], cuantas: number): EnElDirectorio[] {
+  const barajar = <T,>(lista: T[]): T[] => {
+    const copia = [...lista];
+    for (let i = copia.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+  };
+
+  const tours = barajar(fichas.filter((f) => f.tipo === 'tour'));
+  const negocios = barajar(fichas.filter((f) => f.tipo === 'negocio'));
+
+  const deTours = tours.slice(0, Math.min(tours.length, Math.ceil(cuantas / 2)));
+  const deNegocios = negocios.slice(0, cuantas - deTours.length);
+
+  /* Si faltan negocios se completa con más tours, y al revés: la sección no
+     sale a medias por un reparto que no se pudo cumplir. */
+  const faltan = cuantas - deTours.length - deNegocios.length;
+  const extra = faltan > 0 ? tours.slice(deTours.length, deTours.length + faltan) : [];
+
+  return barajar([...deTours, ...deNegocios, ...extra]);
+}

@@ -98,11 +98,11 @@ export const T: Record<string, Diccionario> = {
      nombre: ahí el negocio ES lo que se busca. */
   tour_quien_opera:  { es: 'Lo opera una empresa local de La Fortuna', en: 'Run by a local La Fortuna company', pt: 'Operado por uma empresa local de La Fortuna', fr: 'Opéré par une entreprise locale de La Fortuna', de: 'Durchgeführt von einem lokalen Anbieter aus La Fortuna' },
   tour_quien_confirma: { es: 'Te decimos cuál al confirmar tu reserva.', en: 'We tell you which one when we confirm your booking.', pt: 'Dizemos qual ao confirmar a sua reserva.', fr: 'Nous vous dirons laquelle à la confirmation.', de: 'Welcher genau, sagen wir dir bei der Bestätigung.' },
-  /* ⚠️ Dice «y lugares» porque la sección mezcla tours Y negocios: el
-     directorio es uno solo. Decía «Otros tours» a secas y abajo salían
-     hoteles y restaurantes — un título que miente sobre lo que hay debajo
-     hace que el siguiente también se lea con desconfianza. */
-  tour_otras:        { es: 'Otros tours y lugares', en: 'Other tours and places', pt: 'Outros tours e lugares', fr: 'Autres excursions et lieux', de: 'Weitere Touren und Orte' },
+  /* La sección de abajo es AL AZAR y mezcla tours con negocios, así que el
+     título tiene que admitir las dos cosas. «Otros tours» a secas con un
+     hotel debajo es un título que miente, y uno que miente hace que el
+     siguiente también se lea con desconfianza. */
+  tour_otras:        { es: 'Más para tu viaje', en: 'More for your trip', pt: 'Mais para a sua viagem', fr: 'Plus pour votre voyage', de: 'Mehr für deine Reise' },
   tour_desde:        { es: 'desde', en: 'from', pt: 'desde', fr: 'à partir de', de: 'ab' },
   tour_cancelacion:  { es: 'Cancelación libre hasta', en: 'Free cancellation up to', pt: 'Cancelamento livre até', fr: 'Annulation gratuite jusqu’à', de: 'Kostenlose Stornierung bis' },
   reserva_lanzamiento:{ es: 'de lanzamiento', en: 'launch discount', pt: 'de lançamento', fr: 'de lancement', de: 'Einführungsrabatt' },

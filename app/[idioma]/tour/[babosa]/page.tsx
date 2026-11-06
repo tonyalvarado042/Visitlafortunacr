@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, tourPorBabosa } from '@/lib/destino';
-import { fichasDelDirectorio } from '@/lib/directorio';
+import { fichasDelDirectorio, alAzarDelDirectorio } from '@/lib/directorio';
 import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { tourReservable } from '@/lib/reservas';
@@ -94,13 +94,16 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
      Primero los de la misma categoría —quien mira cuadraciclos quiere ver
      cuadraciclos— y el resto detrás, para no dejar la sección vacía cuando la
      categoría tiene una sola cosa. */
-  const relacionadas = (await fichasDelDirectorio(destino, idioma, categorias))
-    .filter((f) => !(f.tipo === 'tour' && f.id === tour.id))
-    .sort((a, b) =>
-      Number(b.categoria_id === tour.categoria_id) - Number(a.categoria_id === tour.categoria_id)
-      || Number(b.es_destacado) - Number(a.es_destacado)
-      || (b.promedio_calificacion ?? 0) - (a.promedio_calificacion ?? 0))
-    .slice(0, 4);
+  /* AL AZAR, y mezclando negocios con tours — lo pidió Tony así: «debe ser
+     random de negocios y tours». Es para descubrir, no para recomendar algo
+     parecido: quien ya está mirando este tour no necesita ver cuatro casi
+     iguales.
+     La página es `force-dynamic`, así que cambia en cada visita. */
+  const relacionadas = alAzarDelDirectorio(
+    (await fichasDelDirectorio(destino, idioma, categorias))
+      .filter((f) => !(f.tipo === 'tour' && f.id === tour.id)),
+    4,
+  );
   const incluye = enLineas(tour.incluye);
   const noIncluye = enLineas(tour.no_incluye);
   const cuerpo = textoRicoAHtml(tour.descripcion);
