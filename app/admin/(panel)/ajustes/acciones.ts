@@ -112,6 +112,11 @@ export async function editarDestino(datos: FormData) {
       email_noreply: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(texto(datos, 'email_noreply').toLowerCase())
         ? texto(datos, 'email_noreply').toLowerCase()
         : null,
+      /* El buzon interno. Mismo trato: lo que no parezca correo se guarda
+         vacio y los avisos vuelven a caer en `email_contacto`. */
+      email_avisos: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(texto(datos, 'email_avisos').toLowerCase())
+        ? texto(datos, 'email_avisos').toLowerCase()
+        : null,
       comision_por_defecto: numero(datos, 'comision_por_defecto'),
       color_tinta: color(datos, 'color_tinta'),
       color_acento: color(datos, 'color_acento'),

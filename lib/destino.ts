@@ -39,6 +39,11 @@ export type Destino = {
      Ojo: esto NO es adonde se responde — ver `remitenteDe` en
      lib/correo/enviar.ts, que las mantiene separadas a proposito. */
   email_noreply: string | null;
+  /* INTERNO: adonde le caen los avisos al equipo. Vacio = `email_contacto`.
+     ⚠️ Son DOS cosas distintas y no se pueden juntar: `email_contacto` es
+     PUBLICO —el concierge se lo dice a los viajeros— y este no se le muestra a
+     nadie de afuera. */
+  email_avisos: string | null;
   /* El crédito de quien hizo el sitio, en el pie. Por destino y no fijo en el
      código: este lo hizo LIDERAX10, el próximo lo puede hacer otro. */
   pie_credito_texto: string | null;

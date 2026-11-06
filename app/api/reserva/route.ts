@@ -151,9 +151,12 @@ export async function POST(peticion: NextRequest) {
           queLlevar: contrato?.que_llevar ?? null,
         });
 
-        /* Al equipo solo si hay a quien escribirle. Sin correo de contacto
-           no se inventa un destinatario. */
-        const equipo = destino.email_contacto?.trim();
+        /* Al equipo solo si hay a quien escribirle. Sin correo no se inventa
+           un destinatario.
+           Va al buzon INTERNO (`email_avisos`), y si no hay, al de contacto,
+           que es como funcionaba antes. No son lo mismo: `email_contacto` es
+           el que el concierge le DICE a los viajeros. */
+        const equipo = destino.email_avisos?.trim() || destino.email_contacto?.trim();
         if (equipo) {
           await correoReservaAlEquipo({
             destino, para: equipo,

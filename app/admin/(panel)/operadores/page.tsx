@@ -79,7 +79,7 @@ export default async function PaginaOperadores() {
   const esAdmin = usuario.rol === 'admin';
 
   const [{ data: d }, { data: neg }, { data: tur }, { data: con }, { data: comp }] = await Promise.all([
-    db.from('dst_destino').select('reservas_activas, pasarela_lista, email_contacto').eq('id', destino.id).single(),
+    db.from('dst_destino').select('reservas_activas, pasarela_lista, email_contacto, email_avisos').eq('id', destino.id).single(),
     db.from('dst_negocio')
       .select('id, nombre, babosa, vende_por_aqui, estado_publicacion, es_operador, categoria:dst_categoria(babosa)')
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
@@ -113,9 +113,13 @@ export default async function PaginaOperadores() {
     return { total: suyas.length, publicadas: suyas.filter((t) => t.estado === 'publicado').length };
   };
   const porNegocio = new Map(negocios.map((n) => [n.id, n]));
-  const ajustes = d as { reservas_activas: boolean; email_contacto: string | null } | null;
+  const ajustes = d as { reservas_activas: boolean; email_contacto: string | null; email_avisos: string | null } | null;
   const modulo = ajustes?.reservas_activas ?? false;
-  const buzon = ajustes?.email_contacto?.trim();
+  /* El mismo orden que usa el envio de verdad: primero el buzon interno, y si
+     no hay, el de contacto. Si este aviso mirara otra columna que la que de
+     verdad recibe, diria «falta el correo» con el correo puesto, o peor,
+     callaria estando roto. */
+  const buzon = ajustes?.email_avisos?.trim() || ajustes?.email_contacto?.trim();
 
   return (
     <>
@@ -136,10 +140,10 @@ export default async function PaginaOperadores() {
 
       {!buzon && (
         <Aviso tipo="mal">
-          <strong>Falta el correo de contacto del destino.</strong> Cuando alguien
+          <strong>Falta el buzón de avisos del destino.</strong> Cuando alguien
           pide una reserva se le avisa al equipo por correo — y sin ese buzón{' '}
           <strong>ese aviso no llega a ninguna parte</strong>. Ponelo en{' '}
-          <Link href="/admin/ajustes">Ajustes → Destino → Correo de contacto</Link>.
+          <Link href="/admin/ajustes">Ajustes → Destino → Correo de avisos</Link>.
         </Aviso>
       )}
 

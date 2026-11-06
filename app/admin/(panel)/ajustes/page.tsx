@@ -76,7 +76,23 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label>Sigla</label><input name="marca_sigla" defaultValue={d.marca_sigla ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo ancho"><label>Lema ({d.idioma_principal})</label><input name="lema" defaultValue={d.lema ?? ''} disabled={!esAdmin} /></div>
                 <div className="campo"><label>WhatsApp del destino</label><input name="whatsapp" defaultValue={d.whatsapp ?? ''} placeholder="+506…" disabled={!esAdmin} /></div>
-                <div className="campo"><label>Correo de contacto</label><input type="email" name="email_contacto" defaultValue={d.email_contacto ?? ''} disabled={!esAdmin} /></div>
+                <div className="campo ancho"><label>Correo de contacto <strong>(público)</strong></label>
+                  <input type="email" name="email_contacto" defaultValue={d.email_contacto ?? ''} disabled={!esAdmin} />
+                  <small>
+                    ⚠️ <strong>Este se lo da el chat del sitio a los viajeros</strong> cuando preguntan cómo
+                    contactarlos. O sea es público: no pongás acá un correo personal. Para los avisos
+                    internos está el campo de abajo.
+                  </small>
+                </div>
+                <div className="campo ancho"><label>Correo de avisos <strong>(interno)</strong></label>
+                  <input type="email" name="email_avisos" defaultValue={d.email_avisos ?? ''} placeholder="a dónde te llegan los avisos" disabled={!esAdmin} />
+                  <small>
+                    Adónde te caen los avisos del sitio. <strong>No se le muestra a nadie de afuera.</strong>
+                    {' '}Vacío = caen en el de contacto, que es como funcionaba antes.
+                    {' '}Hoy el único aviso que sale es el de <strong>solicitud de reserva</strong>; los leads y los
+                    negocios nuevos todavía no le avisan a nadie.
+                  </small>
+                </div>
                 <div className="campo ancho"><label>Correo desde el que se envía (remitente)</label>
                   <input type="email" name="email_noreply" defaultValue={d.email_noreply ?? ''} placeholder="noreply@visitlafortunacr.com" disabled={!esAdmin} />
                   <small>

@@ -114,11 +114,18 @@ export async function mandarCorreoDePrueba(_previo: EstadoLlave, _datos: FormDat
     motivo: 'prueba',
     titulo: 'Si estás leyendo esto, el correo funciona',
     parrafos: [
-      `Esta prueba salió del panel de ${destino.marca_nombre} y pasó por todo el camino de verdad: la llave de Resend guardada en la bóveda, el remitente del canal de correo y la plantilla con la marca.`,
+      `Esta prueba salió del panel de ${destino.marca_nombre} y pasó por todo el camino de verdad: la llave de Resend guardada en la bóveda, el remitente configurado en Ajustes y la plantilla con la marca.`,
       'O sea que las confirmaciones de negocio y las respuestas a consultas también van a llegar.',
+      /* El remitente se dice EN el correo. Es el unico dato que esta prueba
+         puede dar y la bandeja no: si el From no fuera el que uno cree,
+         llegaria igual y nadie se enteraria hasta que alguien responda y la
+         respuesta caiga en un buzon muerto. */
+      `Mirá el remitente de arriba: tiene que decir ${destino.email_noreply?.trim() || '(el del canal de correo)'}.`,
     ],
     datos: [
       { rotulo: 'Para', valor: usuario.email },
+      { rotulo: 'Sale de', valor: destino.email_noreply?.trim() || '(el del canal de correo)' },
+      { rotulo: 'Avisos del equipo van a', valor: destino.email_avisos?.trim() || destino.email_contacto?.trim() || '(sin configurar)' },
       { rotulo: 'Mandada', valor: new Date().toLocaleString('es-CR', { timeZone: 'America/Costa_Rica' }) },
     ],
     boton: { texto: 'Ver el sitio', url: `https://${destino.dominio}` },
