@@ -690,8 +690,21 @@ export function ReservarProducto({
         )}
 
         <small className="reservar-letra">{t('reserva_sin_cobro', idioma)}</small>
+        {/* ⚠️ EN UN TOUR NO VA EL NOMBRE DEL OPERADOR.
+            En la ficha de un NEGOCIO sí: ahí el negocio es lo que la persona
+            está buscando y ya está listado entero, con su teléfono. En la de
+            un tour es regalarle el cliente — quien lee el nombre lo busca en
+            Google y reserva directo.
+
+            Esto se escapó una vez y conviene saber por qué: la ficha de un
+            tour tiene DOS cajas. Mientras el tour no era reservable se pintaba
+            la estática, se le quitó el nombre ahí, y al activar el convenio la
+            página pasó a esta otra — con el nombre de vuelta. Si se toca una,
+            se mira la otra. */}
         <small className="reservar-presta">
-          {t('reserva_quien_presta', idioma)}: <strong>{producto.negocio_nombre}</strong>
+          {esTour
+            ? t('tour_quien_confirma', idioma)
+            : <>{t('reserva_quien_presta', idioma)}: <strong>{producto.negocio_nombre}</strong></>}
         </small>
       </form>
     </div>
