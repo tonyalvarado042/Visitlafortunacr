@@ -38,10 +38,14 @@ export const dynamic = 'force-dynamic';
 type Parametros = Promise<{ idioma: Idioma; babosa: string }>;
 
 export async function generateMetadata({ params }: { params: Parametros }): Promise<Metadata> {
-  const { babosa } = await params;
+  const { idioma, babosa } = await params;
   try {
     const destino = await destinoActual();
-    const tour = await tourPorBabosa(destino, babosa);
+    /* El idioma también acá, y no solo en la página: el título y la
+       descripción de esta función son lo que se lee en Google y lo que sale
+       al compartir el enlace. Una ficha traducida con el título en español en
+       el buscador se pierde justo donde se decide el clic. */
+    const tour = await tourPorBabosa(destino, babosa, idioma);
     if (!tour) return {};
     return { title: tour.nombre, description: tour.resumen ?? undefined };
   } catch {
@@ -56,7 +60,7 @@ const enLineas = (texto: string | null) =>
 export default async function PaginaTour({ params }: { params: Parametros }) {
   const { idioma, babosa } = await params;
   const destino = await destinoActual();
-  const tour = await tourPorBabosa(destino, babosa);
+  const tour = await tourPorBabosa(destino, babosa, idioma);
   /* Las fotos del tour se mapean al tipo de las fichas para poder reusar la
      MISMA galería: tres grandes arriba, la tira con el «+N» más abajo y el
      visor a pantalla completa, todo sin una línea de JavaScript en el cliente.

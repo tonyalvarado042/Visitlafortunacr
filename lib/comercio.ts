@@ -1,6 +1,7 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { sesion } from './supabase-sesion';
+import { NOMBRES_DE_CAMPOS_TRADUCIBLES } from '@/lib/traducciones-de-tour';
 
 /*
  * El lado del COMERCIANTE: el dueño de un negocio que administra su propia
@@ -284,3 +285,38 @@ export async function fotosDeMiTour(tourId: string): Promise<MiFotoDeTour[]> {
  * número sagrado; es el mínimo para que la galería no se vea pobre.
  */
 export const MINIMO_FOTOS_TOUR = 3;
+
+/* ---- Traducciones de una tour ---- */
+
+/**
+ * Lo que el operador ya tradujo de SU tour, para rellenar el formulario.
+ *
+ * Lee `dst_traduccion` directo y no por una función de la base: esa tabla ya
+ * se lee en público —así salen traducidas las etiquetas y el lema del
+ * destino— así que una función nueva solo agregaría una pieza que mantener.
+ *
+ * Si falla, devuelve vacío: el formulario sale sin rellenar y el operador
+ * puede escribir. Lo que NO puede pasar es que la pantalla no cargue por esto.
+ */
+export async function traduccionesDeMiTour(
+  tourId: string,
+): Promise<Record<string, Record<string, string>>> {
+  const db = await sesion();
+  const { data, error } = await db
+    .from('dst_traduccion')
+    .select('campo, idioma, texto')
+    .eq('entidad', 'tour')
+    .eq('entidad_id', tourId)
+    .in('campo', NOMBRES_DE_CAMPOS_TRADUCIBLES as string[]);
+
+  if (error) {
+    console.error('traduccionesDeMiTour:', error.message);
+    return {};
+  }
+
+  const porIdioma: Record<string, Record<string, string>> = {};
+  for (const fila of (data ?? []) as { campo: string; idioma: string; texto: string }[]) {
+    (porIdioma[fila.idioma] ??= {})[fila.campo] = fila.texto;
+  }
+  return porIdioma;
+}

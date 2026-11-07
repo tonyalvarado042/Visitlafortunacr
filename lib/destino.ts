@@ -577,7 +577,25 @@ export type FotoDeTour = {
   orden: number;
 };
 
-export async function tourPorBabosa(destino: Destino, babosa: string): Promise<TourPublico | null> {
+/*
+ * Los campos de una tour que se traducen.
+ *
+ * ⚠️ Tiene que coincidir con la lista blanca de
+ * `destinos.guardar_traducciones_de_mi_tour`, que es la que decide qué puede
+ * escribir el operador. Si acá sobrara uno, se leería una traducción que
+ * nadie puede escribir; si allá sobrara, el operador escribiría algo que la
+ * ficha nunca muestra — trabajo suyo tirado a la basura, y en silencio.
+ *
+ * `precio_nota` NO está, y es a propósito: ese campo lo pone el equipo desde
+ * el panel, no el operador. Se traduce desde `/admin`, como el de un negocio.
+ */
+const CAMPOS_TRADUCIBLES_DE_TOUR = [
+  'nombre', 'resumen', 'descripcion', 'incluye', 'no_incluye', 'que_llevar',
+] as const;
+
+export async function tourPorBabosa(
+  destino: Destino, babosa: string, idioma?: Idioma,
+): Promise<TourPublico | null> {
   const { data, error } = await supabase
     .from('dst_tour')
     .select(`id, categoria_id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
@@ -611,13 +629,42 @@ export async function tourPorBabosa(destino: Destino, babosa: string): Promise<T
     .slice()
     .sort((a, b) => (Number(b.es_portada) - Number(a.es_portada)) || (a.orden - b.orden));
 
-  return {
+  const tour: TourPublico = {
     ...(data as unknown as TourPublico),
     fotos,
     negocio: n
       ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null, es_operador: Boolean(n.es_operador) }
       : null,
   };
+
+  /* En el idioma principal no se consulta nada: es el texto de la fila, y la
+     mayoría del tráfico pasa por acá. Una consulta de más en cada visita para
+     no encontrar nunca nada sería pagar el caso raro en el caso común. */
+  if (!idioma || idioma === destino.idioma_principal) return tour;
+
+  const { data: traducciones, error: falloLaTraduccion } = await supabase
+    .from('dst_traduccion')
+    .select('campo, texto')
+    .eq('entidad', 'tour')
+    .eq('entidad_id', tour.id)
+    .eq('idioma', idioma)
+    .in('campo', CAMPOS_TRADUCIBLES_DE_TOUR as unknown as string[]);
+
+  /* Si la consulta falla, la ficha sale en español y NO se cae. Media ficha
+     traducida es mejor que media ficha vacía — la misma regla que `lemaDe`.
+     Pero se grita al registro: una tour que de pronto deja de verse traducida
+     no se nota mirándola, porque el español se lee igual de bien. */
+  if (falloLaTraduccion) {
+    console.error('tourPorBabosa: no se pudieron leer las traducciones de', babosa,
+      falloLaTraduccion.message);
+    return tour;
+  }
+
+  for (const { campo, texto } of (traducciones ?? []) as { campo: string; texto: string }[]) {
+    const limpio = (texto ?? '').trim();
+    if (limpio) (tour as unknown as Record<string, unknown>)[campo] = limpio;
+  }
+  return tour;
 }
 
 export type RazonDeNegocio = {

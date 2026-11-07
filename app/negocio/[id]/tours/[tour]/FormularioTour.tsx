@@ -5,6 +5,7 @@ import type { MiTourDetalle } from '@/lib/comercio';
 import { EditorRico } from '@/componentes/EditorRico';
 import { guardarMiTour, type EstadoComercio } from '../../../acciones';
 import { FotoTour } from '../FotoTour';
+import { CAMPOS_TRADUCIBLES_DE_TOUR, campoDeTraduccion } from '@/lib/traducciones-de-tour';
 
 const NADA: EstadoComercio = {};
 
@@ -28,12 +29,16 @@ const DIFICULTADES = [
  * alguien pegue un `<script>` sale escrito en pantalla. Ver lib/texto-rico.ts.
  */
 export function FormularioTour({
-  tour, negocioId, destinoBabosa, negocioBabosa,
+  tour, negocioId, destinoBabosa, negocioBabosa, otrosIdiomas, traducciones,
 }: {
   tour: MiTourDetalle;
   negocioId: string;
   destinoBabosa: string;
   negocioBabosa: string;
+  /** Los idiomas que el sitio sirve, menos el principal. */
+  otrosIdiomas: { codigo: string; nombre: string }[];
+  /** Lo ya traducido: { en: { nombre: '...' }, pt: { ... } }. */
+  traducciones: Record<string, Record<string, string>>;
 }) {
   const [estado, accion, pendiente] = useActionState(guardarMiTour, NADA);
 
@@ -169,6 +174,58 @@ export function FormularioTour({
       <label htmlFor="t-can">Hasta cuántas horas antes se puede cancelar sin costo</label>
       <input id="t-can" name="cancelacion_libre_horas" type="number" min={0} max={720}
              defaultValue={tour.cancelacion_libre_horas} />
+
+      {/* ───────────────── Los otros idiomas ─────────────────
+          Va al final y plegado, no mezclado con los campos de arriba. Un
+          operador que abre esta pantalla para cambiar un precio no tiene por
+          qué pasar por doce campos en inglés para llegar al botón.
+
+          Y el aviso dice la verdad de lo que pasa si lo deja vacío —la ficha
+          sale en español— porque esa es justamente la parte que no se nota:
+          el sitio NO se rompe sin traducción, se ve perfecto, en español, a
+          alguien que no lo lee. */}
+      {otrosIdiomas.length > 0 && (
+        <>
+          <h2>Otros idiomas</h2>
+          <p className="tour-trad-aviso">
+            El sitio se lee en {otrosIdiomas.map((i) => i.nombre).join(' y ')}, y
+            la mayoría de quien busca esta tour no lee español. Lo que dejés vacío
+            acá <strong>sale en español</strong> en esas páginas: no da error, no
+            se ve roto, simplemente lo lee alguien que no lo entiende.
+          </p>
+
+          {otrosIdiomas.map((idi) => {
+            const puestos = CAMPOS_TRADUCIBLES_DE_TOUR
+              .filter((c) => (traducciones[idi.codigo]?.[c.campo] ?? '').trim()).length;
+            return (
+              <details key={idi.codigo} className="tour-trad" open={puestos === 0}>
+                <summary>
+                  <strong>{idi.nombre}</strong>
+                  <span className={puestos === CAMPOS_TRADUCIBLES_DE_TOUR.length
+                    ? 'tour-trad-completo' : 'tour-trad-falta'}>
+                    {puestos} de {CAMPOS_TRADUCIBLES_DE_TOUR.length}
+                  </span>
+                </summary>
+                {CAMPOS_TRADUCIBLES_DE_TOUR.map((c) => {
+                  const nombreCampo = campoDeTraduccion(idi.codigo, c.campo);
+                  /* El texto en español al lado, como referencia. Sin esto hay
+                     que traducir de memoria o abrir la pantalla dos veces. */
+                  const original = (tour[c.campo as keyof MiTourDetalle] as string | null) ?? '';
+                  return (
+                    <div key={c.campo} className="tour-trad-campo">
+                      <label htmlFor={nombreCampo}>{c.etiqueta}</label>
+                      {original ? <p className="tour-trad-original">{original}</p> : null}
+                      <textarea id={nombreCampo} name={nombreCampo} rows={c.filas}
+                                defaultValue={traducciones[idi.codigo]?.[c.campo] ?? ''}
+                                placeholder={original ? '' : 'Primero escribilo en español arriba'} />
+                    </div>
+                  );
+                })}
+              </details>
+            );
+          })}
+        </>
+      )}
 
       {estado.error && <p className="forma-error" role="alert">{estado.error}</p>}
       {estado.ok && <p className="forma-ok" role="status">{estado.ok}</p>}

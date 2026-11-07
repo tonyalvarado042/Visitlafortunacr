@@ -2071,6 +2071,48 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 
 .tour-nueva { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--borde); }
 
+/* Los otros idiomas, en el formulario del tour del operador.
+
+   Plegado por idioma y con un contador «2 de 6» en el resumen: el operador
+   tiene que poder ver de un vistazo QUE LE FALTA sin abrir nada. Sin ese
+   numero, media traduccion y ninguna se ven igual desde afuera.
+
+   Se abre solo cuando esta en cero —ahi hay trabajo que hacer y conviene que
+   lo vea— y queda cerrado cuando ya hay algo, para no empujar el boton de
+   guardar fuera de la pantalla. */
+.tour-trad-aviso {
+  font-size: 13px; line-height: 1.55; color: var(--txt-3);
+  max-width: 62ch; margin: 2px 0 12px;
+}
+.tour-trad-aviso strong { color: var(--txt-1); }
+.tour-trad {
+  border: 1px solid var(--borde-2); border-radius: 10px;
+  padding: 0 14px; margin-bottom: 10px; background: var(--sup-1);
+}
+.tour-trad > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 12px 0; cursor: pointer; list-style: none; font-size: 14px;
+}
+.tour-trad > summary::-webkit-details-marker { display: none; }
+.tour-trad > summary::after {
+  content: '▸'; margin-left: auto; color: var(--txt-4); transition: transform .15s;
+}
+.tour-trad[open] > summary::after { transform: rotate(90deg); }
+.tour-trad > summary strong { color: var(--txt-0); }
+.tour-trad-completo { font-size: 12px; font-weight: 600; color: var(--verde); }
+.tour-trad-falta    { font-size: 12px; font-weight: 600; color: var(--aviso); }
+.tour-trad-campo { padding-bottom: 12px; }
+.tour-trad-campo label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 5px; }
+/* El original en espanol: se lee, no se edita. Borde a la izquierda para que
+   se distinga de un campo a simple vista. */
+.tour-trad-original {
+  margin: 0 0 6px; padding: 6px 0 6px 10px;
+  border-left: 2px solid var(--borde-3);
+  font-size: 12.5px; line-height: 1.5; color: var(--txt-4);
+  white-space: pre-wrap; max-height: 7.5em; overflow: auto;
+}
+.tour-trad-campo textarea { width: 100%; }
+
 .tour-enviar, .tour-borrar { margin-top: 30px; }
 .tour-enviar {
   display: flex; align-items: center; justify-content: space-between; gap: 20px;

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { miNegocio, miTour, fotosDeMiTour, ESTADO_TOUR, MINIMO_FOTOS_TOUR } from '@/lib/comercio';
+import { miNegocio, miTour, fotosDeMiTour, traduccionesDeMiTour, ESTADO_TOUR, MINIMO_FOTOS_TOUR } from '@/lib/comercio';
+import { destinoActual } from '@/lib/destino';
+import { NOMBRE_PROPIO } from '@/lib/idiomas';
 import { FormularioTour } from './FormularioTour';
 import { FotosTour } from '../FotosTour';
 import { mandarMiTourARevision, borrarMiTour } from '../../../acciones';
@@ -22,7 +24,17 @@ export default async function EditarMiTour({
   const tour = await miTour(tourId);
   if (!tour) notFound();
 
-  const fotos = await fotosDeMiTour(tourId);
+  const [fotos, traducciones, destino] = await Promise.all([
+    fotosDeMiTour(tourId), traduccionesDeMiTour(tourId), destinoActual(),
+  ]);
+
+  /* Los idiomas que el operador tiene que llenar: los que el sitio SIRVE,
+     menos el principal, que es el que ya escribió arriba. Sale de la base y
+     no de una lista acá: el día que el destino active un idioma más, este
+     formulario lo pide solo. */
+  const otrosIdiomas = destino.idiomas
+    .filter((i) => i !== destino.idioma_principal)
+    .map((codigo) => ({ codigo, nombre: NOMBRE_PROPIO[codigo] ?? codigo }));
 
   const estado = ESTADO_TOUR[tour.estado] ?? ESTADO_TOUR.borrador;
   const sinPrecio = !(tour.precio_adulto_usd > 0);
@@ -60,6 +72,8 @@ export default async function EditarMiTour({
         negocioId={id}
         destinoBabosa={negocio.destino_babosa}
         negocioBabosa={negocio.babosa}
+        otrosIdiomas={otrosIdiomas}
+        traducciones={traducciones}
       />
 
       {/* La GALERÍA, fuera del formulario del tour.

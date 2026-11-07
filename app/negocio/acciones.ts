@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { sesion } from '@/lib/supabase-sesion';
 import { escribirClaveNueva, pedirEnlaceDeClave } from '@/lib/recuperacion';
+import { CAMPOS_TRADUCIBLES_DE_TOUR, campoDeTraduccion } from '@/lib/traducciones-de-tour';
 
 export type EstadoComercio = {
   ok?: string | null;
@@ -311,9 +312,62 @@ export async function guardarMiTour(_previo: EstadoComercio, datos: FormData): P
   });
   if (error) return { error: error.message };
 
+  const avisoDeTraduccion = await guardarTraduccionesDelTour(db, tourId, datos);
+
   revalidatePath(`/negocio/${negocioId}/tours`);
   revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
-  return { ok: 'Guardado.' };
+  return { ok: avisoDeTraduccion ? `Guardado, pero ${avisoDeTraduccion}` : 'Guardado.' };
+}
+
+/**
+ * Las traducciones del tour, idioma por idioma.
+ *
+ * ⚠️ VA DESPUÉS DE GUARDAR EL TOUR, Y SI FALLA NO TUMBA EL GUARDADO.
+ *
+ * Lo de arriba es el trabajo del operador en español, que es lo que de verdad
+ * vino a hacer. Si una traducción rebota —un idioma que el destino apagó, la
+ * sesión vencida— perder el texto en español con él sería cobrarle su trabajo
+ * por un extra.
+ *
+ * Pero **no se calla**: lo que no entró se dice en el mismo mensaje de
+ * «Guardado». Un fallo silencioso acá se vería exactamente igual que haberlo
+ * dejado vacío, y el operador juraría que lo escribió.
+ */
+async function guardarTraduccionesDelTour(
+  db: Awaited<ReturnType<typeof sesion>>, tourId: string, datos: FormData,
+): Promise<string | null> {
+  const fallaron: string[] = [];
+
+  /* Los idiomas salen de los nombres que vinieron en el formulario, no de una
+     lista acá: así el día que el destino active otro, esto lo guarda sin que
+     nadie toque este archivo. La base vuelve a comprobar que el idioma sea
+     uno de los que el sitio sirve — esto es comodidad, no validación. */
+  const idiomas = new Set<string>();
+  for (const clave of datos.keys()) {
+    const m = /^trad_([a-z]{2})_/.exec(clave);
+    if (m) idiomas.add(m[1]);
+  }
+
+  for (const idioma of idiomas) {
+    const textos: Record<string, string> = {};
+    for (const { campo } of CAMPOS_TRADUCIBLES_DE_TOUR) {
+      /* Se mandan TODOS los campos, también los vacíos: un campo que el
+         operador borró tiene que borrarse en la base, y si no se manda, la
+         traducción vieja se quedaría puesta para siempre. */
+      textos[campo] = texto(datos, campoDeTraduccion(idioma, campo));
+    }
+    const { error: fallo } = await db.rpc('guardar_traducciones_de_mi_tour', {
+      p_tour_id: tourId, p_idioma: idioma, p_textos: textos,
+    });
+    if (fallo) {
+      console.error('guardar_traducciones_de_mi_tour', idioma, fallo.message);
+      fallaron.push(idioma);
+    }
+  }
+
+  return fallaron.length
+    ? `no se pudo guardar lo de ${fallaron.join(' ni ')}. Volvé a intentarlo.`
+    : null;
 }
 
 export async function mandarMiTourARevision(datos: FormData): Promise<void> {
