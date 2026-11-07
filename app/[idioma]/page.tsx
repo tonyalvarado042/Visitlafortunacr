@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { esManual } from '@/lib/itinerario-modo';
 import { notFound } from 'next/navigation';
 import { destinoActual, categoriasDe, negociosDe, destacadosDe, lemaDe, type Negocio, type Categoria } from '@/lib/destino';
 import { fichasDelDirectorio } from '@/lib/directorio';
@@ -203,7 +204,7 @@ export default async function Portada({ params, searchParams }: {
                 <h2>
                   {t('tu_viaje_a', idioma)}<br />
                   {destino.nombre},<br />
-                  {t('en_60', idioma)}
+                  {t(esManual(destino.itinerario_modo) ? 'armado_a_mano' : 'en_60', idioma)}
                 </h2>
                 <p style={{ fontSize: 16.5, color: 'var(--txt-1)', maxWidth: '44ch', marginTop: 18 }}>
                   {t('plan_explica', idioma)}

@@ -2,6 +2,7 @@ import 'server-only';
 import { z } from 'zod';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { servicio } from '@/lib/supabase-servidor';
+import { esManual, esDisparoAutomatico } from '@/lib/itinerario-modo';
 import { agenteDe, ahoraEn, ejecutar, parametrosBase, sistemaCacheado, type Origen } from './cliente';
 import { bloqueCatalogo, bloqueConocimiento, contextoDestino, type ContextoDestino } from './conocimiento';
 import { NOMBRE_IDIOMA } from './modelos';
@@ -296,6 +297,51 @@ function diasEntre(llega: string | null, sale: string | null): number {
  * El camino normal: llega una solicitud de itinerario desde el planificador
  * del sitio, se genera el plan y se le avisa al viajero por su canal.
  */
+/*
+ * La tarea que se le deja al equipo cuando el destino arma los itinerarios a
+ * mano. Lleva en el detalle lo que hace falta para contestar sin ir a buscar
+ * nada: fechas, cuántos son y qué les gusta.
+ *
+ * No revienta si falla. Si la tarea no se pudo crear, el lead igual está
+ * guardado y aparece en el panel; tirar el error acá no lo arreglaría y sí
+ * taparía el motivo verdadero. Pero se grita en los registros.
+ */
+async function avisarQueHayQueArmarloAMano(
+  db: ReturnType<typeof servicio>,
+  solicitudId: string,
+  destinoId: string,
+  viajero: unknown,
+): Promise<void> {
+  const v = (Array.isArray(viajero) ? viajero[0] : viajero) as {
+    id?: string; nombre?: string | null; llega_el?: string | null; sale_el?: string | null;
+    personas?: number | null; ninos?: number | null; intereses?: string[] | null;
+  } | null;
+
+  const quien = v?.nombre?.trim() || 'Un viajero';
+  const detalle = [
+    v?.llega_el || v?.sale_el ? `Fechas: ${v?.llega_el ?? '?'} → ${v?.sale_el ?? '?'}` : null,
+    v?.personas ? `Personas: ${v.personas}${v?.ninos ? ` (${v.ninos} niños)` : ''}` : null,
+    v?.intereses?.length ? `Le interesa: ${v.intereses.join(', ')}` : null,
+    'Mandale uno pre-armado desde /admin/experiencias, o escribile a mano desde el lead.',
+  ].filter(Boolean).join('\n');
+
+  const { error } = await db.from('dst_tarea').insert({
+    destino_id: destinoId,
+    titulo: `Armarle el itinerario a ${quien}`.slice(0, 160),
+    detalle,
+    solicitud_id: solicitudId,
+    viajero_id: v?.id ?? null,
+    prioridad: 'alta',
+    vence_el: new Date().toISOString().slice(0, 10),
+  });
+  if (error) {
+    console.error(
+      `itinerario manual: la solicitud ${solicitudId} no generó plan (correcto) pero ` +
+      `TAMPOCO se le pudo crear la tarea al equipo (${error.message}). Ese lead no le avisa a nadie.`,
+    );
+  }
+}
+
 export async function generarItinerarioParaSolicitud(solicitudId: string, origen: Origen = 'web'): Promise<PlanGuardado> {
   const db = servicio();
   const { data: s, error } = await db
@@ -304,6 +350,40 @@ export async function generarItinerarioParaSolicitud(solicitudId: string, origen
     .eq('id', solicitudId)
     .single();
   if (error || !s) throw new Error(`No existe la solicitud ${solicitudId}.`);
+
+  /*
+   * ¿ESTE DESTINO ARMA LOS ITINERARIOS SOLO, O LOS ARMA EL EQUIPO?
+   *
+   * Pedido por Tony: «el itinerario quiero que tenga función manual y
+   * automático. En manual el lead cae y el personal debe enviar algo pre
+   * armado o algo 100% personalizado.»
+   *
+   * El guardia va ACÁ y no en los tres puntos de entrada —el formulario web,
+   * la cola de trabajos y /api/ia/planificar— porque este es el único cuello
+   * de botella por el que pasan los tres. Es la misma lección que la baja:
+   * parchar cada llamador deja al cuarto, el que se escriba el mes que viene,
+   * sin guardia.
+   *
+   * ⚠️ Y mira el ORIGEN, no solo el modo. `panel` no se frena nunca: modo
+   * manual significa «no se dispara solo», NO «el equipo no puede usar la
+   * IA». Si alguien aprieta «generar plan» en la pantalla del lead, eso lo
+   * pidió una persona — que es justo lo que el modo manual quiere.
+   *
+   * Y antes de rebotar deja una TAREA. Un lead que cae en modo manual y no le
+   * avisa a nadie es un lead perdido en silencio, que cuesta más que uno que
+   * falla ruidoso.
+   */
+  if (esDisparoAutomatico(origen)) {
+    const { data: d } = await db
+      .from('dst_destino').select('itinerario_modo').eq('id', s.destino_id).maybeSingle();
+    if (esManual((d as { itinerario_modo?: string } | null)?.itinerario_modo)) {
+      await avisarQueHayQueArmarloAMano(db, s.id, s.destino_id, s.viajero);
+      throw new Error(
+        `MODO_MANUAL: el destino arma los itinerarios a mano, así que no se genera uno ` +
+        `automático para la solicitud ${solicitudId}. Quedó una tarea para el equipo.`,
+      );
+    }
+  }
 
   const v = (Array.isArray(s.viajero) ? s.viajero[0] : s.viajero) as {
     id: string; nombre: string | null; email: string | null; whatsapp: string | null; idioma: string | null;

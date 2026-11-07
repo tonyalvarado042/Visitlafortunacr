@@ -51,6 +51,10 @@ export type Destino = {
   /* Si la burbuja del concierge sale en el sitio. Por destino: uno puede
      querer chat y el de al lado no. */
   chat_activo: boolean;
+  /** 'automatico' | 'manual'. Decide si la IA arma el itinerario sola cuando
+   *  cae el lead, y de paso qué promete el titular de la portada.
+   *  Ver lib/itinerario-modo.ts, que tiene los dos valores. */
+  itinerario_modo: string;
   /* El ID del pixel de Meta. En la fila y no en el codigo: se cambia desde
      Ajustes sin desplegar, y cada destino lleva el suyo. Vacio = no se carga
      nada. */

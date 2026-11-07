@@ -228,6 +228,13 @@ export const T: Record<string, Diccionario> = {
   armar_itinerario:  { es: 'Armar mi itinerario', en: 'Build my itinerary', pt: 'Montar meu roteiro', fr: 'Créer mon itinéraire', de: 'Route erstellen' },
   tu_viaje_a:        { es: 'Tu viaje a', en: 'Your trip to', pt: 'Sua viagem a', fr: 'Votre voyage à', de: 'Ihre Reise nach' },
   en_60:             { es: 'en 60 segundos', en: 'in 60 seconds', pt: 'em 60 segundos', fr: 'en 60 secondes', de: 'in 60 Sekunden' },
+  /* El mismo titular cuando el destino arma los itinerarios A MANO. Pedido por
+     Tony: «si se escoge manual debes cambiar el texto que sale en home que se
+     envía automático». Prometer 60 segundos cuando lo escribe una persona es
+     mentir en lo primero que se lee — y además «a mano» vende mejor que
+     «automático» para un destino chico: no es un robot, es alguien que vive
+     ahí. Ver lib/itinerario-modo.ts. */
+  armado_a_mano:     { es: 'armado a mano', en: 'planned by hand', pt: 'montado à mão', fr: 'conçu à la main', de: 'von Hand geplant' },
   planifica:         { es: 'Planificá', en: 'Plan', pt: 'Planeje', fr: 'Planifiez', de: 'Planen' },
   comer:             { es: 'Comer', en: 'Eat', pt: 'Comer', fr: 'Manger', de: 'Essen' },
   int_termales:      { es: 'Termales', en: 'Hot springs', pt: 'Termas', fr: 'Sources chaudes', de: 'Thermalquellen' },

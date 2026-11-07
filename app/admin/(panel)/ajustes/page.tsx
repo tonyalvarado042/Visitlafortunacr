@@ -108,6 +108,19 @@ export default async function PaginaAjustes() {
                 <div className="campo"><label><input type="checkbox" name="contacto_bloqueado" value="1" defaultChecked={d.contacto_bloqueado} disabled={!esAdmin} /> Tapar el teléfono hasta que dejen sus datos</label>
                   <small>Como encuentra24: la ficha se ve, el contacto no. Apagado, el directorio deja de generar leads.</small>
                 </div>
+                <div className="campo ancho"><label>Itinerarios</label>
+                  <select name="itinerario_modo" defaultValue={d.itinerario_modo ?? 'automatico'} disabled={!esAdmin}>
+                    <option value="automatico">Automático — la IA lo arma sola cuando cae el lead</option>
+                    <option value="manual">Manual — cae el lead y lo arma el equipo</option>
+                  </select>
+                  <small>
+                    En <strong>manual</strong> no se genera nada solo: queda una tarea en
+                    /admin/tareas y el equipo le manda uno pre-armado de /admin/experiencias o
+                    se lo escribe a mano desde el lead. El botón «generar plan» de la pantalla
+                    del lead sigue funcionando en los dos modos — lo aprieta una persona.
+                    Y el titular de la portada deja de prometer «en 60 segundos».
+                  </small>
+                </div>
                 <div className="campo"><label><input type="checkbox" name="chat_activo" value="1" defaultChecked={d.chat_activo} disabled={!esAdmin} /> Burbuja de chat en el sitio</label>
                   <small>Apagada, la burbuja no se pinta y el chat deja de atender. Lo que ya estaba conversado no se borra.</small>
                 </div>

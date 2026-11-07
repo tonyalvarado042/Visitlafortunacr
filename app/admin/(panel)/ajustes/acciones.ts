@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { modoItinerario } from '@/lib/itinerario-modo';
 import { contextoPanel } from '@/lib/admin/contexto';
 
 export type Estado = { ok?: string | null; error?: string | null };
@@ -133,6 +134,11 @@ export async function editarDestino(datos: FormData) {
         ? texto(datos, 'pie_credito_url')
         : null,
       chat_activo: texto(datos, 'chat_activo') === '1',
+      /* El modo del itinerario. Pasa por `modoItinerario()` y no se guarda
+         crudo: la base tiene un CHECK con exactamente dos valores, y lo que no
+         calce rebota sin explicación. Ante la duda cae en `automatico`, que es
+         como venía funcionando el sitio. Ver lib/itinerario-modo.ts. */
+      itinerario_modo: modoItinerario(texto(datos, 'itinerario_modo')),
       pixel_meta: pixel(datos, 'pixel_meta'),
       /* El tema pinta TODO el sitio publico. Lo que no sea uno de los dos se
          cae a claro en vez de guardarse: la base tiene un check y rebotaria
