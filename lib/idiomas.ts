@@ -437,6 +437,14 @@ export const T: Record<string, Diccionario> = {
   sorteo_gratis:        { es: 'Participar es gratis. No hay que comprar nada.', en: 'Free to enter. No purchase necessary.', pt: 'Participar e gratis. Nao precisa comprar nada.', fr: 'Participation gratuite, sans obligation d\u2019achat.', de: 'Teilnahme kostenlos. Kein Kauf notig.' },
   sorteo_adentro:       { es: '\u00a1Ya estas adentro!', en: 'You are in!', pt: 'Voce esta dentro!', fr: 'Vous participez !', de: 'Du bist dabei!' },
   sorteo_ya_estabas:    { es: 'Ya estabas adentro', en: 'You were already in', pt: 'Voce ja estava dentro', fr: 'Vous participiez deja', de: 'Du warst schon dabei' },
+  /* La pregunta de intereses va en la pantalla de «ya estas adentro», NO en
+     el formulario: el propio FormularioSorteo.tsx advierte que «cada campo que
+     se agrega cuesta participantes». Preguntando despues no cuesta ninguno,
+     porque la persona ya quedo apuntada. Ver app/api/sorteo/intereses. */
+  sorteo_una_mas:       { es: 'Una cosa mas, y es opcional', en: 'One more thing, and it is optional', pt: 'Mais uma coisa, e e opcional', fr: 'Encore une chose, et c’est optionnel', de: 'Noch eine Sache, und sie ist freiwillig' },
+  sorteo_para_que:      { es: 'Marca lo que te gusta y te escribimos solo de eso. Nada mas.', en: 'Tap what you like and we will only write about that. Nothing else.', pt: 'Marque o que gosta e escrevemos so sobre isso. Nada mais.', fr: 'Cochez ce qui vous plait et nous ne vous ecrirons que sur cela. Rien d’autre.', de: 'Markiere, was dir gefallt, und wir schreiben nur daruber. Sonst nichts.' },
+  sorteo_guardar_eso:   { es: 'Listo, guardalo', en: 'Done, save it', pt: 'Pronto, salvar', fr: 'C’est bon, enregistrer', de: 'Fertig, speichern' },
+  sorteo_gracias_eso:   { es: 'Gracias. Con eso basta.', en: 'Thank you. That is all we need.', pt: 'Obrigado. E so isso.', fr: 'Merci. C’est tout ce qu’il faut.', de: 'Danke. Das genugt.' },
   sorteo_te_avisamos:   { es: 'Te escribimos antes del sorteo. Mientras tanto, mira que hay para hacer.', en: 'We will write before the draw. Meanwhile, have a look around.', pt: 'Escrevemos antes do sorteio. Enquanto isso, veja o que ha para fazer.', fr: 'Nous vous ecrirons avant le tirage. En attendant, regardez ce qu\u2019il y a a faire.', de: 'Wir melden uns vor der Ziehung. Schau dich derweil um.' },
   sorteo_error:         { es: 'No se pudo apuntar. Proba de nuevo en un momento.', en: 'Could not sign you up. Try again in a moment.', pt: 'Nao deu para inscrever. Tente de novo.', fr: "L'inscription n'a pas abouti. Reessayez.", de: 'Eintragen hat nicht geklappt. Versuch es gleich noch einmal.' },
   sorteo_falta_nombre:  { es: 'Falta tu nombre.', en: 'Your name is missing.', pt: 'Falta seu nome.', fr: 'Votre nom manque.', de: 'Dein Name fehlt.' },

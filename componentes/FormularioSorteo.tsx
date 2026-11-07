@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
+import { INTERESES } from '@/lib/intereses';
 import type { Sorteo } from '@/lib/sorteo';
 
 /*
@@ -13,6 +14,16 @@ import type { Sorteo } from '@/lib/sorteo';
  * correo. El WhatsApp va aparte y opcional —se decide desde el panel— porque
  * sube mucho la probabilidad de poder avisarle al ganador meses despues,
  * cuando el correo ya se enfrio, pero no vale perder gente por pedirlo.
+ *
+ * ⚠️ LOS INTERESES SE PREGUNTAN DESPUES, Y ESA REGLA DE ARRIBA ES LA RAZON.
+ *
+ * El 7 de noviembre de 2026 habia que empezar a etiquetar a la gente que entra
+ * por aqui: de 11 viajeros, 6 entraron por el sorteo y los 6 tenian
+ * `intereses` vacio, asi que el boletin no podia segmentar nada. La salida no
+ * fue un cuarto campo: la pregunta vive en la pantalla de «ya estas adentro»,
+ * donde la conversion ya esta en el banco y preguntar no cuesta un
+ * participante. Si la persona cierra sin contestar, no se pierde nada.
+ * Ver app/api/sorteo/intereses/route.ts.
  */
 
 export function FormularioSorteo({
@@ -31,6 +42,29 @@ export function FormularioSorteo({
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listo, setListo] = useState<'nuevo' | 'ya_estaba' | null>(null);
+  const [gustos, setGustos] = useState<string[]>([]);
+  const [gustosListos, setGustosListos] = useState(false);
+
+  function alternarGusto(babosa: string) {
+    setGustos((previos) =>
+      previos.includes(babosa) ? previos.filter((x) => x !== babosa) : [...previos, babosa]);
+  }
+
+  /* Guarda los intereses y NO le cuenta al visitante si fallo. A proposito:
+     esto es un extra despues de que ya quedo apuntada, y un error rojo aca
+     solo la asustaria por algo que no le afecta. El fallo se grita del lado
+     del servidor, donde lo vemos nosotros. */
+  async function guardarGustos() {
+    setGustosListos(true);
+    if (!gustos.length) return;
+    try {
+      await fetch('/api/sorteo/intereses', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, intereses: gustos }),
+      });
+    } catch { /* ya esta adentro: esto era un extra */ }
+  }
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
@@ -76,6 +110,29 @@ export function FormularioSorteo({
           {listo === 'ya_estaba' ? t('sorteo_ya_estabas', idioma) : t('sorteo_adentro', idioma)}
         </strong>
         <p>{t('sorteo_te_avisamos', idioma)}</p>
+
+        {gustosListos ? (
+          <p className="sorteo-letra">{t('sorteo_gracias_eso', idioma)}</p>
+        ) : (
+          <div className="sorteo-gustos">
+            <strong className="sorteo-gustos-titulo">{t('sorteo_una_mas', idioma)}</strong>
+            <p className="sorteo-letra">{t('sorteo_para_que', idioma)}</p>
+            <div className="sorteo-chips">
+              {INTERESES.map((i) => (
+                <button key={i.babosa} type="button" onClick={() => alternarGusto(i.babosa)}
+                        aria-pressed={gustos.includes(i.babosa)}
+                        className={gustos.includes(i.babosa) ? 'chip puesto' : 'chip'}>
+                  {t(i.texto, idioma)}
+                </button>
+              ))}
+            </div>
+            {/* El boton se ve siempre, incluso sin nada marcado: asi se puede
+                decir «no, gracias» sin dejar la pantalla a medias. */}
+            <button className="boton tenue" type="button" onClick={guardarGustos}>
+              {t('sorteo_guardar_eso', idioma)}
+            </button>
+          </div>
+        )}
       </div>
     );
   }

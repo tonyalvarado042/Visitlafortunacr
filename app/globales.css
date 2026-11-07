@@ -629,6 +629,36 @@ input[type="date"], input[type="time"], input[type="number"], input[type="dateti
 .sorteo-listo strong { font-size: 19px; color: var(--blanco); }
 .sorteo-listo p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--txt-3); max-width: 34ch; }
 
+/* La pregunta de intereses, DESPUES de que la persona ya quedo adentro. Va
+   separada por una linea arriba a proposito: se lee como «esto ya es otra
+   cosa, y es opcional», no como un paso que falta del sorteo.
+   Ver componentes/FormularioSorteo.tsx. */
+.sorteo-gustos {
+  display: grid; justify-items: center; gap: 9px; width: 100%;
+  margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--borde-2);
+}
+.sorteo-gustos-titulo { font-size: 14px !important; color: var(--txt-1) !important; }
+.sorteo-gustos .sorteo-letra { font-size: 12.5px; color: var(--txt-4); max-width: 32ch; }
+.sorteo-chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+.sorteo-chips .chip {
+  border: 1px solid var(--borde-3); background: var(--sup-2); color: var(--txt-2);
+  border-radius: 100px; padding: 7px 13px; font: inherit; font-size: 12.5px;
+  font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s, color .15s;
+}
+.sorteo-chips .chip:hover { border-color: var(--borde-5); color: var(--txt-0); }
+/* Marcado: borde naranja y no relleno naranja. Ocho chips rellenos de color
+   de marca gritan mas que el «ya estas adentro», que es el mensaje que
+   importa en esta pantalla. */
+.sorteo-chips .chip.puesto {
+  border-color: var(--naranja); background: color-mix(in srgb, var(--naranja) 14%, transparent);
+  color: var(--txt-0);
+}
+.sorteo-gustos .boton.tenue {
+  width: auto; border-radius: 100px; padding: 9px 20px; font-size: 13px;
+  background: transparent; color: var(--txt-2); border: 1px solid var(--borde-3);
+}
+.sorteo-gustos .boton.tenue:hover { border-color: var(--borde-5); color: var(--txt-0); }
+
 /* ---- La pagina de la rifa ---- */
 .sorteo-apagado {
   margin: 0; padding: 11px 20px; text-align: center;

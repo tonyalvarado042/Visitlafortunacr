@@ -27,6 +27,34 @@ export default async function PaginaViajero({ params }: { params: Promise<{ id: 
   if (!ficha?.viajero) notFound();
   const v = ficha.viajero;
   if (v.destino_id !== destino.id) notFound();
+
+  /* Las etiquetas de la persona. Se leen acá y no dentro de `contexto_viajero`
+     porque esa función la comparten varias pantallas y esto solo lo usa esta.
+     El vocabulario viene de la base, no de una lista en el código: así una
+     etiqueta nueva aparece sola, sin desplegar nada. */
+  const [{ data: vocabulario }, { data: puestas }] = await Promise.all([
+    db.from('dst_etiqueta').select('id, grupo, babosa, nombre')
+      .in('grupo', ['interes', 'momento', 'mano']).order('grupo').order('babosa'),
+    db.from('dst_viajero_etiqueta').select('etiqueta_id').eq('viajero_id', id),
+  ]);
+  const yaPuestas = new Set((puestas ?? []).map((e) => e.etiqueta_id as string));
+  const porGrupo = (grupo: string) =>
+    (vocabulario ?? []).filter((e) => e.grupo === grupo) as
+      { id: string; grupo: string; babosa: string; nombre: string }[];
+
+  /* Los intereses que la IA sacó de una conversación y que NO son parte del
+     vocabulario: "pesca", "fotografía". No tienen casilla y no se pueden
+     editar acá, pero se MUESTRAN. Esconderlos sería peor que no tenerlos: se
+     usan para redactar, y alguien tiene que poder ver con qué está hablando
+     la IA. Ver el disparador refrescar_intereses_del_viajero. */
+  const deLaIA = ((v.intereses as string[]) ?? [])
+    .filter((i) => !(vocabulario ?? []).some((e) => e.grupo === 'interes' && e.babosa === i));
+
+  const TITULO_GRUPO: Record<string, string> = {
+    interes: 'Qué le gusta',
+    momento: 'Dónde va en su viaje',
+    mano: 'Etiquetas tuyas',
+  };
   const nombre = [v.nombre, v.apellidos].filter(Boolean).join(' ') || (v.email as string) || (v.whatsapp as string);
 
   return (
@@ -100,7 +128,33 @@ export default async function PaginaViajero({ params }: { params: Promise<{ id: 
               <div className="campo"><label>Viaja</label><select name="tipo_viajero" defaultValue={(v.tipo_viajero as string) ?? ''}><option value="">—</option>{['pareja', 'familia', 'amigos', 'solo', 'grupo', 'negocios'].map((x) => <option key={x} value={x}>{x}</option>)}</select></div>
               <div className="campo"><label>Presupuesto</label><select name="presupuesto" defaultValue={(v.presupuesto as string) ?? ''}><option value="">—</option>{['economico', 'medio', 'alto', 'lujo'].map((x) => <option key={x} value={x}>{x}</option>)}</select></div>
               <div className="campo"><label>Presupuesto USD</label><input type="number" name="presupuesto_usd" defaultValue={(v.presupuesto_usd as number) ?? ''} /></div>
-              <div className="campo ancho"><label>Intereses (separados por coma)</label><input name="intereses" defaultValue={((v.intereses as string[]) ?? []).join(', ')} /></div>
+              {['interes', 'momento', 'mano'].map((grupo) => porGrupo(grupo).length ? (
+                <div className="campo ancho" key={grupo}>
+                  <label>{TITULO_GRUPO[grupo]}</label>
+                  <div className="etiquetas-casillas">
+                    {porGrupo(grupo).map((e) => (
+                      <label key={e.id} className="etiqueta-casilla">
+                        <input type="checkbox" name="etiqueta" value={e.id}
+                               defaultChecked={yaPuestas.has(e.id)} />
+                        <span>{e.nombre}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : null)}
+              {deLaIA.length ? (
+                <div className="campo ancho">
+                  <label>Lo que sacó la IA de la conversación</label>
+                  <p className="gris" style={{ margin: 0, fontSize: 12.5 }}>
+                    {deLaIA.join(' · ')}
+                    <br />
+                    <span style={{ fontSize: 11.5 }}>
+                      No está en el vocabulario, así que no entra a ningún envío por sí solo.
+                      Si vale, márcalo arriba.
+                    </span>
+                  </p>
+                </div>
+              ) : null}
               <div className="campo ancho"><label>Notas internas</label><textarea name="notas" defaultValue={(v.notas as string) ?? ''} style={{ minHeight: 70 }} /></div>
               <div className="campo ancho acciones-fila">
                 <label><input type="checkbox" name="no_molestar" value="1" defaultChecked={!!v.no_molestar} /> No molestar (sin automatizaciones)</label>

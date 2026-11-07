@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
+import { INTERESES } from '@/lib/intereses';
 
 const CON_QUIEN = [
   { valor: 'pareja',  clave: 'pareja'  },
@@ -10,19 +11,10 @@ const CON_QUIEN = [
   { valor: 'solo',    clave: 'solo'    },
 ] as const;
 
-/* Intereses cortos y fijos, no las categorías del directorio: "Termales" cabe
-   en un chip, "Aguas termales de La Fortuna" no. Lo que se guarda es la clave,
-   que es con lo que después se segmenta en el CRM. */
-const INTERESES = [
-  { clave: 'aguas-termales', texto: 'int_termales'   },
-  { clave: 'rafting',        texto: 'int_rafting'    },
-  { clave: 'naturaleza',     texto: 'int_naturaleza' },
-  { clave: 'bienestar',      texto: 'int_bienestar'  },
-  { clave: 'ciclismo',       texto: 'int_ciclismo'   },
-  { clave: 'comida',         texto: 'int_comida'     },
-  { clave: 'aventura',       texto: 'int_aventura'   },
-  { clave: 'vida-silvestre', texto: 'int_fauna'      },
-] as const;
+/* Los intereses se MUDARON a `lib/intereses.ts` el 7 de noviembre de 2026,
+   cuando el sorteo tambien empezo a preguntarlos. La razon de la mudanza, y
+   el comentario original que explica por que son cortos y fijos en vez de las
+   categorias del directorio, viven ahora alla. */
 
 export function Planificador({ idioma }: { idioma: Idioma }) {
   const [llegaEl, setLlegaEl] = useState('');
@@ -117,8 +109,8 @@ export function Planificador({ idioma }: { idioma: Idioma }) {
       </label>
       <div style={fila}>
         {INTERESES.map((i) => (
-          <button key={i.clave} type="button" onClick={() => alternar(i.clave)}
-                  style={chip(elegidos.includes(i.clave))}>
+          <button key={i.babosa} type="button" onClick={() => alternar(i.babosa)}
+                  style={chip(elegidos.includes(i.babosa))}>
             {t(i.texto, idioma)}
           </button>
         ))}
