@@ -109,6 +109,16 @@ export const T: Record<string, Diccionario> = {
      valor. Antes eran celditas de «CUPO MAXIMO / 20», que obligan a quien lee
      a traducir el dato a lo que significa para el. «Grupo pequeno / Hasta 20
      personas» ya viene traducido. Ver componentes/DatosClaveDelTour.tsx. */
+  /* ── El itinerario de una tour, parada por parada ────────────────────── */
+  itinerario_titulo: { es: 'Qué vas a hacer', en: 'What you will do', pt: 'O que você vai fazer', fr: 'Ce que vous allez faire', de: 'Was dich erwartet' },
+  parada_salida:     { es: 'Punto de salida', en: 'Starting point', pt: 'Ponto de partida', fr: 'Point de départ', de: 'Startpunkt' },
+  parada_paso:       { es: 'Pasás por', en: 'You pass by', pt: 'Você passa por', fr: 'Vous passez par', de: 'Vorbeifahrt an' },
+  parada_regreso:    { es: 'Punto de regreso', en: 'Return point', pt: 'Ponto de retorno', fr: 'Point de retour', de: 'Rückkehrpunkt' },
+  parada_entrada_si: { es: 'Entrada incluida', en: 'Admission included', pt: 'Entrada incluída', fr: 'Entrée incluse', de: 'Eintritt inklusive' },
+  parada_entrada_no: { es: 'Entrada aparte', en: 'Admission not included', pt: 'Entrada à parte', fr: 'Entrée non incluse', de: 'Eintritt nicht inklusive' },
+  parada_ver_ficha:  { es: 'Ver el lugar', en: 'See the place', pt: 'Ver o lugar', fr: 'Voir le lieu', de: 'Ort ansehen' },
+  minutos_corto:     { es: 'min', en: 'min', pt: 'min', fr: 'min', de: 'Min.' },
+  hora_corto:        { es: 'h', en: 'h', pt: 'h', fr: 'h', de: 'Std.' },
   clave_cancela_si:  { es: 'Cancelación gratuita', en: 'Free cancellation', pt: 'Cancelamento grátis', fr: 'Annulation gratuite', de: 'Kostenlose Stornierung' },
   clave_cancela_det: { es: 'Cancelá sin costo hasta', en: 'Cancel at no cost up to', pt: 'Cancele sem custo até', fr: 'Annulez sans frais jusqu’à', de: 'Kostenlos stornieren bis' },
   clave_horas_antes: { es: 'horas antes', en: 'hours before', pt: 'horas antes', fr: 'heures avant', de: 'Stunden vorher' },

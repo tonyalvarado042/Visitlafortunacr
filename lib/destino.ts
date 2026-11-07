@@ -808,3 +808,41 @@ export async function categoriaEnCualquierIdioma(
     .maybeSingle();
   return (data?.entidad_id as string | undefined) ?? null;
 }
+
+/*
+ * El itinerario de una tour: sus paradas, en orden y traducidas.
+ *
+ * ⚠️ Va por función de la base y no por consulta directa, y no es capricho:
+ * `paradas_de_tour` traduce con `texto_en`, el mismo helper que usan
+ * `negocio_por_babosa` y `tour_reservable`. Leyendo la tabla directo, cada
+ * parada saldría en el idioma en que la escribió el operador — que es
+ * exactamente lo que Tony señaló el 7 de noviembre de 2026 mirando una ficha
+ * en `/es` con el título en inglés.
+ */
+export type ParadaDeTour = {
+  id: string;
+  orden: number;
+  tipo: 'salida' | 'parada' | 'paso' | 'regreso';
+  titulo: string;
+  descripcion: string | null;
+  duracion_minutos: number | null;
+  entrada_incluida: boolean | null;
+  /* La ficha del directorio, si la parada apunta a una y sigue publicada. */
+  negocio_babosa: string | null;
+  negocio_categoria: string | null;
+  negocio_foto: string | null;
+};
+
+export async function paradasDeTour(tourId: string, idioma: Idioma): Promise<ParadaDeTour[]> {
+  const { data, error } = await supabase.rpc('paradas_de_tour', {
+    p_tour_id: tourId, p_idioma: idioma,
+  });
+  if (error) {
+    /* Una tour sin itinerario no es un error —la mayoría todavía no lo tiene—
+       pero que la consulta FALLE sí: la ficha se vería igual de bien, sin el
+       bloque, y nadie lo notaría. Por eso queda en el registro. */
+    console.error('paradasDeTour:', tourId, error.message);
+    return [];
+  }
+  return (data ?? []) as ParadaDeTour[];
+}

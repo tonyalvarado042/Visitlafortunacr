@@ -324,3 +324,55 @@ export async function traduccionesDeMiTour(
   }
   return porIdioma;
 }
+
+/* ---- Las paradas del itinerario de una tour ---- */
+
+export type MiParadaDeTour = {
+  id: string;
+  orden: number;
+  tipo: 'salida' | 'parada' | 'paso' | 'regreso';
+  titulo: string;
+  descripcion: string | null;
+  duracion_minutos: number | null;
+  entrada_incluida: boolean | null;
+  negocio_id: string | null;
+  negocio_nombre: string | null;
+};
+
+/**
+ * Las paradas como las ve su dueño: SIN traducir.
+ *
+ * A propósito. La ficha pública las pasa por `texto_en`; acá el operador edita
+ * el original, y mostrarle la traducción sería dejarlo corregir un texto que
+ * no es el que se guarda.
+ */
+export async function misParadasDeTour(tourId: string): Promise<MiParadaDeTour[]> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('mis_paradas_de_tour', { p_tour_id: tourId });
+  if (error) {
+    console.error('mis_paradas_de_tour:', error.message);
+    return [];
+  }
+  return (data ?? []) as MiParadaDeTour[];
+}
+
+/**
+ * Los lugares del directorio a los que una parada se puede enlazar.
+ *
+ * Solo publicados y solo de este destino — la base lo vuelve a comprobar en
+ * `guardar_mi_parada`, porque un `<select>` se edita desde el navegador en
+ * diez segundos.
+ */
+export async function lugaresParaEnlazar(
+  dominio: string,
+): Promise<{ id: string; nombre: string }[]> {
+  const db = await sesion();
+  const { data, error } = await db.rpc('negocios_publicados', { p_dominio: dominio, p_idioma: 'es' });
+  if (error) {
+    console.error('lugaresParaEnlazar:', error.message);
+    return [];
+  }
+  return ((data ?? []) as { id: string; nombre: string }[])
+    .map((n) => ({ id: n.id, nombre: n.nombre }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}

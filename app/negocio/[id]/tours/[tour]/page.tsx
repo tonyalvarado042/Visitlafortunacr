@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { miNegocio, miTour, fotosDeMiTour, traduccionesDeMiTour, ESTADO_TOUR, MINIMO_FOTOS_TOUR } from '@/lib/comercio';
+import { miNegocio, miTour, fotosDeMiTour, traduccionesDeMiTour, misParadasDeTour, lugaresParaEnlazar, ESTADO_TOUR, MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 import { destinoActual } from '@/lib/destino';
 import { NOMBRE_PROPIO } from '@/lib/idiomas';
 import { FormularioTour } from './FormularioTour';
 import { FotosTour } from '../FotosTour';
+import { ParadasTour } from '../ParadasTour';
 import { mandarMiTourARevision, borrarMiTour } from '../../../acciones';
 
 export const dynamic = 'force-dynamic';
@@ -24,9 +25,13 @@ export default async function EditarMiTour({
   const tour = await miTour(tourId);
   if (!tour) notFound();
 
-  const [fotos, traducciones, destino] = await Promise.all([
+  const [fotos, traducciones, destino, paradas] = await Promise.all([
     fotosDeMiTour(tourId), traduccionesDeMiTour(tourId), destinoActual(),
+    misParadasDeTour(tourId),
   ]);
+  /* Los lugares del directorio para enlazar una parada. Va después y no en el
+     mismo Promise.all porque necesita el dominio del destino. */
+  const lugares = await lugaresParaEnlazar(destino.dominio);
 
   /* Los idiomas que el operador tiene que llenar: los que el sitio SIRVE,
      menos el principal, que es el que ya escribió arriba. Sale de la base y
@@ -89,6 +94,10 @@ export default async function EditarMiTour({
         fotos={fotos}
         minimoFotos={MINIMO_FOTOS_TOUR}
       />
+
+      {/* El itinerario, también FUERA del formulario del tour: cada parada
+          trae sus propios botones, y HTML no permite formularios anidados. */}
+      <ParadasTour tourId={tour.id} negocioId={id} paradas={paradas} lugares={lugares} />
 
       {/* Mandar a revisión solo desde borrador: una publicada que volviera a
           revisión se caería del sitio sola, y eso no lo decide el operador. */}

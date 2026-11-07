@@ -9,7 +9,9 @@ import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { BloqueResenas } from '@/componentes/BloqueResenas';
 import { DatosClaveDelTour, filasClaveDeTour } from '@/componentes/DatosClaveDelTour';
+import { ItinerarioDelTour } from '@/componentes/ItinerarioDelTour';
 import { resenasDeTour } from '@/lib/resenas';
+import { paradasDeTour } from '@/lib/destino';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
 import { t, type Idioma } from '@/lib/idiomas';
@@ -67,7 +69,9 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
 
   /* Las reseñas de ESTA tour. Se piden solo si la tour existe —si no, la
      página va al 404 unas líneas más abajo y la consulta se habría tirado. */
-  const resenasPropias = tour ? await resenasDeTour(tour.id) : [];
+  const [resenasPropias, paradas] = tour
+    ? await Promise.all([resenasDeTour(tour.id), paradasDeTour(tour.id, idioma)])
+    : [[], []];
   const negocioIdDeLaTour = tour?.negocio_id ?? '';
 
   /* Las fotos del tour se mapean al tipo de las fichas para poder reusar la
@@ -207,6 +211,13 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   idioma={idioma}
                 />
               )}
+
+              {/* El itinerario va DESPUÉS de la descripción y ANTES de «qué
+                  incluye»: primero se entiende de qué va la tour, después se
+                  ve el plan del día, y recién al final la letra de lo que
+                  entra y lo que no. Leído al revés, «qué incluye» no se sabe
+                  incluido en QUÉ. */}
+              <ItinerarioDelTour paradas={paradas} idioma={idioma} />
 
               {(incluye.length > 0 || noIncluye.length > 0) && (
                 <div className="tour-listas">

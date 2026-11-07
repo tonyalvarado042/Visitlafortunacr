@@ -2071,6 +2071,43 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 
 .tour-nueva { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--borde); }
 
+/* El itinerario del lado del OPERADOR. Cada parada en su caja, con su propio
+   formulario: un itinerario de ocho paradas en un formulario gigante pierde
+   las ocho si una falla.
+   Ver app/negocio/[id]/tours/ParadasTour.tsx. */
+.comercio-paradas { margin-top: 34px; }
+.comercio-paradas > h2 { margin: 0 0 6px; }
+.comercio-ayuda {
+  font-size: 13px; line-height: 1.55; color: var(--txt-3); max-width: 62ch; margin: 0 0 16px;
+}
+.comercio-ayuda strong { color: var(--txt-1); }
+.comercio-vacio { font-size: 13.5px; color: var(--txt-4); margin: 0 0 14px; }
+.comercio-parada {
+  border: 1px solid var(--borde-2); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 14px; background: var(--sup-1);
+}
+.comercio-parada-cabeza {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 10px;
+}
+.comercio-parada-cabeza > strong { font-size: 15px; color: var(--txt-0); min-width: 0; }
+.comercio-parada-mover { display: flex; gap: 6px; flex: 0 0 auto; }
+.comercio-parada-mover form { display: inline; }
+.comercio-parada-mover button {
+  width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--borde-3); background: var(--sup-2); color: var(--txt-2);
+  font-size: 14px; line-height: 1;
+}
+.comercio-parada-mover button:hover:not(:disabled) { border-color: var(--naranja); color: var(--txt-0); }
+.comercio-parada-mover button:disabled { opacity: .35; cursor: default; }
+.comercio-parada-borrar { margin-top: 10px; }
+.comercio-parada-borrar .boton { font-size: 12.5px; padding: 7px 14px; border-radius: 100px; }
+.comercio-parada-nueva > summary {
+  cursor: pointer; list-style: none; padding: 2px 0; font-size: 15px; color: var(--naranja);
+}
+.comercio-parada-nueva > summary::-webkit-details-marker { display: none; }
+.comercio-parada-nueva[open] > summary { margin-bottom: 10px; }
+
 /* Los otros idiomas, en el formulario del tour del operador.
 
    Plegado por idioma y con un contador «2 de 6» en el resumen: el operador
@@ -2925,6 +2962,75 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 }
 
 /* La página de una tour: los datos duros en una tira y las dos listas. */
+/* El itinerario de una tour, parada por parada.
+
+   La linea vertical que une los numeros se dibuja con un `::before` SOBRE EL
+   <li>, no con un elemento aparte: asi nunca se despega del numero, pase lo
+   que pase con el alto del texto de al lado. Y se corta en el ultimo con
+   `:last-child`, porque una linea que sigue despues de la ultima parada
+   promete una parada mas que no existe.
+   Ver componentes/ItinerarioDelTour.tsx. */
+.tour-itinerario ol { list-style: none; margin: 4px 0 0; padding: 0; }
+.tour-itinerario li { position: relative; display: flex; gap: 14px; padding-bottom: 22px; }
+.tour-itinerario li::before {
+  content: ''; position: absolute; left: 14px; top: 30px; bottom: 0;
+  width: 2px; background: var(--borde-3);
+}
+.tour-itinerario li:last-child { padding-bottom: 0; }
+.tour-itinerario li:last-child::before { display: none; }
+
+.parada-numero {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--naranja); color: var(--sobre-naranja);
+  font-size: 14px; font-weight: 800; line-height: 1;
+}
+/* La salida, el regreso y los «pasas por» NO llevan numero: numerar la
+   recogida como «1» hace que la primera cosa que se hace sea la 2. Llevan un
+   punto, que ancla la linea igual sin contar como parada. */
+.tour-itinerario li.suave .parada-numero { background: transparent; }
+.parada-punto {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--sup-4); border: 2px solid var(--borde-4);
+}
+.parada-cuerpo { min-width: 0; padding-top: 3px; }
+.parada-tipo {
+  display: block; font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--txt-4); margin-bottom: 2px;
+}
+.parada-cuerpo > strong { display: block; font-size: 16px; line-height: 1.35; color: var(--txt-0); }
+.parada-cuerpo > strong a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--borde-5); }
+.parada-cuerpo > strong a:hover { text-decoration-color: var(--naranja); }
+.parada-cuerpo > p { margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--txt-3); }
+
+.parada-marcas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.parada-marcas span {
+  font-size: 11.5px; font-weight: 600; color: var(--txt-3);
+  border: 1px solid var(--borde-3); border-radius: 100px; padding: 2px 9px;
+}
+.parada-marcas .si { color: var(--verde); border-color: color-mix(in srgb, var(--verde) 45%, transparent); }
+/* «Entrada aparte» en ambar y no en rojo: no es un error, es un dato que hay
+   que leer. En rojo parece que el tour esta mal. */
+.parada-marcas .no { color: var(--aviso); border-color: var(--borde-aviso-2); }
+
+/* La tarjetita que enlaza a la ficha del directorio. Esto es lo que
+   GetYourGuide no puede hacer: su parada es texto, la nuestra es un lugar que
+   existe en el sitio, con foto. */
+.parada-ficha {
+  display: inline-flex; align-items: center; gap: 9px; margin-top: 9px;
+  border: 1px solid var(--borde-2); border-radius: 100px; padding: 4px 13px 4px 4px;
+  font-size: 12.5px; font-weight: 600; color: var(--txt-2); text-decoration: none;
+  transition: border-color .15s, color .15s;
+}
+.parada-ficha:hover { border-color: var(--naranja); color: var(--txt-0); }
+.parada-ficha img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+@media (max-width: 560px) {
+  .tour-itinerario li { gap: 12px; padding-bottom: 18px; }
+  .parada-cuerpo > strong { font-size: 15.5px; }
+  .parada-cuerpo > p { font-size: 13.5px; }
+}
+
 /* Los datos clave de una tour: icono, titular y la linea que lo explica.
 
    Reemplazo de `.tour-ficha-datos`, que era una rejilla de celditas con

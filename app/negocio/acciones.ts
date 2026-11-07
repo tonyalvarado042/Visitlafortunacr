@@ -500,3 +500,72 @@ async function revalidarTour(tourId: string) {
   const { data } = await db.from('dst_tour').select('negocio_id').eq('id', tourId).maybeSingle();
   if (data?.negocio_id) revalidatePath(`/negocio/${data.negocio_id}/tours/${tourId}`);
 }
+
+/* ---- Las paradas del itinerario de una tour ---- */
+
+/*
+ * ⚠️ CADA UNA ES SU PROPIA ACCIÓN Y SU PROPIO <form>, y van FUERA del
+ * formulario del tour. HTML no permite formularios anidados: adentro, el
+ * navegador se come los botones y «Borrar parada» terminaría guardando el
+ * tour entero. Es la misma razón por la que la galería de fotos vive aparte —
+ * ver el comentario en la página del tour, y lib/texto-rico.ts para el otro
+ * caso donde esto ya costó caro.
+ *
+ * El guardia de dueño NO está acá: está en la base, en `guardar_mi_parada`,
+ * `borrar_mi_parada` y `mover_mi_parada`, que comprueban `es_mi_negocio`.
+ * Acá solo se recogen los campos.
+ */
+export async function guardarMiParada(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const negocioId = texto(datos, 'negocio_id');
+  const paradaId = texto(datos, 'parada_id');
+  if (!esUuid(tourId) || !esUuid(negocioId)) return;
+
+  const lugarId = texto(datos, 'lugar_id');
+  const entrada = texto(datos, 'entrada_incluida');
+
+  const db = await sesion();
+  const { error } = await db.rpc('guardar_mi_parada', {
+    p_tour_id: tourId,
+    p_parada_id: esUuid(paradaId) ? paradaId : null,
+    p_tipo: texto(datos, 'tipo') || 'parada',
+    p_titulo: texto(datos, 'titulo'),
+    p_descripcion: texto(datos, 'descripcion') || null,
+    p_duracion_minutos: numero(datos, 'duracion_minutos'),
+    p_negocio_id: esUuid(lugarId) ? lugarId : null,
+    /* Tres estados, no dos: sí, no, y «no se dijo». Mandar `false` cuando el
+       operador no contestó pondría «Entrada aparte» en la ficha pública de
+       una tour donde nadie dijo eso. */
+    p_entrada_incluida: entrada === 'si' ? true : entrada === 'no' ? false : null,
+  });
+  if (error) console.error('guardar_mi_parada:', error.message);
+
+  revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
+}
+
+export async function borrarMiParada(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const negocioId = texto(datos, 'negocio_id');
+  const paradaId = texto(datos, 'parada_id');
+  if (!esUuid(paradaId) || !esUuid(negocioId) || !esUuid(tourId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('borrar_mi_parada', { p_parada_id: paradaId });
+  if (error) console.error('borrar_mi_parada:', error.message);
+
+  revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
+}
+
+export async function moverMiParada(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const negocioId = texto(datos, 'negocio_id');
+  const paradaId = texto(datos, 'parada_id');
+  const hacia = texto(datos, 'hacia') === 'arriba' ? 'arriba' : 'abajo';
+  if (!esUuid(paradaId) || !esUuid(negocioId) || !esUuid(tourId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('mover_mi_parada', { p_parada_id: paradaId, p_hacia: hacia });
+  if (error) console.error('mover_mi_parada:', error.message);
+
+  revalidatePath(`/negocio/${negocioId}/tours/${tourId}`);
+}
