@@ -171,6 +171,22 @@ export function FormularioTour({
         </>
       )}
 
+      {/* El punto de encuentro, pegado a la casilla de recogida porque las dos
+          contestan la misma pregunta del viajero: «¿dónde nos vemos?».
+          La ayuda cambia de sentido según la casilla, y por eso dice las dos
+          cosas: con recogida marcada esto es DE DÓNDE los pasan buscando, y
+          sin marcar es ADÓNDE hay que llegar. */}
+      <label htmlFor="t-pe">¿Dónde se encuentran?</label>
+      <textarea id="t-pe" name="punto_encuentro" rows={2} maxLength={300}
+                defaultValue={tour.punto_encuentro ?? ''}
+                placeholder="Los recogemos en los hoteles de La Fortuna y de Tabacón, entre 7:30 y 8:00." />
+      <small>
+        Si marcaste la recogida arriba, acá va <strong>de dónde</strong> los pasan
+        buscando. Si no, <strong>adónde</strong> tiene que llegar la gente.
+        Dejalo vacío y la ficha dice solo «desde tu hotel en La Fortuna», que
+        casi siempre es menos de lo que necesitan saber.
+      </small>
+
       <label htmlFor="t-can">Hasta cuántas horas antes se puede cancelar sin costo</label>
       <input id="t-can" name="cancelacion_libre_horas" type="number" min={0} max={720}
              defaultValue={tour.cancelacion_libre_horas} />

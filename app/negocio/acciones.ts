@@ -309,6 +309,7 @@ export async function guardarMiTour(_previo: EstadoComercio, datos: FormData): P
     p_precio_adulto_usd: numero(datos, 'precio_adulto_usd'),
     p_precio_nino_usd: numero(datos, 'precio_nino_usd'),
     p_cancelacion_libre_horas: numero(datos, 'cancelacion_libre_horas'),
+    p_punto_encuentro: texto(datos, 'punto_encuentro') || null,
   });
   if (error) return { error: error.message };
 

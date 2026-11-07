@@ -544,6 +544,10 @@ export type TourPublico = TourDeNegocio & {
   cupo_maximo: number | null;
   idiomas_guia: string[];
   cancelacion_libre_horas: number;
+  /* Dónde los recogen o dónde se encuentran, en texto del operador. Lo que
+     significa lo decide `recoge_en_hotel`: con true es DE DÓNDE los pasan
+     buscando; con false es ADÓNDE hay que ir. */
+  punto_encuentro: string | null;
   precio_nino_usd: number | null;
   precio_nota: string | null;
   categoria_id: string | null;
@@ -600,6 +604,7 @@ export type FotoDeTour = {
  */
 const CAMPOS_TRADUCIBLES_DE_TOUR = [
   'nombre', 'resumen', 'descripcion', 'incluye', 'no_incluye', 'que_llevar',
+  'punto_encuentro',
 ] as const;
 
 export async function tourPorBabosa(
@@ -609,7 +614,7 @@ export async function tourPorBabosa(
     .from('dst_tour')
     .select(`id, categoria_id, negocio_id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
-             idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
+             idiomas_guia, recoge_en_hotel, cancelacion_libre_horas, punto_encuentro,
              precio_adulto_usd, precio_nino_usd, precio_nota, imagen_url, video_url, video_portada_url,
              total_resenas, promedio_calificacion,
              fotos:dst_tour_foto(id, url, texto_alternativo_es, texto_alternativo_en, credito, licencia, fuente_url, es_portada, orden),

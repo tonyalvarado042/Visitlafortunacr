@@ -32,6 +32,7 @@ export const CAMPOS_TRADUCIBLES_DE_TOUR = [
   { campo: 'incluye',     etiqueta: 'Qué incluye',          filas: 4 },
   { campo: 'no_incluye',  etiqueta: 'Qué NO incluye',       filas: 3 },
   { campo: 'que_llevar',  etiqueta: 'Qué llevar',           filas: 2 },
+  { campo: 'punto_encuentro', etiqueta: 'Dónde se encuentran', filas: 2 },
 ] as const;
 
 export type CampoTraducibleDeTour = (typeof CAMPOS_TRADUCIBLES_DE_TOUR)[number]['campo'];

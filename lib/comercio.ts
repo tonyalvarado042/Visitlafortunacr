@@ -176,6 +176,7 @@ export type MiTourDetalle = MiTour & {
   edad_minima: number | null;
   cupo_maximo: number | null;
   recoge_en_hotel: boolean;
+  punto_encuentro: string | null;
   idiomas_guia: string[];
   cancelacion_libre_horas: number;
 };

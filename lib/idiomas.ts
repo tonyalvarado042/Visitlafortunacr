@@ -129,6 +129,7 @@ export const T: Record<string, Diccionario> = {
   clave_guia_vivo:   { es: 'Guía en vivo', en: 'Live tour guide', pt: 'Guia ao vivo', fr: 'Guide en direct', de: 'Live-Guide' },
   clave_recoge:      { es: 'Te pasan buscando', en: 'Pickup included', pt: 'Buscam você', fr: 'Prise en charge incluse', de: 'Abholung inklusive' },
   clave_recoge_det:  { es: 'Desde tu hotel en', en: 'From your hotel in', pt: 'Do seu hotel em', fr: 'Depuis votre hôtel à', de: 'Von deinem Hotel in' },
+  clave_encuentro:   { es: 'Punto de encuentro', en: 'Meeting point', pt: 'Ponto de encontro', fr: 'Point de rendez-vous', de: 'Treffpunkt' },
   clave_grupo:       { es: 'Grupo pequeño', en: 'Small group', pt: 'Grupo pequeno', fr: 'Petit groupe', de: 'Kleine Gruppe' },
   clave_grupo_grande:{ es: 'Grupo', en: 'Group', pt: 'Grupo', fr: 'Groupe', de: 'Gruppe' },
   clave_hasta:       { es: 'Hasta', en: 'Up to', pt: 'Até', fr: 'Jusqu’à', de: 'Bis zu' },

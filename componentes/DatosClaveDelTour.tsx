@@ -44,6 +44,7 @@ const BUS         = 'M4 17h16M6 17v2M18 17v2M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 
 const GRUPO       = 'M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9.5 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75';
 const ESCUDO     = 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z';
 const MONTANA     = 'M3 19h18L14 7l-3.5 6L8 10l-5 9z';
+const BANDERA     = 'M4 22V4M4 4h12l-2 4 2 4H4';
 
 export type FilaClave = { icono: string; titulo: string; detalle: string | null; apagada?: boolean };
 
@@ -56,6 +57,7 @@ export function filasClaveDeTour(
     cancelacion_libre_horas: number; duracion_horas: number | null; hora_inicio: string | null;
     idiomas_guia: string[]; recoge_en_hotel: boolean; cupo_maximo: number | null;
     edad_minima: number | null; dificultad: string | null;
+    punto_encuentro: string | null;
   },
   idioma: Idioma,
   dondeRecoge: string,
@@ -99,12 +101,26 @@ export function filasClaveDeTour(
     });
   }
 
+  /* La recogida y el punto de encuentro son LA MISMA FILA con dos sentidos, y
+     lo decide `recoge_en_hotel`:
+       - true  → «Te pasan buscando», y el texto dice DE DÓNDE;
+       - false → «Punto de encuentro», y el texto dice ADÓNDE hay que ir.
+     Antes esto solo existía en el primer caso y el «desde» lo ponía el
+     código, con el nombre del destino. Un tour que recoge nada más en
+     ciertos hoteles, o que arranca en un punto fijo, no tenía dónde decirlo
+     — y esa pregunta llegaba por WhatsApp. Lo pidió Tony el 7 de noviembre
+     de 2026. */
+  const donde = tour.punto_encuentro?.trim();
   if (tour.recoge_en_hotel) {
     filas.push({
       icono: BUS,
       titulo: t('clave_recoge', idioma),
-      detalle: `${t('clave_recoge_det', idioma)} ${dondeRecoge}.`,
+      /* Sin texto, se cae al nombre del destino, que es lo que decía antes:
+         es cierto y es mejor que no decir nada. */
+      detalle: donde ?? `${t('clave_recoge_det', idioma)} ${dondeRecoge}.`,
     });
+  } else if (donde) {
+    filas.push({ icono: BANDERA, titulo: t('clave_encuentro', idioma), detalle: donde });
   }
 
   if (tour.cupo_maximo != null) {
