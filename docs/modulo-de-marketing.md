@@ -64,10 +64,37 @@ cuatro mensajes.
 
 ### Por qué las cadenas nunca mandaron nada
 
-1. **Nadie inscribe a nadie.** `dst_cadena_inscrito` tiene cero filas y el
-   único código que la menciona es la pantalla de admin, **leyéndola**.
+> ⚠️ **Corregido el 7 de noviembre de 2026. El punto 1 de esta lista estaba
+> MAL, y era el más importante de los tres.**
+>
+> Decía *«nadie inscribe a nadie»*, y lo decía porque yo busqué la tabla en el
+> TypeScript y no en las funciones de la base. **Dos de las tres cadenas sí
+> tienen puerta de entrada, y está escrita en SQL:**
+>
+> | Cadena | Público | Quién inscribe | Pasos |
+> |---|---|---|---|
+> | `rifa` | `sorteo` | `participar_en_sorteo` | 4 |
+> | `contacto` | `contacto_negocio` | `pedir_contacto_de_negocio` | 3 |
+> | `premium` | `comerciante_gratis` | **nadie** | 4 |
+>
+> `inscribir_en_cadena` arranca con `where ... and c.esta_activa` y **devuelve
+> sin hacer nada si la cadena está apagada**. Por eso `dst_cadena_inscrito`
+> tiene cero filas: no es que falte la puerta, es que el interruptor está en
+> apagado.
+>
+> **Lo que eso cambia:** encender la cadena `rifa` no es construir nada. Es un
+> `update ... set esta_activa = true`, y a partir de ahí **todo el que se
+> apunte al sorteo entra a un goteo de 4 pasos**. Por eso NO se enciende sin
+> que Tony lea antes los 4 correos en pantalla — la regla de siempre.
+>
+> La lección: *buscar en el código no es buscar en el sistema.* La mitad de
+> este proyecto vive en funciones de Postgres, y un `grep` por `.ts` no las ve.
+
+1. ~~Nadie inscribe a nadie.~~ Ver el cuadro de arriba: dos de tres sí
+   inscriben, pero la inscripción no ocurre con la cadena apagada.
 2. **Las tres están apagadas**: `contacto`, `premium`, `rifa`.
-3. **Los pasos solo tienen `es` y `en`.** El sitio sirve cinco idiomas.
+3. **Los pasos solo tienen `es` y `en`.** El sitio sirve **tres** idiomas
+   (`es`, `en`, `pt`), no cinco: `/fr` y `/de` redirigen a `/es`. Falta `pt`.
 
 ---
 
@@ -84,7 +111,19 @@ cuatro mensajes.
 
 O sea: **lo que pedís existe a medias y ya funciona.** Falta tres cosas.
 
-### a) ⚠️ El sorteo no etiqueta nada — y es la puerta más grande
+### a) ✅ HECHO el 7 de noviembre de 2026: el sorteo ya etiqueta
+
+> La pregunta NO quedó como un cuarto campo del formulario, sino en la pantalla
+> de «¡Ya estás adentro!», después de apuntarse. El propio
+> `FormularioSorteo.tsx` traía escrito que *«cada campo que se agrega cuesta
+> participantes»*, y tiene razón: preguntando después, la conversión ya está
+> en el banco y la pregunta no cuesta ninguno.
+>
+> Y las etiquetas quedaron en **tabla propia** (`dst_viajero_etiqueta`), que
+> era la recomendación de §3c. Ver
+> `supabase/plataforma/33_etiquetas_de_personas.sql` y `lib/intereses.ts`.
+
+### a) El problema que esto resolvía
 
 **Los 5 viajeros que entraron por `sorteo` tienen `intereses` VACÍO.** Los que
 entraron por el planificador sí los traen. Es decir: la puerta por la que
