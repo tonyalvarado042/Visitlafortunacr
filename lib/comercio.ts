@@ -245,3 +245,42 @@ export async function pedidosDeMiNegocio(negocioId: string, dias = 30): Promise<
   return { cuantos: Number(fila?.cuantos ?? 0), ultimo: fila?.ultimo ?? null };
 }
 
+
+export type MiFotoDeTour = { id: string; url: string; es_portada: boolean };
+
+/**
+ * Las fotos de UN tour mío.
+ *
+ * Va por consulta directa y no por RPC, al revés que `mis_fotos`: la política
+ * de `dst_tour_foto` ya deja al dueño ver las de SUS tours, así que una
+ * función que repitiera esa comprobación sería la misma regla escrita dos
+ * veces — y el día que cambie una, la otra se queda vieja.
+ */
+export async function fotosDeMiTour(tourId: string): Promise<MiFotoDeTour[]> {
+  const db = await sesion();
+  const { data, error } = await db
+    .from('dst_tour_foto')
+    .select('id, url, es_portada')
+    .eq('tour_id', tourId)
+    .order('es_portada', { ascending: false })
+    .order('orden');
+  if (error) {
+    console.error('fotosDeMiTour:', error.message);
+    return [];
+  }
+  return (data ?? []) as MiFotoDeTour[];
+}
+
+/*
+ * Cuántas fotos necesita un tour para que valga la pena mandarlo al mundo.
+ *
+ * ⚠️ Estaba en CERO y era un error: Tony lo cachó. Con una sola foto el
+ * sistema decía «no falta nada» y el botón de pedirle fotos al operador ni
+ * aparecía — justo lo que pasa con los dos tours de Jacamar, que tienen una
+ * foto cada uno y están publicados.
+ *
+ * Tres, porque la ficha tiene galería: con una, la galería es un cuadrito
+ * solo y el visitante no ve ni el lugar ni la gente ni la actividad. No es un
+ * número sagrado; es el mínimo para que la galería no se vea pobre.
+ */
+export const MINIMO_FOTOS_TOUR = 3;

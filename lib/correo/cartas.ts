@@ -891,3 +891,322 @@ export async function correoNegocioRechazado(
 ): Promise<Envio> {
   return enviarCorreo({ destino: o.destino, idioma: o.idioma, para: o.para, ...piezasNegocioRechazado(o) });
 }
+
+/* ---- Al operador le falta algo en UN tour ------------------------------
+ *
+ * Distinto del de la ficha de un negocio, y no es duplicar por duplicar: lo
+ * que le falta a un tour es otra cosa (fotos DEL TOUR, su precio, qué
+ * incluye) y sobre todo **el botón tiene que llevar a otro lado** — a la
+ * pantalla de ESE tour en el portal, no a la del negocio. Mandarlo a la raíz
+ * de su cuenta y que busque cuál de sus cuatro tours es, es como se pierde a
+ * alguien que estaba dispuesto a hacerlo.
+ *
+ * Dice qué falta y qué hacer, en ese orden, porque es lo que decide si la
+ * persona lo hace ahora o lo deja para después.
+ */
+
+const TUR_ASUNTO: Texto = {
+  es: 'Nos falta algo de tu tour', en: 'Something is missing from your tour',
+  pt: 'Falta algo no seu tour', fr: 'Il manque quelque chose à votre excursion',
+  de: 'Deiner Tour fehlt noch etwas',
+};
+const TUR_TITULO: Texto = {
+  es: 'Para publicar tu tour nos falta esto',
+  en: 'We need this to publish your tour',
+  pt: 'Para publicar o seu tour precisamos disto',
+  fr: 'Il nous faut ceci pour publier votre excursion',
+  de: 'Das brauchen wir noch, um deine Tour zu veröffentlichen',
+};
+const TUR_P1: Texto = {
+  es: 'El botón de abajo abre directamente la pantalla de este tour en tu cuenta — no hay que buscar nada. Se hace desde el teléfono en unos minutos.',
+  en: 'The button below opens this tour’s screen in your account directly — nothing to search for. It takes a few minutes from your phone.',
+  pt: 'O botão abaixo abre diretamente o ecrã deste tour na sua conta — não há nada para procurar. Faz-se pelo telemóvel em poucos minutos.',
+  fr: 'Le bouton ci-dessous ouvre directement l’écran de cette excursion dans votre compte — rien à chercher. Cela prend quelques minutes depuis votre téléphone.',
+  de: 'Der Button unten öffnet direkt die Seite dieser Tour in deinem Konto — nichts zu suchen. Vom Handy aus in wenigen Minuten erledigt.',
+};
+const TUR_FOTOS: Texto = {
+  es: 'Las fotos son lo que más mueve: subí tres o cuatro del tour en marcha — gente haciéndolo, no solo el paisaje. Las del teléfono sirven, se achican solas.',
+  en: 'Photos move the needle most: upload three or four of the tour in action — people doing it, not just scenery. Phone photos work, they get resized automatically.',
+  pt: 'As fotos são o que mais pesa: carregue três ou quatro do tour a decorrer — pessoas a fazê-lo, não só a paisagem. As do telemóvel servem.',
+  fr: 'Les photos comptent le plus : ajoutez-en trois ou quatre de l’excursion en cours — des gens qui la font, pas seulement le paysage. Celles du téléphone conviennent.',
+  de: 'Fotos bringen am meisten: lade drei oder vier von der Tour in Aktion hoch — Leute, die sie machen, nicht nur Landschaft. Handyfotos genügen.',
+};
+/* El mismo pedido, pero para quien YA subió alguna. Decirle «subí fotos» a
+   alguien que ya puso una suena a que no le miramos la ficha, y es la forma
+   más rápida de que el próximo correo no se abra. Dice cuántas tiene y
+   cuántas hacen falta, porque «más» sin número no se sabe si es una o diez. */
+/* ⚠️ «{n} de {min} fotos» y no «tenés {n} foto»: el sustantivo concuerda con
+   el mínimo, que siempre es plural, así que la frase sale bien con 1 o con 2
+   sin tener que cargar singular y plural en cinco idiomas. Y de paso se lee
+   como progreso —«vas 1 de 3»—, que empuja más que un reclamo. */
+const TUR_MAS_FOTOS: Texto = {
+  /* Sin «con una sola»: con dos fotos esa frase es falsa, y una frase falsa en
+     el correo que pide confianza es lo último que uno quiere. */
+  es: 'Vas {n} de {min} fotos. Subí las que falten del tour en marcha — gente haciéndolo, no solo el paisaje. Las del teléfono sirven, se achican solas.',
+  en: 'You are at {n} of {min} photos. Add the missing ones from the tour in action — people doing it, not just scenery. Phone photos work, they get resized automatically.',
+  pt: 'Vai {n} de {min} fotos. Carregue as que faltam do tour a decorrer — pessoas a fazê-lo, não só a paisagem. As do telemóvel servem.',
+  fr: 'Vous en êtes à {n} sur {min} photos. Ajoutez celles qui manquent de l’excursion en cours — des gens qui la font, pas seulement le paysage.',
+  de: 'Du bist bei {n} von {min} Fotos. Lade die fehlenden von der Tour in Aktion hoch — Leute, die sie machen, nicht nur Landschaft.',
+};
+const TUR_DESC: Texto = {
+  es: 'En la descripción contá cómo es el día: qué se ve, cuánto se camina, para quién es y para quién no.',
+  en: 'In the description, tell us what the day is like: what you see, how much walking, who it suits and who it does not.',
+  pt: 'Na descrição conte como é o dia: o que se vê, quanto se caminha, para quem é e para quem não é.',
+  fr: 'Dans la description, racontez la journée : ce qu’on voit, combien on marche, à qui elle convient et à qui non.',
+  de: 'Beschreib den Tag: was man sieht, wie viel gelaufen wird, für wen sie passt und für wen nicht.',
+};
+const TUR_PRECIO: Texto = {
+  es: 'Sin precio el tour no se puede reservar desde el sitio: es el dato que falta para que alguien pueda apretar el botón.',
+  en: 'Without a price the tour cannot be booked from the site: it is the one thing missing for someone to press the button.',
+  pt: 'Sem preço o tour não pode ser reservado pelo site: é o dado que falta para alguém carregar no botão.',
+  fr: 'Sans prix, l’excursion ne peut pas être réservée depuis le site : c’est la donnée qui manque pour que quelqu’un puisse cliquer.',
+  de: 'Ohne Preis kann die Tour auf der Seite nicht gebucht werden: genau das fehlt, damit jemand den Button drücken kann.',
+};
+const TUR_BOTON: Texto = {
+  es: 'Abrir mi tour y completarlo', en: 'Open my tour and complete it',
+  pt: 'Abrir o meu tour e completá-lo', fr: 'Ouvrir mon excursion et la compléter',
+  de: 'Meine Tour öffnen und ergänzen',
+};
+const TUR_ROT_TOUR: Texto = { es: 'Tour', en: 'Tour', pt: 'Tour', fr: 'Excursion', de: 'Tour' };
+const TUR_ROT_FALTA: Texto = {
+  es: 'Lo que falta', en: 'What is missing', pt: 'O que falta',
+  fr: 'Ce qui manque', de: 'Was noch fehlt',
+};
+const TUR_FOTOS_C: Texto = { es: 'las fotos', en: 'photos', pt: 'as fotos', fr: 'les photos', de: 'die Fotos' };
+const TUR_MAS_FOTOS_C: Texto = { es: 'más fotos', en: 'more photos', pt: 'mais fotos', fr: 'plus de photos', de: 'mehr Fotos' };
+const TUR_DESC_C: Texto = { es: 'la descripción', en: 'the description', pt: 'a descrição', fr: 'la description', de: 'die Beschreibung' };
+const TUR_PRECIO_C: Texto = { es: 'el precio', en: 'the price', pt: 'o preço', fr: 'le prix', de: 'der Preis' };
+/* ⚠️ El pie genérico dice «porque escribiste a», y el operador NUNCA nos
+   escribió: lo cargamos nosotros. Decirle eso en el primer correo que recibe
+   es empezar mintiéndole. Sirve para los dos correos de tour, y dice «de este
+   tour» y no «publicado» porque los de Outback son borradores: el pie tiene
+   que ser cierto también cuando todavía no se ve en el sitio. */
+const TUR_PIE: Texto = {
+  es: 'Recibís este correo porque sos el operador de este tour en',
+  en: 'You are getting this email because you are the operator of this tour on',
+  pt: 'Você recebe este e-mail porque é o operador deste tour em',
+  fr: 'Vous recevez cet e-mail parce que vous êtes l’opérateur de cette excursion sur',
+  de: 'Du bekommst diese E-Mail, weil du der Anbieter dieser Tour bist auf',
+};
+const TUR_NOTA: Texto = {
+  es: 'Si preferís mandarnos las fotos por WhatsApp y que las subamos nosotros, respondé este correo y lo arreglamos.',
+  en: 'If you would rather send the photos by WhatsApp and have us upload them, reply to this email.',
+  pt: 'Se preferir enviar as fotos por WhatsApp e que as carreguemos nós, responda a este e-mail.',
+  fr: 'Si vous préférez nous envoyer les photos par WhatsApp pour qu’on les ajoute, répondez à cet e-mail.',
+  de: 'Wenn du uns die Fotos lieber per WhatsApp schickst und wir sie hochladen, antworte auf diese E-Mail.',
+};
+
+export function piezasFaltaCompletarTour(o: {
+  destino: Destino;
+  idioma: Idioma;
+  negocioId: string;
+  tourId: string;
+  nombreTour: string;
+  faltanFotos: boolean;
+  /** Cuántas tiene ya. Decide si se le pide «fotos» o «más fotos». */
+  cuantasFotos: number;
+  /** El mínimo que se le pide. Entra como dato y no se importa de
+      `lib/comercio` a propósito: las cartas no deberían depender del portal
+      del comercio para armar una frase. */
+  minimoFotos: number;
+  faltaDescripcion: boolean;
+  faltaPrecio: boolean;
+}) {
+  const yaTieneAlgunas = o.cuantasFotos > 0;
+  const lista = [
+    o.faltanFotos ? d(yaTieneAlgunas ? TUR_MAS_FOTOS_C : TUR_FOTOS_C, o.idioma) : null,
+    o.faltaDescripcion ? d(TUR_DESC_C, o.idioma) : null,
+    o.faltaPrecio ? d(TUR_PRECIO_C, o.idioma) : null,
+  ].filter(Boolean);
+  const queFalta = lista.join(` ${d(FAL_Y, o.idioma)} `);
+
+  return {
+    asunto: `${d(TUR_ASUNTO, o.idioma)}: ${o.nombreTour}`,
+    motivo: 'falta_completar_tour',
+    titulo: d(TUR_TITULO, o.idioma),
+    /* Un párrafo por cosa que falte, y solo por lo que falte: explicarle las
+       fotos a quien ya las subió es ruido, y el ruido hace que el próximo
+       correo no se abra. */
+    parrafos: [
+      d(TUR_P1, o.idioma),
+      ...(o.faltanFotos
+        ? [
+            yaTieneAlgunas
+              ? d(TUR_MAS_FOTOS, o.idioma)
+                  .replace('{n}', String(o.cuantasFotos))
+                  .replace('{min}', String(o.minimoFotos))
+              : d(TUR_FOTOS, o.idioma),
+          ]
+        : []),
+      ...(o.faltaDescripcion ? [d(TUR_DESC, o.idioma)] : []),
+      ...(o.faltaPrecio ? [d(TUR_PRECIO, o.idioma)] : []),
+    ],
+    datos: [
+      { rotulo: d(TUR_ROT_TOUR, o.idioma), valor: o.nombreTour },
+      { rotulo: d(TUR_ROT_FALTA, o.idioma), valor: queFalta.charAt(0).toUpperCase() + queFalta.slice(1) },
+    ],
+    /* ⚠️ DIRECTO A LA PANTALLA DE ESE TOUR. Mandarlo a la raíz de su cuenta y
+       que busque cuál de sus cuatro tours es, es como se pierde a alguien que
+       estaba dispuesto a hacerlo. */
+    boton: {
+      texto: d(TUR_BOTON, o.idioma),
+      url: `https://${o.destino.dominio}/negocio/${o.negocioId}/tours/${o.tourId}`,
+    },
+    nota: d(TUR_NOTA, o.idioma),
+    pie: d(TUR_PIE, o.idioma),
+  };
+}
+
+export async function correoFaltaCompletarTour(
+  o: Parameters<typeof piezasFaltaCompletarTour>[0] & { para: string },
+): Promise<Envio> {
+  return enviarCorreo({ destino: o.destino, idioma: o.idioma, para: o.para, ...piezasFaltaCompletarTour(o) });
+}
+
+/* ---- Que el operador revise lo publicado y confirme las tarifas --------
+ *
+ * El otro correo pide lo que FALTA. Este pide que mire lo que YA está: el
+ * texto que lee el viajero y, sobre todo, los números.
+ *
+ * ⚠️ LE MUESTRA LAS TRES CIFRAS: lo que paga el viajero (rack), lo que se le
+ * gira a él (neto) y la comisión. No es generosidad, es lo que evita el
+ * problema: un operador que descubre la comisión cuando le llega la primera
+ * liquidación se enoja con razón, y ese enojo cuesta más que la comisión. Si
+ * no está de acuerdo, mejor que lo diga ahora.
+ *
+ * Y es el momento de corregir: lo que publica el sitio sale de lo que él
+ * cargó. Un precio viejo o un «qué incluye» que ya no es cierto se descubre
+ * cuando el viajero llega y reclama.
+ */
+
+const RVT_ASUNTO: Texto = {
+  es: 'Revisá cómo quedó tu tour y las tarifas',
+  en: 'Check how your tour looks and its rates',
+  pt: 'Reveja como ficou o seu tour e as tarifas',
+  fr: 'Vérifiez votre excursion et ses tarifs',
+  de: 'Prüf deine Tour und die Preise',
+};
+const RVT_TITULO: Texto = {
+  es: 'Esto es lo que ve el viajero',
+  en: 'This is what the traveller sees',
+  pt: 'Isto é o que o viajante vê',
+  fr: 'Voici ce que voit le voyageur',
+  de: 'Das sieht der Reisende',
+};
+const RVT_P1: Texto = {
+  es: 'Antes de empujarlo queremos que lo revises vos. El botón de abajo abre la pantalla de este tour en tu cuenta: lo que esté mal lo corregís ahí mismo.',
+  en: 'Before we push it we want you to check it. The button below opens this tour in your account: anything wrong, you fix it right there.',
+  pt: 'Antes de o promovermos queremos que o reveja. O botão abaixo abre este tour na sua conta: o que estiver errado corrige ali mesmo.',
+  fr: 'Avant de le mettre en avant, nous aimerions que vous le vérifiiez. Le bouton ci-dessous ouvre cette excursion dans votre compte : ce qui ne va pas, vous le corrigez sur place.',
+  de: 'Bevor wir sie bewerben, schau sie dir bitte an. Der Button unten öffnet diese Tour in deinem Konto: was nicht stimmt, korrigierst du direkt dort.',
+};
+const RVT_P_TARIFAS: Texto = {
+  es: 'Mirá bien los números. El viajero paga la tarifa pública; a vos se te gira el neto. La diferencia es nuestra comisión, y está acá abajo para que no haya sorpresas en la primera liquidación.',
+  en: 'Look closely at the numbers. The traveller pays the public rate; you receive the net. The difference is our commission, and it is right here so there are no surprises on the first payout.',
+  pt: 'Veja bem os números. O viajante paga a tarifa pública; a si é transferido o líquido. A diferença é a nossa comissão, e está aqui para não haver surpresas na primeira liquidação.',
+  fr: 'Regardez bien les chiffres. Le voyageur paie le tarif public ; vous recevez le net. La différence est notre commission, indiquée ici pour qu’il n’y ait pas de surprise au premier versement.',
+  de: 'Schau dir die Zahlen genau an. Der Reisende zahlt den öffentlichen Preis; dir wird der Nettobetrag überwiesen. Die Differenz ist unsere Provision — hier aufgeführt, damit es bei der ersten Abrechnung keine Überraschung gibt.',
+};
+const RVT_P_SIN_TARIFAS: Texto = {
+  es: 'Este tour todavía no tiene convenio, así que no se reserva desde el sitio: por ahora solo se muestra. Si querés que se pueda reservar, respondé este correo y lo armamos.',
+  en: 'This tour has no agreement yet, so it cannot be booked from the site: for now it is only listed. If you want it bookable, reply to this email.',
+  pt: 'Este tour ainda não tem acordo, por isso não se reserva pelo site: por agora só aparece. Se quiser que se possa reservar, responda a este e-mail.',
+  fr: 'Cette excursion n’a pas encore d’accord : elle n’est pas réservable depuis le site, seulement visible. Si vous souhaitez la rendre réservable, répondez à cet e-mail.',
+  de: 'Für diese Tour gibt es noch keine Vereinbarung, sie ist also nicht buchbar — nur sichtbar. Wenn du sie buchbar machen willst, antworte auf diese E-Mail.',
+};
+const RVT_BOTON: Texto = {
+  es: 'Revisar mi tour', en: 'Review my tour', pt: 'Rever o meu tour',
+  fr: 'Vérifier mon excursion', de: 'Meine Tour prüfen',
+};
+const RVT_ROT_TOUR: Texto = { es: 'Tour', en: 'Tour', pt: 'Tour', fr: 'Excursion', de: 'Tour' };
+const RVT_ROT_RACK: Texto = {
+  es: 'Lo que paga el viajero', en: 'What the traveller pays', pt: 'O que o viajante paga',
+  fr: 'Ce que paie le voyageur', de: 'Was der Reisende zahlt',
+};
+const RVT_ROT_NETO: Texto = {
+  es: 'Lo que recibís vos', en: 'What you receive', pt: 'O que recebe',
+  fr: 'Ce que vous recevez', de: 'Was du bekommst',
+};
+const RVT_ROT_COM: Texto = {
+  es: 'Nuestra comisión', en: 'Our commission', pt: 'A nossa comissão',
+  fr: 'Notre commission', de: 'Unsere Provision',
+};
+const RVT_ROT_DURA: Texto = { es: 'Duración', en: 'Duration', pt: 'Duração', fr: 'Durée', de: 'Dauer' };
+const RVT_ROT_ESTADO: Texto = { es: 'Estado', en: 'Status', pt: 'Estado', fr: 'Statut', de: 'Status' };
+const RVT_PUBLICADO: Texto = {
+  es: 'Publicado — se ve en el sitio', en: 'Published — live on the site',
+  pt: 'Publicado — visível no site', fr: 'Publié — visible sur le site',
+  de: 'Veröffentlicht — auf der Seite sichtbar',
+};
+const RVT_BORRADOR: Texto = {
+  es: 'Borrador — todavía no se ve', en: 'Draft — not visible yet',
+  pt: 'Rascunho — ainda não se vê', fr: 'Brouillon — pas encore visible',
+  de: 'Entwurf — noch nicht sichtbar',
+};
+const RVT_NOTA: Texto = {
+  es: 'Si algún dato no está bien —el precio, lo que incluye, los horarios— corregilo vos o respondé este correo y lo cambiamos nosotros.',
+  en: 'If something is wrong — the price, what is included, the schedule — fix it yourself or reply to this email and we will change it.',
+  pt: 'Se algum dado não estiver certo — o preço, o que inclui, os horários — corrija ou responda a este e-mail e alteramos nós.',
+  fr: 'Si une information est erronée — le prix, ce qui est inclus, les horaires — corrigez-la ou répondez à cet e-mail.',
+  de: 'Wenn etwas nicht stimmt — Preis, Leistungen, Zeiten — korrigier es selbst oder antworte auf diese E-Mail.',
+};
+
+export function piezasRevisarTour(o: {
+  destino: Destino;
+  idioma: Idioma;
+  negocioId: string;
+  tourId: string;
+  nombreTour: string;
+  publicado: boolean;
+  duracionHoras: number | null;
+  rackUsd: number | null;
+  netoUsd: number | null;
+  comisionPct: number | null;
+}) {
+  const plata = (n: number | null) => (n != null ? `$${Number(n).toFixed(2)}` : null);
+  /* ⚠️ La comisión NO se redondea a entero. Outback firmó 12.60% y 22.80%:
+     un `toFixed(0)` le diría «13%» a quien firmó 12.6 — y este correo es
+     justo el que se manda para que confirme esa cifra. `Number` solo quita
+     los ceros de más: 25.00 → «25%», 12.60 → «12.6%». */
+  const pct = (n: number | null) => `${Number(n)}%`;
+  /* Las tres cifras solo si hay convenio. Mostrar «comisión: —» no informa:
+     deja al operador preguntándose si es cero o si falta cargarla. */
+  const hayTarifas = o.netoUsd != null && o.comisionPct != null;
+
+  return {
+    asunto: `${d(RVT_ASUNTO, o.idioma)}: ${o.nombreTour}`,
+    motivo: 'revisar_tour',
+    titulo: d(RVT_TITULO, o.idioma),
+    parrafos: [
+      d(RVT_P1, o.idioma),
+      hayTarifas ? d(RVT_P_TARIFAS, o.idioma) : d(RVT_P_SIN_TARIFAS, o.idioma),
+    ],
+    datos: [
+      { rotulo: d(RVT_ROT_TOUR, o.idioma), valor: o.nombreTour },
+      {
+        rotulo: d(RVT_ROT_ESTADO, o.idioma),
+        valor: o.publicado ? d(RVT_PUBLICADO, o.idioma) : d(RVT_BORRADOR, o.idioma),
+      },
+      ...(o.duracionHoras ? [{ rotulo: d(RVT_ROT_DURA, o.idioma), valor: `${o.duracionHoras} h` }] : []),
+      ...(plata(o.rackUsd) ? [{ rotulo: d(RVT_ROT_RACK, o.idioma), valor: plata(o.rackUsd)! }] : []),
+      ...(hayTarifas
+        ? [
+            { rotulo: d(RVT_ROT_NETO, o.idioma), valor: plata(o.netoUsd)! },
+            { rotulo: d(RVT_ROT_COM, o.idioma), valor: pct(o.comisionPct) },
+          ]
+        : []),
+    ],
+    boton: {
+      texto: d(RVT_BOTON, o.idioma),
+      url: `https://${o.destino.dominio}/negocio/${o.negocioId}/tours/${o.tourId}`,
+    },
+    nota: d(RVT_NOTA, o.idioma),
+    pie: d(TUR_PIE, o.idioma),
+  };
+}
+
+export async function correoRevisarTour(
+  o: Parameters<typeof piezasRevisarTour>[0] & { para: string },
+): Promise<Envio> {
+  return enviarCorreo({ destino: o.destino, idioma: o.idioma, para: o.para, ...piezasRevisarTour(o) });
+}

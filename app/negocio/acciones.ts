@@ -384,3 +384,65 @@ export async function guardarMisDatosFiscales(
     guardados: ((data ?? []) as Record<string, unknown>[])[0] ?? null,
   };
 }
+
+/* ---- La galería de un tour, desde el portal del operador ----------------
+ *
+ * Su pantalla aceptaba UNA sola foto (`dst_tour.imagen_url`); la galería
+ * existía solo en el panel del equipo. Eso volvía mentiroso el correo que le
+ * pide «subí tres o cuatro fotos»: el botón lo llevaba a un lugar que acepta
+ * una.
+ *
+ * Van por RPC y no por un update directo, igual que las fotos de un negocio:
+ * la función comprueba que el tour sea suyo, que no pase de ocho, y que la
+ * foto esté de verdad en la carpeta de su negocio — una dirección de otro
+ * lado se cae el día que el otro la borre y deja la ficha con un hueco.
+ */
+
+export async function anotarMiFotoDeTour(tourId: string, url: string, texto?: string): Promise<EstadoComercio> {
+  if (!esUuid(tourId)) return { error: 'Falta el tour.' };
+
+  const db = await sesion();
+  const { error } = await db.rpc('agregar_mi_foto_de_tour', {
+    p_tour_id: tourId,
+    p_url: url,
+    p_texto: texto?.trim() || null,
+  });
+  if (error) {
+    console.error('agregar_mi_foto_de_tour:', error.message);
+    return { error: error.message };
+  }
+  revalidarTour(tourId);
+  return { ok: 'Foto agregada.' };
+}
+
+export async function ponerMiPortadaDeTour(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(tourId) || !esUuid(fotoId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('marcar_mi_portada_de_tour', { p_tour_id: tourId, p_foto_id: fotoId });
+  if (error) console.error('marcar_mi_portada_de_tour:', error.message);
+  revalidarTour(tourId);
+}
+
+export async function quitarMiFotoDeTour(datos: FormData): Promise<void> {
+  const tourId = texto(datos, 'tour_id');
+  const fotoId = texto(datos, 'foto_id');
+  if (!esUuid(tourId) || !esUuid(fotoId)) return;
+
+  const db = await sesion();
+  const { error } = await db.rpc('quitar_mi_foto_de_tour', { p_tour_id: tourId, p_foto_id: fotoId });
+  if (error) console.error('quitar_mi_foto_de_tour:', error.message);
+  revalidarTour(tourId);
+}
+
+/* La pantalla del tour cuelga del negocio, así que hay que saber de cuál es
+   para poder refrescarla. Una consulta más por cada cambio de foto, y vale la
+   pena: sin esto la galería se guarda bien y la pantalla sigue mostrando lo
+   de antes. */
+async function revalidarTour(tourId: string) {
+  const db = await sesion();
+  const { data } = await db.from('dst_tour').select('negocio_id').eq('id', tourId).maybeSingle();
+  if (data?.negocio_id) revalidatePath(`/negocio/${data.negocio_id}/tours/${tourId}`);
+}

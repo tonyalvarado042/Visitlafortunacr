@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
+import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -248,5 +249,193 @@ export async function borrarFotoTour(datos: FormData) {
 
   const { error } = await db.from('dst_tour_foto').delete().eq('id', fotoId).eq('tour_id', id);
   if (error) console.error('borrarFotoTour:', error.message);
+  refrescarTour(id);
+}
+
+/**
+ * Le pide al operador que complete ESTE tour: fotos, descripción, precio.
+ *
+ * Lo pidió Tony así: *«un botón donde solicitar más info, fotos del tour al
+ * operador… pero el link lo debe llevar a la página de administración del
+ * tour o de una vez a subir fotos»*. Por eso el correo apunta a
+ * `/negocio/<negocio>/tours/<tour>` y no a la raíz de su cuenta: mandarlo a
+ * buscar cuál de sus cuatro tours es, es como se pierde a alguien que estaba
+ * dispuesto a hacerlo.
+ *
+ * ⚠️ NO MANDA NADA SOLO. Lo dispara alguien del equipo desde la pantalla del
+ * tour.
+ *
+ * Calcula lo que falta EN EL MOMENTO del envío y no confía en lo que diga la
+ * pantalla: entre que se pintó y que se tocó el botón, el operador pudo haber
+ * subido las fotos. Pedirle lo que ya hizo es la forma más rápida de que el
+ * próximo correo no se abra.
+ */
+export async function pedirCompletarTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  const { data: t } = await db.from('dst_tour')
+    .select('id, nombre, negocio_id, descripcion, precio_adulto_usd')
+    .eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!t?.negocio_id) return;
+
+  const { data: n } = await db.from('dst_negocio')
+    .select('id, email').eq('id', t.negocio_id).maybeSingle();
+  /* Sin correo no hay a quién escribirle. La pantalla ya no ofrece el botón
+     en ese caso, pero un formulario se puede mandar a mano. */
+  if (!n?.email) return;
+
+  const { count: fotos } = await db.from('dst_tour_foto')
+    .select('id', { count: 'exact', head: true }).eq('tour_id', id);
+
+  /* ⚠️ No es «cero fotos», es «menos de las que necesita». Lo tenía en cero y
+     Tony lo cachó: los dos tours de Jacamar están publicados con UNA foto
+     cada uno, y con el chequeo en cero el sistema decía «no falta nada» y no
+     ofrecía pedírselas. Una foto no es una galería. */
+  const cuantasFotos = fotos ?? 0;
+  const faltanFotos = cuantasFotos < MINIMO_FOTOS_TOUR;
+  const faltaDescripcion = !String(t.descripcion ?? '').trim();
+  const faltaPrecio = !(Number(t.precio_adulto_usd) > 0);
+  /* Si no falta nada, no se manda: un correo que dice «te falta» cuando no
+     falta nada quema la confianza del operador en todos los que vengan. */
+  if (!faltanFotos && !faltaDescripcion && !faltaPrecio) return;
+
+  /* El correo necesita la fila ENTERA del destino y `contextoPanel` solo da
+     el resumen del panel. Se comprueba que sea el mismo: `destinoActual()`
+     resuelve por el Host, y el día que haya dos destinos alguien parado en el
+     panel de uno con el navegador en el dominio del otro mandaría el correo
+     con la marca equivocada. */
+  const { destinoActual } = await import('@/lib/destino');
+  const completo = await destinoActual();
+  if (completo.id !== destino.id) {
+    console.error('pedirCompletarTour: el destino del panel y el del dominio no calzan; no se manda.');
+    return;
+  }
+
+  const { correoFaltaCompletarTour } = await import('@/lib/correo/cartas');
+  const envio = await correoFaltaCompletarTour({
+    destino: completo,
+    /* En el idioma principal: `dst_negocio` no guarda el idioma del dueño
+       (ver la nota en negocios/acciones.ts). */
+    idioma: completo.idioma_principal,
+    para: n.email,
+    negocioId: t.negocio_id,
+    tourId: t.id,
+    nombreTour: t.nombre,
+    faltanFotos,
+    /* Cuántas tiene, no solo si faltan: con eso el correo pide «más fotos» a
+       quien ya subió una y «fotos» a quien no subió ninguna. Decirle «subí
+       fotos» a alguien que ya puso una suena a que no miramos. */
+    cuantasFotos,
+    minimoFotos: MINIMO_FOTOS_TOUR,
+    faltaDescripcion,
+    faltaPrecio,
+  });
+
+  /* La fecha se anota SOLO si el correo salió. Anotarla igual haría que la
+     pantalla dijera «ya se le pidió» de algo que nunca llegó, y entonces
+     nadie volvería a pedirlo. El error queda en la bitácora de `dst_correo`. */
+  if (envio.ok) {
+    await db.from('dst_tour')
+      .update({ completar_pedido_en: new Date().toISOString() })
+      .eq('id', id).eq('destino_id', destino.id);
+  } else {
+    console.error('pedirCompletarTour:', envio.error);
+  }
+  refrescarTour(id);
+}
+
+/**
+ * Le pide al operador que REVISE lo que ya está publicado y confirme las
+ * tarifas: rack, neta y comisión.
+ *
+ * Lo pidió Tony así: *«a la par de ese botón otro al operador para que revise
+ * la información pública además el tema de comisión tarifa rack y neta etc»*.
+ *
+ * El otro botón pide lo que FALTA. Este sirve cuando no falta nada: que mire
+ * los números antes de que entre la primera reserva. Un operador que descubre
+ * la comisión cuando le llega la liquidación se enoja con razón, y ese enojo
+ * cuesta más que la comisión.
+ *
+ * ⚠️ NO MANDA NADA SOLO. Lo dispara alguien del equipo desde la pantalla del
+ * tour.
+ */
+export async function pedirRevisionDeTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  const { data: t } = await db.from('dst_tour')
+    .select('id, nombre, negocio_id, estado, duracion_horas, precio_adulto_usd, precio_neto_usd, comision_pct')
+    .eq('id', id).eq('destino_id', destino.id).maybeSingle();
+  if (!t?.negocio_id) return;
+
+  const { data: n } = await db.from('dst_negocio')
+    .select('id, email').eq('id', t.negocio_id).maybeSingle();
+  if (!n?.email) return;
+
+  /* ⚠️ LAS TRES CIFRAS TIENEN QUE CUADRAR ANTES DE MANDARLAS.
+     El correo le muestra rack, neto y comisión juntos. Si el neto no es el
+     rack menos la comisión, el operador recibe tres números que se
+     contradicen y lo que iba a dar confianza la quita. Hoy cuadran los seis
+     tours; el día que alguien toque un precio y se olvide del otro campo,
+     esto frena el correo en vez de mandar la contradicción.
+     Medio punto de tolerancia porque los netos están redondeados a centavos
+     (99.44 − 74.58 = 24.86, que es 25.0% justo, pero no todos caen tan
+     redondo). La pantalla muestra el mismo aviso para que no sea un botón
+     que no hace nada. */
+  const rack = Number(t.precio_adulto_usd);
+  const neto = t.precio_neto_usd != null ? Number(t.precio_neto_usd) : null;
+  const comision = t.comision_pct != null ? Number(t.comision_pct) : null;
+  if (rack > 0 && neto != null && comision != null) {
+    const implicita = ((rack - neto) / rack) * 100;
+    if (Math.abs(implicita - comision) > 0.5) {
+      console.error(
+        `pedirRevisionDeTour: no se manda, las cifras de «${t.nombre}» no cuadran — ` +
+        `rack ${rack} menos neto ${neto} da ${implicita.toFixed(1)}% y el tour dice ${comision}%.`,
+      );
+      return;
+    }
+  }
+
+  /* El correo necesita la fila ENTERA del destino; `contextoPanel` solo da el
+     resumen. Misma comprobación que en `pedirCompletarTour`: el día que haya
+     dos destinos, alguien en el panel de uno con el navegador en el dominio
+     del otro mandaría el correo con la marca equivocada. */
+  const { destinoActual } = await import('@/lib/destino');
+  const completo = await destinoActual();
+  if (completo.id !== destino.id) {
+    console.error('pedirRevisionDeTour: el destino del panel y el del dominio no calzan; no se manda.');
+    return;
+  }
+
+  const { correoRevisarTour } = await import('@/lib/correo/cartas');
+  const envio = await correoRevisarTour({
+    destino: completo,
+    /* En el idioma principal: `dst_negocio` no guarda el idioma del dueño
+       (ver la nota en negocios/acciones.ts). */
+    idioma: completo.idioma_principal,
+    para: n.email,
+    negocioId: t.negocio_id,
+    tourId: t.id,
+    nombreTour: t.nombre,
+    publicado: t.estado === 'publicado',
+    duracionHoras: t.duracion_horas != null ? Number(t.duracion_horas) : null,
+    rackUsd: rack > 0 ? rack : null,
+    netoUsd: neto,
+    comisionPct: comision,
+  });
+
+  /* La fecha se anota SOLO si el correo salió: si se anotara igual, la
+     pantalla diría «ya se le pidió» de algo que nunca llegó y nadie volvería
+     a pedirlo. El error queda en la bitácora de `dst_correo`. */
+  if (envio.ok) {
+    await db.from('dst_tour')
+      .update({ revisar_pedido_en: new Date().toISOString() })
+      .eq('id', id).eq('destino_id', destino.id);
+  } else {
+    console.error('pedirRevisionDeTour:', envio.error);
+  }
   refrescarTour(id);
 }

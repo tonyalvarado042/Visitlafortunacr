@@ -4,7 +4,9 @@ import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour } from '../acciones';
+import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour } from '../acciones';
+import { relativo } from '@/lib/admin/formato';
+import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,8 +21,42 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
   const { data: fotos } = await db.from('dst_tour_foto')
     .select('id, url, es_portada, orden, credito, licencia').eq('tour_id', id).order('orden');
   const { data: operador } = t.negocio_id
-    ? await db.from('dst_negocio').select('babosa').eq('id', t.negocio_id).maybeSingle()
+    ? await db.from('dst_negocio').select('babosa, email, nombre').eq('id', t.negocio_id).maybeSingle()
     : { data: null };
+  /* Lo que le falta al tour para poder publicarse y venderse. El precio
+     cuenta: sin él `tour_reservable` no devuelve nada y la caja de reservar
+     no sale — ver la nota de ese RPC. */
+  const faltan = [
+    /* Menos de las que necesita, no «ninguna». Con el chequeo en cero los dos
+       tours de Jacamar —publicados, con UNA foto cada uno— salían como si no
+       les faltara nada, y el botón de pedírselas no aparecía. */
+    (fotos?.length ?? 0) < MINIMO_FOTOS_TOUR && (fotos?.length ? 'más fotos' : 'las fotos'),
+    !String(t.descripcion ?? '').trim() && 'la descripción',
+    !(Number(t.precio_adulto_usd) > 0) && 'el precio',
+  ].filter(Boolean) as string[];
+  /* Las tres cifras que el correo de revisión le muestra JUNTAS: lo que paga
+     el viajero, lo que se le gira y la comisión. Si el neto no es el rack
+     menos la comisión, el operador recibiría tres números que se contradicen
+     y el correo quita la confianza que venía a dar — así que el botón no se
+     ofrece y la cabecera dice por qué. Un botón que se sabe que va a rebotar
+     es peor que ninguno.
+     Medio punto de tolerancia porque los netos están redondeados a centavos:
+     99.44 − 74.58 = 24.86, que es 25.0% justo, pero no todos caen tan
+     redondo. */
+  const rack = Number(t.precio_adulto_usd);
+  const neto = t.precio_neto_usd != null ? Number(t.precio_neto_usd) : null;
+  const comision = t.comision_pct != null ? Number(t.comision_pct) : null;
+  const pctImplicita = rack > 0 && neto != null ? ((rack - neto) / rack) * 100 : null;
+  const cifrasCuadran =
+    pctImplicita == null || comision == null || Math.abs(pctImplicita - comision) <= 0.5;
+  /* Para la confirmación del botón: que quien lo aprieta vea los mismos
+     números que le van a llegar al operador, no un «¿seguro?» a ciegas.
+     `Number` y no `toFixed(0)`: Outback firmó 12.60% y 22.80%. */
+  const resumenTarifas = [
+    rack > 0 ? `rack $${rack.toFixed(2)}` : null,
+    neto != null ? `neto $${neto.toFixed(2)}` : null,
+    comision != null ? `comisión ${Number(comision)}%` : null,
+  ].filter(Boolean).join(', ') || 'todavía sin tarifas cargadas';
   /* Solo los contratos DEL OPERADOR de esta tour. La base tiene un disparador
      que rechaza un contrato de otro negocio, asi que ofrecer los demas seria
      ofrecer un error: la lista se arma con los que de verdad se pueden pegar. */
@@ -38,12 +74,49 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <Cabecera titulo={t.nombre} migas={[{ ruta: '/admin/tours', nombre: 'Tours' }]} sub={<><Etiqueta suave>{t.estado}</Etiqueta> · {t.total_reservas} reservas</>}>
+      <Cabecera titulo={t.nombre} migas={[{ ruta: '/admin/tours', nombre: 'Tours' }]} sub={<><Etiqueta suave>{t.estado}</Etiqueta>{t.completar_pedido_en ? <> <Etiqueta suave>se le pidió {relativo(t.completar_pedido_en)}</Etiqueta></> : null}{t.revisar_pedido_en ? <> <Etiqueta suave>revisión pedida {relativo(t.revisar_pedido_en)}</Etiqueta></> : null}{faltan.length ? <> <Etiqueta color="alerta">le falta {faltan.join(' y ')}</Etiqueta></> : null}{!cifrasCuadran ? <> <Etiqueta color="alerta">las cifras no cuadran: rack menos neto da {pctImplicita!.toFixed(1)}% y el tour dice {Number(comision)}%</Etiqueta></> : null} · {t.total_reservas} reservas</>}>
         {/* Ver el tour en el sitio. Regla de Tony: toda ficha lleva su enlace
             para mirarla directamente — si no, revisar lo que uno acaba de
             escribir obliga a adivinar la dirección. Solo si está publicado:
             un enlace a algo que no se sirve lleva a un 404 y hace dudar de si
             el tour existe. */}
+        {/* Pedirle al operador lo que falta. El correo lo lleva DIRECTO a la
+            pantalla de este tour en su portal, no a la raíz de su cuenta:
+            mandarlo a buscar cuál de sus cuatro tours es, es como se pierde a
+            alguien que estaba dispuesto a hacerlo.
+            Sin correo del operador no se ofrece: un botón que no puede hacer
+            nada es peor que ninguno. */}
+        {faltan.length > 0 && operador?.email && (
+          <form action={pedirCompletarTour}>
+            <input type="hidden" name="id" value={id} />
+            <BotonAccion
+              confirmar={`Se le manda un correo a ${operador.email} pidiéndole ${faltan.join(' y ')} de «${t.nombre}». El enlace lo lleva directo a este tour en su cuenta. ¿Lo mando?`}
+            >
+              {t.completar_pedido_en ? 'Volver a pedírselo' : `Pedirle ${faltan.join(' y ')}`}
+            </BotonAccion>
+          </form>
+        )}
+
+        {/* A la par del otro, y hace otra cosa: ese pide lo que FALTA, este
+            sirve cuando no falta nada — que mire lo que ya se publica y
+            confirme los números antes de que entre la primera reserva. Un
+            operador que descubre la comisión cuando le llega la liquidación
+            se enoja con razón, y ese enojo cuesta más que la comisión.
+            No se ofrece sin correo del operador, ni cuando las tres cifras no
+            cuadran: el correo las muestra juntas y mandar una contradicción
+            quita la confianza que venía a dar. El por qué sale arriba, en la
+            cabecera, para que no parezca que el botón se perdió. */}
+        {operador?.email && cifrasCuadran && (
+          <form action={pedirRevisionDeTour}>
+            <input type="hidden" name="id" value={id} />
+            <BotonAccion
+              confirmar={`Se le manda un correo a ${operador.email} con lo que se publica de «${t.nombre}» y las tarifas —${resumenTarifas}— para que lo confirme o lo corrija. El enlace lo lleva directo a este tour en su cuenta. ¿Lo mando?`}
+            >
+              {t.revisar_pedido_en ? 'Volver a pedirle que revise' : 'Pedirle que revise info y tarifas'}
+            </BotonAccion>
+          </form>
+        )}
+
         {t.estado === 'publicado' && t.babosa && (
           <a className="boton secundario" target="_blank" rel="noreferrer"
              href={`https://${destino.dominio}/${destino.idioma_principal}/tour/${t.babosa}`}>

@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { miNegocio, miTour, ESTADO_TOUR } from '@/lib/comercio';
+import { miNegocio, miTour, fotosDeMiTour, ESTADO_TOUR, MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 import { FormularioTour } from './FormularioTour';
+import { FotosTour } from '../FotosTour';
 import { mandarMiTourARevision, borrarMiTour } from '../../../acciones';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,8 @@ export default async function EditarMiTour({
      esto es un 404 y no un "prohibido" — que ya confirmaría que existe. */
   const tour = await miTour(tourId);
   if (!tour) notFound();
+
+  const fotos = await fotosDeMiTour(tourId);
 
   const estado = ESTADO_TOUR[tour.estado] ?? ESTADO_TOUR.borrador;
   const sinPrecio = !(tour.precio_adulto_usd > 0);
@@ -57,6 +60,20 @@ export default async function EditarMiTour({
         negocioId={id}
         destinoBabosa={negocio.destino_babosa}
         negocioBabosa={negocio.babosa}
+      />
+
+      {/* La GALERÍA, fuera del formulario del tour.
+          ⚠️ Fuera y no adentro: HTML no permite formularios anidados, y los
+          botones de cada foto son formularios. Adentro, el navegador se los
+          come y «Hacerla portada» terminaría guardando el tour.
+          Antes acá solo cabía UNA foto, y eso volvía mentiroso el correo que
+          le pide al operador «subí tres o cuatro». */}
+      <FotosTour
+        tourId={tour.id}
+        destinoBabosa={negocio.destino_babosa}
+        negocioBabosa={negocio.babosa}
+        fotos={fotos}
+        minimoFotos={MINIMO_FOTOS_TOUR}
       />
 
       {/* Mandar a revisión solo desde borrador: una publicada que volviera a

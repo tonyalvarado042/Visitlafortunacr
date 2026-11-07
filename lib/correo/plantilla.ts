@@ -194,7 +194,13 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
     ...(url ? ['', `${boton!.texto}: ${url}`] : []),
     ...(nota ? ['', nota] : []),
     '',
-    `${PIE[idioma] ?? PIE.es} ${destino.dominio}.`,
+    /* `pie` primero, igual que en el HTML de arriba. Hasta hoy esta línea
+       ignoraba el pie propio y metía el genérico: la versión HTML le decía al
+       dueño de un hotel «porque tenés un negocio publicado en» y la de texto
+       —la que se ve con las imágenes apagadas— le decía «porque escribiste
+       a», que nunca pasó. Dos versiones del mismo correo diciendo cosas
+       distintas, y la mentira en la que nadie mira. */
+    `${pie ?? PIE[idioma] ?? PIE.es} ${destino.dominio}.`,
     ...(urlBaja ? [`${BAJA[idioma] ?? BAJA.es}: ${urlBaja}`] : []),
   ].join('\n');
 
