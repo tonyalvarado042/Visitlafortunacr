@@ -104,6 +104,32 @@ export const T: Record<string, Diccionario> = {
      siguiente también se lea con desconfianza. */
   tour_otras:        { es: 'Más para tu viaje', en: 'More for your trip', pt: 'Mais para a sua viagem', fr: 'Plus pour votre voyage', de: 'Mehr für deine Reise' },
   tour_desde:        { es: 'desde', en: 'from', pt: 'desde', fr: 'à partir de', de: 'ab' },
+  /* ── Las filas de datos clave de una tour ──────────────────────────────
+     Cada una es un TITULAR y una linea que lo explica, no una etiqueta y un
+     valor. Antes eran celditas de «CUPO MAXIMO / 20», que obligan a quien lee
+     a traducir el dato a lo que significa para el. «Grupo pequeno / Hasta 20
+     personas» ya viene traducido. Ver componentes/DatosClaveDelTour.tsx. */
+  clave_cancela_si:  { es: 'Cancelación gratuita', en: 'Free cancellation', pt: 'Cancelamento grátis', fr: 'Annulation gratuite', de: 'Kostenlose Stornierung' },
+  clave_cancela_det: { es: 'Cancelá sin costo hasta', en: 'Cancel at no cost up to', pt: 'Cancele sem custo até', fr: 'Annulez sans frais jusqu’à', de: 'Kostenlos stornieren bis' },
+  clave_horas_antes: { es: 'horas antes', en: 'hours before', pt: 'horas antes', fr: 'heures avant', de: 'Stunden vorher' },
+  clave_cancela_no:  { es: 'Sin cancelación gratuita', en: 'No free cancellation', pt: 'Sem cancelamento grátis', fr: 'Pas d’annulation gratuite', de: 'Keine kostenlose Stornierung' },
+  clave_cancela_no_det: { es: 'Escribinos antes de reservar si necesitás flexibilidad.', en: 'Write to us before booking if you need flexibility.', pt: 'Escreva antes de reservar se precisar de flexibilidade.', fr: 'Écrivez-nous avant de réserver si vous avez besoin de flexibilité.', de: 'Schreib uns vor der Buchung, wenn du Flexibilität brauchst.' },
+  clave_horas:       { es: 'horas', en: 'hours', pt: 'horas', fr: 'heures', de: 'Stunden' },
+  clave_consulta_salida: { es: 'Consultá las horas de salida al reservar.', en: 'Check departure times when you book.', pt: 'Consulte os horários de saída ao reservar.', fr: 'Vérifiez les horaires de départ à la réservation.', de: 'Abfahrtszeiten bei der Buchung erfragen.' },
+  clave_guia_vivo:   { es: 'Guía en vivo', en: 'Live tour guide', pt: 'Guia ao vivo', fr: 'Guide en direct', de: 'Live-Guide' },
+  clave_recoge:      { es: 'Te pasan buscando', en: 'Pickup included', pt: 'Buscam você', fr: 'Prise en charge incluse', de: 'Abholung inklusive' },
+  clave_recoge_det:  { es: 'Desde tu hotel en', en: 'From your hotel in', pt: 'Do seu hotel em', fr: 'Depuis votre hôtel à', de: 'Von deinem Hotel in' },
+  clave_grupo:       { es: 'Grupo pequeño', en: 'Small group', pt: 'Grupo pequeno', fr: 'Petit groupe', de: 'Kleine Gruppe' },
+  clave_grupo_grande:{ es: 'Grupo', en: 'Group', pt: 'Grupo', fr: 'Groupe', de: 'Gruppe' },
+  clave_hasta:       { es: 'Hasta', en: 'Up to', pt: 'Até', fr: 'Jusqu’à', de: 'Bis zu' },
+  clave_personas:    { es: 'personas', en: 'people', pt: 'pessoas', fr: 'personnes', de: 'Personen' },
+  clave_anos:        { es: 'años en adelante', en: 'years and older', pt: 'anos ou mais', fr: 'ans et plus', de: 'Jahre und älter' },
+  dificultad_facil:    { es: 'Fácil', en: 'Easy', pt: 'Fácil', fr: 'Facile', de: 'Leicht' },
+  dificultad_moderada: { es: 'Moderada', en: 'Moderate', pt: 'Moderada', fr: 'Modérée', de: 'Mittel' },
+  dificultad_dificil:  { es: 'Difícil', en: 'Hard', pt: 'Difícil', fr: 'Difficile', de: 'Schwer' },
+  dificultad_facil_det:    { es: 'Casi todo el mundo la puede hacer.', en: 'Almost anyone can do it.', pt: 'Quase todo mundo consegue.', fr: 'Presque tout le monde peut la faire.', de: 'Fast jeder schafft das.' },
+  dificultad_moderada_det: { es: 'Pide estar en forma razonable.', en: 'Asks for reasonable fitness.', pt: 'Pede estar em forma razoável.', fr: 'Demande une forme physique correcte.', de: 'Erfordert normale Fitness.' },
+  dificultad_dificil_det:  { es: 'Exigente: mirá bien qué incluye antes de reservar.', en: 'Demanding: read what it involves before booking.', pt: 'Exigente: veja bem o que inclui antes de reservar.', fr: 'Exigeante : lisez bien avant de réserver.', de: 'Anspruchsvoll: lies vorher genau, was dich erwartet.' },
   tour_cancelacion:  { es: 'Cancelación libre hasta', en: 'Free cancellation up to', pt: 'Cancelamento livre até', fr: 'Annulation gratuite jusqu’à', de: 'Kostenlose Stornierung bis' },
   reserva_lanzamiento:{ es: 'de lanzamiento', en: 'launch discount', pt: 'de lançamento', fr: 'de lancement', de: 'Einführungsrabatt' },
   reserva_total:     { es: 'Total', en: 'Total', pt: 'Total', fr: 'Total', de: 'Gesamt' },

@@ -8,6 +8,7 @@ import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNe
 import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
 import { BloqueResenas } from '@/componentes/BloqueResenas';
+import { DatosClaveDelTour, filasClaveDeTour } from '@/componentes/DatosClaveDelTour';
 import { resenasDeTour } from '@/lib/resenas';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
@@ -120,14 +121,10 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
   const noIncluye = enLineas(tour.no_incluye);
   const cuerpo = textoRicoAHtml(tour.descripcion);
 
-  const datos: { que: string; valor: string }[] = [
-    ...(tour.duracion_horas != null ? [{ que: t('tour_duracion', idioma), valor: `${tour.duracion_horas} h` }] : []),
-    ...(tour.hora_inicio ? [{ que: t('tour_salida', idioma), valor: tour.hora_inicio.slice(0, 5) }] : []),
-    ...(tour.dificultad ? [{ que: t('tour_dificultad', idioma), valor: tour.dificultad }] : []),
-    ...(tour.edad_minima != null ? [{ que: t('tour_edad', idioma), valor: `${tour.edad_minima}+` }] : []),
-    ...(tour.cupo_maximo != null ? [{ que: t('tour_cupo', idioma), valor: `${tour.cupo_maximo}` }] : []),
-    ...(tour.idiomas_guia?.length ? [{ que: t('tour_idiomas', idioma), valor: tour.idiomas_guia.join(', ').toUpperCase() }] : []),
-  ];
+  /* Las filas de datos clave. Dejaron de ser celditas de «CUPO MÁXIMO / 20»
+     y pasaron a ser titular + explicación — ver componentes/DatosClaveDelTour.
+     La recogida dice DÓNDE: «Desde tu hotel en La Fortuna». */
+  const filasClave = tour ? filasClaveDeTour(tour, idioma, destino.nombre) : [];
 
   return (
     <>
@@ -188,22 +185,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   no hay una segunda escrita para tours. */}
               <FotosArriba fotos={fotos} idioma={idioma} />
 
-              {datos.length > 0 && (
-                <ul className="tour-ficha-datos">
-                  {datos.map((d) => (
-                    <li key={d.que}>
-                      <span>{d.que}</span>
-                      <strong>{d.valor}</strong>
-                    </li>
-                  ))}
-                  {tour.recoge_en_hotel && (
-                    <li>
-                      <span>{t('tour_recoge', idioma)}</span>
-                      <strong>{t('si', idioma)}</strong>
-                    </li>
-                  )}
-                </ul>
-              )}
+              <DatosClaveDelTour filas={filasClave} />
 
               {cuerpo && (
                 /* El HTML lo generó `textoRicoAHtml` a partir de marcas: no se
@@ -298,7 +280,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
             </div>
 
             <aside className="ficha-lado">
-              <div className="ficha-reservar">
+              <div className="ficha-reservar" id="reservar">
                 {vendible ? (
                   <ReservarProducto producto={vendible} descuentoHasta={destino.descuento_lanzamiento_hasta}
                                     leyenda={destino.leyenda_precio} idioma={idioma} esTour />
@@ -389,6 +371,30 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
           )}
         </div>
       </main>
+
+      {/* La barra de precio fija abajo, de 1000px para abajo — que es donde la
+          ficha deja de tener dos columnas y la caja de reservar se va al final,
+          debajo de las reseñas. Sin esto, en teléfono el precio y el botón
+          quedan a dos pantallas de scroll de donde se decide.
+
+          Es el MISMO `.barra-reservar` que ya usaba la ficha de un negocio: un
+          <a> y nada más, ni una línea de JavaScript. La tour no lo tenía, y es
+          justo lo que Tony pidió el 7 de noviembre de 2026 señalando la ficha
+          de GetYourGuide en su teléfono.
+
+          ⚠️ Dice la tarifa de ADULTO con su nombre, no «desde». Con adulto a
+          $101 y niño a $70, un «desde $70» es cierto y engañoso a la vez. */}
+      {tour.precio_adulto_usd != null && tour.precio_adulto_usd > 0 && (
+        <a className="barra-reservar" href="#reservar">
+          <span className="cuanto">
+            <strong>${Number(tour.precio_adulto_usd).toFixed(0)}</strong>
+            <span>{t('reserva_adulto_uno', idioma)}</span>
+          </span>
+          <span className="boton">
+            {vendible ? t('reserva_pedir', idioma) : t('tour_consultar', idioma)}
+          </span>
+        </a>
+      )}
 
       {/* El visor va FUERA de las dos columnas y al final del documento: se
           abre con `:target`, y dentro de un contenedor con `overflow` o

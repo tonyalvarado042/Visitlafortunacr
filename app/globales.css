@@ -2925,17 +2925,47 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 }
 
 /* La página de una tour: los datos duros en una tira y las dos listas. */
-.tour-ficha-datos {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(126px, 1fr)); gap: 1px;
-  background: var(--borde); border: 1px solid var(--borde); border-radius: 6px; overflow: hidden;
+/* Los datos clave de una tour: icono, titular y la linea que lo explica.
+
+   Reemplazo de `.tour-ficha-datos`, que era una rejilla de celditas con
+   ETIQUETA y valor («CUPO MAXIMO / 20»). El dato estaba, pero le dejaba el
+   trabajo a quien lee. Ahora cada fila se entiende sola.
+
+   Separadas por una linea de 1px y NO por tarjetas: siete tarjetas seguidas
+   compiten entre si y con la foto de arriba. La linea deja que el ojo baje.
+   Ver componentes/DatosClaveDelTour.tsx. */
+.tour-claves { list-style: none; margin: 0; padding: 0; }
+.tour-claves li {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 15px 0; border-bottom: 1px solid var(--borde-2);
 }
-.tour-ficha-datos li {
-  background: var(--carbon); padding: 13px 15px;
-  display: flex; flex-direction: column; gap: 3px;
+.tour-claves li:first-child { padding-top: 4px; }
+.tour-claves li:last-child { border-bottom: 0; }
+/* El icono en su cuadrito gris, como un boton apagado: ancla la fila a la
+   izquierda y hace que las siete se lean como una lista y no como parrafos. */
+.tour-clave-icono {
+  flex: 0 0 auto; width: 42px; height: 42px; border-radius: 11px;
+  background: var(--sup-3); color: var(--txt-2);
+  display: inline-flex; align-items: center; justify-content: center;
 }
-.tour-ficha-datos span { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--humo); }
-.tour-ficha-datos strong { font-size: 16px; text-transform: capitalize; }
+.tour-claves strong {
+  display: block; font-size: 16.5px; line-height: 1.3; color: var(--txt-0);
+}
+.tour-claves span:not(.tour-clave-icono) {
+  display: block; margin-top: 3px;
+  font-size: 14px; line-height: 1.5; color: var(--txt-3);
+}
+/* La fila apagada es «sin cancelacion gratuita». Se MUESTRA igual —callarlo
+   seria lo caro— pero sin gritar: no es una alarma, es una condicion. */
+.tour-claves li.apagada .tour-clave-icono { color: var(--txt-4); }
+.tour-claves li.apagada strong { color: var(--txt-3); font-weight: 600; }
+
+@media (max-width: 560px) {
+  .tour-claves li { gap: 12px; padding: 13px 0; }
+  .tour-clave-icono { width: 38px; height: 38px; border-radius: 10px; }
+  .tour-claves strong { font-size: 15.5px; }
+  .tour-claves span:not(.tour-clave-icono) { font-size: 13.5px; }
+}
 .tour-listas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 26px; }
 .tour-marcas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .tour-marcas li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; line-height: 1.5; }
