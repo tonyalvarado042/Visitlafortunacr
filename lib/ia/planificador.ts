@@ -219,13 +219,65 @@ export async function generarItinerario(
       };
     })
   );
-  if (paradas.length) {
-    const { error: fallo } = await db.from('dst_itinerario_parada').insert(paradas);
-    if (fallo) throw new Error(`No se pudieron guardar las paradas: ${fallo.message}`);
+  /*
+   * ⚠️ UN ITINERARIO SIN PARADAS NO SE GUARDA. Esto pasó de verdad.
+   *
+   * El 14 de octubre de 2026, con un plan de 3 días que el modelo entregó bien
+   * (72 s, $0,27, sin error), este bloque reventó y dejó TRES destrozos de un
+   * solo golpe, porque la fila del itinerario ya estaba insertada y el `throw`
+   * se llevó todo lo que venía después:
+   *
+   *   1. Un plan PÚBLICO y VACÍO en una URL que ya se podía abrir: título y
+   *      nada más. Comprobado meses después, seguía dando 200.
+   *   2. La solicitud sin `itinerario_id`, porque el update de abajo nunca
+   *      corrió — y la pantalla del lead lee justo esa columna.
+   *   3. El viajero sin su correo, porque `avisarPlanListo` va después.
+   *
+   * La causa era un valor de más contra la base: el esquema le pide al modelo
+   * `['manana','mediodia','tarde','noche']` y el CHECK de
+   * `dst_itinerario_parada` solo aceptaba tres, sin `mediodia`. Una sola
+   * parada de almuerzo tumbaba el insert COMPLETO del lote. Se arregla en
+   * `supabase/plataforma/32_el_mediodia_existe.sql`.
+   *
+   * Pero la causa es lo de menos: lo que no puede volver a pasar es que un
+   * fallo acá deje una fila a medias y pública. Así que si las paradas no se
+   * pueden guardar, el itinerario SE BORRA antes de reventar.
+   */
+  const problemaConLasParadas = !paradas.length
+    ? 'el modelo no devolvió ninguna parada'
+    : (await db.from('dst_itinerario_parada').insert(paradas)).error?.message ?? null;
+
+  if (problemaConLasParadas) {
+    /* Las paradas cuelgan con `on delete cascade`, así que esto limpia las que
+       hayan entrado. Y se borra ANTES de tirar el error: si se tirara primero,
+       la fila huérfana se queda para siempre. */
+    await db.from('dst_itinerario').delete().eq('id', fila.id);
+    throw new Error(
+      `No se pudieron guardar las paradas, así que no hay itinerario: ${problemaConLasParadas}`,
+    );
   }
 
   if (peticion.solicitud_id) {
-    await db.from('dst_solicitud').update({ itinerario_id: fila.id }).eq('id', peticion.solicitud_id);
+    /* CON comprobación. Hasta hoy esta línea era un `await` pelado sin leer el
+       error: cuando falló, no se enteró nadie, y el síntoma salió a la luz
+       tres semanas después como «el itinerario no se ve en el lead».
+
+       No revienta si falla: el plan ya está bien guardado y el enlace también
+       vive en `dst_itinerario.solicitud_id`, que lo puso el insert de arriba.
+       Tirar el error acá botaría un plan bueno que ya se pagó. Pero se grita,
+       y se dice cómo repararlo. */
+    const { error: falloElEnlace } = await db
+      .from('dst_solicitud')
+      .update({ itinerario_id: fila.id })
+      .eq('id', peticion.solicitud_id);
+    if (falloElEnlace) {
+      console.error(
+        `planificador: el itinerario ${fila.id} quedó guardado pero NO se pudo pegar a la ` +
+        `solicitud ${peticion.solicitud_id} (${falloElEnlace.message}). El plan no se perdió: ` +
+        `dst_itinerario.solicitud_id lo tiene. Para repararlo: ` +
+        `update destinos.dst_solicitud set itinerario_id = '${fila.id}' where id = '${peticion.solicitud_id}';`,
+      );
+    }
   }
 
   const url = `https://${contexto.destino.dominio}/${idioma}/plan/${babosa}`;
