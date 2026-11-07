@@ -148,7 +148,7 @@ async function ejecutarEnvio(envio: Envio, zona: string): Promise<Estado> {
     if (!solicitud) return cerrar('omitido', 'La solicitud ya no existe.');
   }
   if (envio.viajero_id) {
-    const { data } = await db.from('dst_viajero').select('id, nombre, email, whatsapp, idioma, no_molestar, llega_el').eq('id', envio.viajero_id).maybeSingle();
+    const { data } = await db.from('dst_viajero').select('id, nombre, email, whatsapp, idioma, no_molestar, baja, llega_el').eq('id', envio.viajero_id).maybeSingle();
     viajero = (data as ViajeroMinimo | null) ?? null;
   }
 
@@ -274,7 +274,7 @@ export async function aprobarEnvio(envioId: string, usuarioId: string, textoFina
   if (!envio || envio.estado !== 'pendiente_aprobacion') return { ok: false, error: 'El envío no está pendiente de aprobación.' };
   if (!envio.viajero_id) return { ok: false, error: 'Sin viajero.' };
 
-  const { data: viajero } = await db.from('dst_viajero').select('id, nombre, email, whatsapp, idioma, no_molestar').eq('id', envio.viajero_id).single();
+  const { data: viajero } = await db.from('dst_viajero').select('id, nombre, email, whatsapp, idioma, no_molestar, baja').eq('id', envio.viajero_id).single();
   if (!viajero) return { ok: false, error: 'El viajero no existe.' };
 
   const crudo = (textoFinal?.trim() || envio.borrador || '').trim();

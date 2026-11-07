@@ -168,6 +168,11 @@ export type ViajeroContacto = {
   whatsapp: string | null;
   idioma: string | null;
   no_molestar?: boolean;
+  /* Se dio de baja. Opcional como `no_molestar`, pero con una diferencia que
+     importa: si no viene, `enviarAViajero` lo VA A BUSCAR. Un campo opcional
+     que decide si se manda o no, y que se lee como `undefined` cuando el
+     llamador olvidó ponerlo en el select, es un guardia que nunca dispara. */
+  baja?: boolean;
 };
 
 /** La conversación abierta de un viajero en un canal, o una nueva. */
@@ -278,11 +283,50 @@ export async function enviarEnConversacion(conversacionId: string, saliente: Sal
  * Manda un mensaje a un viajero eligiendo el canal: el pedido, o WhatsApp si
  * tiene, o correo. Abre la conversación si hace falta.
  */
+/* El respaldo del guardia de la baja: solo corre si el llamador no trajo el
+   campo. Ante la duda dice que NO se dio de baja —si la consulta falla, no se
+   calla un envío legítimo—, pero deja el error escrito en vez de tragárselo. */
+async function seDioDeBaja(viajeroId: string): Promise<boolean> {
+  const { data, error } = await servicio()
+    .from('dst_viajero').select('baja').eq('id', viajeroId).maybeSingle();
+  if (error) {
+    console.error('seDioDeBaja:', error.message);
+    return false;
+  }
+  return Boolean((data as { baja?: boolean } | null)?.baja);
+}
+
 export async function enviarAViajero(
   destinoId: string, viajero: ViajeroContacto, saliente: Saliente, canalPreferido?: 'whatsapp' | 'email' | null
 ): Promise<ResultadoEnvio> {
   if (viajero.no_molestar && saliente.automatico) {
     return { mensaje_id: null, canal: null, enviado: false, error: 'El viajero pidió que no le escriban.' };
+  }
+
+  /*
+   * LA BAJA, que hasta hoy no se miraba en ninguna parte.
+   *
+   * No la miraba `programar_automatizaciones`, ni `ejecutarEnvio`, ni esta
+   * función: solo `no_molestar`. Y existe una ruta `/baja` en el sitio y una
+   * columna `token_baja`, o sea que la gente SÍ puede darse de baja y la baja
+   * SÍ se guardaba — solo que a nadie le servía de nada.
+   *
+   * Va aquí y no en los cinco llamadores a propósito: este es el único cuello
+   * de botella por el que pasa todo envío. Parchar cada llamador deja el
+   * sexto, el que se escriba el mes que viene, sin guardia.
+   *
+   * Y si el campo no vino en el select, se busca. Cuesta una consulta en el
+   * camino raro y hace imposible saltarse el guardia por olvidar una columna.
+   *
+   * Solo frena lo AUTOMÁTICO, igual que `no_molestar`: darse de baja es
+   * decirle «no me mandes más correos de estos», no «no me contestes nunca».
+   * Si alguien del equipo responde a mano, eso tiene que salir.
+   */
+  if (saliente.automatico) {
+    const dioDeBaja = viajero.baja ?? await seDioDeBaja(viajero.id);
+    if (dioDeBaja) {
+      return { mensaje_id: null, canal: null, enviado: false, error: 'El viajero se dio de baja.' };
+    }
   }
 
   const candidatos: ('whatsapp' | 'email')[] = [];
