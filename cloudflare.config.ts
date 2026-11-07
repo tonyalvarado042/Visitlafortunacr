@@ -18,7 +18,26 @@ export default defineConfig({
     assets: {
       htmlHandling: "none",
       notFoundHandling: "none",
-      runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*"],
+      /* EL VIDEO SE EXCLUYE A PROPOSITO, y es un arreglo, no una optimizacion.
+
+         `runWorkerFirst: ["/*"]` manda TODO al Worker salvo lo que se excluya
+         aqui. El Worker sirve los archivos en streaming:
+         `Transfer-Encoding: chunked`, sin `Content-Length` y sin
+         `Accept-Ranges`. A un `Range:` le contesta **200 en vez de 206**.
+
+         Para un .js da igual. Para un <video> NO: **WebKit exige rangos de
+         bytes**, y Safari y Chrome-en-iPhone (que por dentro es WebKit)
+         sencillamente no reproducen. Tony lo vio en su iPhone el 7 de
+         noviembre de 2026: el hero salia GRIS. En escritorio reproducia
+         perfecto, por eso tardo en salir.
+
+         Y dio la pista que lo cerro: **en Vercel si funcionaba**. Mismo
+         archivo, misma pagina — Vercel sirve estaticos con rangos y el Worker
+         no. No era el video ni el navegador: era quien lo servia.
+
+         Excluyendolo, lo sirve el servidor de assets de Cloudflare, que si
+         responde 206. */
+      runWorkerFirst: ["/*", "!/_next/static/*", "!/*/_next/static/*", "!/video/*"],
     },
     /* Sin esto el Worker es una caja negra: los console.log de los crons y de
        la cola no se guardan en ninguna parte, y el paso 5 de CLAUDE.md pide

@@ -138,6 +138,7 @@ export default async function Portada({ params, searchParams }: {
         colorAcento={destino.color_acento}
         colorVerde={destino.color_naturaleza}
         videoUrl={destino.video_portada_url}
+        imagenUrl={destino.imagen_portada_url}
       />
 
       {/* ---- Qué hacer ---- */}

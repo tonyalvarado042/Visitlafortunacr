@@ -5,7 +5,7 @@ import { t, type Idioma } from '@/lib/idiomas';
 import { CampoBusqueda } from './CampoBusqueda';
 
 export function Hero({
-  idioma, nombre, region, pais, lema, colorAcento, colorVerde, consulta = '', videoUrl,
+  idioma, nombre, region, pais, lema, colorAcento, colorVerde, consulta = '', videoUrl, imagenUrl,
 }: {
   idioma: Idioma;
   nombre: string;
@@ -19,6 +19,10 @@ export function Hero({
   /** El video del destino, de dst_destino.video_portada_url. Sin él, el hero
    *  se queda con el volcán dibujado y no pasa nada. */
   videoUrl?: string | null;
+  /** El póster, de `dst_destino.imagen_portada_url`. Es lo que se ve en el
+   *  teléfono y lo primero que se ve en escritorio. Ver el bloque grande de
+   *  abajo: sin esto el hero móvil era un rectángulo gris. */
+  imagenUrl?: string | null;
 }) {
   const lienzo = useRef<HTMLCanvasElement>(null);
   const pista = useRef<HTMLDivElement>(null);
@@ -28,6 +32,22 @@ export function Hero({
   const c2 = useRef<SVGSVGElement>(null);
   const c3 = useRef<SVGSVGElement>(null);
   const video = useRef<HTMLVideoElement>(null);
+
+  /*
+   * EL PÓSTER. No es decoración: es lo que se ve mientras el video baja, y lo
+   * que queda si el video no puede reproducirse.
+   *
+   * El 7 de noviembre de 2026 el hero salía GRIS en el iPhone de Tony: el
+   * `<video>` no llevaba `poster`, y el lienzo de respaldo de más arriba solo
+   * se dibuja cuando NO hay video. Así que cuando el video no arrancaba, lo
+   * que quedaba era el hueco.
+   *
+   * La causa de fondo se arregló donde correspondía —en
+   * `cloudflare.config.ts`, para que el mp4 lo sirva el servidor de assets de
+   * Cloudflare con soporte de rangos, que es lo que WebKit exige— pero el
+   * póster se queda igual: hace de primer pixel visible (es el LCP) y es la
+   * red debajo el día que el video vuelva a fallar por lo que sea.
+   */
 
   useEffect(() => {
     const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -122,11 +142,17 @@ export function Hero({
       if (c2.current) c2.current.style.transform = `translateX(-50%) translateY(${p * 34}px) scale(${1 + p * 0.09})`;
       if (c3.current) c3.current.style.transform = `translateX(-50%) translateY(${p * 12}px) scale(${1 + p * 0.04})`;
 
-      /* El video está desde el primer fotograma y se mueve con el scroll: se
+      /* El fondo está desde el primer fotograma y se mueve con el scroll: se
          acerca y sube un poco, igual que hacían las capas dibujadas. Es lo
-         que evita que se sienta una foto pegada detrás del texto. */
-      if (video.current) {
-        video.current.style.transform = `translateY(${-p * 60}px) scale(${1 + p * 0.14})`;
+         que evita que se sienta una foto pegada detrás del texto.
+
+         Se busca por CLASE y no por la referencia del video: en el teléfono
+         el fondo es un `<img>`, no un `<video>`, y si esto mirara solo la
+         referencia el póster se quedaría clavado mientras todo lo demás se
+         desplaza — que se lee peor que no tener efecto. */
+      const fondo = pista.current?.querySelector<HTMLElement>('.video-escena');
+      if (fondo) {
+        fondo.style.transform = `translateY(${-p * 60}px) scale(${1 + p * 0.14})`;
       }
 
       barra?.classList.toggle('pegada', y > 80);
@@ -199,12 +225,24 @@ export function Hero({
         {/* El fondo del hero. Va antes del velo y del grano a propósito, para
             que esos dos lo cubran: son los que disuelven sus bordes en negro
             y los que mantienen legible el titular encima. */}
-        {videoUrl && (
+        {/* El póster mientras el video no esté puesto: en el teléfono se queda
+            para siempre, en escritorio es lo primero que se ve. Va con
+            `fetchPriority="high"` porque ES el elemento más grande de la
+            pantalla y lo que mide el LCP.
+            Es una url de Storage o de /public y ya viene del tamaño justo:
+            next/image no aporta nada y obligaría a configurar el dominio. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {videoUrl ? (
           <video ref={video} className="video-escena" src={videoUrl}
+                 poster={imagenUrl ?? undefined}
                  autoPlay muted loop playsInline preload="auto" aria-hidden="true" />
-        )}
+        ) : imagenUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img className="video-escena" src={imagenUrl} alt=""
+               fetchPriority="high" decoding="async" aria-hidden="true" />
+        ) : null}
 
-        <div className={videoUrl ? 'velo con-video' : 'velo'} />
+        <div className={videoUrl || imagenUrl ? 'velo con-video' : 'velo'} />
         <div className="grano" />
 
         <div className="titular" ref={titular}>
