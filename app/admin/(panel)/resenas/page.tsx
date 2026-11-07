@@ -25,6 +25,10 @@ type Fila = {
   motivo_rechazo: string | null;
   respuesta_negocio: string | null;
   negocio: { id: string; nombre: string } | { id: string; nombre: string }[] | null;
+  /* De cual TOUR es. Null = del negocio entero. Sin esto, el que modera no
+     sabe si la queja es del hotel o de uno de sus seis tours, que es
+     exactamente el dato que necesita para decidir. */
+  tour: { nombre: string } | { nombre: string }[] | null;
   viajero: { nombre: string | null; email: string | null } | { nombre: string | null; email: string | null }[] | null;
 };
 
@@ -49,6 +53,7 @@ function Resena({ r, zona }: { r: Fila; zona: string }) {
       <div className="acciones-fila" style={{ marginBottom: 6 }}>
         <Volcanes nota={r.calificacion} />
         <strong>{n ? <Link href={`/admin/negocios/${n.id}`}>{n.nombre}</Link> : '—'}</strong>
+        {uno(r.tour) && <span className="etiqueta-tour">tour: {uno(r.tour)!.nombre}</span>}
         <Etiqueta color={COLOR[r.estado]}>{r.estado}</Etiqueta>
         <span className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>
           {v?.nombre ?? 'anónimo'} · {v?.email} · {r.idioma} · {fecha(r.creado_en, zona)}
@@ -100,7 +105,7 @@ export default async function PaginaResenas() {
 
   const [{ data: filas, error: fallo }, { data: ajuste }] = await Promise.all([
     db.from('dst_resena')
-      .select('id, calificacion, titulo, cuerpo, idioma, estado, visitado_el, creado_en, motivo_rechazo, respuesta_negocio, negocio:dst_negocio!inner(id, nombre, destino_id), viajero:dst_viajero!fk_dst_resena_viajero(nombre, email)')
+      .select('id, calificacion, titulo, cuerpo, idioma, estado, visitado_el, creado_en, motivo_rechazo, respuesta_negocio, negocio:dst_negocio!inner(id, nombre, destino_id), tour:dst_tour(nombre), viajero:dst_viajero!fk_dst_resena_viajero(nombre, email)')
       .eq('negocio.destino_id', destino.id)
       .order('creado_en', { ascending: false })
       .limit(200),

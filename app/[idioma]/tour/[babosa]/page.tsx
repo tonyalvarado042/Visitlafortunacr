@@ -7,6 +7,8 @@ import { TarjetaNegocio } from '@/componentes/TarjetaNegocio';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { tourReservable } from '@/lib/reservas';
 import { ReservarProducto } from '@/componentes/ReservarProducto';
+import { BloqueResenas } from '@/componentes/BloqueResenas';
+import { resenasDeTour } from '@/lib/resenas';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
 import { t, type Idioma } from '@/lib/idiomas';
@@ -61,6 +63,12 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
   const { idioma, babosa } = await params;
   const destino = await destinoActual();
   const tour = await tourPorBabosa(destino, babosa, idioma);
+
+  /* Las reseñas de ESTA tour. Se piden solo si la tour existe —si no, la
+     página va al 404 unas líneas más abajo y la consulta se habría tirado. */
+  const resenasPropias = tour ? await resenasDeTour(tour.id) : [];
+  const negocioIdDeLaTour = tour?.negocio_id ?? '';
+
   /* Las fotos del tour se mapean al tipo de las fichas para poder reusar la
      MISMA galería: tres grandes arriba, la tira con el «+N» más abajo y el
      visor a pantalla completa, todo sin una línea de JavaScript en el cliente.
@@ -266,6 +274,27 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
               {/* La tira con el «+N». Arriba van las tres que venden; esta
                   dice «hay más, mirá». Se calla sola si no sobran fotos. */}
               <GaleriaAbajo fotos={fotos} idioma={idioma} />
+
+              {/* Las reseñas DE ESTA TOUR, no las del operador.
+                  Es la diferencia que importa y la que hace GetYourGuide: la
+                  nota de un operador con diez tours no dice nada de la que uno
+                  está mirando. El bloque es el MISMO componente que usa la
+                  ficha de un negocio — ver componentes/BloqueResenas.tsx.
+                  Y va debajo de las fotos a propósito: quien llegó hasta acá
+                  ya sabe qué es la tour y lo que le falta es que alguien más
+                  se la recomiende. */}
+              {tour.negocio && (
+                <BloqueResenas
+                  idioma={idioma}
+                  total={tour.total_resenas}
+                  promedio={tour.promedio_calificacion}
+                  resenas={resenasPropias}
+                  negocioId={negocioIdDeLaTour}
+                  negocioNombre={tour.nombre}
+                  tourId={tour.id}
+                  estilo={{ marginTop: 34 }}
+                />
+              )}
             </div>
 
             <aside className="ficha-lado">

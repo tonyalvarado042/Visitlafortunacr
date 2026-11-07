@@ -55,6 +55,10 @@ export type ResenaDeMiNegocio = {
   respuesta_negocio: string | null;
   respondida_en: string | null;
   autor: string;
+  /* De cuál de SUS tours es la reseña. Null = del negocio entero. Un operador
+     con varias tours necesita saber a cuál se refiere lo que está leyendo. */
+  tour_id: string | null;
+  tour_nombre: string | null;
 };
 
 /** Los negocios de quien está en sesión. Vacío si no tiene ninguno. */

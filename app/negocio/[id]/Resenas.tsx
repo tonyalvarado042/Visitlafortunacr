@@ -43,6 +43,9 @@ function Resena({ negocioId, resena }: { negocioId: string; resena: ResenaDeMiNe
           {'★'.repeat(resena.calificacion)}{'☆'.repeat(5 - resena.calificacion)}
         </span>
         <strong>{resena.autor}</strong>
+        {/* De cual de sus tours. Sin esto, un operador con varias no sabe a
+            que se refiere la resena que esta leyendo. */}
+        {resena.tour_nombre && <span className="comercio-de-tour">{resena.tour_nombre}</span>}
         <time dateTime={resena.creado_en}>
           {new Date(resena.creado_en).toLocaleDateString('es-CR', { day: 'numeric', month: 'long', year: 'numeric' })}
         </time>

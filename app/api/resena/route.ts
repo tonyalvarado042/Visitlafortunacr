@@ -30,6 +30,12 @@ export async function POST(peticion: NextRequest) {
     NextResponse.json({ error: mensaje ?? t('resena_invalida', idioma) }, { status: 400 });
 
   const negocioId = cadena(cuerpo.negocio_id);
+  /* La reseña de una TOUR. Opcional: sin esto, es del negocio entero.
+     Acá solo se comprueba la FORMA; que la tour sea de ese negocio y esté
+     publicada lo comprueba `registrar_resena`, que es por donde pasa toda
+     reseña que entra. Validar la pertenencia acá sería una segunda verdad que
+     el día que se desincronice deja pasar lo que la base rechaza, o al revés. */
+  const tourId = cadena(cuerpo.tour_id);
   const calificacion = Number(cuerpo.calificacion);
   const texto = cadena(cuerpo.cuerpo);
   const nombre = cadena(cuerpo.nombre);
@@ -37,6 +43,7 @@ export async function POST(peticion: NextRequest) {
   const visitadoEl = cadena(cuerpo.visitado_el);
 
   if (!UUID.test(negocioId)) return invalido();
+  if (tourId && !UUID.test(tourId)) return invalido();
   if (!Number.isInteger(calificacion) || calificacion < 1 || calificacion > 5) return invalido();
   if (texto.length < MINIMO) return invalido(t('resena_corta', idioma));
   if (!nombre) return invalido();
@@ -53,6 +60,7 @@ export async function POST(peticion: NextRequest) {
     p_titulo:       cadena(cuerpo.titulo) || null,
     p_idioma:       idioma,
     p_visitado_el:  visitadoEl || null,
+    p_tour_id:      tourId || null,
   });
 
   if (error) {

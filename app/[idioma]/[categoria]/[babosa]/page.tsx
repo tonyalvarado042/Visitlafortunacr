@@ -2,7 +2,8 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { destinoActual, categoriasDe, negocioPorBabosa, babosaNuevaDe, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, combinaCon, SIMBOLO_PRECIO } from '@/lib/destino';
-import { nota, resenasDe } from '@/lib/resenas';
+import { resenasDe } from '@/lib/resenas';
+import { BloqueResenas } from '@/componentes/BloqueResenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -376,60 +377,15 @@ export default async function Ficha({ params }: { params: Parametros }) {
             {/* Las reseñas propias van primero y aparte: son las únicas que
                 cuentan para el promedio y para el marcado. Lo de Google y
                 Booking va debajo, citado y enlazado a su fuente. */}
-            <div className="bloque" style={{ marginTop: 34 }}>
-              <div className="titulo">{t('resenas_titulo', idioma)}</div>
-
-              <div className="resumen-nota">
-                {negocio.total_resenas > 0 && negocio.promedio_calificacion ? (
-                  <>
-                    <div className="cifra-nota">{nota(negocio.promedio_calificacion, idioma)}</div>
-                    <div>
-                      <Volcanes nota={negocio.promedio_calificacion} tamano={20}
-                                etiqueta={`${nota(negocio.promedio_calificacion, idioma)} ${t('de_cinco', idioma)}`} />
-                      <div className="cuantas">
-                        {negocio.total_resenas} {resenasPalabra(negocio.total_resenas, idioma)}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  /* Sin resenas, el bloque mantiene LA MISMA forma: la raya en
-                     lugar de la nota y los cinco volcanes vacios. Antes caia a
-                     una linea de texto gris de 204px de alto al lado de los
-                     1086px de las citas de Google, y se leia como si las
-                     resenas propias no existieran. */
-                  <>
-                    <div className="cifra-nota sin-nota">&mdash;</div>
-                    <div>
-                      <Volcanes nota={0} tamano={20} etiqueta={t('escribi_primera', idioma)} />
-                      <div className="cuantas">{t('escribi_primera', idioma)}</div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              <Calificar negocioId={negocio.id} negocioNombre={negocio.nombre} idioma={idioma} />
-
-              {propias.map((r) => (
-                <article className="resena" key={r.id}>
-                  <div className="quien">
-                    <Volcanes nota={r.calificacion} tamano={13}
-                              etiqueta={`${r.calificacion} ${t('de_cinco', idioma)}`} />
-                    <strong>{r.autor}</strong>
-                    <span>
-                      {new Date(r.visitado_el ?? r.creado_en).toLocaleDateString(idioma, { year: 'numeric', month: 'long' })}
-                    </span>
-                  </div>
-                  {r.titulo && <h4>{r.titulo}</h4>}
-                  <p>{r.cuerpo}</p>
-                  {r.respuesta_negocio && (
-                    <div className="respuesta">
-                      <span>{t('respuesta_negocio', idioma)}</span>
-                      <p>{r.respuesta_negocio}</p>
-                    </div>
-                  )}
-                </article>
-              ))}
-            </div>
+            <BloqueResenas
+              idioma={idioma}
+              total={negocio.total_resenas}
+              promedio={negocio.promedio_calificacion}
+              resenas={propias}
+              negocioId={negocio.id}
+              negocioNombre={negocio.nombre}
+              estilo={{ marginTop: 34 }}
+            />
 
             {/* Dónde queda y cómo llegar. La dirección de Google ya estaba
                 armada arriba: con coordenadas si las hay, y con el nombre si

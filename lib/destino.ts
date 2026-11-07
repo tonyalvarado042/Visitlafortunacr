@@ -547,6 +547,15 @@ export type TourPublico = TourDeNegocio & {
   precio_nino_usd: number | null;
   precio_nota: string | null;
   categoria_id: string | null;
+  /* Los mantiene el disparador de `dst_resena`. Cuentan SOLO las reseñas de
+     esta tour, no las del negocio: la nota de un operador con diez tours no
+     dice nada de la que uno está mirando. */
+  total_resenas: number;
+  promedio_calificacion: number | null;
+  /* El operador, por id. El objeto `negocio` de abajo trae lo que se PINTA
+     (nombre, babosa); esto es lo que hace falta para ESCRIBIR: toda reseña
+     lleva negocio_id, también las de una tour. */
+  negocio_id: string;
   /* La galeria. `imagen_url` sigue existiendo como respaldo: la foto vieja se
      copio a la galeria como portada, asi que lo normal es que `fotos[0]` sea
      la misma. */
@@ -598,10 +607,11 @@ export async function tourPorBabosa(
 ): Promise<TourPublico | null> {
   const { data, error } = await supabase
     .from('dst_tour')
-    .select(`id, categoria_id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
+    .select(`id, categoria_id, negocio_id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas,
              precio_adulto_usd, precio_nino_usd, precio_nota, imagen_url, video_url, video_portada_url,
+             total_resenas, promedio_calificacion,
              fotos:dst_tour_foto(id, url, texto_alternativo_es, texto_alternativo_en, credito, licencia, fuente_url, es_portada, orden),
              negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
     .eq('destino_id', destino.id)

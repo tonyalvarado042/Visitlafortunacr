@@ -195,6 +195,15 @@ table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
    variables se dan vuelta con el tema y la tarjeta del panel es #fff fija,
    asi que en oscuro las casillas saldrian casi negras sobre blanco. El unico
    color de variable que se usa aca es --naranja, que vale igual en los dos. */
+/* «tour: Caminata nocturna» al lado del negocio, en la moderacion de resenas.
+   Colores claros a mano por lo mismo que las casillas de abajo: la tarjeta del
+   panel es #fff fija y las variables del sitio se dan vuelta con el tema. */
+.etiqueta-tour {
+  display: inline-block; font-size: 11.5px; font-weight: 600; color: #514D46;
+  border: 1px solid #E6E6E2; border-radius: 100px; background: #FBFAF7;
+  padding: 2px 8px; margin-left: 8px; white-space: nowrap;
+}
+
 .etiquetas-casillas { display: flex; flex-wrap: wrap; gap: 6px; }
 .etiqueta-casilla {
   display: inline-flex !important; align-items: center; gap: 6px;

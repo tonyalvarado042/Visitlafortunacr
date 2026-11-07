@@ -22,11 +22,17 @@ export function Calificar({
   negocioNombre,
   idioma,
   compacto = false,
+  tourId,
 }: {
   negocioId: string;
   negocioNombre: string;
   idioma: Idioma;
   compacto?: boolean;
+  /* Con `tourId`, la reseña es de ESA tour. Sin él, del negocio entero.
+     `negocioId` va SIEMPRE, también cuando hay tour: la base comprueba que la
+     tour sea de ese negocio, y así el operador ve en su pantalla todo lo que
+     le escribieron sin un join de más. */
+  tourId?: string;
 }) {
   const router = useRouter();
   const [nota, setNota] = useState(0);
@@ -76,6 +82,7 @@ export function Calificar({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           negocio_id:   negocioId,
+          tour_id:      tourId ?? null,
           calificacion: nota,
           cuerpo:       String(datos.get('cuerpo') ?? ''),
           titulo:       String(datos.get('titulo') ?? ''),

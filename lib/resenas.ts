@@ -42,3 +42,26 @@ export async function resenasDe(negocioId: string, limite = 20): Promise<Resena[
 export function nota(valor: number, idioma: Idioma): string {
   return valor.toFixed(1).replace('.', idioma === 'en' ? '.' : ',');
 }
+
+/**
+ * Las reseñas publicadas de una TOUR.
+ *
+ * Hermana de `resenasDe`, y por la misma razón va por función de la base: el
+ * nombre de quien escribe vive en `dst_viajero`, que es el CRM. Dar SELECT
+ * sobre esa tabla para poder firmar una reseña publicaría correos, fechas de
+ * viaje y presupuestos.
+ */
+export async function resenasDeTour(tourId: string, limite = 20): Promise<Resena[]> {
+  const { data, error } = await supabase.rpc('resenas_de_tour', {
+    p_tour_id: tourId,
+    p_limite: limite,
+  });
+  if (error) {
+    /* A diferencia de una ficha sin reseñas, esto SÍ es un fallo: la tour
+       podría tener diez y no mostrar ninguna. Se dibuja el bloque vacío para
+       no tumbar la página, pero queda en el registro. */
+    console.error('resenasDeTour:', tourId, error.message);
+    return [];
+  }
+  return (data ?? []) as Resena[];
+}
