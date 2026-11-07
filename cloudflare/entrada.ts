@@ -42,11 +42,19 @@ export default {
       console.error(`cron sin ruta: "${evento.cron}"`);
       return;
     }
-    /* Mientras Vercel siga siendo producción, sus crons también corren, contra
-       la misma base. Refrescar dos veces no hace daño; mandar dos veces el
-       seguimiento a un viajero sí. Así que este cron espera a que el Worker
-       sea oficialmente producción: CLOUDFLARE_ES_PRODUCCION=si, que se pone
-       el mismo día que se quitan los crons de Vercel. */
+    /* Este gate existió porque Vercel corría los mismos crons contra la misma
+       base: refrescar dos veces no hace daño, mandar dos veces el seguimiento
+       a un viajero sí.
+
+       **6 de noviembre de 2026: ya no hay con quien chocar.** Vercel quedó
+       congelado —la API contesta `"live": false`, y un proyecto pausado no
+       corre crons— y los crons se quitaron de `vercel.json` el mismo día.
+       `CLOUDFLARE_ES_PRODUCCION=si` vive en `cloudflare.config.ts`.
+
+       El gate se deja puesto igual: es el interruptor para apagar el envío
+       automático sin desplegar código, y la línea de abajo deja dicho en los
+       registros por qué no corrió. Un cron que se calla cuesta más que uno
+       que falla. */
     if (ruta === '/api/cron/automatizaciones' && process.env.CLOUDFLARE_ES_PRODUCCION?.trim() !== 'si') {
       console.log('cron automatizaciones: en pausa hasta CLOUDFLARE_ES_PRODUCCION=si');
       return;

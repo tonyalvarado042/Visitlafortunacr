@@ -1,16 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/automatizaciones",
-      "schedule": "0 13 * * *"
-    },
-    {
-      "path": "/api/cron/externas",
-      "schedule": "0 5 * * *"
-    },
-    {
-      "path": "/api/cron/tipo-cambio",
-      "schedule": "15 12 * * *"
-    }
-  ]
+  "crons": []
 }

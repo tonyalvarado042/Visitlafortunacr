@@ -63,8 +63,17 @@ export async function GET(peticion: NextRequest) {
        entorno (Preview en vez de Production), o en otro proyecto de Vercel:
        desde fuera eso se ve igual que no haberla puesto. */
     nombres_presentes: Object.keys(process.env)
-      .filter((n) => /SUPABASE|ANTHROPIC|CRON|GOOGLE_PLACES|SMTP|WHATSAPP|RESEND|VERCEL_ENV|VERCEL_GIT_COMMIT_REF/.test(n))
+      .filter((n) => /SUPABASE|ANTHROPIC|CRON|GOOGLE_PLACES|SMTP|WHATSAPP|RESEND|VERCEL_ENV|VERCEL_GIT_COMMIT_REF|CLOUDFLARE/.test(n))
       .sort(),
+    /* ¿Está armado el envío automático? Esta bandera decide si el cron de
+       automatizaciones le escribe a viajeros de verdad, y hasta hoy no se
+       podía ver su estado desde ningún lado: el filtro de arriba no incluía
+       CLOUDFLARE, así que la variable podía estar puesta o no y desde fuera se
+       veía igual. Una bandera que manda correos y no se puede mirar es
+       exactamente lo que falla callado. */
+    envio_automatico: process.env.CLOUDFLARE_ES_PRODUCCION?.trim() === 'si'
+      ? 'ARMADO: el cron le escribe a viajeros'
+      : 'en pausa (falta CLOUDFLARE_ES_PRODUCCION=si)',
     chat_disponible: hayClaveDeServicio() && hayClaveDeIA(),
   };
 

@@ -35,9 +35,25 @@ export default defineConfig({
       IMAGES: bindings.images(),
       // Trabajos largos (planificador, concierge de WhatsApp): ver lib/segundo-plano.ts
       TRABAJOS: bindings.queue({ name: "visit-la-fortuna-trabajos" }),
+      /* EL CRON DE AUTOMATIZACIONES, ENCENDIDO. Dicho por Tony el 6 de
+         noviembre de 2026, despues de contar en seco lo que saldria.
+
+         Va aqui y no en el panel a proposito: no es una llave, es una
+         bandera. Escrita en la config queda versionada y un despliegue
+         futuro no la puede apagar sin que se vea en el diff — lo mismo que
+         ya se hace con `observability` arriba. Una bandera que solo vive en
+         el panel se apaga sola el dia que alguien recrea el Worker.
+
+         Estuvo apagada porque Vercel corria los mismos crons contra la
+         misma base. Vercel quedo congelado (`"live": false`), asi que ya no
+         hay con quien chocar. Ver cloudflare/entrada.ts. */
+      CLOUDFLARE_ES_PRODUCCION: bindings.text("si"),
     },
-    // Los mismos de vercel.json. Las expresiones tienen que coincidir con
-    // CRONES en cloudflare/entrada.ts.
+    /* Las expresiones tienen que coincidir con CRONES en
+       cloudflare/entrada.ts, o el cron entra y no encuentra ruta.
+       Antes decian «los mismos de vercel.json»: ya no. Ese archivo quedo con
+       `"crons": []` el 6 de noviembre de 2026, cuando Vercel se congelo.
+       Estos son los unicos crons del proyecto. */
     triggers: [
       triggers.scheduled({ schedule: "0 13 * * *" }),
       triggers.scheduled({ schedule: "0 5 * * *" }),
