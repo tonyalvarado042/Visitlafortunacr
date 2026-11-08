@@ -195,6 +195,18 @@ table.tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
    variables se dan vuelta con el tema y la tarjeta del panel es #fff fija,
    asi que en oscuro las casillas saldrian casi negras sobre blanco. El unico
    color de variable que se usa aca es --naranja, que vale igual en los dos. */
+/* Los textos configurables, uno por idioma. El codigo del idioma va a la
+   IZQUIERDA y no arriba: con tres idiomas apilados, las etiquetas encima
+   duplican el alto del bloque y el formulario se vuelve una tira larga.
+   Colores claros a mano, por lo mismo que las casillas de etiquetas de abajo:
+   la tarjeta del panel es #fff fija. */
+.texto-sitio-fila { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 7px; }
+.texto-sitio-idioma {
+  flex: 0 0 74px; padding-top: 9px;
+  font-size: 11.5px; font-weight: 700; color: #514D46;
+}
+.texto-sitio-fila textarea { flex: 1 1 auto; min-width: 0; }
+
 /* «tour: Caminata nocturna» al lado del negocio, en la moderacion de resenas.
    Colores claros a mano por lo mismo que las casillas de abajo: la tarjeta del
    panel es #fff fija y las variables del sitio se dan vuelta con el tema. */

@@ -1,7 +1,7 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { destinoActual, categoriasDe, negocioPorBabosa, babosaNuevaDe, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, combinaCon, SIMBOLO_PRECIO } from '@/lib/destino';
+import { destinoActual, categoriasDe, negocioPorBabosa, babosaNuevaDe, notasExternasDe, seccionesDe, horarioDe, etiquetasDe, fotosDe, toursDe, razonesDe, combinaCon, SIMBOLO_PRECIO, textosDelSitio } from '@/lib/destino';
 import { resenasDe } from '@/lib/resenas';
 import { BloqueResenas } from '@/componentes/BloqueResenas';
 import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
@@ -108,6 +108,14 @@ export default async function Ficha({ params }: { params: Parametros }) {
   /* Solo donde se puede reservar: ofrecerle un cupón a quien mira una ficha
      que no vende es ofrecerle algo que no va a poder usar. */
   const cuponSalida = reservables.length ? await cuponAlSalir(destino) : null;
+
+  /* Los textos que el equipo configuró en Ajustes, para el widget de reserva.
+     Sin configurar, devuelve los de lib/idiomas.ts y nada cambia. */
+  const tx = await textosDelSitio(destino, idioma);
+  const textosDeReserva = {
+    reserva_sin_cobro: tx('reserva_sin_cobro'),
+    tour_quien_confirma: tx('tour_quien_confirma'),
+  };
 
   const mapa = negocio.latitud && negocio.longitud
     ? `https://www.google.com/maps/search/?api=1&query=${negocio.latitud},${negocio.longitud}`
@@ -462,7 +470,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 segundo quedaba a dos pantallas. El pase se elige adentro. */}
             {reservables.length > 0 && (
               <div className="ficha-reservar" id="reservar">
-                <ReservarProducto productos={reservables} complementos={complementos}
+                <ReservarProducto textos={textosDeReserva} productos={reservables} complementos={complementos}
                                   descuentoHasta={destino.descuento_lanzamiento_hasta}
                                   leyenda={destino.leyenda_precio} idioma={idioma} />
               </div>

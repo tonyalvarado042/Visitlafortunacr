@@ -116,6 +116,7 @@ function textoDelBoton(accion: ProductoReservable['accion'], idioma: Idioma): st
 
 export function ReservarProducto({
   productos, producto: unoSolo, complementos = [], descuentoHasta, leyenda, idioma, esTour,
+  textos,
 }: {
   /* Varios pases en UNA tarjeta. Antes la ficha pintaba una tarjeta entera por
      producto: dos fechas, dos contadores y dos botones de enviar para el mismo
@@ -131,6 +132,12 @@ export function ReservarProducto({
      se muestra nada: lo que se escribe ahí es una afirmación que lee alguien
      que está por pagar. */
   leyenda?: string | null;
+  /* Los textos que el equipo configuró en Ajustes. Sin esto, el widget usa
+     los de lib/idiomas.ts, que es como funcionó siempre: el prop es opcional
+     a propósito, para que ninguna pantalla que todavía no lo pasa se rompa.
+     La resolución se hace del lado del servidor y acá solo llega el resultado
+     — este componente corre en el navegador y no puede ir a la base. */
+  textos?: { reserva_sin_cobro?: string; tour_quien_confirma?: string };
   idioma: Idioma;
   /* El mismo widget sirve para un producto de una ficha y para una tour con
      su propia página. Lo único que cambia es con qué nombre viaja el id: la
@@ -695,7 +702,7 @@ export function ReservarProducto({
           </>
         )}
 
-        <small className="reservar-letra">{t('reserva_sin_cobro', idioma)}</small>
+        <small className="reservar-letra">{textos?.reserva_sin_cobro ?? t('reserva_sin_cobro', idioma)}</small>
         {/* ⚠️ EN UN TOUR NO VA EL NOMBRE DEL OPERADOR.
             En la ficha de un NEGOCIO sí: ahí el negocio es lo que la persona
             está buscando y ya está listado entero, con su teléfono. En la de
@@ -709,7 +716,7 @@ export function ReservarProducto({
             se mira la otra. */}
         <small className="reservar-presta">
           {esTour
-            ? t('tour_quien_confirma', idioma)
+            ? (textos?.tour_quien_confirma ?? t('tour_quien_confirma', idioma))
             : <>{t('reserva_quien_presta', idioma)}: <strong>{producto.negocio_nombre}</strong></>}
         </small>
       </form>

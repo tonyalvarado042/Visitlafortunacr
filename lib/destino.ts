@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { supabase } from './supabase';
-import type { Idioma } from './idiomas';
+import { t, type Idioma } from './idiomas';
+import { CLAVES_CONFIGURABLES, agruparTextos } from './textos-del-sitio';
 
 export type Destino = {
   id: string;
@@ -15,6 +16,8 @@ export type Destino = {
   lema: string | null;
   idioma_principal: Idioma;
   idiomas: Idioma[];
+  /* Cuántas fichas salen en «Más para tu viaje». Antes era un 4 en duro. */
+  cuantas_recomendadas: number;
   moneda_iso: string;
   moneda_visitante: string | null;
   latitud: number | null;
@@ -850,4 +853,44 @@ export async function paradasDeTour(tourId: string, idioma: Idioma): Promise<Par
     return [];
   }
   return (data ?? []) as ParadaDeTour[];
+}
+
+
+/*
+ * Los textos que el equipo configuró para este destino, en un idioma.
+ *
+ * Devuelve una función que se usa igual que `t()`: `tx('tour_otras')`. Si hay
+ * texto puesto en Ajustes gana ese; si no, cae al de `lib/idiomas.ts`, que es
+ * el de siempre. **No configurar nada deja el sitio exactamente como está.**
+ *
+ * ⚠️ UNA sola consulta por página, no una por texto. Son tres claves hoy y
+ * van a ser más: pedirlas de a una convertiría cada ficha en N viajes a la
+ * base por un puñado de frases.
+ *
+ * Si la consulta falla, se cae al texto base y la página NO se rompe —pero
+ * queda en el registro, porque un texto que vuelve solo al original es
+ * exactamente de lo que nadie se da cuenta.
+ */
+export async function textosDelSitio(
+  destino: Destino, idioma: Idioma,
+): Promise<(clave: string) => string> {
+  const base = (clave: string) => t(clave as Parameters<typeof t>[0], idioma);
+
+  if (!CLAVES_CONFIGURABLES.length) return base;
+
+  const { data, error } = await supabase
+    .from('dst_traduccion')
+    .select('campo, idioma, texto')
+    .eq('entidad', 'destino')
+    .eq('entidad_id', destino.id)
+    .eq('idioma', idioma)
+    .in('campo', CLAVES_CONFIGURABLES as string[]);
+
+  if (error) {
+    console.error('textosDelSitio:', destino.babosa, idioma, error.message);
+    return base;
+  }
+
+  const puestos = agruparTextos(data as { campo: string; idioma: string; texto: string }[], idioma);
+  return (clave: string) => puestos[clave] ?? base(clave);
 }

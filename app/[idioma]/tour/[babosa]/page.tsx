@@ -11,7 +11,7 @@ import { BloqueResenas } from '@/componentes/BloqueResenas';
 import { DatosClaveDelTour, filasClaveDeTour } from '@/componentes/DatosClaveDelTour';
 import { ItinerarioDelTour } from '@/componentes/ItinerarioDelTour';
 import { resenasDeTour } from '@/lib/resenas';
-import { paradasDeTour } from '@/lib/destino';
+import { paradasDeTour, textosDelSitio } from '@/lib/destino';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
 import { t, type Idioma } from '@/lib/idiomas';
@@ -116,11 +116,20 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
      parecido: quien ya está mirando este tour no necesita ver cuatro casi
      iguales.
      La página es `force-dynamic`, así que cambia en cada visita. */
-  const relacionadas = alAzarDelDirectorio(
-    (await fichasDelDirectorio(destino, idioma, categorias))
-      .filter((f) => !(f.tipo === 'tour' && f.id === tour.id)),
-    4,
-  );
+  /* Los textos que el equipo configuró en Ajustes. Si no configuró nada, `tx`
+     devuelve el texto de lib/idiomas.ts: la página se ve igual que siempre. */
+  const tx = await textosDelSitio(destino, idioma);
+
+  /* Cuántas recomendadas salen: lo decide Ajustes. Antes era un 4 en duro.
+     En 0 la sección no se pinta, que es una opción legítima — con pocas
+     fichas publicadas, recomendar al azar recomienda lo mismo siempre. */
+  const relacionadas = destino.cuantas_recomendadas > 0
+    ? alAzarDelDirectorio(
+        (await fichasDelDirectorio(destino, idioma, categorias))
+          .filter((f) => !(f.tipo === 'tour' && f.id === tour.id)),
+        destino.cuantas_recomendadas,
+      )
+    : [];
   const incluye = enLineas(tour.incluye);
   const noIncluye = enLineas(tour.no_incluye);
   const cuerpo = textoRicoAHtml(tour.descripcion);
@@ -294,7 +303,9 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
               <div className="ficha-reservar" id="reservar">
                 {vendible ? (
                   <ReservarProducto producto={vendible} descuentoHasta={destino.descuento_lanzamiento_hasta}
-                                    leyenda={destino.leyenda_precio} idioma={idioma} esTour />
+                                    leyenda={destino.leyenda_precio} idioma={idioma} esTour
+                                    textos={{ reserva_sin_cobro: tx('reserva_sin_cobro'),
+                                              tour_quien_confirma: tx('tour_quien_confirma') }} />
                 ) : (
                 <div className="reservar">
                   <div className="reservar-cabeza">
@@ -350,7 +361,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                       confirmar, que es lo que vuelve honesta la reserva en vez
                       de solo opaca. */}
                   <small className="reservar-presta">
-                    {t('tour_quien_confirma', idioma)}
+                    {tx('tour_quien_confirma')}
                   </small>
                 </div>
                 )}
@@ -372,7 +383,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
               ficha pública — ver la nota de la caja de precio. */}
           {relacionadas.length > 0 && (
             <section className="combina" style={{ marginTop: 8 }}>
-              <h2>{t('tour_otras', idioma)}</h2>
+              <h2>{tx('tour_otras')}</h2>
               <div className="rejilla" style={{ marginTop: 18 }}>
                 {relacionadas.map((r) => (
                   <TarjetaNegocio key={`${r.tipo}-${r.id}`} negocio={r} idioma={idioma} />

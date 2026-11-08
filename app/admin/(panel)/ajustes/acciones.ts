@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { modoItinerario } from '@/lib/itinerario-modo';
 import { contextoPanel } from '@/lib/admin/contexto';
+import { TEXTOS_DEL_SITIO, campoDeTexto } from '@/lib/textos-del-sitio';
 
 export type Estado = { ok?: string | null; error?: string | null };
 
@@ -348,4 +349,79 @@ export async function guardarGanchoCupon(datos: FormData) {
     .eq('id', id).eq('destino_id', destino.id);
   if (error) console.error('guardarGanchoCupon:', error.message);
   revalidatePath('/admin/ajustes');
+}
+
+/**
+ * Los textos del sitio que el equipo puede cambiar sin desplegar.
+ *
+ * ⚠️ VACIAR UN CAMPO BORRA LA FILA, y entonces el sitio vuelve al texto base
+ * de `lib/idiomas.ts`. Es lo que alguien espera que pase al borrar — guardar
+ * una cadena vacía dejaría el título de la sección en blanco, y nadie pide
+ * eso queriendo.
+ *
+ * Se guardan en `dst_traduccion` con `entidad = 'destino'`: la misma tabla
+ * donde ya vive el lema traducido y la misma que lee el sitio público. No hay
+ * tabla nueva. Ver `lib/textos-del-sitio.ts`.
+ */
+export async function guardarTextosDelSitio(datos: FormData) {
+  const { db, destino, usuario } = await contextoPanel('ajustes');
+  if (usuario.rol !== 'admin') return;
+
+  /* La CANTIDAD va en el mismo formulario porque se decide junto con el
+     título de la sección, pero es una columna de dst_destino y no un texto:
+     se guarda aparte. El `between` lo vuelve a comprobar la base. */
+  const cuantas = numero(datos, 'cuantas_recomendadas');
+  if (cuantas !== null && cuantas >= 0 && cuantas <= 12) {
+    const { error } = await db.from('dst_destino')
+      .update({ cuantas_recomendadas: Math.round(cuantas) }).eq('id', destino.id);
+    if (error) console.error('guardarTextosDelSitio, la cantidad:', error.message);
+  }
+
+  const aBorrar: string[] = [];
+  const aPoner: {
+    entidad: string; entidad_id: string; campo: string; idioma: string;
+    texto: string; origen: string; esta_revisada: boolean;
+  }[] = [];
+
+  /* Solo los idiomas que el sitio SIRVE. Guardar uno apagado deja filas que
+     nadie lee y que reaparecen el día que se prenda, con un texto que quizá
+     ya no corresponde. */
+  for (const idioma of destino.idiomas ?? []) {
+    for (const { clave } of TEXTOS_DEL_SITIO) {
+      const valor = texto(datos, campoDeTexto(idioma, clave));
+      if (valor) {
+        aPoner.push({
+          entidad: 'destino', entidad_id: destino.id, campo: clave, idioma,
+          texto: valor, origen: 'humano', esta_revisada: true,
+        });
+      } else {
+        aBorrar.push(`${idioma}|${clave}`);
+      }
+    }
+  }
+
+  if (aPoner.length) {
+    const { error } = await db.from('dst_traduccion')
+      .upsert(aPoner, { onConflict: 'entidad,entidad_id,campo,idioma' });
+    if (error) console.error('guardarTextosDelSitio, al poner:', error.message);
+  }
+
+  /* El borrado va de a uno por par (idioma, clave): PostgREST no sabe armar
+     un `delete` con una condición compuesta en una sola llamada, y hacerlo
+     con `.in()` sobre cada columna por separado borraría combinaciones que
+     nadie pidió quitar. */
+  for (const par of aBorrar) {
+    const [idioma, clave] = par.split('|');
+    const { error } = await db.from('dst_traduccion').delete()
+      .eq('entidad', 'destino').eq('entidad_id', destino.id)
+      .eq('campo', clave).eq('idioma', idioma);
+    if (error) console.error('guardarTextosDelSitio, al borrar:', clave, idioma, error.message);
+  }
+
+  revalidatePath('/admin/ajustes');
+  /* Y el SITIO PÚBLICO, que es donde se ven. Sin esto el texto se guardaba
+     bien y la ficha seguía mostrando el viejo hasta que caducara el caché —
+     que es justo lo que hace dudar de si el botón funcionó. Misma razón por
+     la que `editarDestino` revalida `/[idioma]`. */
+  revalidatePath('/[idioma]', 'layout');
 }

@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarDestino, eliminarCanal, guardarCanal, crearCupon, prenderCupon, cuponDeSalida, guardarGanchoCupon } from './acciones';
+import { editarDestino, eliminarCanal, guardarCanal, crearCupon, prenderCupon, cuponDeSalida, guardarGanchoCupon, guardarTextosDelSitio } from './acciones';
 import { LanzarDestino } from './LanzarDestino';
-import { NOMBRE_PROPIO } from '@/lib/idiomas';
+import { NOMBRE_PROPIO, t, type Idioma } from '@/lib/idiomas';
+import { TEXTOS_DEL_SITIO, CLAVES_CONFIGURABLES, campoDeTexto } from '@/lib/textos-del-sitio';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,7 +32,7 @@ export default async function PaginaAjustes() {
   /* Las candidatas al destacado del menu. Se ofrecen en una lista y no en un
      campo de texto: una babosa mal escrita no da error, simplemente deja el
      menu sin tarjeta — y eso se descubre semanas despues. */
-  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }, { data: cupones }, { data: avance }] = await Promise.all([
+  const [{ data: d }, { data: canales }, { data: experiencias }, { data: destacables }, { data: cupones }, { data: textosPuestos }, { data: avance }] = await Promise.all([
     db.from('dst_destino').select('*').eq('id', destino.id).single(),
     db.from('dst_canal').select('*').eq('destino_id', destino.id).order('tipo'),
     db.from('dst_itinerario').select('babosa, titulo')
@@ -41,6 +42,11 @@ export default async function PaginaAjustes() {
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
       .order('es_destacado', { ascending: false }).order('nombre'),
     db.from('dst_cupon').select('*').eq('destino_id', destino.id).order('creado_en', { ascending: false }),
+    /* Los textos configurables que ya tiene puestos, en TODOS los idiomas:
+       esta pantalla los edita todos a la vez. */
+    db.from('dst_traduccion').select('campo, idioma, texto')
+      .eq('entidad', 'destino').eq('entidad_id', destino.id)
+      .in('campo', CLAVES_CONFIGURABLES as string[]),
     /* Cuanto hay traducido en cada idioma. Devuelve los CINCO, encendidos o
        no: la gracia del bloque de idiomas es poder mirar lo que hay en uno
        apagado ANTES de prenderlo. */
@@ -277,6 +283,61 @@ export default async function PaginaAjustes() {
       </form>
 
       <div className="tarjeta">
+        {/* ───────────────── Textos del sitio ─────────────────
+            Pegado al bloque de idiomas a propósito: lo primero que se pregunta
+            al cambiar un texto es «¿y en los otros idiomas?», y la respuesta
+            está acá mismo.
+
+            Se guardan en `dst_traduccion` con `entidad='destino'` — la misma
+            tabla del lema — así que agregar un texto configurable nuevo cuesta
+            una línea en `lib/textos-del-sitio.ts` y NO una migración. */}
+        <div className="tarjeta">
+          <h2>Textos del sitio <small>vacío = el texto de siempre</small></h2>
+          <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
+            Frases que salen en las fichas y que a veces hay que ajustar sin
+            esperar un despliegue. <strong>Lo que dejés vacío usa el texto que
+            el sitio ya trae</strong>, así que borrar un campo lo devuelve al
+            original — no lo deja en blanco.
+          </p>
+          <form action={guardarTextosDelSitio} className="forma">
+            <div className="campo ancho">
+              <label htmlFor="cuantas-rec">Cuántas recomendadas salen al pie de una tour</label>
+              <input id="cuantas-rec" name="cuantas_recomendadas" type="number" min={0} max={12}
+                     defaultValue={d.cuantas_recomendadas ?? 4} disabled={!esAdmin} />
+              <small>
+                En <strong>0</strong> la sección no sale. Con pocas fichas publicadas,
+                recomendar al azar termina recomendando lo mismo siempre.
+              </small>
+            </div>
+
+            {TEXTOS_DEL_SITIO.map((txt) => (
+              <div className="campo ancho" key={txt.clave}>
+                <label>{txt.etiqueta}</label>
+                <small style={{ marginBottom: 8, display: 'block' }}>{txt.donde}</small>
+                {(d.idiomas ?? []).map((idi: string) => (
+                  <div key={idi} className="texto-sitio-fila">
+                    <span className="texto-sitio-idioma">{NOMBRE_PROPIO[idi as Idioma] ?? idi}</span>
+                    <textarea
+                      name={campoDeTexto(idi, txt.clave)}
+                      rows={txt.filas}
+                      disabled={!esAdmin}
+                      defaultValue={(textosPuestos ?? []).find(
+                        (x: { campo: string; idioma: string }) =>
+                          x.campo === txt.clave && x.idioma === idi)?.texto ?? ''}
+                      placeholder={t(txt.clave as 'tour_otras', idi as Idioma)}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* El botón NO se pinta si no sos admin, en vez de pintarse gris:
+                es el patrón del resto de esta pantalla, y un botón apagado
+                invita a apretarlo igual para ver qué pasa. */}
+            {esAdmin && <div className="campo ancho"><BotonAccion>Guardar los textos</BotonAccion></div>}
+          </form>
+        </div>
+
         <h2>Motor de reservas <small>apagado, el sitio es un directorio</small></h2>
         <p className="gris" style={{ fontSize: 13, lineHeight: 1.6, marginTop: 0 }}>
           Este es el <strong>interruptor maestro</strong>. Apagado, nadie ve nada:
