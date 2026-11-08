@@ -174,9 +174,18 @@ export default async function Ficha({ params }: { params: Parametros }) {
           <div className="meta" style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
             {esDestacado && <span className="cintillo cintillo-suelto">{t('destacado_cintillo', idioma)}</span>}
             <span className="etiqueta-cat">{negocio.categoria_nombre}</span>
-            {verificado
-              ? <span className="sello"><IconoVerificado />{t('verificado', idioma)}</span>
-              : <span className="sello sello-tenue">{t('por_confirmar', idioma)}</span>}
+            {/* Solo el sello POSITIVO. Antes, cuando el negocio no estaba
+                verificado salía «Datos por confirmar» — y eso lo llevaban 59
+                de las 66 fichas publicadas, o sea casi el directorio entero.
+                Un sello que tiene casi todo el mundo no informa de nada: solo
+                hace que el sitio se lea como un borrador. Lo pidió Tony el 7
+                de noviembre de 2026.
+                La señal no se pierde: el que SÍ está verificado lo sigue
+                diciendo, y lo que antes era una marca negativa ahora es
+                simplemente su ausencia. */}
+            {verificado && (
+              <span className="sello"><IconoVerificado />{t('verificado', idioma)}</span>
+            )}
           </div>
           <h1>{negocio.nombre}</h1>
           {negocio.direccion && (

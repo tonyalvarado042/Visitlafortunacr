@@ -72,9 +72,10 @@ export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio | EnElDir
       <div className="cuerpo">
         <div className="meta">
           <span className="etiqueta-cat">{negocio.categoria_nombre}</span>
-          {verificado
-            ? <span className="sello"><IconoVerificado />{t('verificado', idioma)}</span>
-            : <span className="sello sello-tenue">{t('por_confirmar', idioma)}</span>}
+          {/* Solo el sello positivo: ver la nota en la ficha del negocio. */}
+          {verificado && (
+            <span className="sello"><IconoVerificado />{t('verificado', idioma)}</span>
+          )}
         </div>
 
         {/* El título es el SEGUNDO enlace de la tarjeta a la misma ficha, así

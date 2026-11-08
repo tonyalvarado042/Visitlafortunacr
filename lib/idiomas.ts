@@ -60,7 +60,6 @@ export const T: Record<string, Diccionario> = {
   transporte:        { es: 'Transporte', en: 'Transport', pt: 'Transporte', fr: 'Transport', de: 'Transport' },
   ver_todo:          { es: 'Ver todo', en: 'See all', pt: 'Ver tudo', fr: 'Tout voir', de: 'Alle ansehen' },
   verificado:        { es: 'Verificado', en: 'Verified', pt: 'Verificado', fr: 'Vérifié', de: 'Verifiziert' },
-  por_confirmar:     { es: 'Datos por confirmar', en: 'Details to confirm', pt: 'Dados a confirmar', fr: 'Données à confirmer', de: 'Angaben unbestätigt' },
   destacado:         { es: 'Destacado pagado', en: 'Paid listing', pt: 'Destaque pago', fr: 'Annonce sponsorisée', de: 'Bezahlte Anzeige' },
   llamar:            { es: 'Llamar', en: 'Call', pt: 'Ligar', fr: 'Appeler', de: 'Anrufen' },
   sitio_web:         { es: 'Sitio web', en: 'Website', pt: 'Site', fr: 'Site web', de: 'Webseite' },

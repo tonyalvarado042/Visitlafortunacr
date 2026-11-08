@@ -1090,7 +1090,6 @@ section { padding: 84px 0; }
 
 .etiqueta-cat { font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--naranja); }
 .sello { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--verde); }
-.sello-tenue { color: var(--humo); background: var(--sup-3); border-radius: 100px; padding: 2px 9px; }
 .sello-pagado { background: var(--naranja); color: var(--sobre-naranja); border-radius: 3px; padding: 3px 9px; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 
 /* ---- Galería de la ficha ---- */
@@ -3111,6 +3110,25 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 }
 .tira-atributos li:nth-child(3n + 1) { border-left: none; }
 .tira-atributos li:nth-child(-n + 3) { border-top: none; }
+
+/* ⚠️ LA ÚLTIMA FILA SE ESTIRA PARA LLENARLA.
+   Lo vio Tony en su teléfono: «Kid friendly» solo en la última fila, con la
+   celda de al lado vacía y sin raya — la caja quedaba abierta por abajo a la
+   derecha, como si faltara algo.
+
+   No es un caso raro: con 3 atributos y DOS columnas pasa siempre, y **20 de
+   los 66 negocios publicados tienen exactamente 3**. Era el caso más común en
+   teléfono.
+
+   Se arregla estirando el sobrante, no dibujando una raya a la nada: una raya
+   que separa algo de un vacío no separa nada.
+
+   A 3 columnas (escritorio) hay dos sobras posibles:
+     - sobra UNA (4, 7 atributos) → esa se estira a lo ancho entero;
+     - sobran DOS (5, 8) → la última toma dos columnas y entre las dos llenan.
+   A 2 columnas (teléfono) solo hay una sobra posible: la impar. */
+.tira-atributos li:last-child:nth-child(3n + 1) { grid-column: 1 / -1; }
+.tira-atributos li:last-child:nth-child(3n + 2) { grid-column: span 2; }
 .tira-atributos svg { flex-shrink: 0; }
 .tira-atributos span {
   font-size: 13.5px; font-weight: 700; line-height: 1.25;
@@ -3126,6 +3144,12 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .tira-atributos li:nth-child(-n + 3) { border-top: 1px solid var(--borde); }
   .tira-atributos li:nth-child(odd) { border-left: none; }
   .tira-atributos li:nth-child(-n + 2) { border-top: none; }
+  /* Con dos columnas, las reglas de 3n de arriba estorban: hay que apagarlas
+     y poner la de acá, que es la única sobra posible — el último en posición
+     impar, o sea solo en su fila. */
+  .tira-atributos li:last-child:nth-child(3n + 1),
+  .tira-atributos li:last-child:nth-child(3n + 2) { grid-column: auto; }
+  .tira-atributos li:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .tira-atributos span { font-size: 12.5px; }
 }
 
