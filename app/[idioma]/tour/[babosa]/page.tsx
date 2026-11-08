@@ -294,6 +294,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   negocioId={negocioIdDeLaTour}
                   negocioNombre={tour.nombre}
                   tourId={tour.id}
+                  titulo={tx('resenas_titulo')}
                   estilo={{ marginTop: 34 }}
                 />
               )}
@@ -316,7 +317,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                           Google y reserva directo con él. Se dice QUÉ es y no
                           CUÁL. La ficha de un NEGOCIO sí lleva nombre — ahí el
                           negocio ES lo que la persona está buscando. */}
-                      <p className="reservar-que">{t('tour_quien_opera', idioma)}</p>
+                      <p className="reservar-que">{tx('tour_quien_opera')}</p>
                     </div>
                     <div className="reservar-precio">
                       <ul className="reservar-tarifas">

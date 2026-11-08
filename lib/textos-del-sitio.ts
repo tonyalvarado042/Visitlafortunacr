@@ -55,10 +55,35 @@ export const TEXTOS_DEL_SITIO: readonly TextoConfigurable[] = [
     filas: 2,
   },
   {
+    clave: 'tour_quien_opera',
+    etiqueta: 'Quién opera la tour',
+    /* ⚠️ Hoy esta frase NO SE VE en ninguna parte, y el aviso lo dice.
+       Solo sale en la caja de precio de un tour que NO se reserva por el
+       sitio, y los dos publicados sí se reservan — ahí se pinta el widget de
+       reserva, que no la muestra. Dejar el campo sin avisar sería un control
+       que no hace nada: alguien lo cambia, no pasa nada, y pierde media hora
+       buscando por qué. */
+    donde: 'Solo en tours que NO se reservan por el sitio. ⚠️ Hoy los dos publicados sí se reservan, '
+         + 'así que esta frase no se está viendo en ninguna parte.',
+    filas: 2,
+  },
+  {
     clave: 'tour_quien_confirma',
     etiqueta: 'Qué se dice del operador',
     donde: 'En la caja de precio de una tour, debajo de «lo opera una empresa local».',
     filas: 2,
+  },
+  {
+    clave: 'combina_titulo',
+    etiqueta: 'Título de las recomendadas de un negocio',
+    donde: 'Al pie de la ficha de un NEGOCIO. Es el hermano del título de arriba, en la otra ficha.',
+    filas: 1,
+  },
+  {
+    clave: 'resenas_titulo',
+    etiqueta: 'Título del bloque de reseñas',
+    donde: 'En las DOS fichas, encima de la nota y las opiniones.',
+    filas: 1,
   },
 ];
 

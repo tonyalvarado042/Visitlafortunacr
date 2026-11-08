@@ -20,9 +20,14 @@ import { resenas as resenasPalabra, t, type Idioma } from '@/lib/idiomas';
  * para uno tiene que valer para el otro.
  */
 export function BloqueResenas({
-  idioma, total, promedio, resenas, negocioId, negocioNombre, tourId, estilo,
+  idioma, total, promedio, resenas, negocioId, negocioNombre, tourId, estilo, titulo,
 }: {
   idioma: Idioma;
+  /* El título, ya resuelto por quien llama: puede venir de Ajustes. Opcional
+     a propósito — sin él usa el de lib/idiomas.ts, que es como funcionó
+     siempre. Se resuelve afuera porque la consulta de textos es una sola por
+     página y no una por bloque. */
+  titulo?: string;
   total: number;
   promedio: number | null;
   resenas: Resena[];
@@ -35,7 +40,7 @@ export function BloqueResenas({
 }) {
   return (
     <div className="bloque" style={estilo}>
-      <div className="titulo">{t('resenas_titulo', idioma)}</div>
+      <div className="titulo">{titulo ?? t('resenas_titulo', idioma)}</div>
 
       <div className="resumen-nota">
         {total > 0 && promedio ? (

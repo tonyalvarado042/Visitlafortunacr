@@ -401,6 +401,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
               resenas={propias}
               negocioId={negocio.id}
               negocioNombre={negocio.nombre}
+              titulo={tx('resenas_titulo')}
               estilo={{ marginTop: 34 }}
             />
 
@@ -425,7 +426,7 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 recomendaría al competidor de al lado. */}
             {combina.length > 0 && (
               <section className="combina">
-                <h2>{t('combina_titulo', idioma)}</h2>
+                <h2>{tx('combina_titulo')}</h2>
                 <div className="combina-tarjetas">
                   {combina.map((c) => (
                     <Link key={c.id} href={`/${idioma}/${c.categoria_babosa ?? ''}/${c.babosa}`}>
