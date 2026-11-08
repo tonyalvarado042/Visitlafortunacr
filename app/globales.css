@@ -1258,13 +1258,27 @@ section { padding: 84px 0; }
    - Solo con DOS COLUMNAS. En el telefono la columna derecha cae al FINAL de
      la pagina, asi que ahi el margen negativo no la subiria sobre la
      cabecera: la subiria encima de las resenas. */
-/* La tira de atributos quedaba PEGADA al borde de la foto a sangre: medido en
-   vivo, separacion 0px — el hero terminaba en 599 y la tira empezaba en 599.
-   Va fuera del @media a proposito: la clase `ficha-con-hero` se aplica en todos
+/* ⚠️ EL AIRE DEBAJO DE LA FOTO A SANGRE VA EN EL CONTENEDOR, NO EN EL PRIMER
+   HIJO. Esto ya se arreglo una vez —el comentario original decia «la tira de
+   atributos quedaba PEGADA al borde de la foto a sangre: medido en vivo,
+   separacion 0px»— pero el margen se le puso a `.tira-atributos`, y eso solo
+   tapa el agujero mientras la tira sea lo primero.
+
+   Volvio el 7 de noviembre de 2026, con la ficha de una TOUR: ahi no hay tira
+   de atributos, asi que lo primero es la galeria y el rotulo «FOTOS» quedaba a
+   **0px** del borde de la foto. Lo vio Tony en su telefono. Medido igual: el
+   hero terminaba en 628 y el rotulo empezaba en 628.
+
+   Y no era solo del tour: `TiraAtributos` devuelve `null` cuando el negocio no
+   tiene ni atributos ni horario parejo, asi que CUALQUIER ficha sin atributos
+   y con foto a sangre tenia el mismo cero. Estaba escondido porque hoy esos
+   negocios tampoco tienen foto de portada.
+
+   Puesto en `.ficha-principal`, el aire no depende nunca mas de QUE venga
+   primero. Fuera del @media a proposito: `ficha-con-hero` se aplica en todos
    los anchos aunque los margenes negativos de abajo solo entren en escritorio,
-   asi que en telefono estaba igual de pegada.
-   Solo con hero: sin foto a sangre la tira ya tiene su aire y no hace falta. */
-.ficha-con-hero .tira-atributos { margin-top: 28px; }
+   asi que en telefono estaba igual de pegada. */
+.ficha-con-hero .ficha-principal { padding-top: 28px; }
 
 @media (min-width: 1001px) {
   .ficha-con-hero .ficha-reservar { margin-top: -132px; }
