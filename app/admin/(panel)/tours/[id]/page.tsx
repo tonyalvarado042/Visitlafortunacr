@@ -107,7 +107,7 @@ export default async function PaginaTour({ params, searchParams }: {
 
   return (
     <>
-      <Cabecera titulo={t.nombre} migas={[{ ruta: '/admin/tours', nombre: 'Tours' }]} sub={<><Etiqueta suave>{t.estado}</Etiqueta>{t.completar_pedido_en ? <> <Etiqueta suave>se le pidió {relativo(t.completar_pedido_en)}</Etiqueta></> : null}{t.revisar_pedido_en ? <> <Etiqueta suave>revisión pedida {relativo(t.revisar_pedido_en)}</Etiqueta></> : null}{faltan.length ? <> <Etiqueta color="alerta">le falta {faltan.join(' y ')}</Etiqueta></> : null}{!cifrasCuadran ? <> <Etiqueta color="alerta">las cifras no cuadran: rack menos neto da {pctImplicita!.toFixed(1)}% y el tour dice {Number(comision)}%</Etiqueta></> : null} · {t.total_reservas} reservas</>}>
+      <Cabecera titulo={t.nombre} migas={[{ ruta: '/admin/tours', nombre: 'Tours' }]} sub={<><Etiqueta suave>{destino.marca_sigla ?? 'REF'}-{t.codigo}</Etiqueta>{' '}<Etiqueta suave>{t.estado}</Etiqueta>{t.completar_pedido_en ? <> <Etiqueta suave>se le pidió {relativo(t.completar_pedido_en)}</Etiqueta></> : null}{t.revisar_pedido_en ? <> <Etiqueta suave>revisión pedida {relativo(t.revisar_pedido_en)}</Etiqueta></> : null}{faltan.length ? <> <Etiqueta color="alerta">le falta {faltan.join(' y ')}</Etiqueta></> : null}{!cifrasCuadran ? <> <Etiqueta color="alerta">las cifras no cuadran: rack menos neto da {pctImplicita!.toFixed(1)}% y el tour dice {Number(comision)}%</Etiqueta></> : null} · {t.total_reservas} reservas</>}>
         {/* Ver el tour en el sitio. Regla de Tony: toda ficha lleva su enlace
             para mirarla directamente — si no, revisar lo que uno acaba de
             escribir obliga a adivinar la dirección. Solo si está publicado:

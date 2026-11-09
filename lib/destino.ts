@@ -581,6 +581,9 @@ export type TourPublico = TourDeNegocio & {
   negocio: {
     nombre: string; babosa: string; categoria_babosa: string | null; es_operador: boolean;
   } | null;
+  /* El número de referencia, estable y opaco. El sitio lo muestra con la sigla
+     del destino delante: VLF-1042. */
+  codigo: number | null;
 };
 
 /*
@@ -628,7 +631,7 @@ export async function tourPorBabosa(
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas, punto_encuentro,
              precio_adulto_usd, precio_nino_usd, precio_nota, precio_incluye_iva, imagen_url, video_url, video_portada_url,
-             total_resenas, promedio_calificacion,
+             codigo, total_resenas, promedio_calificacion,
              fotos:dst_tour_foto(id, url, texto_alternativo_es, texto_alternativo_en, credito, licencia, fuente_url, es_portada, orden),
              negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
     .eq('destino_id', destino.id)
@@ -660,7 +663,10 @@ export async function tourPorBabosa(
     ...(data as unknown as TourPublico),
     fotos,
     negocio: n
-      ? { nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null, es_operador: Boolean(n.es_operador) }
+      ? {
+          nombre: n.nombre, babosa: n.babosa, categoria_babosa: cat?.babosa ?? null,
+          es_operador: Boolean(n.es_operador),
+        }
       : null,
   };
 
@@ -905,6 +911,40 @@ export type OpcionDeTour = {
      no dependa de que nadie se acuerde. El panel sí la ve: lee la tabla
      directo con el cliente del equipo. */
 };
+
+/*
+ * Las credenciales del operador de una tour, SIN su nombre.
+ *
+ * ⚠️ POR QUÉ ES UNA FUNCIÓN APARTE Y NO EL EMBED DEL NEGOCIO, dos razones y
+ * las dos importan:
+ *
+ * 1. El embed `negocio:dst_negocio(...)` devuelve **null** cuando el negocio
+ *    no está publicado, porque lo filtra su RLS. Y eso no es el caso raro: un
+ *    operador de tours normalmente NO tiene ficha propia, porque lo que se
+ *    publica de él son sus tours. Outback está en borrador y el bloque no se
+ *    pintaba nunca.
+ * 2. Por el embed, las credenciales llegaban **en el mismo objeto que el
+ *    nombre**, y ese objeto es justo el que no puede cruzar a un componente
+ *    de cliente. Acá el nombre no viene, así que no se puede filtrar ni por
+ *    descuido. Lo que no se debe revelar, que no exista en el chorro.
+ *
+ * Devuelve null si el operador no tiene nada cargado: entonces la ficha no
+ * pinta el bloque, que es lo correcto — un recuadro vacío que dice «quién lo
+ * opera» y no dice nada es peor que no tenerlo.
+ */
+export type OperadorDeTour = { opera_desde: number | null; credenciales: string | null };
+
+export async function operadorDeTour(tourId: string, idioma: Idioma): Promise<OperadorDeTour | null> {
+  const { data, error } = await supabase.rpc('operador_de_tour', {
+    p_tour_id: tourId, p_idioma: idioma,
+  });
+  if (error) {
+    console.error('operadorDeTour:', tourId, error.message);
+    return null;
+  }
+  const fila = (data ?? [])[0] as OperadorDeTour | undefined;
+  return fila ?? null;
+}
 
 export async function opcionesDeTour(tourId: string, idioma: Idioma): Promise<OpcionDeTour[]> {
   const { data, error } = await supabase.rpc('opciones_de_tour', {

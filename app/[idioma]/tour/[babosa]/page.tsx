@@ -11,7 +11,7 @@ import { BloqueResenas } from '@/componentes/BloqueResenas';
 import { DatosClaveDelTour, filasClaveDeTour } from '@/componentes/DatosClaveDelTour';
 import { ItinerarioDelTour } from '@/componentes/ItinerarioDelTour';
 import { resenasDeTour } from '@/lib/resenas';
-import { paradasDeTour, opcionesDeTour, textosDelSitio } from '@/lib/destino';
+import { paradasDeTour, opcionesDeTour, operadorDeTour, textosDelSitio } from '@/lib/destino';
 import { OpcionesDeTour } from '@/componentes/OpcionesDeTour';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
@@ -70,11 +70,12 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
 
   /* Las reseñas de ESTA tour. Se piden solo si la tour existe —si no, la
      página va al 404 unas líneas más abajo y la consulta se habría tirado. */
-  const [resenasPropias, paradas, opciones] = tour
+  const [resenasPropias, paradas, opciones, operador] = tour
     ? await Promise.all([
         resenasDeTour(tour.id), paradasDeTour(tour.id, idioma), opcionesDeTour(tour.id, idioma),
+        operadorDeTour(tour.id, idioma),
       ])
-    : [[], [], []];
+    : [[], [], [], null];
   const negocioIdDeLaTour = tour?.negocio_id ?? '';
 
   /* El precio de ENTRADA, que es el que ven el «desde» de la caja y la barra
@@ -312,6 +313,51 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
             </div>
 
             <aside className="ficha-lado">
+              {/* ---- QUIÉN LO OPERA, SIN DECIR CUÁL ----
+                  El nombre del operador no va en la ficha de una tour: quien
+                  lo lee reserva directo con él (regla del 6 nov 2026). Pero
+                  entonces la única respuesta a «¿con quién voy, es serio?» era
+                  «te decimos cuál al confirmar», que es honesto y no vende
+                  nada. Esto sí contesta: los años y las credenciales, sin
+                  identificarlo.
+
+                  ⚠️ VA FUERA de la caja de reservar y no adentro, a propósito:
+                  esa caja es `ReservarProducto`, un componente de CLIENTE, y
+                  todo lo que se le pasa queda serializado en el HTML. Las
+                  credenciales llegan en el mismo objeto que el NOMBRE del
+                  operador. Acá se pintan en el servidor y nunca se cruza esa
+                  frontera — así se filtró el nombre el 6 de noviembre y la
+                  tarifa neta el 9. */}
+              {operador && (
+                <div className="opera-quien">
+                  <h2>{t('opera_quien', idioma)}</h2>
+                  {operador.opera_desde && (
+                    <p className="opera-anios">
+                      {t('opera_local', idioma)} {destino.nombre}{' · '}
+                      <strong>{new Date().getFullYear() - operador.opera_desde} {t('opera_anios', idioma)}</strong>
+                    </p>
+                  )}
+                  {operador.credenciales && (
+                    <ul className="opera-lista">
+                      {operador.credenciales.split('\n')
+                        .map((l: string) => l.trim()).filter(Boolean)
+                        .map((linea: string) => <li key={linea}>{linea}</li>)}
+                    </ul>
+                  )}
+                  <p className="opera-cual">{tx('tour_quien_confirma')}</p>
+                  {/* El número de referencia. Opaco a propósito: con las
+                      iniciales del operador delataría lo que la regla esconde.
+                      Sirve para que quien escriba «quiero el VLF-1006» sea
+                      entendido a la primera. */}
+                  {tour.codigo && (
+                    <p className="opera-codigo">
+                      {t('tour_referencia', idioma)}{' '}
+                      <code>{destino.marca_sigla ?? 'REF'}-{tour.codigo}</code>
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="ficha-reservar" id="reservar">
                 {vendible ? (
                   <ReservarProducto producto={vendible} descuentoHasta={destino.descuento_lanzamiento_hasta}
@@ -328,7 +374,10 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                           Google y reserva directo con él. Se dice QUÉ es y no
                           CUÁL. La ficha de un NEGOCIO sí lleva nombre — ahí el
                           negocio ES lo que la persona está buscando. */}
-                      <p className="reservar-que">{tx('tour_quien_opera')}</p>
+                      {/* Solo si NO hay bloque de credenciales arriba: con los
+                          dos, la misma columna dice dos veces lo mismo y quien
+                          lo lee se pregunta si son cosas distintas. */}
+                      {!operador && <p className="reservar-que">{tx('tour_quien_opera')}</p>}
                     </div>
                     <div className="reservar-precio">
                       {/* Con opciones cargadas manda el selector: el catálogo
@@ -391,9 +440,11 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                   {/* Mismo motivo: qué, no cuál. Y se promete decir cuál al
                       confirmar, que es lo que vuelve honesta la reserva en vez
                       de solo opaca. */}
-                  <small className="reservar-presta">
-                    {tx('tour_quien_confirma')}
-                  </small>
+                  {!operador && (
+                    <small className="reservar-presta">
+                      {tx('tour_quien_confirma')}
+                    </small>
+                  )}
                 </div>
                 )}
               </div>

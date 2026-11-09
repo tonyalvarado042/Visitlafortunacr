@@ -103,6 +103,14 @@ export const T: Record<string, Diccionario> = {
   precio_iva:        { es: 'IVA', en: 'VAT', pt: 'IVA', fr: 'TVA', de: 'MwSt.' },
   precio_total:      { es: 'Total', en: 'Total', pt: 'Total', fr: 'Total', de: 'Gesamt' },
   precio_mas_iva:    { es: '+ IVA', en: '+ VAT', pt: '+ IVA', fr: '+ TVA', de: '+ MwSt.' },
+  /* Quién lo opera, SIN decir cuál. El nombre del operador no va en la ficha
+     de una tour —quien lo lee reserva directo con él— pero «te decimos cuál al
+     confirmar» no contesta la pregunta de verdad, que es si es serio. Esto sí:
+     los años y las credenciales, sin identificarlo. */
+  opera_quien:       { es: 'Quién lo opera', en: 'Who runs it', pt: 'Quem opera', fr: 'Qui l’organise', de: 'Wer es durchführt' },
+  opera_local:       { es: 'Operador local de', en: 'Local operator in', pt: 'Operador local de', fr: 'Opérateur local de', de: 'Lokaler Anbieter in' },
+  opera_anios:       { es: 'años operando', en: 'years operating', pt: 'anos operando', fr: 'ans d’activité', de: 'Jahre im Betrieb' },
+  tour_referencia:   { es: 'Referencia', en: 'Reference', pt: 'Referência', fr: 'Référence', de: 'Referenz' },
   /* ⚠️ EL OPERADOR NO SE NOMBRA en la ficha de una tour. Decía «Servicio
      ofrecido por: <nombre>» y eso es regalarle el cliente: quien lee el
      nombre lo busca en Google y reserva directo con él. Se dice QUÉ es

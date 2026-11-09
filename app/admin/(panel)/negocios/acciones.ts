@@ -53,6 +53,10 @@ export async function editarNegocio(datos: FormData) {
     nombre: texto(datos, 'nombre') || undefined,
     categoria_id: esUuid(texto(datos, 'categoria_id')) ? texto(datos, 'categoria_id') : undefined,
     resumen: texto(datos, 'resumen') || null,
+    /* Las credenciales que salen en la ficha de sus TOURS, donde su nombre no
+       va a propósito. El año y no la antigüedad: así no envejece. */
+    opera_desde: numero(datos, 'opera_desde'),
+    credenciales: texto(datos, 'credenciales') || null,
     descripcion: texto(datos, 'descripcion') || null,
     email: texto(datos, 'email').toLowerCase() || null,
     telefono: telefono('telefono'),

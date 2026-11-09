@@ -196,6 +196,33 @@ export default async function PaginaNegocio({ params, searchParams }: {
                     sirven para una ficha: razones, combinaciones, opiniones, fotos y traducciones.
                   </small>
                 </div>
+                {/* ---- LAS CREDENCIALES, para la ficha de sus TOURS ----
+                    En la ficha de un tour el nombre del operador NO va: quien
+                    lo lee reserva directo con él (regla del 6 nov 2026). Pero
+                    entonces la única respuesta a «¿con quién voy, es serio?»
+                    era «te decimos cuál al confirmar», que es honesto y no
+                    vende nada. Esto sí contesta, sin identificarlo.
+                    Se muestran aunque el operador NO tenga ficha publicada:
+                    van por `operador_de_tour`, que no devuelve el nombre. */}
+                <div className="campo">
+                  <label>Opera desde (año)</label>
+                  <input type="number" name="opera_desde" defaultValue={n.opera_desde ?? ''}
+                         min="1800" max={new Date().getFullYear()} placeholder="2014" />
+                  <small style={{ display: 'block', color: '#8B8B87', marginTop: 5 }}>
+                    El <strong>año</strong>, no cuántos años lleva: la ficha resta sola y así no
+                    envejece.
+                  </small>
+                </div>
+                <div className="campo ancho">
+                  <label>Credenciales <small style={{ fontWeight: 400, color: '#8B8B87' }}>una por renglón · SIN el nombre</small></label>
+                  <textarea name="credenciales" defaultValue={n.credenciales ?? ''} style={{ minHeight: 90 }}
+                            placeholder={'Guías certificados y bilingües\nUn guía por cada cinco personas\nFlota 2023-2024'} />
+                  <small style={{ display: 'block', color: '#8B8B87', marginTop: 5 }}>
+                    Salen con un ✓ en <strong>la ficha de sus tours</strong>, debajo de «Quién lo
+                    opera». Nada que lo identifique: ni el nombre, ni el sitio web, ni el teléfono
+                    — eso es justo lo que la ficha esconde a propósito.
+                  </small>
+                </div>
                 <div className="campo ancho"><label>Resumen (una frase para tarjetas)</label><input name="resumen" defaultValue={n.resumen ?? ''} maxLength={200} /></div>
                 <div className="campo ancho"><label>Descripción (obligatoria para publicar)</label><textarea name="descripcion" defaultValue={n.descripcion ?? ''} style={{ minHeight: 140 }} /></div>
                 <div className="campo"><label>Rango de precio</label><select name="rango_precio" defaultValue={n.rango_precio ?? ''}><option value="">—</option>{['economico', 'moderado', 'alto', 'lujo'].map((x) => <option key={x} value={x}>{x}</option>)}</select></div>

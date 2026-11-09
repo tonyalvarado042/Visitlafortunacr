@@ -13,6 +13,10 @@ import { puedeVer, type Seccion } from './permisos';
 export type DestinoPanel = {
   id: string; nombre: string; babosa: string; dominio: string; zona_horaria: string;
   marca_nombre: string; idioma_principal: string; idiomas: string[];
+  /* La sigla de la marca. La pantalla del tour arma con ella su codigo de
+     referencia (VLF-1006): la sigla NO se guarda en el tour porque es del
+     destino, y el dia que haya dos no puede venir pegada al numero. */
+  marca_sigla: string | null;
   whatsapp: string | null; email_contacto: string | null; esta_activo: boolean;
   moneda_iso: string; comision_por_defecto: number | null;
   /* El titulo del bloque de piezas de la columna del blog. */
@@ -39,7 +43,7 @@ export async function contextoPanel(seccion?: Seccion) {
   const db = await sesion();
   const { data } = await db
     .from('dst_destino')
-    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo, iva_pct')
+    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, marca_sigla, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo, iva_pct')
     .order('nombre');
 
   let destinos = (data ?? []) as DestinoPanel[];
