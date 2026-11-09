@@ -72,12 +72,111 @@ export async function editarTour(datos: FormData) {
     video_url: texto(datos, 'video_url') || null,
     video_portada_url: texto(datos, 'video_portada_url') || null,
     es_destacado: texto(datos, 'es_destacado') === '1',
+    /* Si el precio cargado ya trae el impuesto. Ver la migración 38. */
+    precio_incluye_iva: texto(datos, 'precio_incluye_iva') === '1',
     estado: ['borrador', 'pendiente', 'publicado', 'archivado'].includes(estado) ? estado : antes.estado,
     publicado_en: estado === 'publicado' && !antes.publicado_en ? new Date().toISOString() : antes.publicado_en,
   }).eq('id', id);
-  if (error) console.error('editarTour:', error.message);
+
+  /* ⚠️ UN FALLO ACÁ NO PUEDE QUEDAR EN LA CONSOLA.
+   *
+   * Así estaba y así falló. Tony, el 9 de noviembre de 2026: *«yo le daba
+   * publicar al jet ski y me vuelve a borrador la pantalla»*.
+   *
+   * Lo reproduje contra la base: este UPDATE manda TODOS los campos de un
+   * saque, así que si UNO rebota, rebota el cambio ENTERO —el estado
+   * incluido— y la pantalla se vuelve a pintar con el estado viejo. Dos
+   * caminos comprobados, los dos terminan en «borrador» sin decir nada:
+   *
+   *   - `ck_dst_tour_publicado` — publicar con la descripción vacía;
+   *   - `ck_dst_tour_neto` — una tarifa neta por encima de la rack, que es
+   *     justo lo que pasa al bajar el precio rack y olvidar el neto.
+   *
+   * Es EXACTAMENTE el bug que ya se había arreglado en `publicarNegocio`
+   * —ahí el motivo viaja en la dirección y la pantalla lo pinta— y que nadie
+   * trasladó a los tours. Pasarse quince minutos buscando si el problema es
+   * el botón, la sesión o la ficha es carísimo, y es culpa de esta línea. */
+  if (error) {
+    console.error('editarTour:', error.message);
+    redirect(`/admin/tours/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+  }
   revalidatePath(`/admin/tours/${id}`);
   revalidatePath('/admin/tours');
+}
+
+/* ---- Las OPCIONES de precio ------------------------------------------------
+ *
+ * 9 de noviembre de 2026. Las carga SOLO el equipo, no el operador: lo decidió
+ * Tony, y es lo coherente con el precio, que ya está congelado para el dueño
+ * cuando la tour se vende («quedó fijado en el acuerdo»).
+ *
+ * Van por el cliente del panel y no por un RPC, igual que las fotos: la RLS de
+ * `dst_tour_opcion` ya deja que el equipo administre las de su destino.
+ */
+
+/** Crea o corrige una opción. El mismo formulario hace las dos cosas. */
+export async function guardarOpcionDeTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  /* Basta con que la tour sea de ESTE destino. A diferencia de las fotos, acá
+     no se exige operador: la carpeta de las fotos se arma con su babosa, pero
+     un precio no necesita dueño para existir. Exigirlo dejaría sin precios a
+     una tour que el equipo arma antes de conseguir al operador. */
+  if (!(await esDeEsteDestino(db, destino.id, id))) return;
+
+  const nombre = texto(datos, 'nombre');
+  const rack = numero(datos, 'precio_rack_usd');
+  /* Sin nombre o sin tarifa no hay opción que mostrar. La pantalla los pide
+     con `required`, pero un formulario se puede mandar a mano. */
+  if (!nombre || rack == null || !(rack >= 0)) return;
+
+  const cobro = texto(datos, 'cobro');
+  const fila = {
+    nombre: nombre.slice(0, 120),
+    que_cubre: texto(datos, 'que_cubre').slice(0, 300) || null,
+    cobro: ['por_persona', 'por_vehiculo', 'por_reserva'].includes(cobro) ? cobro : 'por_persona',
+    personas: numero(datos, 'personas'),
+    precio_rack_usd: rack,
+    precio_neto_usd: numero(datos, 'precio_neto_usd'),
+    esta_activa: texto(datos, 'esta_activa') === '1',
+  };
+
+  const opcionId = texto(datos, 'opcion_id');
+  const { error } = esUuid(opcionId)
+    ? await db.from('dst_tour_opcion').update(fila).eq('id', opcionId).eq('tour_id', id)
+    : await db.from('dst_tour_opcion').insert({
+        ...fila, tour_id: id,
+        /* Al final de la lista. El orden de la ficha lo decide después el
+           precio, pero el de la pantalla es el que puso el equipo. */
+        orden: (await db.from('dst_tour_opcion')
+          .select('id', { count: 'exact', head: true }).eq('tour_id', id)).count ?? 0,
+      });
+
+  /* Mismo criterio que arriba: el motivo se ve. El guardia de neta por encima
+     de la rack vive en la base (`ck_dst_tour_opcion_neto`) y es el que más va
+     a saltar, porque es el error fácil de cometer cargando un tarifario. */
+  if (error) {
+    console.error('guardarOpcionDeTour:', error.message);
+    redirect(`/admin/tours/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+  }
+  refrescarTour(id);
+}
+
+export async function borrarOpcionDeTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  const opcionId = texto(datos, 'opcion_id');
+  if (!esUuid(id) || !esUuid(opcionId)) return;
+  if (!(await esDeEsteDestino(db, destino.id, id))) return;
+
+  /* Se borran TAMBIÉN sus traducciones: no cuelgan con clave foránea —van por
+     entidad + entidad_id— así que Postgres no las arrastra. Mismo caso que las
+     paradas del itinerario al borrarlas. */
+  await db.from('dst_traduccion').delete().eq('entidad', 'tour_opcion').eq('entidad_id', opcionId);
+  const { error } = await db.from('dst_tour_opcion').delete().eq('id', opcionId).eq('tour_id', id);
+  if (error) console.error('borrarOpcionDeTour:', error.message);
+  refrescarTour(id);
 }
 
 /* ---- Las fotos del tour ---------------------------------------------------
@@ -100,6 +199,17 @@ const ANCHO_MAX_TOUR = 1600;
  * El tour, si es de este destino. Devuelve también la babosa del operador,
  * que es la que arma la carpeta donde van las fotos.
  */
+/** La tour es de este destino. Lo mínimo para dejar tocar lo suyo. */
+async function esDeEsteDestino(
+  db: Awaited<ReturnType<typeof contextoPanel>>['db'],
+  destinoId: string,
+  tourId: string,
+): Promise<boolean> {
+  const { data } = await db.from('dst_tour')
+    .select('id').eq('id', tourId).eq('destino_id', destinoId).maybeSingle();
+  return !!data;
+}
+
 async function tourConOperador(
   db: Awaited<ReturnType<typeof contextoPanel>>['db'],
   destinoId: string,

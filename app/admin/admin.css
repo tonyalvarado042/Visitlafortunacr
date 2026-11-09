@@ -582,3 +582,35 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
 .categoria-fila input[type="number"] { width: 64px; }
 .categoria-fila label { display: flex; align-items: center; gap: 5px; font-size: 12.5px; white-space: nowrap; margin: 0; }
 .categoria-fila input[type="checkbox"] { width: auto; margin: 0; accent-color: var(--naranja); }
+
+/* ── Las opciones de precio de un tour ─────────────────────────────────────
+   ⚠️ COLORES EN DURO, no variables del tema. La tarjeta del panel es #fff
+   fijo mientras las variables del sitio cambian con el tema: con variables,
+   en modo oscuro esto queda texto negro sobre fondo blanco. Es la trampa que
+   este archivo ya documenta mas arriba.
+
+   Cada opcion es su propio <form> porque HTML no permite formularios
+   anidados y el formulario grande del tour envuelve todo lo de arriba. */
+.opciones-admin { display: grid; gap: 12px; }
+
+.opcion-admin {
+  border: 1px solid #E6E4DC; border-radius: 9px; padding: 14px 16px 12px; background: #FCFBF8;
+}
+.opcion-admin-nueva { margin-top: 16px; border-style: dashed; background: #fff; }
+.opcion-admin-nueva h3 {
+  margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #2B2B28;
+}
+
+.opcion-admin-pie {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid #EFEDE5;
+}
+.opcion-admin-pie label { font-size: 13px; color: #44443F; display: flex; align-items: center; gap: 6px; }
+/* La comision no se guarda en ninguna parte: sale de rack − neto. Mostrarla
+   calculada es lo que evita las dos verdades que se contradicen. */
+.opcion-admin-pct { font-size: 12.5px; color: #6B6B64; font-variant-numeric: tabular-nums; }
+
+.opciones-admin-borrar {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 4px; padding-top: 12px; border-top: 1px solid #EFEDE5;
+}

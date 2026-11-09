@@ -4,14 +4,21 @@ import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour } from '../acciones';
+import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour, guardarOpcionDeTour, borrarOpcionDeTour } from '../acciones';
 import { relativo } from '@/lib/admin/formato';
 import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PaginaTour({ params }: { params: Promise<{ id: string }> }) {
+export default async function PaginaTour({ params, searchParams }: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ fallo?: string }>;
+}) {
   const { id } = await params;
+  /* El motivo del rebote, que `editarTour` manda en la dirección. Ver la nota
+     larga de esa acción: sin esto, guardar «publicado» devolvía la pantalla a
+     «borrador» sin decir una palabra. */
+  const { fallo } = await searchParams;
   const { destino, db } = await contextoPanel('tours');
   const { data: t } = await db.from('dst_tour').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!t) notFound();
@@ -21,8 +28,13 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
   const { data: fotos } = await db.from('dst_tour_foto')
     .select('id, url, es_portada, orden, credito, licencia').eq('tour_id', id).order('orden');
   const { data: operador } = t.negocio_id
-    ? await db.from('dst_negocio').select('babosa, email, nombre').eq('id', t.negocio_id).maybeSingle()
+    ? await db.from('dst_negocio').select('babosa, email, nombre, estado_publicacion').eq('id', t.negocio_id).maybeSingle()
     : { data: null };
+  /* Las opciones de precio. Van acá y no en el Promise.all de abajo porque ese
+     necesita `t.negocio_id` y este no. */
+  const { data: opciones } = await db.from('dst_tour_opcion')
+    .select('id, orden, nombre, que_cubre, cobro, personas, precio_rack_usd, precio_neto_usd, esta_activa')
+    .eq('tour_id', id).order('orden');
   /* Lo que le falta al tour para poder publicarse y venderse. El precio
      cuenta: sin él `tour_reservable` no devuelve nada y la caja de reservar
      no sale — ver la nota de ese RPC. */
@@ -124,6 +136,46 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
           </a>
         )}
       </Cabecera>
+
+      {/* ⚠️ EL MOTIVO DEL REBOTE, A LA VISTA.
+          Tony, 9 de noviembre de 2026: «yo le daba publicar al jet ski y me
+          vuelve a borrador la pantalla». `editarTour` manda TODOS los campos
+          de un saque: si uno rebota, rebota el cambio entero —el estado
+          incluido— y la pantalla se repintaba con el estado viejo y ni una
+          palabra. Los dos culpables comprobados: publicar sin descripción
+          (`ck_dst_tour_publicado`) y una tarifa neta por encima de la rack
+          (`ck_dst_tour_neto`). */}
+      {fallo && (
+        <Aviso tipo="mal">
+          <strong>No se guardó.</strong> La base lo rechazó así: <code>{fallo}</code>
+          {fallo.includes('ck_dst_tour_publicado') && (
+            <> — es la regla que no deja publicar una tour <strong>sin descripción</strong>.</>
+          )}
+          {fallo.includes('ck_dst_tour_neto') && (
+            <> — la tarifa <strong>neta no puede ser mayor que la rack</strong>: eso sería comisión negativa.</>
+          )}
+        </Aviso>
+      )}
+
+      {/* ⚠️ PUBLICAR LA TOUR NO BASTA: EL OPERADOR SE PUBLICA PRIMERO.
+          El sitio no tiene una lista general de tours. La única que las lista
+          es la ficha del negocio (`toursDe` en lib/destino.ts), así que una
+          tour publicada cuyo operador está en borrador queda viva en su URL y
+          en ninguna otra parte. Comprobado el 9 de noviembre con el jet ski de
+          Outback: publicado, 200 en los tres idiomas, y cero menciones en la
+          portada y en /experiencias.
+          El panel no lo decía, y por eso parecía que publicar no servía. */}
+      {t.estado === 'publicado' && operador && operador.estado_publicacion !== 'publicado' && (
+        <Aviso tipo="mal">
+          <strong>Esta tour está publicada pero no aparece en ninguna parte del sitio.</strong>
+          {' '}Su operador, <strong>{operador.nombre}</strong>, está en{' '}
+          <strong>{operador.estado_publicacion}</strong>. Las tours se listan desde la ficha
+          del negocio: sin ficha publicada no hay de dónde colgarla, y solo vive en su
+          dirección directa, que nadie va a adivinar.{' '}
+          <Link href={`/admin/negocios/${t.negocio_id}`}>Publicar a {operador.nombre}</Link>.
+        </Aviso>
+      )}
+
       <form action={editarTour}>
         <input type="hidden" name="id" value={id} />
         <div className="lado">
@@ -184,6 +236,25 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
                 <div className="campo"><label>Niño USD</label><input type="number" step="0.01" name="precio_nino_usd" defaultValue={t.precio_nino_usd ?? ''} /></div>
                 <div className="campo"><label>Neto al operador USD</label><input type="number" step="0.01" name="precio_neto_usd" defaultValue={t.precio_neto_usd ?? ''} /></div>
                 <div className="campo"><label>Comisión %</label><input type="number" step="0.5" name="comision_pct" defaultValue={t.comision_pct ?? ''} /></div>
+                {/* ⚠️ EL IVA. Marcado —como nacen todos— la ficha se ve igual
+                    que siempre: el precio ES el total. Desmarcado, la ficha
+                    muestra el precio pelado, el impuesto aparte y el total
+                    abajo, que es como lo pidió Tony: «se ve más barato y el
+                    IVA al final».
+                    No es una preferencia de diseño, es un dato del convenio:
+                    el de Outback dice con todas las letras que sus tarifas son
+                    sin impuesto; los de Jacamar y Paradise ya lo traen. */}
+                <div className="campo ancho">
+                  <label>
+                    <input type="checkbox" name="precio_incluye_iva" value="1" defaultChecked={!!t.precio_incluye_iva} />
+                    {' '}El precio cargado ya incluye el IVA
+                  </label>
+                  <small>
+                    Desmarcalo si el operador entregó las tarifas sin impuesto. La ficha
+                    entonces muestra el precio sin IVA y abajo el desglose con el total —
+                    {' '}{Number(destino.iva_pct)}% acá.
+                  </small>
+                </div>
               </div>
 
               {/* ---- Lo que vuelve vendible una tour ----
@@ -241,6 +312,109 @@ export default async function PaginaTour({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </form>
+
+      {/* ---- LAS OPCIONES DE PRECIO ----
+          ⚠️ FUERA del formulario grande, y no es cosmético: HTML no permite
+          formularios anidados. Cada opción es su propio <form>; adentro, el
+          navegador se los come y «Guardar» terminaría guardando la tour. Es la
+          misma razón por la que la galería y el itinerario viven acá abajo.
+
+          Esto es lo que Tony pidió el 9 de noviembre de 2026 mirando el
+          catálogo de Outback: el jet ski doble no cuesta $119 × 2 = $238,
+          cuesta $139, porque son dos personas en el MISMO jet ski. Eso no cabe
+          en «adulto / niño» y antes vivía en la letra chica. */}
+      <div className="tarjeta">
+        <h2>Opciones de precio</h2>
+        <p className="gris" style={{ margin: '0 0 14px', fontSize: 13.5, lineHeight: 1.55, color: '#5A5A56' }}>
+          Una fila por <strong>opción comprable</strong>. Sin opciones, la ficha muestra el
+          precio de adulto de siempre y no cambia nada. Con opciones, la ficha pinta un
+          selector y el <strong>«desde» es la más barata</strong>, calculada — no hay que
+          marcarla.
+        </p>
+
+        {!opciones?.length ? (
+          <Vacio texto="Todavía no tiene opciones. La ficha muestra el precio de adulto, como siempre." />
+        ) : (
+          <div className="opciones-admin">
+            {opciones.map((o) => {
+              const rackO = Number(o.precio_rack_usd);
+              const netoO = o.precio_neto_usd != null ? Number(o.precio_neto_usd) : null;
+              /* La comisión no se guarda: sale de rack − neto. Guardarla sería
+                 tener dos verdades que se pueden contradecir, que es justo lo
+                 que ya pasa con `dst_tour` y tiene un aviso entero dedicado. */
+              const pct = netoO != null && rackO > 0 ? ((rackO - netoO) / rackO) * 100 : null;
+              return (
+                <form key={o.id} action={guardarOpcionDeTour} className="opcion-admin">
+                  <input type="hidden" name="id" value={id} />
+                  <input type="hidden" name="opcion_id" value={o.id} />
+                  <div className="campos" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr' }}>
+                    <div className="campo"><label>Nombre</label><input name="nombre" defaultValue={o.nombre} required /></div>
+                    <div className="campo"><label>Se cobra</label>
+                      <select name="cobro" defaultValue={o.cobro}>
+                        <option value="por_persona">por persona</option>
+                        <option value="por_vehiculo">por vehículo</option>
+                        <option value="por_reserva">por la reserva</option>
+                      </select>
+                    </div>
+                    <div className="campo"><label>Personas</label><input type="number" name="personas" defaultValue={o.personas ?? ''} min="1" /></div>
+                    <div className="campo"><label>Rack USD</label><input type="number" step="0.01" name="precio_rack_usd" defaultValue={rackO} required /></div>
+                    <div className="campo"><label>Neto USD</label><input type="number" step="0.01" name="precio_neto_usd" defaultValue={netoO ?? ''} /></div>
+                    <div className="campo ancho"><label>Qué cubre <small style={{ fontWeight: 400, color: '#8B8B87' }}>sale debajo del nombre, en la ficha</small></label>
+                      <input name="que_cubre" defaultValue={o.que_cubre ?? ''} placeholder="Dos personas en el mismo jet ski." />
+                    </div>
+                  </div>
+                  <div className="opcion-admin-pie">
+                    <label><input type="checkbox" name="esta_activa" value="1" defaultChecked={!!o.esta_activa} /> Se muestra</label>
+                    {pct != null && <span className="opcion-admin-pct">comisión {pct.toFixed(1)}%</span>}
+                    <span style={{ flexGrow: 1 }} />
+                    <BotonAccion>Guardar</BotonAccion>
+                  </div>
+                </form>
+              );
+            })}
+            {/* Borrar va en su PROPIO formulario y al final: un <button> de
+                borrar dentro del de guardar manda los dos campos y el
+                navegador decide cuál gana. */}
+            <div className="opciones-admin-borrar">
+              {opciones.map((o) => (
+                <form key={o.id} action={borrarOpcionDeTour}>
+                  <input type="hidden" name="id" value={id} />
+                  <input type="hidden" name="opcion_id" value={o.id} />
+                  <BotonAccion clase="boton peligro tenue" confirmar={`Se borra la opción «${o.nombre}» y sus traducciones. ¿Seguro?`}>
+                    Borrar «{o.nombre}»
+                  </BotonAccion>
+                </form>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <form action={guardarOpcionDeTour} className="opcion-admin opcion-admin-nueva">
+          <input type="hidden" name="id" value={id} />
+          <h3>Agregar una opción</h3>
+          <div className="campos" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr' }}>
+            <div className="campo"><label>Nombre</label><input name="nombre" required placeholder="Doble, con transporte" /></div>
+            <div className="campo"><label>Se cobra</label>
+              <select name="cobro" defaultValue="por_persona">
+                <option value="por_persona">por persona</option>
+                <option value="por_vehiculo">por vehículo</option>
+                <option value="por_reserva">por la reserva</option>
+              </select>
+            </div>
+            <div className="campo"><label>Personas</label><input type="number" name="personas" min="1" placeholder="2" /></div>
+            <div className="campo"><label>Rack USD</label><input type="number" step="0.01" name="precio_rack_usd" required placeholder="139" /></div>
+            <div className="campo"><label>Neto USD</label><input type="number" step="0.01" name="precio_neto_usd" placeholder="119" /></div>
+            <div className="campo ancho"><label>Qué cubre</label>
+              <input name="que_cubre" placeholder="Dos personas en el mismo jet ski. Los pasan buscando." />
+            </div>
+          </div>
+          <div className="opcion-admin-pie">
+            <label><input type="checkbox" name="esta_activa" value="1" defaultChecked /> Se muestra</label>
+            <span style={{ flexGrow: 1 }} />
+            <BotonAccion>Agregar</BotonAccion>
+          </div>
+        </form>
+      </div>
 
       {/* ⚠️ LA GALERÍA VIVE FUERA DEL FORMULARIO GRANDE, y no es cosmético:
           HTML NO PERMITE FORMULARIOS ANIDADOS. Estaba dentro del <form> de

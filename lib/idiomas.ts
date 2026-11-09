@@ -89,6 +89,20 @@ export const T: Record<string, Diccionario> = {
   tour_llevar:       { es: 'Qué llevar', en: 'What to bring', pt: 'O que levar', fr: 'À apporter', de: 'Was mitbringen' },
   tour_precio:       { es: 'Precio', en: 'Price', pt: 'Preço', fr: 'Prix', de: 'Preis' },
   tour_consultar:    { es: 'Consultar disponibilidad', en: 'Check availability', pt: 'Consultar disponibilidade', fr: 'Vérifier la disponibilité', de: 'Verfügbarkeit anfragen' },
+  /* Las OPCIONES de precio. Una tour puede cobrarse de tres maneras —por
+     persona, por vehículo, por la reserva entera— y el catálogo de Outback usa
+     las tres. «por el vehículo» es lo que evita que alguien crea que el jet
+     ski doble cuesta $139 CADA UNO. */
+  opcion_elegi:      { es: 'Elegí tu opción', en: 'Choose your option', pt: 'Escolha a sua opção', fr: 'Choisissez votre option', de: 'Wähle deine Option' },
+  opcion_desde:      { es: 'Desde', en: 'From', pt: 'A partir de', fr: 'À partir de', de: 'Ab' },
+  opcion_por_persona:{ es: 'por persona', en: 'per person', pt: 'por pessoa', fr: 'par personne', de: 'pro Person' },
+  opcion_por_vehiculo:{ es: 'por el vehículo', en: 'for the vehicle', pt: 'pelo veículo', fr: 'pour le véhicule', de: 'für das Fahrzeug' },
+  opcion_por_reserva:{ es: 'por la reserva', en: 'for the booking', pt: 'pela reserva', fr: 'pour la réservation', de: 'für die Buchung' },
+  /* El desglose del impuesto. Sale solo cuando el precio cargado NO lo trae. */
+  precio_subtotal:   { es: 'Subtotal', en: 'Subtotal', pt: 'Subtotal', fr: 'Sous-total', de: 'Zwischensumme' },
+  precio_iva:        { es: 'IVA', en: 'VAT', pt: 'IVA', fr: 'TVA', de: 'MwSt.' },
+  precio_total:      { es: 'Total', en: 'Total', pt: 'Total', fr: 'Total', de: 'Gesamt' },
+  precio_mas_iva:    { es: '+ IVA', en: '+ VAT', pt: '+ IVA', fr: '+ TVA', de: '+ MwSt.' },
   /* ⚠️ EL OPERADOR NO SE NOMBRA en la ficha de una tour. Decía «Servicio
      ofrecido por: <nombre>» y eso es regalarle el cliente: quien lee el
      nombre lo busca en Google y reserva directo con él. Se dice QUÉ es

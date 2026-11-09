@@ -11,7 +11,8 @@ import { BloqueResenas } from '@/componentes/BloqueResenas';
 import { DatosClaveDelTour, filasClaveDeTour } from '@/componentes/DatosClaveDelTour';
 import { ItinerarioDelTour } from '@/componentes/ItinerarioDelTour';
 import { resenasDeTour } from '@/lib/resenas';
-import { paradasDeTour, textosDelSitio } from '@/lib/destino';
+import { paradasDeTour, opcionesDeTour, textosDelSitio } from '@/lib/destino';
+import { OpcionesDeTour } from '@/componentes/OpcionesDeTour';
 import { VideoNegocio } from '@/componentes/VideoNegocio';
 import { textoRicoAHtml } from '@/lib/texto-rico';
 import { t, type Idioma } from '@/lib/idiomas';
@@ -69,10 +70,20 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
 
   /* Las reseñas de ESTA tour. Se piden solo si la tour existe —si no, la
      página va al 404 unas líneas más abajo y la consulta se habría tirado. */
-  const [resenasPropias, paradas] = tour
-    ? await Promise.all([resenasDeTour(tour.id), paradasDeTour(tour.id, idioma)])
-    : [[], []];
+  const [resenasPropias, paradas, opciones] = tour
+    ? await Promise.all([
+        resenasDeTour(tour.id), paradasDeTour(tour.id, idioma), opcionesDeTour(tour.id, idioma),
+      ])
+    : [[], [], []];
   const negocioIdDeLaTour = tour?.negocio_id ?? '';
+
+  /* El precio de ENTRADA, que es el que ven el «desde» de la caja y la barra
+     fija de abajo. Con opciones es la más barata; sin opciones es el de
+     adulto, como siempre. Calcularlo acá —y no en los dos lugares que lo
+     pintan— es lo que evita que la caja diga «desde $109» y la barra $119. */
+  const precioDeEntrada = opciones.length
+    ? Math.min(...opciones.map((o) => Number(o.precio_rack_usd)))
+    : Number(tour?.precio_adulto_usd ?? 0);
 
   /* Las fotos del tour se mapean al tipo de las fichas para poder reusar la
      MISMA galería: tres grandes arriba, la tira con el «+N» más abajo y el
@@ -320,10 +331,28 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                       <p className="reservar-que">{tx('tour_quien_opera')}</p>
                     </div>
                     <div className="reservar-precio">
+                      {/* Con opciones cargadas manda el selector: el catálogo
+                          de Outback cobra por persona, por vehículo y por la
+                          reserva entera, y eso no cabe en «adulto / niño».
+                          Sin opciones, la tour se ve exactamente como siempre
+                          —las dos de Jacamar no tienen y no cambiaron. */}
+                      {opciones.length > 0 ? (
+                        <OpcionesDeTour opciones={opciones} idioma={idioma}
+                                        ivaPct={Number(destino.iva_pct)}
+                                        incluyeIva={tour.precio_incluye_iva} />
+                      ) : (
                       <ul className="reservar-tarifas">
                         <li>
                           <span>{t('reserva_adulto_uno', idioma)}</span>
-                          <strong>${Number(tour.precio_adulto_usd).toFixed(0)}</strong>
+                          <strong>
+                            ${Number(tour.precio_adulto_usd).toFixed(0)}
+                            {/* Sin opciones pero con precio pelado, el «+ IVA»
+                                va PEGADO a la cifra. Un precio que no es el
+                                precio es peor que no mostrar precio. */}
+                            {!tour.precio_incluye_iva && (
+                              <small className="precio-mas-iva"> {t('precio_mas_iva', idioma)}</small>
+                            )}
+                          </strong>
                         </li>
                         {tour.precio_nino_usd != null && (
                           <li>
@@ -332,6 +361,7 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
                           </li>
                         )}
                       </ul>
+                      )}
                       {/* La letra chica. Sin esto la ficha muestra «$101» y
                           el viajero paga $114 (+13% de IVA), o cree que es
                           por persona cuando el cuadraciclo se cobra por
@@ -406,12 +436,24 @@ export default async function PaginaTour({ params }: { params: Parametros }) {
           de GetYourGuide en su teléfono.
 
           ⚠️ Dice la tarifa de ADULTO con su nombre, no «desde». Con adulto a
-          $101 y niño a $70, un «desde $70» es cierto y engañoso a la vez. */}
-      {tour.precio_adulto_usd != null && tour.precio_adulto_usd > 0 && (
+          $101 y niño a $70, un «desde $70» es cierto y engañoso a la vez.
+
+          ⚠️ CON OPCIONES SÍ DICE «DESDE», y no se contradice con lo de arriba:
+          un adulto no puede comprar la tarifa de niño, pero cualquiera puede
+          comprar la opción más barata. Ahí «desde» es la verdad y poner la más
+          cara sería mentir al revés. La cifra sale de `precioDeEntrada`, la
+          MISMA que usa la caja: calcularla dos veces es como terminan la barra
+          y la caja diciendo precios distintos. */}
+      {precioDeEntrada > 0 && (
         <a className="barra-reservar" href="#reservar">
           <span className="cuanto">
-            <strong>${Number(tour.precio_adulto_usd).toFixed(0)}</strong>
-            <span>{t('reserva_adulto_uno', idioma)}</span>
+            <strong>${precioDeEntrada.toFixed(0)}</strong>
+            <span>
+              {opciones.length > 0
+                ? t('opcion_desde', idioma).toLowerCase()
+                : t('reserva_adulto_uno', idioma)}
+              {!tour.precio_incluye_iva && ` · ${t('precio_mas_iva', idioma)}`}
+            </span>
           </span>
           <span className="boton">
             {vendible ? t('reserva_pedir', idioma) : t('tour_consultar', idioma)}

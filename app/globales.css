@@ -1006,11 +1006,16 @@ input[type="date"], input[type="time"], input[type="number"], input[type="dateti
     background: rgba(var(--rgb-fondo), .97); backdrop-filter: blur(14px);
     border-top: 1px solid var(--borde);
   }
-  .barra-reservar .cuanto { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
-  .barra-reservar .cuanto strong { font-size: 23px; font-weight: 900; letter-spacing: -.03em; color: var(--naranja); }
+  /* ⚠️ APILADO, no en linea. Estaba en linea con `text-overflow: ellipsis` y
+     el ancho que sobra junto al boton es de 96px: «desde · + IVA» salia
+     cortado en «des…». Un precio con la leyenda cortada es un precio que no se
+     entiende — y es justo el caso que importa, porque la leyenda dice si la
+     cifra lleva impuesto o no. En columna cabe entero y la barra no crece. */
+  .barra-reservar .cuanto { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+  .barra-reservar .cuanto strong { font-size: 23px; font-weight: 900; letter-spacing: -.03em; color: var(--naranja); line-height: 1.1; }
   .barra-reservar .cuanto span {
-    font-size: 12.5px; color: var(--humo);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 12.5px; color: var(--humo); line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
   }
   .barra-reservar .boton { border-radius: 100px; padding: 12px 20px; font-size: 14px; flex-shrink: 0; }
 }
@@ -3516,3 +3521,56 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   color: var(--humo);
 }
 
+
+/* ── Las opciones de precio de una tour ────────────────────────────────────
+   El catalogo de Outback cobra de tres maneras: por persona, por vehiculo y
+   por la reserva entera. Antes todo eso vivia en `precio_nota`, seis lineas
+   de letra chica debajo de un precio grande que no era el unico precio.
+
+   ⚠️ COLORES POR VARIABLE, no en duro: esta caja vive en la ficha publica,
+   que cambia con el tema. (La pantalla del panel es al reves — ahi la tarjeta
+   es #fff fijo y los colores van en duro; ver la nota de admin.css.) */
+.tour-opciones { display: grid; gap: 14px; }
+
+.opciones-lista { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.opciones-lista legend {
+  padding: 0; margin-bottom: 9px;
+  font-size: 14px; font-weight: 700; color: var(--txt-0);
+}
+
+.opcion-fila {
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 13px; border-radius: 9px; cursor: pointer;
+  /* 44px de alto minimo: es un control que se toca con el dedo. */
+  min-height: 44px; box-sizing: border-box;
+  border: 1.5px solid var(--borde); background: var(--sup-2);
+}
+.opcion-fila:hover { border-color: var(--humo); }
+.opcion-fila.activa { border-color: var(--naranja); background: var(--sup-3); }
+.opcion-fila input { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--naranja); }
+
+.opcion-texto { display: grid; gap: 2px; flex-grow: 1; min-width: 0; }
+.opcion-texto strong { font-size: 14px; font-weight: 700; color: var(--txt-0); }
+.opcion-texto small { font-size: 12px; line-height: 1.4; color: var(--txt-1); }
+
+.opcion-plata { display: grid; gap: 1px; text-align: right; flex-shrink: 0; }
+.opcion-plata strong { font-size: 17px; font-weight: 900; letter-spacing: -.02em; color: var(--naranja); }
+/* «por el vehiculo» es lo que evita que alguien crea que el jet ski doble
+   cuesta $139 cada uno. No es decoracion. */
+.opcion-plata small { font-size: 11px; color: var(--humo); }
+
+.opciones-cuenta {
+  margin: 0; display: grid; gap: 6px;
+  border-top: 1px solid var(--borde); padding-top: 13px;
+}
+.opciones-cuenta div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.opciones-cuenta dt { font-size: 13px; color: var(--txt-1); }
+.opciones-cuenta dd { margin: 0; font-size: 13px; color: var(--txt-1); font-variant-numeric: tabular-nums; }
+.opciones-cuenta .cuenta-total dt { font-size: 14px; font-weight: 700; color: var(--txt-0); }
+.opciones-cuenta .cuenta-total dd {
+  font-size: 23px; font-weight: 900; letter-spacing: -.02em; color: var(--naranja);
+}
+
+/* El «+ IVA» pegado a la cifra, cuando la tour no tiene opciones pero su
+   precio viene pelado. Chico y en gris: es una aclaracion, no un precio. */
+.precio-mas-iva { font-size: 13px; font-weight: 700; color: var(--humo); letter-spacing: 0; }

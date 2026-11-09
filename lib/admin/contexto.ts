@@ -17,6 +17,10 @@ export type DestinoPanel = {
   moneda_iso: string; comision_por_defecto: number | null;
   /* El titulo del bloque de piezas de la columna del blog. */
   lateral_titulo: string | null;
+  /* El IVA del PAIS del destino: 13 en Costa Rica. La pantalla del tour lo
+     dice al lado de la casilla de «el precio ya incluye el IVA», para que
+     quien la marca sepa de que porcentaje esta hablando. */
+  iva_pct: number;
 };
 
 export const COOKIE_DESTINO = 'vlf_admin_destino';
@@ -35,7 +39,7 @@ export async function contextoPanel(seccion?: Seccion) {
   const db = await sesion();
   const { data } = await db
     .from('dst_destino')
-    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo')
+    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo, iva_pct')
     .order('nombre');
 
   let destinos = (data ?? []) as DestinoPanel[];

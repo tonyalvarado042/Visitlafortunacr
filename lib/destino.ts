@@ -18,6 +18,10 @@ export type Destino = {
   idiomas: Idioma[];
   /* Cuántas fichas salen en «Más para tu viaje». Antes era un 4 en duro. */
   cuantas_recomendadas: number;
+  /* El IVA del PAÍS del destino: 13 en Costa Rica. Va acá y no en el tour
+     porque es del país, no del operador. Solo se usa para desglosar el total
+     cuando un tour trae `precio_incluye_iva` en false. */
+  iva_pct: number;
   moneda_iso: string;
   moneda_visitante: string | null;
   latitud: number | null;
@@ -553,6 +557,11 @@ export type TourPublico = TourDeNegocio & {
   punto_encuentro: string | null;
   precio_nino_usd: number | null;
   precio_nota: string | null;
+  /* Si el precio cargado YA trae el impuesto. En `true` —como nacen todos—
+     la ficha se ve como siempre. En `false` muestra el precio pelado, el IVA
+     aparte y el total abajo. Lo decide cómo entregó los precios el operador:
+     el convenio de Outback dice que sus tarifas son sin impuesto. */
+  precio_incluye_iva: boolean;
   categoria_id: string | null;
   /* Los mantiene el disparador de `dst_resena`. Cuentan SOLO las reseñas de
      esta tour, no las del negocio: la nota de un operador con diez tours no
@@ -618,7 +627,7 @@ export async function tourPorBabosa(
     .select(`id, categoria_id, negocio_id, babosa, nombre, resumen, descripcion, incluye, no_incluye, que_llevar,
              duracion_horas, hora_inicio, dificultad, edad_minima, cupo_maximo,
              idiomas_guia, recoge_en_hotel, cancelacion_libre_horas, punto_encuentro,
-             precio_adulto_usd, precio_nino_usd, precio_nota, imagen_url, video_url, video_portada_url,
+             precio_adulto_usd, precio_nino_usd, precio_nota, precio_incluye_iva, imagen_url, video_url, video_portada_url,
              total_resenas, promedio_calificacion,
              fotos:dst_tour_foto(id, url, texto_alternativo_es, texto_alternativo_en, credito, licencia, fuente_url, es_portada, orden),
              negocio:dst_negocio(nombre, babosa, es_operador, categoria:dst_categoria(babosa))`)
@@ -853,6 +862,48 @@ export async function paradasDeTour(tourId: string, idioma: Idioma): Promise<Par
     return [];
   }
   return (data ?? []) as ParadaDeTour[];
+}
+
+/*
+ * Las OPCIONES de precio de una tour: «individual con transporte», «doble sin
+ * transporte», «el vehículo completo».
+ *
+ * ⚠️ NO REEMPLAZAN `precio_adulto_usd`. Una tour sin opciones se ve igual que
+ * siempre; las dos de Jacamar no tienen y no cambian. Es el mismo criterio de
+ * los textos configurables: lo que no se configura se queda como estaba.
+ *
+ * La opción de ENTRADA —la del «desde»— es la más barata, calculada acá y no
+ * marcada en la base: un campo marcable queda con dos marcadas o con ninguna
+ * el día que alguien borre una fila, y entonces la ficha dice «desde» de algo
+ * que no es lo más barato.
+ */
+export type OpcionDeTour = {
+  id: string;
+  orden: number;
+  nombre: string;
+  que_cubre: string | null;
+  /* `por_persona` el precio es por cada quien; `por_vehiculo` cubre la máquina
+     entera con la gente que quepa; `por_reserva` se cobra por la reserva
+     completa. Son tres y no dos porque el catálogo de Outback cobra de las
+     tres maneras. */
+  cobro: 'por_persona' | 'por_vehiculo' | 'por_reserva';
+  personas: number | null;
+  precio_rack_usd: number;
+  precio_neto_usd: number | null;
+};
+
+export async function opcionesDeTour(tourId: string, idioma: Idioma): Promise<OpcionDeTour[]> {
+  const { data, error } = await supabase.rpc('opciones_de_tour', {
+    p_tour_id: tourId, p_idioma: idioma,
+  });
+  if (error) {
+    /* Igual que el itinerario: que una tour no tenga opciones es normal, que
+       la consulta falle no. Sin esto la ficha caería al precio de siempre sin
+       que nadie se entere de que el selector dejó de salir. */
+    console.error('opcionesDeTour:', tourId, error.message);
+    return [];
+  }
+  return (data ?? []) as OpcionDeTour[];
 }
 
 
