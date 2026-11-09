@@ -4,7 +4,9 @@ import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
-import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour, guardarOpcionDeTour, borrarOpcionDeTour } from '../acciones';
+import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour, guardarOpcionDeTour, borrarOpcionDeTour, guardarTraduccionesDeTour } from '../acciones';
+import { CAMPOS_TRADUCIBLES_DESDE_EL_PANEL } from '@/lib/traducciones-de-tour';
+import { NOMBRE_PROPIO } from '@/lib/idiomas';
 import { relativo } from '@/lib/admin/formato';
 import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 
@@ -33,8 +35,27 @@ export default async function PaginaTour({ params, searchParams }: {
   /* Las opciones de precio. Van acá y no en el Promise.all de abajo porque ese
      necesita `t.negocio_id` y este no. */
   const { data: opciones } = await db.from('dst_tour_opcion')
-    .select('id, orden, nombre, que_cubre, cobro, personas, precio_rack_usd, precio_neto_usd, esta_activa')
+    .select('id, orden, nombre, que_cubre, cobro, personas, personas_min, precio_rack_usd, precio_neto_usd, esta_activa')
     .eq('tour_id', id).order('orden');
+  /* Las traducciones del tour Y las de sus opciones, de una. El panel las lee
+     y las escribe directo: `dst_traduccion` es del equipo, y el RPC del
+     operador (`guardar_traducciones_de_mi_tour`) tiene su propia lista blanca
+     que deja fuera `precio_nota` a propósito — acá sí se puede. */
+  const { data: tradTour } = await db.from('dst_traduccion')
+    .select('campo, idioma, texto').eq('entidad', 'tour').eq('entidad_id', id);
+  const { data: tradOpciones } = (opciones ?? []).length
+    ? await db.from('dst_traduccion').select('entidad_id, campo, idioma, texto')
+        .eq('entidad', 'tour_opcion').in('entidad_id', (opciones ?? []).map((o) => o.id))
+    : { data: [] as { entidad_id: string; campo: string; idioma: string; texto: string }[] };
+
+  const puestoTour = (idi: string, campo: string) =>
+    (tradTour ?? []).find((t) => t.idioma === idi && t.campo === campo)?.texto ?? '';
+  const puestoOpcion = (opcionId: string, idi: string, campo: string) =>
+    (tradOpciones ?? []).find((t) => t.entidad_id === opcionId && t.idioma === idi && t.campo === campo)?.texto ?? '';
+  /* Los idiomas que el sitio SIRVE menos el principal: el principal es lo que
+     ya está escrito arriba. Sale de la base, así que el día que el destino
+     active otro idioma, esta pantalla lo pide sola. */
+  const otrosIdiomas = (destino.idiomas ?? []).filter((i) => i !== destino.idioma_principal);
   /* Lo que le falta al tour para poder publicarse y venderse. El precio
      cuenta: sin él `tour_reservable` no devuelve nada y la caja de reservar
      no sale — ver la nota de ese RPC. */
@@ -347,7 +368,7 @@ export default async function PaginaTour({ params, searchParams }: {
                 <form key={o.id} action={guardarOpcionDeTour} className="opcion-admin">
                   <input type="hidden" name="id" value={id} />
                   <input type="hidden" name="opcion_id" value={o.id} />
-                  <div className="campos" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr' }}>
+                  <div className="campos" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
                     <div className="campo"><label>Nombre</label><input name="nombre" defaultValue={o.nombre} required /></div>
                     <div className="campo"><label>Se cobra</label>
                       <select name="cobro" defaultValue={o.cobro}>
@@ -356,7 +377,11 @@ export default async function PaginaTour({ params, searchParams }: {
                         <option value="por_reserva">por la reserva</option>
                       </select>
                     </div>
-                    <div className="campo"><label>Personas</label><input type="number" name="personas" defaultValue={o.personas ?? ''} min="1" /></div>
+                    {/* El piso y el techo. Juntos la ficha dice «de 2 a 6
+                        personas», que es lo que preguntan antes de reservar un
+                        privado. */}
+                    <div className="campo"><label>Mínimo</label><input type="number" name="personas_min" defaultValue={o.personas_min ?? ''} min="1" /></div>
+                    <div className="campo"><label>Máximo</label><input type="number" name="personas" defaultValue={o.personas ?? ''} min="1" /></div>
                     <div className="campo"><label>Rack USD</label><input type="number" step="0.01" name="precio_rack_usd" defaultValue={rackO} required /></div>
                     <div className="campo"><label>Neto USD</label><input type="number" step="0.01" name="precio_neto_usd" defaultValue={netoO ?? ''} /></div>
                     <div className="campo ancho"><label>Qué cubre <small style={{ fontWeight: 400, color: '#8B8B87' }}>sale debajo del nombre, en la ficha</small></label>
@@ -392,7 +417,7 @@ export default async function PaginaTour({ params, searchParams }: {
         <form action={guardarOpcionDeTour} className="opcion-admin opcion-admin-nueva">
           <input type="hidden" name="id" value={id} />
           <h3>Agregar una opción</h3>
-          <div className="campos" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr' }}>
+          <div className="campos" style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr' }}>
             <div className="campo"><label>Nombre</label><input name="nombre" required placeholder="Doble, con transporte" /></div>
             <div className="campo"><label>Se cobra</label>
               <select name="cobro" defaultValue="por_persona">
@@ -401,7 +426,8 @@ export default async function PaginaTour({ params, searchParams }: {
                 <option value="por_reserva">por la reserva</option>
               </select>
             </div>
-            <div className="campo"><label>Personas</label><input type="number" name="personas" min="1" placeholder="2" /></div>
+            <div className="campo"><label>Mínimo</label><input type="number" name="personas_min" min="1" placeholder="1" /></div>
+            <div className="campo"><label>Máximo</label><input type="number" name="personas" min="1" placeholder="2" /></div>
             <div className="campo"><label>Rack USD</label><input type="number" step="0.01" name="precio_rack_usd" required placeholder="139" /></div>
             <div className="campo"><label>Neto USD</label><input type="number" step="0.01" name="precio_neto_usd" placeholder="119" /></div>
             <div className="campo ancho"><label>Qué cubre</label>
@@ -415,6 +441,85 @@ export default async function PaginaTour({ params, searchParams }: {
           </div>
         </form>
       </div>
+
+      {/* ---- LOS OTROS IDIOMAS ----
+          ⚠️ Fuera del formulario grande, como todo lo de acá abajo: HTML no
+          permite formularios anidados.
+
+          Tony, 9 de noviembre de 2026: *«¿dónde está la traducción en el tour?
+          ¿el campo de idiomas?»*. No estaba. Se podía traducir SOLO desde el
+          portal del operador, y los cuatro tours de Outback los cargó el
+          equipo —Outback ni siquiera tiene cuenta— así que no había forma de
+          traducirlos sin meterse a la base.
+
+          ⚠️ «Idiomas del guía», arriba, NO es esto: ese dice en qué idiomas
+          habla el guía durante la tour. Esto es en qué idiomas se LEE la
+          ficha. Se parecen en el nombre y no tienen nada que ver. */}
+      {otrosIdiomas.length > 0 && (
+        <div className="tarjeta">
+          <h2>Otros idiomas</h2>
+          <p className="gris" style={{ margin: '0 0 14px', fontSize: 13.5, lineHeight: 1.55, color: '#5A5A56' }}>
+            Lo que quede vacío <strong>sale en {destino.idioma_principal === 'es' ? 'español' : destino.idioma_principal}</strong> en
+            esas páginas. No da error ni se ve roto: simplemente lo lee alguien que no lo
+            entiende. Vaciar un campo borra la traducción y lo devuelve al original.
+          </p>
+
+          <form action={guardarTraduccionesDeTour}>
+            <input type="hidden" name="id" value={id} />
+
+            {otrosIdiomas.map((idi) => {
+              const deTour = CAMPOS_TRADUCIBLES_DESDE_EL_PANEL
+                .filter((c) => puestoTour(idi, c.campo).trim()).length;
+              const deOpciones = (opciones ?? [])
+                .filter((o) => puestoOpcion(o.id, idi, 'nombre').trim()).length;
+              const total = CAMPOS_TRADUCIBLES_DESDE_EL_PANEL.length + (opciones?.length ?? 0);
+              const hechos = deTour + deOpciones;
+              return (
+                <details key={idi} className="trad-idioma" open={hechos === 0}>
+                  <summary>
+                    <strong>{NOMBRE_PROPIO[idi as keyof typeof NOMBRE_PROPIO] ?? idi}</strong>
+                    <span className={hechos === total ? 'trad-completo' : 'trad-falta'}>
+                      {hechos} de {total}
+                    </span>
+                  </summary>
+
+                  {CAMPOS_TRADUCIBLES_DESDE_EL_PANEL.map((c) => {
+                    /* El original al lado. Sin esto hay que traducir de
+                       memoria o abrir la pantalla dos veces. */
+                    const original = String((t as Record<string, unknown>)[c.campo] ?? '');
+                    return (
+                      <div key={c.campo} className="trad-campo">
+                        <label htmlFor={`trad_${idi}_${c.campo}`}>{c.etiqueta}</label>
+                        {original && <p className="trad-original">{original}</p>}
+                        <textarea id={`trad_${idi}_${c.campo}`} name={`trad_${idi}_${c.campo}`}
+                                  rows={c.filas} defaultValue={puestoTour(idi, c.campo)}
+                                  placeholder={original ? '' : 'Primero escribilo arriba'} />
+                      </div>
+                    );
+                  })}
+
+                  {/* Las opciones de precio también se traducen. Si no, la
+                      ficha en inglés muestra «Doble, con transporte». */}
+                  {(opciones ?? []).map((o) => (
+                    <div key={o.id} className="trad-campo">
+                      <label htmlFor={`opc_${o.id}_${idi}_nombre`}>Opción: {o.nombre}</label>
+                      <p className="trad-original">{o.que_cubre ?? '—'}</p>
+                      <input id={`opc_${o.id}_${idi}_nombre`} name={`opc_${o.id}_${idi}_nombre`}
+                             defaultValue={puestoOpcion(o.id, idi, 'nombre')}
+                             placeholder="El nombre de la opción" />
+                      <textarea name={`opc_${o.id}_${idi}_que_cubre`} rows={2}
+                                defaultValue={puestoOpcion(o.id, idi, 'que_cubre')}
+                                placeholder="Qué cubre" style={{ marginTop: 6 }} />
+                    </div>
+                  ))}
+                </details>
+              );
+            })}
+
+            <div className="pie-formulario"><BotonAccion>Guardar las traducciones</BotonAccion></div>
+          </form>
+        </div>
+      )}
 
       {/* ⚠️ LA GALERÍA VIVE FUERA DEL FORMULARIO GRANDE, y no es cosmético:
           HTML NO PERMITE FORMULARIOS ANIDADOS. Estaba dentro del <form> de

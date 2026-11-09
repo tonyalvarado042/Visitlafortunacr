@@ -614,3 +614,28 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
   display: flex; flex-wrap: wrap; gap: 8px;
   margin-top: 4px; padding-top: 12px; border-top: 1px solid #EFEDE5;
 }
+
+/* ── Los otros idiomas de un tour, en el panel ─────────────────────────────
+   Plegados y con el contador, igual que en el portal del operador: quien
+   abre esta pantalla para cambiar un precio no tiene por que pasar por doce
+   campos en ingles para llegar al boton. Colores en duro, como todo acá. */
+.trad-idioma { border: 1px solid #E6E4DC; border-radius: 9px; margin-bottom: 10px; background: #FCFBF8; }
+.trad-idioma summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; cursor: pointer; font-size: 14px; color: #2B2B28;
+}
+.trad-idioma[open] summary { border-bottom: 1px solid #EFEDE5; }
+.trad-completo { font-size: 12px; font-weight: 700; color: #1B6B4A; }
+/* Ambar y no rojo: faltar traducciones no es un error, es trabajo pendiente. */
+.trad-falta { font-size: 12px; font-weight: 700; color: #8A5A00; }
+
+.trad-campo { padding: 12px 16px; border-bottom: 1px solid #F4F2EA; }
+.trad-campo:last-child { border-bottom: 0; }
+.trad-campo label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; color: #44443F; }
+/* El original al lado: sin esto hay que traducir de memoria. */
+.trad-original {
+  margin: 0 0 7px; padding: 7px 10px; border-radius: 6px;
+  background: #F4F2EA; color: #5A5A56; font-size: 12.5px; line-height: 1.5;
+  white-space: pre-line; max-height: 120px; overflow-y: auto;
+}
+.trad-campo textarea, .trad-campo input { width: 100%; box-sizing: border-box; }

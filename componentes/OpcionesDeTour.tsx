@@ -37,6 +37,22 @@ function plata(n: number): string {
   return `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
 }
 
+/**
+ * «de 2 a 6 personas», «hasta 6 personas», «desde 2 personas».
+ *
+ * Es la pregunta que llega antes de reservar un privado —«¿me lo hacen si
+ * vamos dos?»— y la respuesta estaba en un correo, no en la ficha. Sale solo
+ * en lo que se cobra por vehículo o por reserva: en «por persona» decir «hasta
+ * 1 persona» no informa nada.
+ */
+function cuantosCaben(min: number | null, max: number | null): string | null {
+  if (min && max && min !== max) return `de ${min} a ${max} personas`;
+  if (min && max && min === max) return `${max} personas`;
+  if (max) return `hasta ${max} personas`;
+  if (min) return `desde ${min} personas`;
+  return null;
+}
+
 export function OpcionesDeTour({
   opciones, idioma, ivaPct, incluyeIva,
 }: {
@@ -79,6 +95,11 @@ export function OpcionesDeTour({
               <span className="opcion-texto">
                 <strong>{o.nombre}</strong>
                 {o.que_cubre && <small>{o.que_cubre}</small>}
+                {/* El cupo, solo donde significa algo: lo que se cobra por
+                    vehículo o por la reserva entera. */}
+                {o.cobro !== 'por_persona' && cuantosCaben(o.personas_min, o.personas) && (
+                  <small className="opcion-cupo">{cuantosCaben(o.personas_min, o.personas)}</small>
+                )}
               </span>
               <span className="opcion-plata">
                 <strong>{plata(Number(o.precio_rack_usd))}</strong>

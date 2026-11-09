@@ -37,6 +37,24 @@ export const CAMPOS_TRADUCIBLES_DE_TOUR = [
 
 export type CampoTraducibleDeTour = (typeof CAMPOS_TRADUCIBLES_DE_TOUR)[number]['campo'];
 
+/*
+ * Lo que el EQUIPO puede traducir desde `/admin/tours/<id>`: los siete de
+ * arriba MÁS `precio_nota`.
+ *
+ * ⚠️ `precio_nota` está acá y NO en la lista del operador, y es a propósito:
+ * ese campo lo escribe el equipo, así que el operador no puede traducir por la
+ * ventana algo que por la puerta no puede escribir. Es la misma frontera que
+ * ya explica la nota larga de arriba, vista desde el otro lado.
+ *
+ * El panel escribe `dst_traduccion` directo con el cliente del equipo, así que
+ * esta lista NO tiene que coincidir con la lista blanca de
+ * `guardar_traducciones_de_mi_tour` — esa guarda al operador, no al equipo.
+ */
+export const CAMPOS_TRADUCIBLES_DESDE_EL_PANEL = [
+  ...CAMPOS_TRADUCIBLES_DE_TOUR,
+  { campo: 'precio_nota', etiqueta: 'La letra chica del precio', filas: 3 },
+] as const;
+
 export const NOMBRES_DE_CAMPOS_TRADUCIBLES: readonly string[] =
   CAMPOS_TRADUCIBLES_DE_TOUR.map((c) => c.campo);
 

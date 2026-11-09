@@ -887,9 +887,23 @@ export type OpcionDeTour = {
      completa. Son tres y no dos porque el catálogo de Outback cobra de las
      tres maneras. */
   cobro: 'por_persona' | 'por_vehiculo' | 'por_reserva';
+  /* Cuántas caben (el techo) y cuántas como mínimo (el piso). Los dos juntos
+     arman la frase: «de 2 a 6 personas». El piso es lo que preguntan antes de
+     reservar un privado. */
   personas: number | null;
+  personas_min: number | null;
   precio_rack_usd: number;
-  precio_neto_usd: number | null;
+  /* ⚠️ NO HAY `precio_neto_usd` ACÁ, Y NO ES UN OLVIDO.
+     La neta es el convenio: cuánto se le paga al operador y, restando, la
+     comisión. El selector de la ficha es un componente de CLIENTE, así que
+     TODO lo que se le pasa queda serializado en el HTML y se lee con
+     ver-código. Lo comprobé el 9 de noviembre de 2026: las seis netas del jet
+     ski de Outback estaban en el fuente de la página.
+     Es la misma lección del 6 de noviembre con el nombre del operador en
+     `ReservarProducto`: lo que no se debe revelar NO SE MANDA.
+     La función `opciones_de_tour` tampoco la devuelve (migración 39), para que
+     no dependa de que nadie se acuerde. El panel sí la ve: lee la tabla
+     directo con el cliente del equipo. */
 };
 
 export async function opcionesDeTour(tourId: string, idioma: Idioma): Promise<OpcionDeTour[]> {

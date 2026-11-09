@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
 import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
+import { CAMPOS_TRADUCIBLES_DESDE_EL_PANEL } from '@/lib/traducciones-de-tour';
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -137,6 +138,10 @@ export async function guardarOpcionDeTour(datos: FormData) {
     que_cubre: texto(datos, 'que_cubre').slice(0, 300) || null,
     cobro: ['por_persona', 'por_vehiculo', 'por_reserva'].includes(cobro) ? cobro : 'por_persona',
     personas: numero(datos, 'personas'),
+    /* El piso. Con el techo arma «de 2 a 6 personas», que es lo que preguntan
+       antes de reservar un privado. La base rechaza un piso mayor que el
+       techo: una opción así no la puede comprar nadie. */
+    personas_min: numero(datos, 'personas_min'),
     precio_rack_usd: rack,
     precio_neto_usd: numero(datos, 'precio_neto_usd'),
     esta_activa: texto(datos, 'esta_activa') === '1',
@@ -161,6 +166,79 @@ export async function guardarOpcionDeTour(datos: FormData) {
     redirect(`/admin/tours/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
   }
   refrescarTour(id);
+}
+
+/*
+ * Las traducciones del tour Y las de sus opciones, desde el PANEL.
+ *
+ * 9 de noviembre de 2026. Tony: *«¿dónde está la traducción en el tour? ¿el
+ * campo de idiomas?»*. No estaba: se podían traducir SOLO desde el portal del
+ * operador. Y los cuatro tours de Outback los cargó el equipo —Outback ni
+ * siquiera tiene cuenta abierta— así que no había manera de traducirlos sin
+ * meterse a la base.
+ *
+ * ⚠️ «Idiomas del guía» NO es esto. Ese campo dice en qué idiomas habla el
+ * guía durante la tour; esto es en qué idiomas se LEE la ficha. Se parecen en
+ * el nombre y no tienen nada que ver, y por eso la pantalla los separa.
+ *
+ * Acá el equipo puede traducir `precio_nota`, que el operador NO puede: su
+ * RPC lo deja fuera de la lista blanca a propósito, porque ese campo lo
+ * escribe el equipo. Ver la nota de `lib/traducciones-de-tour.ts`.
+ *
+ * Escribe directo sobre `dst_traduccion` con el cliente del panel. Un campo
+ * vacío BORRA la fila y el texto vuelve al español, que es lo que uno espera
+ * al borrar: guardar una cadena vacía dejaría el título en blanco en la ficha.
+ */
+export async function guardarTraduccionesDeTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+  if (!(await esDeEsteDestino(db, destino.id, id))) return;
+
+  const { data: opciones } = await db.from('dst_tour_opcion').select('id').eq('tour_id', id);
+  const idiomas = (destino.idiomas ?? []).filter((i) => i !== destino.idioma_principal);
+
+  type Fila = { entidad: string; entidad_id: string; campo: string; idioma: string; texto: string; origen: string; esta_revisada: boolean };
+  const aPoner: Fila[] = [];
+  const aBorrar: { entidad: string; entidad_id: string; campo: string; idioma: string }[] = [];
+
+  const juntar = (entidad: string, entidadId: string, campo: string, idioma: string, valor: string) => {
+    if (valor) aPoner.push({ entidad, entidad_id: entidadId, campo, idioma, texto: valor, origen: 'humano', esta_revisada: true });
+    else aBorrar.push({ entidad, entidad_id: entidadId, campo, idioma });
+  };
+
+  for (const idioma of idiomas) {
+    for (const { campo } of CAMPOS_TRADUCIBLES_DESDE_EL_PANEL) {
+      juntar('tour', id, campo, idioma, texto(datos, `trad_${idioma}_${campo}`));
+    }
+    for (const o of opciones ?? []) {
+      for (const campo of ['nombre', 'que_cubre']) {
+        juntar('tour_opcion', o.id as string, campo, idioma, texto(datos, `opc_${o.id}_${idioma}_${campo}`));
+      }
+    }
+  }
+
+  if (aPoner.length) {
+    const { error } = await db.from('dst_traduccion')
+      .upsert(aPoner, { onConflict: 'entidad,entidad_id,campo,idioma' });
+    if (error) {
+      console.error('guardarTraduccionesDeTour:', error.message);
+      redirect(`/admin/tours/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+    }
+  }
+  /* De a uno: `delete` con varias condiciones compuestas no se expresa en una
+     sola llamada de PostgREST, y armar un `or` con cuatro campos por fila es
+     más frágil que este bucle, que corre sobre un puñado de filas. */
+  for (const b of aBorrar) {
+    await db.from('dst_traduccion').delete()
+      .eq('entidad', b.entidad).eq('entidad_id', b.entidad_id)
+      .eq('campo', b.campo).eq('idioma', b.idioma);
+  }
+
+  refrescarTour(id);
+  /* La ficha pública también: las traducciones son lo que se sirve en /en y
+     /pt, y sin esto el cambio no se ve hasta que caduque el caché. */
+  revalidatePath('/[idioma]/tour/[babosa]', 'page');
 }
 
 export async function borrarOpcionDeTour(datos: FormData) {

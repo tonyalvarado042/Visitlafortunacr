@@ -3574,3 +3574,6 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 /* El «+ IVA» pegado a la cifra, cuando la tour no tiene opciones pero su
    precio viene pelado. Chico y en gris: es una aclaracion, no un precio. */
 .precio-mas-iva { font-size: 13px; font-weight: 700; color: var(--humo); letter-spacing: 0; }
+/* «de 2 a 6 personas». Es la pregunta que llegaba por correo antes de
+   reservar un privado, puesta donde se decide. */
+.opcion-cupo { font-weight: 600; color: var(--txt-1) !important; }
