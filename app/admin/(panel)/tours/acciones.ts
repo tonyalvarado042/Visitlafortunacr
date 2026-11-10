@@ -103,6 +103,13 @@ export async function editarTour(datos: FormData) {
   }
   revalidatePath(`/admin/tours/${id}`);
   revalidatePath('/admin/tours');
+  /* ⚠️ TAMBIÉN se redirige cuando SALE BIEN, y por el mismo motivo que en
+     `editarNegocio`: `revalidatePath` limpia el caché del servidor, pero el
+     navegador se queda con el árbol que ya tenía y los campos —no
+     controlados— conservan sus valores viejos. El formulario manda lo que
+     MUESTRA, así que un segundo «Guardar» sin tocar nada deshace el primero.
+     Probado en producción el 10 de noviembre de 2026. */
+  redirect(`/admin/tours/${id}?guardado=1`);
 }
 
 /* ---- Las OPCIONES de precio ------------------------------------------------

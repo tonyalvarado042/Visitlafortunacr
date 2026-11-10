@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function PaginaNegocio({ params, searchParams }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fallo?: string; fotos?: string }>;
+  searchParams: Promise<{ fallo?: string; fotos?: string; guardado?: string }>;
 }) {
   const { id } = await params;
   /* El motivo por el que no se pudo publicar, si la acción rebotó. Viaja por

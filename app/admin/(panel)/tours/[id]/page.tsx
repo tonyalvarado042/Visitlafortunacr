@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function PaginaTour({ params, searchParams }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fallo?: string; fotos?: string }>;
+  searchParams: Promise<{ fallo?: string; fotos?: string; guardado?: string }>;
 }) {
   const { id } = await params;
   /* El motivo del rebote, que `editarTour` manda en la dirección. Ver la nota

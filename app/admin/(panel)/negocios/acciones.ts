@@ -89,8 +89,39 @@ export async function editarNegocio(datos: FormData) {
     es_operador: marca(datos, 'es_operador'),
     esta_cerrado: marca(datos, 'esta_cerrado'),
   }).eq('id', id);
-  if (error) console.error('editarNegocio:', error.message);
+
   refrescar(id);
+
+  /*
+   * ⚠️ SE REDIRIGE SIEMPRE, Y NO ES UN ADORNO.
+   *
+   * Tony, 10 de noviembre de 2026: «le di poner en borrador y no me deja,
+   * vuelve a publicado después de guardar». El guardado funcionaba: la base
+   * tenía «borrador» y la cabecera lo decía. Lo que mentía era el formulario.
+   *
+   * `revalidatePath` invalida el caché del SERVIDOR, pero esta acción se llama
+   * desde el cliente y lo que vuelve es el resultado de la acción, no una
+   * página nueva: el navegador se queda con el árbol que ya tenía y los campos
+   * —que son no controlados— conservan sus valores viejos.
+   *
+   * Y eso no es cosmético: el formulario manda LO QUE MUESTRA. Quien lee
+   * «publicado» y vuelve a darle Guardar sin tocar nada REPUBLICA el negocio,
+   * o revierte el cambio que acababa de hacer. Probado en producción: guardar
+   * dos veces seguidas deshacía el primer guardado.
+   *
+   * Un `redirect` fuerza una navegación de verdad, el servidor arma la página
+   * con lo que hay en la base y los campos nacen con el valor guardado. Es lo
+   * único que lo arregla de raíz; el `key` del <form> solo, no alcanzó.
+   *
+   * Y EL ERROR SE DICE EN PANTALLA. Antes era un `console.error` que solo veía
+   * el Worker: la base rechazaba, la pantalla repintaba el valor viejo y
+   * parecía que «no guardaba». Es el mismo fallo callado que tenía el tour.
+   */
+  if (error) {
+    console.error('editarNegocio:', error.message);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+  }
+  redirect(`/admin/negocios/${id}?guardado=1`);
 }
 
 /*
