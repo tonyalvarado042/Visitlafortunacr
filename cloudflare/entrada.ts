@@ -2,6 +2,7 @@ import { env as entorno } from 'cloudflare:workers';
 import manejador from 'vinext/server/fetch-handler';
 import { secreto } from '../lib/secretos';
 import { ejecutarTrabajo, type Trabajo } from '../lib/trabajos';
+import { recibirCorreo } from '../lib/correo/entrante';
 
 /* La cola de trabajos largos queda a mano de lib/segundo-plano.ts, que no
    puede importar 'cloudflare:workers' porque también compila para Vercel. */
@@ -79,6 +80,49 @@ export default {
       if (respuesta.status !== 401) break;
     }
     if (respuesta && !respuesta.ok) console.error(`cron ${ruta}: ${respuesta.status} ${await respuesta.text()}`);
+  },
+
+  /*
+   * EL CORREO QUE ENTRA. Cloudflare Email Routing llama a esto cuando llega un
+   * correo a una dirección ruteada a este Worker (hola@visitlafortunacr.com).
+   *
+   * Por qué Email Routing y no el inbound de un proveedor: el dominio YA está
+   * en Cloudflare y el sitio YA corre en este Worker. Es gratis, no hay
+   * webhook que firmar ni otro servicio que se caiga aparte, y el correo entra
+   * en el mismo proceso que lo va a contestar.
+   *
+   * ⚠️ NUNCA LANZA. Si esto tira, Cloudflare rebota el correo al remitente con
+   * un error — o sea, al viajero. Un fallo nuestro no puede volverse un «tu
+   * mensaje no se pudo entregar» en la bandeja de un cliente. Se traga todo,
+   * se deja en los registros, y el correo se da por recibido.
+   */
+  async email(mensaje: ForwardableEmailMessage) {
+    try {
+      const { default: PostalMime } = await import('postal-mime');
+      const leido = await PostalMime.parse(mensaje.raw);
+
+      const r = await recibirCorreo({
+        de: leido.from?.address ?? mensaje.from,
+        para: mensaje.to,
+        asunto: leido.subject ?? null,
+        /* El texto plano manda; si el correo vino solo en HTML se le quitan
+           las etiquetas a lo bruto, que para leerlo y contestarlo alcanza. */
+        texto: (leido.text
+          ?? (leido.html ?? '')
+            .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<\/p>/gi, '\n\n')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/[ 	]{2,}/g, ' ')
+        ).trim(),
+        id_externo: leido.messageId ?? null,
+      });
+
+      console.log(`correo de ${mensaje.from} para ${mensaje.to}: ${r.motivo}`);
+    } catch (fallo) {
+      console.error('email():', fallo instanceof Error ? fallo.message : fallo);
+    }
   },
 
   /* El consumidor de la Queue: aquí corre lo que en Vercel corría en after().
