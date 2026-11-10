@@ -338,6 +338,7 @@ export async function subirFotoTour(datos: FormData) {
   let siguiente = count ?? 0;
 
   const sharp = (await import('sharp')).default;
+  const fallaron: string[] = [];
 
   for (const archivo of archivos) {
     try {
@@ -370,11 +371,20 @@ export async function subirFotoTour(datos: FormData) {
       siguiente += 1;
     } catch (fallo) {
       /* La que falle no se lleva a las demás. */
+      fallaron.push(archivo.name);
       console.error('subirFotoTour:', archivo.name, fallo instanceof Error ? fallo.message : fallo);
     }
   }
 
   refrescarTour(id);
+
+  /* Lo que no entró se dice EN PANTALLA. Hasta hoy solo se escribía en la
+     consola del Worker: entraban seis de ocho, la galería mostraba seis y
+     nadie se enteraba de que faltaban dos. Mismo arreglo que en
+     `negocios/acciones.ts`. `redirect` lanza, así que va al final. */
+  if (fallaron.length) {
+    redirect(`/admin/tours/${id}?fotos=${encodeURIComponent(fallaron.join(', ').slice(0, 300))}`);
+  }
 }
 
 export async function marcarPortadaTour(datos: FormData) {

@@ -6,6 +6,7 @@ import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { editarNegocio, publicarNegocio, pedirCompletarFicha, publicarYPedirFicha, rechazarNegocio, borrarNegocio, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
+import { ElegirFotos } from '@/componentes/admin/ElegirFotos';
 import { TraerFotos } from './TraerFotos';
 import { hayClaveDePlaces } from '@/lib/externas';
 import { cedulaConForma } from '@/lib/cedula';
@@ -24,12 +25,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function PaginaNegocio({ params, searchParams }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fallo?: string }>;
+  searchParams: Promise<{ fallo?: string; fotos?: string }>;
 }) {
   const { id } = await params;
   /* El motivo por el que no se pudo publicar, si la acción rebotó. Viaja por
      la dirección porque este formulario no lleva estado: ver `publicarNegocio`. */
-  const { fallo } = await searchParams;
+  /* `fotos` son las que `subirFoto` no pudo subir. Antes solo iban a la
+     consola del Worker y quien las subía se iba creyendo que estaban. */
+  const { fallo, fotos: fotosQueNoEntraron } = await searchParams;
   const { destino, db } = await contextoPanel('negocios');
   const conPlaces = await hayClaveDePlaces();
 
@@ -584,6 +587,13 @@ export default async function PaginaNegocio({ params, searchParams }: {
           estaba escrita dos tarjetas mas arriba, en la de opiniones. */}
           <div className={n.es_operador ? 'tarjeta solo-ficha' : 'tarjeta'}>
             <h2>Fotos</h2>
+            {fotosQueNoEntraron && (
+              <Aviso tipo="mal">
+                <strong>No entraron todas.</strong> Estas se quedaron afuera:{' '}
+                <code>{fotosQueNoEntraron}</code>. Las demás sí entraron, así que
+                volvé a intentar solo con esas.
+              </Aviso>
+            )}
             {!fotos?.length ? <Vacio texto="Sin fotos." /> : (
               <div className="rejilla-fotos">
                 {fotos.map((f, i) => (
@@ -636,10 +646,11 @@ export default async function PaginaNegocio({ params, searchParams }: {
                 se acuerda de dónde salió la imagen. */}
             <form action={subirFoto} className="subir-foto">
               <input type="hidden" name="id" value={id} />
-              <div className="campo">
-                <label>Agregar fotos <small style={{ fontWeight: 400, color: '#8B8B87' }}>podés elegir varias de un solo</small></label>
-                <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
-              </div>
+              {/* Encoge en el navegador antes de mandar. No es cosmética: sin
+                  esto, una foto de teléfono se pasa del tope del cuerpo de la
+                  acción y la pantalla entera se cambia por «Algo se rompió».
+                  Ver `componentes/admin/ElegirFotos.tsx` y `lib/limites.ts`. */}
+              <ElegirFotos />
               <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={n.nombre} /></div>
               <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra" /></div>
               <div className="campo"><label>Licencia</label><input name="licencia" placeholder="CC BY 4.0, cedida por el negocio…" /></div>

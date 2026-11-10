@@ -474,8 +474,17 @@ export async function subirFoto(datos: FormData) {
     }
   }
 
-  if (fallaron.length) console.error(`subirFoto: no entraron ${fallaron.length} de ${archivos.length}:`, fallaron.join(', '));
   refrescar(id);
+
+  /* ⚠️ LO QUE NO ENTRO SE DICE EN PANTALLA, no solo en la consola del Worker.
+     Antes esto terminaba en un `console.error` y nada mas: se elegian ocho
+     fotos, entraban seis, la galeria mostraba seis y quien las subio se iba
+     creyendo que estaban las ocho. Un log que nadie lee es un fallo callado.
+     `redirect` lanza, asi que va despues de refrescar. */
+  if (fallaron.length) {
+    console.error(`subirFoto: no entraron ${fallaron.length} de ${archivos.length}:`, fallaron.join(', '));
+    redirect(`/admin/negocios/${id}?fotos=${encodeURIComponent(fallaron.join(', ').slice(0, 300))}`);
+  }
 }
 
 /**

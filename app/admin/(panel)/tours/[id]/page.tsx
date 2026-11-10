@@ -4,6 +4,7 @@ import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
+import { ElegirFotos } from '@/componentes/admin/ElegirFotos';
 import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour, guardarOpcionDeTour, borrarOpcionDeTour, guardarTraduccionesDeTour } from '../acciones';
 import { CAMPOS_TRADUCIBLES_DESDE_EL_PANEL } from '@/lib/traducciones-de-tour';
 import { NOMBRE_PROPIO } from '@/lib/idiomas';
@@ -14,13 +15,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function PaginaTour({ params, searchParams }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fallo?: string }>;
+  searchParams: Promise<{ fallo?: string; fotos?: string }>;
 }) {
   const { id } = await params;
   /* El motivo del rebote, que `editarTour` manda en la dirección. Ver la nota
      larga de esa acción: sin esto, guardar «publicado» devolvía la pantalla a
      «borrador» sin decir una palabra. */
-  const { fallo } = await searchParams;
+  /* `fotos` son las que `subirFotoTour` no pudo subir: se dicen en
+     pantalla, no solo en la consola del Worker. */
+  const { fallo, fotos: fotosQueNoEntraron } = await searchParams;
   const { destino, db } = await contextoPanel('tours');
   const { data: t } = await db.from('dst_tour').select('*').eq('id', id).eq('destino_id', destino.id).maybeSingle();
   if (!t) notFound();
@@ -540,6 +543,13 @@ export default async function PaginaTour({ params, searchParams }: {
             cosa. */}
         <div className="tarjeta">
           <h2>Fotos <small>la primera manda: es la que se ve en las tarjetas</small></h2>
+          {fotosQueNoEntraron && (
+            <Aviso tipo="mal">
+              <strong>No entraron todas.</strong> Estas se quedaron afuera:{' '}
+              <code>{fotosQueNoEntraron}</code>. Las demás sí entraron, así que
+              volvé a intentar solo con esas.
+            </Aviso>
+          )}
           {!operador?.babosa ? (
             <Aviso tipo="info">
               Para subir fotos hay que elegir primero el <strong>operador</strong> arriba y guardar.
@@ -598,10 +608,10 @@ export default async function PaginaTour({ params, searchParams }: {
                   es cuando ya nadie se acuerda de dónde salió la imagen. */}
               <form action={subirFotoTour} className="subir-foto">
                 <input type="hidden" name="id" value={id} />
-                <div className="campo">
-                  <label>Agregar fotos <small style={{ fontWeight: 400, color: '#8B8B87' }}>podés elegir varias de un solo</small></label>
-                  <input type="file" name="archivo" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
-                </div>
+                {/* Mismo arreglo que en la ficha del negocio: encoge en el
+                    navegador antes de mandar, porque el tope del cuerpo de la
+                    accion es lo que rompia la pantalla. Ver `lib/limites.ts`. */}
+                <ElegirFotos />
                 <div className="campo"><label>Qué se ve (texto alternativo)</label><input name="texto_alternativo" placeholder={t.nombre} /></div>
                 <div className="campo"><label>Autor</label><input name="credito" placeholder="Vacío si la foto es nuestra o del operador" /></div>
                 <div className="campo"><label>Licencia</label><input name="licencia" placeholder="Cedida por el operador…" /></div>
