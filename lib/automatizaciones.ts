@@ -1,3 +1,4 @@
+import { rellenarPlantilla } from '@/lib/plantillas';
 import 'server-only';
 import { servicio } from '@/lib/supabase-servidor';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
@@ -45,9 +46,9 @@ function proximaVentana(zona: string): string | null {
   return new Date(Date.now() + horasHasta8 * 3_600_000).toISOString();
 }
 
-function rellenar(texto: string, variables: Record<string, string | null | undefined>): string {
-  return texto.replace(/\{\{([a-z_]+)\}\}/g, (_, clave: string) => variables[clave] ?? '');
-}
+/* La copia que vivia aca se fue a `lib/plantillas.ts`: eran dos, una limpiaba
+   y la otra no, y de ahi salio el correo que empezaba «Hi ,». */
+const rellenar = rellenarPlantilla;
 
 export async function correrAutomatizaciones(opciones: { limite?: number; destino_id?: string | null } = {}): Promise<Resumen> {
   const db = servicio();

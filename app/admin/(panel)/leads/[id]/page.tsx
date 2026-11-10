@@ -1,3 +1,4 @@
+import { CuerpoDeMensaje } from '@/componentes/admin/CuerpoDeMensaje';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
@@ -35,13 +36,22 @@ export default async function PaginaLead({ params }: { params: Promise<{ id: str
   const v = uno(s.viajero) as Record<string, string | number | boolean | string[] | null> & { id: string } | null;
   const plan = uno(s.itinerario) as { id: string; titulo: string; babosa: string; idioma: string; dias: number; total_usd: number | null } | null;
 
-  const [{ data: mensajes }, { data: tareas }, { data: historial }, { data: envios }, { data: ejecuciones }, { data: equipo }, { data: conversaciones }, { data: reservas }] = await Promise.all([
+  const [{ data: mensajes }, { data: tareas }, { data: historial }, { data: envios }, { data: ejecuciones }, { data: equipo }, { data: planesDelViajero }, { data: conversaciones }, { data: reservas }] = await Promise.all([
     v ? db.from('dst_mensaje').select('id, canal, direccion, autor, asunto, cuerpo, automatico, plantilla, estado_envio, error_envio, enviado_en, usuario_id, conversacion_id').eq('viajero_id', v.id).order('enviado_en', { ascending: false }).limit(80) : Promise.resolve({ data: [] }),
     db.from('dst_tarea').select('id, titulo, prioridad, vence_el, esta_hecha, responsable_id').or(`solicitud_id.eq.${id}${v ? `,viajero_id.eq.${v.id}` : ''}`).order('esta_hecha').order('vence_el').limit(20),
     db.from('dst_etapa_historial').select('de_etapa, a_etapa, actor, motivo, creado_en, usuario_id').eq('solicitud_id', id).order('creado_en'),
     db.from('dst_automatizacion_envio').select('id, estado, intento, programado_para, ejecutado_en, resultado, borrador, automatizacion:dst_automatizacion(nombre, accion)').eq('solicitud_id', id).order('programado_para', { ascending: false }).limit(15),
     db.from('dst_agente_ejecucion').select('id, clave_agente, modelo, costo_usd, duracion_ms, motivo_parada, error, herramientas_usadas, creado_en').eq('solicitud_id', id).order('creado_en', { ascending: false }).limit(10),
     db.from('dst_usuario').select('id, nombre').eq('esta_activo', true).order('nombre'),
+    /* ⚠️ LOS PLANES DEL VIAJERO, no los de esta solicitud.
+       Tony, 10 nov 2026: la ficha decía «sin plan todavía» con el plan hecho y
+       mandado. El plan estaba — colgado de OTRA solicitud de la misma persona,
+       creada dos minutos antes. Los mensajes ya se traían por `viajero_id` (por
+       eso el correo sí se veía) y el plan no. Mirando una ficha de cliente uno
+       quiere ver lo de ESA PERSONA, no lo de un formulario suyo en particular. */
+    v ? db.from('dst_itinerario').select('id, titulo, babosa, idioma, dias, total_usd, creado_en, solicitud_id')
+          .eq('viajero_id', v.id).order('creado_en', { ascending: false }).limit(10)
+      : Promise.resolve({ data: [] }),
     v ? db.from('dst_conversacion').select('id, canal, estado, atendida_por, ultimo_mensaje_en, resumen_ia').eq('viajero_id', v.id).order('ultimo_mensaje_en', { ascending: false }) : Promise.resolve({ data: [] }),
     v ? db.from('dst_reserva').select('id, codigo, estado, total_usd, estado_pago, creado_en').eq('viajero_id', v.id).order('creado_en', { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
@@ -102,7 +112,7 @@ export default async function PaginaLead({ params }: { params: Promise<{ id: str
                     <div className={`msg ${clase}`} key={m.id}>
                       <div className="quien">{quien} · {m.canal} · {fecha(m.enviado_en, destino.zona_horaria)}{m.estado_envio === 'pendiente' ? <i> · PENDIENTE DE ENVÍO MANUAL</i> : m.estado_envio === 'fallido' ? <i> · falló</i> : ''}</div>
                       {m.asunto && <div style={{ fontWeight: 700 }}>{m.asunto}</div>}
-                      {m.cuerpo}
+                      <CuerpoDeMensaje texto={m.cuerpo} />
                       {m.error_envio && <div className="gris" style={{ color: '#B42318', fontSize: 12 }}>{m.error_envio}</div>}
                     </div>
                   );
@@ -183,7 +193,31 @@ export default async function PaginaLead({ params }: { params: Promise<{ id: str
 
           <div className="tarjeta">
             <h2>Plan</h2>
-            {plan ? <><strong>{plan.titulo}</strong><div className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>{plan.dias} días{plan.total_usd ? ` · ≈ ${dinero(plan.total_usd)} por persona` : ''}</div><a href={urlPlan!} target="_blank" rel="noreferrer">{urlPlan}</a></> : <Vacio texto="Sin plan todavía. Usá “Armar un plan”." />}
+            {/* Los planes de ESTA PERSONA, no los de este formulario. Ver la
+                nota de la consulta: el plan existía y la ficha decía que no,
+                porque colgaba de otra solicitud suya. */}
+            {!planesDelViajero?.length ? (
+              <Vacio texto="Sin plan todavía. Usá “Armar un plan”." />
+            ) : (
+              <div style={{ display: 'grid', gap: 12 }}>
+                {planesDelViajero.map((p) => {
+                  const suUrl = `https://${destino.dominio}/${p.idioma}/plan/${p.babosa}`;
+                  const esDeEsteLead = p.solicitud_id === id || p.id === plan?.id;
+                  return (
+                    <div key={p.id} style={{ borderLeft: esDeEsteLead ? '3px solid #E8842A' : '3px solid #E6E4DC', paddingLeft: 10 }}>
+                      <strong>{p.titulo}</strong>
+                      <div className="gris" style={{ color: '#8B8B87', fontSize: 12.5 }}>
+                        {p.dias} días{p.total_usd ? ` · ≈ ${dinero(p.total_usd)} por persona` : ''}
+                        {/* Cuál salió de este formulario y cuál de otro suyo:
+                            sin decirlo, dos planes parecidos se confunden. */}
+                        {esDeEsteLead ? ' · de este lead' : ' · de otra solicitud suya'}
+                      </div>
+                      <a href={suUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12.5, wordBreak: 'break-all' }}>{suUrl}</a>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="tarjeta">

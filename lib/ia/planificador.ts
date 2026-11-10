@@ -6,6 +6,7 @@ import { esManual, esDisparoAutomatico } from '@/lib/itinerario-modo';
 import { agenteDe, ahoraEn, ejecutar, parametrosBase, sistemaCacheado, type Origen } from './cliente';
 import { bloqueCatalogo, bloqueConocimiento, contextoDestino, type ContextoDestino } from './conocimiento';
 import { NOMBRE_IDIOMA } from './modelos';
+import { rellenarPlantilla } from '@/lib/plantillas';
 import { enviarAViajero, type ViajeroContacto } from './mensajeria';
 
 /*
@@ -431,7 +432,10 @@ async function avisarPlanListo(destinoId: string, viajero: ViajeroContacto & { n
     marca: destino?.marca_nombre ?? '',
     enlace_itinerario: plan.url,
   };
-  const rellenar = (t: string) => t.replace(/\{\{([a-z_]+)\}\}/g, (_, k: string) => variables[k] ?? '');
+  /* El rellenador compartido, que ademas limpia lo que deja una variable
+     vacia. Antes era una copia local SIN limpieza, y por eso salio un correo
+     que empezaba «Hi ,» — ver lib/plantillas.ts. */
+  const rellenar = (t: string) => rellenarPlantilla(t, variables);
 
   const texto = fila ? rellenar(fila.cuerpo) : `${variables.nombre ? variables.nombre + ', ' : ''}tu plan para ${variables.destino}: ${plan.url}`;
   const asunto = fila?.asunto ? rellenar(fila.asunto) : `Tu plan para ${variables.destino}`;
