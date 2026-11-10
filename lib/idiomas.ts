@@ -277,6 +277,10 @@ export const T: Record<string, Diccionario> = {
   plan_estimado:     { es: 'Estimado por persona', en: 'Estimate per person', pt: 'Estimativa por pessoa', fr: 'Estimation par personne', de: 'Schätzung pro Person' },
   plan_reservar:     { es: 'Reservá con el equipo', en: 'Book with our team', pt: 'Reserve com a equipe', fr: 'Réservez avec l’équipe', de: 'Mit dem Team buchen' },
   plan_ajustar:      { es: '¿Querés cambiar algo? Escribinos y lo ajustamos.', en: 'Want to change something? Message us and we will adjust it.', pt: 'Quer mudar algo? Fale conosco e ajustamos.', fr: 'Envie de changer quelque chose ? Écrivez-nous.', de: 'Möchtest du etwas ändern? Schreib uns.' },
+  /* La primera línea del mensaje cuando el botón del plan cae a WhatsApp o al
+     correo. Sin esto el correo le llega al equipo con un título y un enlace
+     pelados, y nadie sabe qué quiere quien escribió. */
+  plan_escribimos:   { es: 'Hola, me interesa este plan:', en: 'Hi, I am interested in this plan:', pt: 'Olá, tenho interesse neste plano:', fr: 'Bonjour, ce plan m’intéresse :', de: 'Hallo, dieser Plan interessiert mich:' },
   plan_ver_ficha:    { es: 'Ver ficha', en: 'See details', pt: 'Ver ficha', fr: 'Voir la fiche', de: 'Details ansehen' },
   momento_manana:    { es: 'Mañana', en: 'Morning', pt: 'Manhã', fr: 'Matin', de: 'Morgen' },
   momento_mediodia:  { es: 'Mediodía', en: 'Midday', pt: 'Meio-dia', fr: 'Midi', de: 'Mittag' },

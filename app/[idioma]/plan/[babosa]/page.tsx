@@ -7,6 +7,7 @@ import { t, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
 import { BotonReservarPlan } from '@/componentes/BotonReservarPlan';
+import { contactoDelEquipo } from '@/lib/contacto-del-equipo';
 
 /*
  * La página pública de un plan armado por el planificador. Se lee con la
@@ -60,6 +61,11 @@ export default async function PaginaPlan({ params }: { params: Parametros }) {
   for (const p of plan.paradas) dias.set(p.dia, [...(dias.get(p.dia) ?? []), p]);
   const consejos = (plan.consejos ?? '').split('\n').map((c: string) => c.trim()).filter(Boolean);
   const url = `/${idioma}/plan/${babosa}`;
+  /* El mensaje se arma UNA vez: lo usan los tres canales —el chat, WhatsApp y
+     el correo— y si cada uno armara el suyo, el día que cambie uno los otros
+     dos quedan diciendo otra cosa. */
+  const mensajeDelPlan = `${t('plan_escribimos', idioma)}\n\n${plan.titulo}\nhttps://${destino.dominio}${url}`;
+  const canal = contactoDelEquipo(destino, plan.titulo, mensajeDelPlan);
 
   return (
     <>
@@ -110,10 +116,30 @@ export default async function PaginaPlan({ params }: { params: Parametros }) {
           </aside>
         )}
 
-        <div className="plan-cierre">
-          <p>{t('plan_ajustar', idioma)}</p>
-          <BotonReservarPlan texto={t('plan_reservar', idioma)} mensaje={`${plan.titulo} · https://${destino.dominio}${url}`} />
-        </div>
+        {/* ⚠️ EL BOTÓN SE DECIDE ACÁ, EN EL SERVIDOR, y no siempre es el mismo.
+            Antes era siempre `BotonReservarPlan`, que dispara el evento que
+            escucha el CHAT. Pero el chat solo se monta si `chat_activo` está
+            encendido en Ajustes — y con el chat apagado el botón quedaba vivo,
+            se podía tocar y NO PASABA NADA: el evento se disparaba al vacío.
+            Lo encontró Tony el 10 de noviembre de 2026.
+            Ahora cae a WhatsApp o al correo, y si no hay ninguno de los tres
+            no se ofrece: un botón que no lleva a ninguna parte es peor que
+            ninguno. Ver `lib/contacto-del-equipo.ts`. */}
+        {canal && (
+          <div className="plan-cierre">
+            <p>{t('plan_ajustar', idioma)}</p>
+            {canal.tipo === 'chat' ? (
+              <BotonReservarPlan texto={t('plan_reservar', idioma)} mensaje={mensajeDelPlan} />
+            ) : (
+              /* Un <a> y nada más: sin JavaScript no hay nada que pueda fallar
+                 callado, que es justo lo que pasaba antes. */
+              <a className="boton" href={canal.href}
+                 {...(canal.tipo === 'whatsapp' ? { target: '_blank', rel: 'noreferrer' } : {})}>
+                {t('plan_reservar', idioma)}
+              </a>
+            )}
+          </div>
+        )}
       </main>
       <Pie destino={destino} categorias={categorias} idioma={idioma} />
     </>
