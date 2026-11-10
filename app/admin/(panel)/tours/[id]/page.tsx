@@ -200,7 +200,10 @@ export default async function PaginaTour({ params, searchParams }: {
         </Aviso>
       )}
 
-      <form action={editarTour}>
+      {/* Mismo arreglo que en la ficha del negocio: sin esto, el
+          desplegable de estado sigue mostrando el valor viejo después
+          de guardar y el siguiente «Guardar» lo republica. */}
+      <form key={String(t.actualizado_en)} action={editarTour} autoComplete="off">
         <input type="hidden" name="id" value={id} />
         <div className="lado">
           <div>

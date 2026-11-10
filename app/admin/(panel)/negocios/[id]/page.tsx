@@ -164,7 +164,29 @@ export default async function PaginaNegocio({ params, searchParams }: {
         </Aviso>
       )}
 
-      <form action={editarNegocio}>
+      {/* ⚠️ `key` CON LA FECHA DE ACTUALIZACIÓN, Y NO ES UN DETALLE.
+
+          Tony, 10 de noviembre de 2026: *«le di poner en borrador y no me
+          deja, vuelve a publicado después de guardar»*. Y el guardado SÍ
+          funcionaba —la base tenía «borrador» y la cabecera lo decía— el que
+          mentía era el desplegable: seguía mostrando «publicado».
+
+          Pasa porque los campos de este formulario son NO CONTROLADOS
+          (`defaultValue`). React aplica un `defaultValue` cuando MONTA el
+          campo y nunca más: tras una acción de servidor el árbol se
+          re-renderiza, pero el <select> conserva el valor que tenía en el DOM.
+          Y el navegador, encima, restaura los valores de formulario al
+          recargar.
+
+          El daño no es que se vea feo. Es que quien lee «publicado» y vuelve a
+          darle «Guardar todo» SIN TOCAR NADA **lo republica sin querer**: el
+          formulario manda lo que muestra, no lo que hay guardado.
+
+          Con la fecha de actualización como `key`, cada guardado cambia la
+          llave, React tira el formulario viejo y monta uno nuevo con los
+          valores de la base. Va en el <form> y no en cada campo porque el
+          problema es de todos: el estado solo fue el que se notó. */}
+      <form key={String(n.actualizado_en)} action={editarNegocio} autoComplete="off">
         <input type="hidden" name="id" value={id} />
         <div className="lado">
           <div>
