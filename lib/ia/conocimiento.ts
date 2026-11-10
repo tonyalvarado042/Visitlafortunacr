@@ -104,11 +104,25 @@ export function bloqueConocimiento(items: Pick<Conocimiento, 'tipo' | 'titulo' |
   }).join('\n\n');
 }
 
-/** El catálogo como texto compacto: una línea por negocio y por tour, con su id. */
+/*
+ * El catálogo como texto compacto: una línea por negocio y por tour, con su id.
+ *
+ * ⚠️ EL ORDEN DE LAS LÍNEAS NO ES ALFABÉTICO NI CASUAL: viene de
+ * `contexto_destino`, que pone los destacados primero y los baraja dentro de
+ * cada grupo con la semilla del día. Un modelo elige más lo que lee primero,
+ * así que un orden fijo convertía al primer destacado en el recomendado de
+ * todos los planes. No reordenar acá. Ver `45_el_catalogo_se_baraja.sql`.
+ *
+ * ⚠️ `seccion=` NO ES DECORACIÓN. Sin ella, el prompt puede pedir «un
+ * alojamiento de la sección donde_dormir» y el modelo no tiene cómo saber
+ * cuál lo es: solo veía `categoria=hoteles`, `categoria=lodges`,
+ * `categoria=lujo`… y tenía que adivinar por el nombre. Descubierto el 10 de
+ * noviembre de 2026, arreglando que los planes salían sin hotel.
+ */
 export function bloqueCatalogo(contexto: ContextoDestino, maxNegocios = 200): string {
   const negocios = contexto.negocios.slice(0, maxNegocios).map((n) => {
     const partes = [
-      `id=${n.id}`, `"${n.nombre}"`, `categoria=${n.categoria}`,
+      `id=${n.id}`, `"${n.nombre}"`, `seccion=${n.seccion}`, `categoria=${n.categoria}`,
       n.rango_precio ? `precio=${n.rango_precio}` : null,
       n.precio_desde_usd != null ? `desde=${n.precio_desde_usd}USD` : null,
       n.calificacion != null ? `nota=${n.calificacion}(${n.resenas})` : null,

@@ -84,6 +84,17 @@ function promptPlanificador(contexto: ContextoDestino, instrucciones: string | n
     `- Escribí TODO (títulos, notas, consejos) en ${NOMBRE_IDIOMA[idioma] ?? idioma}.`,
     '- Usá negocio_id y tour_id EXACTOS del catálogo. Si una actividad no está en el catálogo (una caminata, un mirador, tiempo libre), va como tipo "libre" con los dos ids en null. Nunca inventes un id.',
     '- El día de llegada y el de salida van livianos. Máximo una actividad de esfuerzo alto por día. Termales la primera tarde si el viajero las pidió o si llega de viaje largo.',
+    /* ⚠️ DÓNDE DORMIR. Tony, 10 de noviembre de 2026: los planes no traían
+       hotel. No era que la IA los inventara ni que faltaran en el catálogo
+       —hay 24 publicados— : es que ESTE PROMPT NO LO PEDÍA NI UNA VEZ. El
+       plan que recibió una viajera el 9 de noviembre tenía diez paradas,
+       ocho del catálogo, y ni un lugar donde quedarse.
+       Va como PRIMERA parada del día 1 y una sola vez: repetir el hotel cada
+       noche llena el plan de ruido y no agrega nada.
+       Y va con costo null a propósito: `total_estimado_usd` dice «sin hotel»,
+       así que meterle el precio por noche desalinearía el total. El precio se
+       dice en la nota, donde se puede aclarar que es por noche. */
+    '- DÓNDE DORMIR: si el viaje tiene más de un día, la PRIMERA parada del día 1 es el alojamiento, de la sección donde_dormir del catálogo, con tipo "negocio" y su negocio_id exacto. UNO SOLO y solo el día 1, no lo repitas cada noche. Elegilo por encaje con el viajero —presupuesto, con quién viaja, si le sirve estar en el pueblo o afuera— y decí por qué en "porque". El precio por noche va en la nota, no en costo_estimado_usd (ese va null: el total del viaje se da sin hotel). Si el catálogo no trae ninguno que encaje, dejala como "libre" y explicá en los consejos qué zona conviene.',
     '- Respetá con quién viaja y el presupuesto: familia con niños → nada con edad mínima mayor a la de los niños; pareja → algo íntimo; económico → sin lujo; lujo → lo mejor del catálogo.',
     '- Precios: usá los del catálogo o del conocimiento como estimado por persona. Si no hay dato, null. Nunca inventes una cifra exacta.',
     '- Neutralidad: nunca digas que un negocio es "nuestro". Preferí verificados y bien calificados, pero elegí por encaje con el viajero, no por comisión.',

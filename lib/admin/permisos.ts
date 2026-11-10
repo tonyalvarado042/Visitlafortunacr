@@ -6,7 +6,7 @@ import type { Rol } from '@/lib/supabase-sesion';
  * esto solo decide qué aparece en el menú y qué páginas se abren.
  */
 export type Seccion =
-  | 'tablero' | 'leads' | 'conversaciones' | 'viajeros' | 'reservas' | 'tareas'
+  | 'tablero' | 'leads' | 'conversaciones' | 'viajeros' | 'planes' | 'reservas' | 'tareas'
   | 'negocios' | 'tours' | 'categorias' | 'experiencias' | 'guias' | 'resenas' | 'rifa' | 'ia' | 'cadenas' | 'operadores' | 'reportes' | 'equipo' | 'ajustes';
 
 export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: string }[] = [
@@ -14,6 +14,10 @@ export const MENU: { seccion: Seccion; ruta: string; nombre: string; grupo: stri
   { seccion: 'leads',          ruta: '/admin/leads',          nombre: 'Leads',          grupo: 'Ventas' },
   { seccion: 'conversaciones', ruta: '/admin/conversaciones', nombre: 'Conversaciones', grupo: 'Ventas' },
   { seccion: 'viajeros',       ruta: '/admin/viajeros',       nombre: 'Viajeros',       grupo: 'Ventas' },
+  /* Los planes que arma la IA. Hasta el 10 de noviembre de 2026 no tenian
+     pantalla: solo se llegaba a uno entrando al lead de quien lo pidio, y
+     solo si colgaba de ESA solicitud. Ver `app/admin/(panel)/planes`. */
+  { seccion: 'planes',         ruta: '/admin/planes',         nombre: 'Planes',         grupo: 'Ventas' },
   { seccion: 'operadores',     ruta: '/admin/operadores',     nombre: 'Operadores',     grupo: 'Ventas' },
   { seccion: 'reservas',       ruta: '/admin/reservas',       nombre: 'Reservas',       grupo: 'Ventas' },
   { seccion: 'tareas',         ruta: '/admin/tareas',         nombre: 'Tareas',         grupo: 'Ventas' },
@@ -35,7 +39,7 @@ const TODAS = MENU.map((m) => m.seccion);
 
 export const PERMISOS: Record<Rol, Seccion[]> = {
   admin:     TODAS,
-  vendedor:  ['tablero', 'leads', 'conversaciones', 'viajeros', 'reservas', 'tareas', 'ia', 'reportes'],
+  vendedor:  ['tablero', 'leads', 'conversaciones', 'viajeros', 'planes', 'reservas', 'tareas', 'ia', 'reportes'],
   editor:    ['tablero', 'negocios', 'tours', 'categorias', 'experiencias', 'guias', 'resenas', 'ia'],
   moderador: ['tablero', 'conversaciones', 'negocios', 'resenas', 'ia'],
   socio:     ['tablero', 'reportes'],
