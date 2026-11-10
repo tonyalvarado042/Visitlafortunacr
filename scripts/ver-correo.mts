@@ -144,10 +144,17 @@ for (const parrafo of lineas) {
   parrafos.push(parrafo);
 }
 
+/* Las razones y la urgencia salen de Ajustes → Textos del sitio. Acá se
+   pueden pasar por el entorno para VER cómo quedan antes de escribirlas:
+     RAZONES="una|otra|otra mas" URGENCIA="..." npm run correo:ver ... */
+const razones = (process.env.RAZONES ?? '').split('|').map((r) => r.trim()).filter(Boolean);
+const urgencia = (process.env.URGENCIA ?? '').trim();
+
 const { html, texto } = armarCorreo({
   destino: destino as unknown as Destino,
   idioma, titulo: asunto, parrafos, boton,
   tokenBaja: 'PRUEBA-no-es-un-testigo-de-verdad',
+  razones, urgencia,
 });
 
 mkdirSync(salida, { recursive: true });

@@ -80,6 +80,22 @@ export const TEXTOS_DEL_SITIO: readonly TextoConfigurable[] = [
     filas: 1,
   },
   {
+    clave: 'correo_razones',
+    etiqueta: 'Por qué reservar con nosotros (correo)',
+    donde: 'En TODOS los correos que salen del sitio, debajo del botón, con una palomita cada una. '
+         + 'UNA POR LÍNEA. Vacío = no sale el bloque. Cortas y concretas: lo que la persona gana '
+         + 'por reservar con el sitio en vez de escribirle al hotel directo.',
+    filas: 5,
+  },
+  {
+    clave: 'correo_urgencia',
+    etiqueta: 'Línea de urgencia (correo)',
+    donde: 'Banda naranja ARRIBA del botón, en todos los correos. Vacío = no sale la banda. '
+         + '⚠️ Si dice lo mismo todo el año deja de ser urgencia: cambiala o dejala vacía. '
+         + 'Tiene que ser verdad — una fecha o un cupo que se pueda comprobar.',
+    filas: 2,
+  },
+  {
     clave: 'resenas_titulo',
     etiqueta: 'Título del bloque de reseñas',
     donde: 'En las DOS fichas, encima de la nota y las opiniones.',

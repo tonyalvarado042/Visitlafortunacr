@@ -212,6 +212,14 @@ export const T: Record<string, Diccionario> = {
   consultar:         { es: 'Consultar disponibilidad', en: 'Ask about availability', pt: 'Consultar disponibilidade', fr: 'Demander les disponibilités', de: 'Verfügbarkeit anfragen' },
 
   /* ---- Reseñas propias ---- */
+  /* ⚠️ LOS DOS CORREOS VAN VACÍOS A PROPÓSITO, y no es que falte llenarlos.
+     Son argumentos de venta y una urgencia: eso lo escribe Tony, que conoce su
+     negocio, no yo. Un texto base aquí saldría en todos los correos sin que
+     nadie lo haya aprobado, y una urgencia inventada se nota y quema la
+     siguiente. Vacíos, el correo sale como salía. Se llenan en
+     Ajustes → Textos del sitio, por idioma. */
+  correo_razones:    { es: '', en: '', pt: '', fr: '', de: '' },
+  correo_urgencia:   { es: '', en: '', pt: '', fr: '', de: '' },
   resenas_titulo:    { es: 'Lo que dice quien ya fue', en: 'What people who went say', pt: 'O que diz quem já foi', fr: 'Ce qu’en disent ceux qui y sont allés', de: 'Was Besucher sagen' },
   resena_una:        { es: 'reseña', en: 'review', pt: 'avaliação', fr: 'avis', de: 'Bewertung' },
   resena_varias:     { es: 'reseñas', en: 'reviews', pt: 'avaliações', fr: 'avis', de: 'Bewertungen' },

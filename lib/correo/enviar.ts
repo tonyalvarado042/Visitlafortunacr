@@ -4,6 +4,7 @@ import { servicio } from '@/lib/supabase-servidor';
 import type { Destino } from '@/lib/destino';
 import type { Idioma } from '@/lib/idiomas';
 import { armarCorreo, type Boton } from './plantilla';
+import { textosDelSitio } from '@/lib/destino';
 
 /*
  * Mandar correo. Siempre por Resend, siempre con HTML.
@@ -126,6 +127,21 @@ export async function enviarCorreo(carta: Carta): Promise<Envio> {
     return { ok: false, error: remitente.error };
   }
 
+  /*
+   * Las razones y la urgencia salen de Ajustes → Textos del sitio, por idioma,
+   * y NO de este código. Son argumentos de venta: los escribe quien conoce el
+   * negocio, y se cambian sin desplegar.
+   *
+   * `textosDelSitio` cae al texto base si no hay nada puesto, y el base de las
+   * dos claves está vacío a propósito: sin configurar, el correo sale igual
+   * que antes. Si la consulta falla tampoco revienta —devuelve el base— que es
+   * lo que tiene que pasar: un correo sin argumentos sale; un correo que no
+   * sale, no.
+   */
+  const texto_ = await textosDelSitio(carta.destino, carta.idioma);
+  const razones = texto_('correo_razones').split('\n').map((r) => r.trim()).filter(Boolean);
+  const urgencia = texto_('correo_urgencia').trim();
+
   const { html, texto } = armarCorreo({
     destino: carta.destino,
     idioma: carta.idioma,
@@ -136,6 +152,8 @@ export async function enviarCorreo(carta: Carta): Promise<Envio> {
     nota: carta.nota,
     pie: carta.pie,
     tokenBaja: carta.tokenBaja,
+    razones,
+    urgencia,
   });
 
   try {

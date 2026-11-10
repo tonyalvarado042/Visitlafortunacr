@@ -27,6 +27,12 @@ type Pieza = {
   datos?: { rotulo: string; valor: string }[];
   /** La línea chica del final, sobre por qué recibe esto. */
   nota?: string;
+  /* Por qué reservar con nosotros. Una por línea, salen con palomita.
+     Se configuran en Ajustes → Textos del sitio, por idioma. */
+  razones?: string[];
+  /* La línea de escasez o urgencia, en banda de color arriba del botón.
+     Vacía = no sale la banda: una urgencia inventada se nota y quema. */
+  urgencia?: string;
   /* Por qué le llega el correo, cuando el motivo de siempre no aplica. El
      genérico dice "porque escribiste a", que es cierto para quien mandó una
      consulta pero no para el dueño de un hotel al que le avisan de una
@@ -45,6 +51,17 @@ const BAJA: Record<Idioma, string> = {
   pt: 'Não quero receber mais e-mails',
   fr: 'Me désabonner',
   de: 'Keine E-Mails mehr',
+};
+
+/* El encabezado del bloque de razones. El CONTENIDO lo escribe Tony en
+   Ajustes → Textos del sitio (clave `correo_razones`), por idioma; esto es
+   solo el rótulo, que no tiene por qué configurarse. */
+const PORQUE: Record<Idioma, string> = {
+  es: 'Por qué reservar con nosotros',
+  en: 'Why book with us',
+  pt: 'Por que reservar conosco',
+  fr: 'Pourquoi réserver avec nous',
+  de: 'Warum bei uns buchen',
 };
 
 const PIE: Record<Idioma, string> = {
@@ -102,7 +119,7 @@ function direccionCompleta(ruta: string | null, dominio: string): string | null 
 }
 
 export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
-  const { destino, idioma, titulo, parrafos, boton, datos, nota, pie, tokenBaja } = pieza;
+  const { destino, idioma, titulo, parrafos, boton, datos, nota, pie, tokenBaja, razones, urgencia } = pieza;
 
   const acento = destino.color_acento || '#FF6A00';
   const tinta = '#111111';
@@ -119,7 +136,53 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
   const urlLogo = direccionCompleta(destino.logo_url, destino.dominio);
   const logo = urlLogo
     ? `<img src="${urlLogo}" width="44" height="44" alt="${marca}" style="display:block;border:0;border-radius:50%;">`
-    : `<span style="display:inline-block;width:44px;height:44px;border-radius:50%;background:${acento};"></span>`;
+    : `<span style="display:inline-block;width:44px;height:44px;border-radius:50%;background-color:${acento};"></span>`;
+
+  /*
+   * LA BANDA DE URGENCIA. Va ARRIBA del botón a propósito: abajo la lee quien
+   * ya decidió, y para ese la urgencia sobra.
+   *
+   * ⚠️ Sale solo si hay texto puesto. Una urgencia que aparece en todos los
+   * correos de todo el año deja de ser urgencia y pasa a ser decorado —y quien
+   * la lee dos veces aprende a no creerle. Vacía, no sale la banda.
+   *
+   * Borde grueso a la izquierda y no fondo de color: en modo oscuro de Gmail
+   * un fondo claro con texto oscuro se invierte y queda ilegible, mientras que
+   * un borde sobrevive.
+   */
+  const bandaUrgencia = urgencia?.trim()
+    ? `<tr><td style="padding:4px 28px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+            <td bgcolor="#FFF6EF" style="background-color:#FFF6EF;border-left:4px solid ${acento};padding:12px 16px;border-radius:0 5px 5px 0;">
+              <p style="margin:0;font:700 14px/1.5 Arial,Helvetica,sans-serif;color:#8A3D00;">${escapar(urgencia.trim())}</p>
+            </td>
+          </tr></table>
+        </td></tr>`
+    : '';
+
+  /*
+   * POR QUÉ RESERVAR CON NOSOTROS. Debajo del botón: el que ya hizo clic no lo
+   * necesita, y el que dudó baja a buscar motivos. Ese es justo el orden.
+   *
+   * La palomita va como texto (✓) y no como imagen: Gmail bloquea imágenes por
+   * omisión y una lista de recuadros rotos es peor que una lista sin viñeta.
+   */
+  const listaRazones = (razones ?? []).map((r) => r.trim()).filter(Boolean);
+  const bloqueRazones = listaRazones.length
+    ? `<tr><td style="padding:26px 28px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="border-top:1px solid #E6E6E2;padding-top:20px;">
+              <p style="margin:0 0 12px;font:800 12px/1 Arial,Helvetica,sans-serif;color:${humo};letter-spacing:0.8px;text-transform:uppercase;">${escapar(PORQUE[idioma] ?? PORQUE.es)}</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                ${listaRazones.map((r) => `<tr>
+                  <td width="20" style="padding:3px 0;font:700 14px/1.6 Arial,Helvetica,sans-serif;color:${acento};vertical-align:top;">&#10003;</td>
+                  <td style="padding:3px 0;font:400 14px/1.6 Arial,Helvetica,sans-serif;color:#3A3A38;">${escapar(r)}</td>
+                </tr>`).join('')}
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>`
+    : '';
 
   const filasDatos = (datos ?? []).map((d) => `
             <tr>
@@ -131,13 +194,13 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
 <html lang="${idioma}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapar(titulo)}</title></head>
-<body style="margin:0;padding:0;background:#F4F4F2;">
+<body bgcolor="#F4F4F2" style="margin:0;padding:0;background-color:#F4F4F2;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapar(parrafos[0] ?? titulo)}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F4F2;padding:28px 12px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#F4F4F2" style="background-color:#F4F4F2;padding:28px 12px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:10px;overflow:hidden;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="max-width:560px;background-color:#FFFFFF;border-radius:10px;overflow:hidden;">
 
-        <tr><td style="background:#0B0B0B;padding:22px 28px;">
+        <tr><td bgcolor="#0B0B0B" style="background-color:#0B0B0B;padding:22px 28px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
             <td style="padding-right:11px;">${logo}</td>
             <td style="font:800 17px/1 Arial,Helvetica,sans-serif;color:#FFFFFF;letter-spacing:-0.3px;">${marca}</td>
@@ -150,18 +213,22 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
         </td></tr>
 
         ${filasDatos ? `<tr><td style="padding:6px 28px 4px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F7F7F5;border-radius:7px;padding:6px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#F7F7F5" style="background-color:#F7F7F5;border-radius:7px;padding:6px 16px;">
             ${filasDatos}
           </table>
         </td></tr>` : ''}
 
+        ${bandaUrgencia}
+
         ${url ? `<tr><td style="padding:22px 28px 6px;">
           <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-            <td style="background:${acento};border-radius:5px;">
+            <td bgcolor="${acento}" style="background-color:${acento};border-radius:5px;">
               <a href="${url}" style="display:inline-block;padding:14px 30px;font:800 15px/1 Arial,Helvetica,sans-serif;color:#0B0B0B;text-decoration:none;">${escapar(boton!.texto)}</a>
             </td>
           </tr></table>
         </td></tr>` : ''}
+
+        ${bloqueRazones}
 
         ${nota ? `<tr><td style="padding:18px 28px 0;">
           <p style="margin:0;font:400 13px/1.6 Arial,Helvetica,sans-serif;color:${humo};">${escapar(nota)}</p>
@@ -191,7 +258,12 @@ export function armarCorreo(pieza: Pieza): { html: string; texto: string } {
     '',
     ...parrafos,
     ...(datos?.length ? ['', ...datos.map((d) => `${d.rotulo}: ${d.valor}`)] : []),
+    /* La urgencia y las razones van TAMBIÉN acá. Quien lee en texto plano
+       —o con el HTML apagado— tiene que recibir el mismo correo, no uno
+       recortado: ya pasó que las dos versiones dijeran cosas distintas. */
+    ...(urgencia?.trim() ? ['', urgencia.trim()] : []),
     ...(url ? ['', `${boton!.texto}: ${url}`] : []),
+    ...(listaRazones.length ? ['', `${PORQUE[idioma] ?? PORQUE.es}:`, ...listaRazones.map((r) => `- ${r}`)] : []),
     ...(nota ? ['', nota] : []),
     '',
     /* `pie` primero, igual que en el HTML de arriba. Hasta hoy esta línea
