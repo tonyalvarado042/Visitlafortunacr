@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "revisar:formularios": "node scripts/revisar-formularios.mjs",
+    "correo:ver": "tsx scripts/ver-correo.mts",
     "build": "node scripts/revisar-formularios.mjs && next build",
     "start": "next start",
     "lint": "next lint",
