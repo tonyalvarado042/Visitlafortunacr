@@ -49,6 +49,13 @@ export async function editarAgente(datos: FormData) {
     max_iteraciones: Math.min(Math.max(numero(datos, 'max_iteraciones') ?? 8, 1), 20),
     instrucciones: texto(datos, 'instrucciones') || null,
     tono: texto(datos, 'tono') || null,
+    /* La cara y el cargo del chat. Solo el formulario del concierge los manda;
+       para los otros agentes `texto()` devuelve vacío y quedarían en null —por
+       eso se escriben nada más si el campo vino, y no «|| null» a secas.
+       Sin esto el campo se vería en el panel y no guardaría: el fallo callado
+       de siempre. */
+    ...(datos.has('foto_url') ? { foto_url: texto(datos, 'foto_url') || null } : {}),
+    ...(datos.has('cargo') ? { cargo: texto(datos, 'cargo') || null } : {}),
     puede_escalar: marca(datos, 'puede_escalar'),
     escala_a: esUuid(texto(datos, 'escala_a')) ? texto(datos, 'escala_a') : null,
     esta_activo: marca(datos, 'esta_activo'),

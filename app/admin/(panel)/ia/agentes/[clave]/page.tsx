@@ -3,6 +3,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { MODELOS_DISPONIBLES } from '@/lib/ia/modelos';
 import { Cabecera, Aviso } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
+import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { editarAgente } from '../../acciones';
 
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,22 @@ export default async function PaginaAgente({ params }: { params: Promise<{ clave
               <h2>Modelo</h2>
               <div className="campos" style={{ gridTemplateColumns: '1fr' }}>
                 <div className="campo"><label>Nombre visible</label><input name="nombre" defaultValue={a.nombre} disabled={soloLectura} /></div>
+                {/* La cara y el cargo solo se ven en el chat del sitio, así que
+                    solo tienen sentido para el concierge. */}
+                {clave === 'concierge' && (
+                  <>
+                    <CampoImagen
+                      nombre="foto_url" etiqueta="Foto que ve el viajero" valor={a.foto_url ?? ''}
+                      carpeta="marca" desactivado={soloLectura}
+                      ayuda="Cuadrada y recortada a la cara. Tiene que ser de alguien REAL del equipo: una cara inventada afirma algo falso sin escribir una palabra, y se nota. Vacía está bien — el chat pinta un círculo de marca con la inicial."
+                    />
+                    <div className="campo">
+                      <label>Qué es, debajo del nombre</label>
+                      <input name="cargo" defaultValue={a.cargo ?? ''} disabled={soloLectura} placeholder="Asistente virtual" />
+                      <small>Se muestra SIEMPRE en el chat, al lado del nombre. Si lo dejás vacío, dice «Asistente virtual»: no se puede esconder, y es a propósito. El viajero puede estar a punto de dejar la tarjeta en este sitio; si después descubre que creía estar hablando con una persona, no desconfía del chat, desconfía del sitio.</small>
+                    </div>
+                  </>
+                )}
                 <div className="campo"><label>Modelo</label><select name="modelo" defaultValue={a.modelo} disabled={soloLectura}>{MODELOS_DISPONIBLES.map((m) => <option key={m} value={m}>{m}</option>)}</select></div>
                 <div className="campo"><label>Esfuerzo (más = mejor y más caro)</label><select name="esfuerzo" defaultValue={a.esfuerzo} disabled={soloLectura}>{['low', 'medium', 'high', 'xhigh', 'max'].map((e) => <option key={e} value={e}>{e}</option>)}</select></div>
                 <div className="campo"><label>Máximo de tokens de salida</label><input type="number" name="max_tokens" min={256} max={64000} defaultValue={a.max_tokens} disabled={soloLectura} /></div>

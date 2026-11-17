@@ -5,6 +5,7 @@ import { esIdioma, type Idioma } from '@/lib/idiomas';
 import { alternativas, mismasRutas } from '@/lib/seo';
 import type { Metadata } from 'next';
 import { Concierge } from '@/componentes/Concierge';
+import { presentacionDelConcierge } from '@/lib/concierge';
 import { AvisoSorteo } from '@/componentes/AvisoSorteo';
 import { sorteoDe } from '@/lib/sorteo';
 import { PixelMeta } from '@/componentes/PixelMeta';
@@ -123,9 +124,16 @@ export default async function LayoutIdioma({
           rastrear a alguien en el acto de salirse es justo lo que no se hace.
           Sin ID en Ajustes no se monta nada. */}
       {destino.pixel_meta && <PixelMeta id={destino.pixel_meta} />}
-      {/* Se apaga desde Ajustes. Ni se monta: apagado no deja ni el botón. */}
+      {/* Se apaga desde Ajustes. Ni se monta: apagado no deja ni el botón.
+          `quien` es la cara, el nombre y el cargo de quien contesta. Se pide
+          SOLO cuando el chat está encendido: una consulta más en cada página
+          del sitio por algo que la mayoría no ve es un precio tonto. Y si
+          falla, devuelve el respaldo en vez de tumbar la página. */}
       {destino.chat_activo && (
-        <Concierge idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio} />
+        <Concierge
+          idioma={idioma} marca={destino.marca_nombre} dominio={destino.dominio}
+          quien={await presentacionDelConcierge(destino.id)}
+        />
       )}
     </div>
   );

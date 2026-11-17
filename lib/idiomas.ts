@@ -275,11 +275,25 @@ export const T: Record<string, Diccionario> = {
   gracias:           { es: '¡Listo! Te escribimos pronto.', en: 'Done! We will write to you soon.', pt: 'Pronto! Escrevemos em breve.', fr: 'C’est fait ! Nous vous écrirons bientôt.', de: 'Fertig! Wir melden uns bald.' },
   concierge_boton:   { es: 'Preguntale a alguien de aquí', en: 'Ask a local', pt: 'Pergunte a alguém daqui', fr: 'Demandez à quelqu’un d’ici', de: 'Frag jemanden von hier' },
   concierge_titulo:  { es: 'Preguntanos lo que quieras', en: 'Ask us anything', pt: 'Pergunte o que quiser', fr: 'Posez-nous vos questions', de: 'Frag uns alles' },
-  concierge_saludo:  { es: '¡Hola! Soy del equipo local. ¿Qué querés saber de tu viaje?', en: 'Hi! I am part of the local team. What would you like to know about your trip?', pt: 'Olá! Faço parte da equipe local. O que você quer saber sobre a sua viagem?', fr: 'Bonjour ! Je fais partie de l’équipe locale. Que voulez-vous savoir sur votre voyage ?', de: 'Hallo! Ich gehöre zum lokalen Team. Was möchtest du über deine Reise wissen?' },
+  /* ⚠️ NO DICE «soy del equipo local». Lo decía, y era una afirmación falsa
+     dicha por una IA a una persona que no tiene forma de comprobarla. Quien
+     contesta se presenta en el encabezado, con su nombre y su cargo; el saludo
+     sirve para arrancar la conversación, no para fingir. Igual de cálido, y
+     además útil, que es lo que de verdad retiene a alguien. */
+  concierge_saludo:  { es: '¡Hola! Conozco la zona al detalle: tours, hoteles, cómo moverse y qué conviene reservar antes. ¿Qué querés saber de tu viaje?', en: 'Hi! I know the area inside out: tours, hotels, getting around and what is worth booking ahead. What would you like to know about your trip?', pt: 'Olá! Conheço a região em detalhe: tours, hotéis, como se locomover e o que vale reservar antes. O que você quer saber sobre a sua viagem?', fr: 'Bonjour ! Je connais la région en détail : excursions, hôtels, déplacements et ce qu’il vaut mieux réserver à l’avance. Que voulez-vous savoir sur votre voyage ?', de: 'Hallo! Ich kenne die Region genau: Touren, Hotels, Anfahrt und was man besser vorab bucht. Was möchtest du über deine Reise wissen?' },
   concierge_escribe: { es: 'Escribí tu pregunta…', en: 'Type your question…', pt: 'Escreva sua pergunta…', fr: 'Écrivez votre question…', de: 'Schreib deine Frage…' },
   concierge_enviar:  { es: 'Enviar', en: 'Send', pt: 'Enviar', fr: 'Envoyer', de: 'Senden' },
   concierge_humano:  { es: 'Una persona del equipo sigue esta conversación.', en: 'A member of our team is on this conversation.', pt: 'Uma pessoa da equipe acompanha esta conversa.', fr: 'Une personne de l’équipe suit cette conversation.', de: 'Jemand aus dem Team übernimmt dieses Gespräch.' },
   concierge_error:   { es: 'No pude responder ahora. Probá de nuevo en un momento.', en: 'I could not answer right now. Please try again in a moment.', pt: 'Não consegui responder agora. Tente de novo em instantes.', fr: 'Je n’ai pas pu répondre. Réessayez dans un instant.', de: 'Ich konnte gerade nicht antworten. Versuch es gleich noch einmal.' },
+  /* ---- El agente que se asoma solo ----
+     ⚠️ `concierge_cargo` es el respaldo del respaldo: el cargo sale de la base
+     (`dst_agente.cargo`), pero si alguien lo deja vacío, esto es lo que se
+     muestra. Lo que no se hace nunca es ocultarlo. */
+  concierge_cargo:   { es: 'Asistente virtual', en: 'Virtual assistant', pt: 'Assistente virtual', fr: 'Assistant virtuel', de: 'Virtuelle Assistenz' },
+  concierge_enlinea: { es: 'Responde al instante', en: 'Replies instantly', pt: 'Responde na hora', fr: 'Répond instantanément', de: 'Antwortet sofort' },
+  concierge_gancho:  { es: '¿Te armo el plan de tu viaje? Preguntame lo que sea.', en: 'Want me to plan your trip? Ask me anything.', pt: 'Quer que eu monte o seu roteiro? Pergunte o que quiser.', fr: 'Je vous prépare votre itinéraire ? Demandez-moi ce que vous voulez.', de: 'Soll ich deine Reise planen? Frag mich alles.' },
+  concierge_gancho_no: { es: 'Cerrar este aviso', en: 'Dismiss', pt: 'Fechar este aviso', fr: 'Fermer cet avis', de: 'Hinweis schließen' },
+  concierge_escribiendo: { es: 'está escribiendo', en: 'is typing', pt: 'está a escrever', fr: 'est en train d’écrire', de: 'schreibt' },
   plan_dia:          { es: 'Día', en: 'Day', pt: 'Dia', fr: 'Jour', de: 'Tag' },
   plan_consejos:     { es: 'Consejos prácticos', en: 'Practical tips', pt: 'Dicas práticas', fr: 'Conseils pratiques', de: 'Praktische Tipps' },
   plan_estimado:     { es: 'Estimado por persona', en: 'Estimate per person', pt: 'Estimativa por pessoa', fr: 'Estimation par personne', de: 'Schätzung pro Person' },

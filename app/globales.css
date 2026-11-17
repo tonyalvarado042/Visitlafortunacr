@@ -1085,6 +1085,17 @@ section { padding: 84px 0; }
 .tarjeta .velo-foto { position: absolute; inset: 0; pointer-events: none; opacity: .28; mix-blend-mode: soft-light; }
 .tarjeta .velo-foto.generica { opacity: .34; }
 @media (prefers-reduced-motion: reduce) {
+  /* El agente del chat: sin pulso, sin saltos y sin entradas. Sigue igual de
+     visible —el color y el tamano no son movimiento—, solo deja de moverse.
+     La campanita se calla sola aparte: ver `agente-sonido.ts`.
+     ⚠️ Esto estuvo diez minutos dentro de `@media (hover: none)` por anclar el
+     reemplazo en la regla equivocada: apagaba las animaciones EN TELEFONO —que
+     es justo donde se pidieron— y se las dejaba encendidas a quien pide menos
+     movimiento. Las dos cosas al reves, y a ojo no se notaba ninguna. */
+  .concierge-boton { animation: none; }
+  .concierge { animation: none; }
+  .agente-gancho { animation: none; }
+  .agente-puntos i { animation: none; opacity: .7; }
   .tarjeta:hover .imagen .foto { transform: none; }
 }
 .tarjeta .cuerpo { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
@@ -1736,18 +1747,133 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 }
 
 /* ---- Concierge (chat) ---- */
+/* ---- El agente del chat: la cara, el lanzador y el gancho -----------------
+   Tony, 16 nov 2026: «que salga mas visible, con movimiento, con foto, y que
+   se asome a la persona que esta navegando».
+   El cargo («Asistente virtual») se ve SIEMPRE junto al nombre. No es un
+   detalle legal: es lo que permite que el chat sea calido sin enganar, y por
+   eso vive en el encabezado y no escondido en un tooltip. */
+
+/* La cara. Con foto si hay; si no, un disco de marca con la inicial. */
+.agente-cara {
+  display: grid; place-items: center; flex: none;
+  border-radius: 50%; overflow: hidden;
+  /* Verde, no naranja: el lanzador ES naranja, asi que una cara que arranca
+     en naranja se funde con el y parece un agujero. El verde de marca
+     contrasta con el boton naranja Y con el panel oscuro, que son los dos
+     sitios donde aparece la misma cara. */
+  /* ⚠️ Verde OSCURO, y medido en los dos extremos del degradado. El verde de
+     marca a pelo da 2.41 de contraste con el blanco: la inicial no se leia.
+     De 62% a 45% sobre negro: medido en el navegador, los dos extremos quedan por encima
+     del 4.5 que pide AA. Y sigue siendo el verde del destino, asi que otro
+     destino con otra paleta sigue saliendo con la suya. */
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--verde) 62%, #000),
+    color-mix(in srgb, var(--verde) 45%, #000));
+  color: #FFF;
+  font-weight: 800; letter-spacing: -.02em;
+  /* El aro claro separa la cara del fondo naranja del lanzador: sin el, una
+     foto oscura se funde con el boton y parece un agujero. */
+  box-shadow: 0 0 0 2px rgba(255,255,255,.55), 0 2px 8px rgba(0,0,0,.35);
+  user-select: none;
+}
+.agente-cara img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* El punto de "responde al instante". Va sobre la cara, abajo a la derecha. */
+.concierge-boton-cara { position: relative; display: inline-flex; flex: none; }
+.agente-punto {
+  position: absolute; right: -1px; bottom: -1px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--verde); border: 2px solid var(--negro);
+}
+.concierge-boton .agente-punto { border-color: var(--naranja); }
+
 .concierge-boton {
   position: fixed; right: 22px; bottom: 22px; z-index: 80;
-  display: inline-flex; align-items: center; gap: 9px;
-  padding: 12px 18px; border-radius: 100px; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 11px;
+  padding: 10px 20px 10px 11px; border-radius: 100px; border: 0; cursor: pointer;
   background: var(--naranja); color: var(--sobre-naranja); font-family: inherit;
-  font-weight: 700; font-size: 13px; letter-spacing: .02em;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45); transition: transform .2s, opacity .2s;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  transition: transform .2s, opacity .2s;
+  /* El pulso: un aro de sombra que crece y se apaga. Se hace con box-shadow y
+     no animando `scale` de un pseudo-elemento, porque asi no mueve el texto
+     medio pixel ni fuerza repintados del contenido. */
+  animation: agente-pulso 3.4s ease-out 2s infinite;
 }
-.concierge-boton:hover { transform: translateY(-2px); }
-.concierge-boton.oculto { opacity: 0; pointer-events: none; }
+.concierge-boton-texto { display: flex; flex-direction: column; gap: 1px; line-height: 1.15; }
+.concierge-boton-texto strong { font-weight: 800; font-size: 13.5px; letter-spacing: .01em; }
+.concierge-boton-texto small {
+  font-size: 11px; font-weight: 600;
+  /* Sobre naranja el humo no contrasta. Se usa la propia tinta, rebajada.
+     ⚠️ Medido en el navegador, no a ojo: a .68 daba 4.18 de contraste y AA
+     pide 4.5 para texto chico. A .85 da 5.77. Este proyecto ya tuvo texto
+     ilegible sobre naranja una vez (ver `--sobre-naranja`); no dos. */
+  color: rgba(11, 11, 11, .85);
+}
+.concierge-boton:hover { transform: translateY(-2px); animation-play-state: paused; }
+.concierge-boton:focus-visible { outline: 3px solid var(--verde); outline-offset: 3px; }
+.concierge-boton.oculto { opacity: 0; pointer-events: none; animation: none; }
+
+@keyframes agente-pulso {
+  0%, 70%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 0 rgba(255,106,0,.5); }
+  85%           { box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 14px rgba(255,106,0,0); }
+}
+
+/* El gancho: el agente se asoma solo, una vez, y se va si lo ignoran.
+   Se apoya sobre el lanzador, con la esquina de abajo apuntandole. */
+.agente-gancho {
+  position: fixed; right: 22px; bottom: 88px; z-index: 81;
+  max-width: min(330px, calc(100vw - 44px));
+  display: flex; align-items: flex-start; gap: 2px;
+  background: var(--carbon); border: 1px solid var(--borde-4);
+  border-radius: 16px 16px 6px 16px; padding: 4px;
+  box-shadow: 0 16px 44px rgba(0,0,0,.55);
+  animation: agente-gancho-entra .45s cubic-bezier(.22,1.2,.36,1) both;
+}
+.agente-gancho-cuerpo {
+  display: flex; align-items: flex-start; gap: 11px; flex: 1; min-width: 0;
+  background: none; border: 0; padding: 10px 4px 11px 10px; cursor: pointer;
+  font-family: inherit; text-align: left;
+}
+.agente-gancho-texto { font-size: 13.5px; line-height: 1.45; color: var(--txt-1); }
+.agente-gancho-texto strong { display: block; font-size: 13px; color: var(--naranja); margin-bottom: 2px; }
+.agente-gancho-cerrar {
+  background: none; border: 0; color: var(--humo); cursor: pointer;
+  font-size: 19px; line-height: 1; padding: 7px 9px 9px; border-radius: 10px;
+  flex: none; transition: color .15s, background .15s;
+}
+.agente-gancho-cerrar:hover { color: var(--txt-0); background: var(--sup-4); }
+
+@keyframes agente-gancho-entra {
+  from { opacity: 0; transform: translateY(14px) scale(.9); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* "Sofia esta escribiendo", con los tres puntos vivos. Reemplaza al «···»,
+   que no se distinguia de un mensaje de verdad. */
+.agente-escribiendo { display: flex; align-items: center; gap: 9px; align-self: flex-start; padding: 2px 0; }
+.agente-escribiendo-texto { font-size: 12px; color: var(--humo); }
+.agente-puntos { display: inline-flex; gap: 4px; align-items: center; }
+.agente-puntos i {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--humo);
+  animation: agente-salto 1.25s ease-in-out infinite;
+}
+.agente-puntos i:nth-child(2) { animation-delay: .16s; }
+.agente-puntos i:nth-child(3) { animation-delay: .32s; }
+@keyframes agente-salto {
+  0%, 60%, 100% { transform: translateY(0); opacity: .45; }
+  30%           { transform: translateY(-5px); opacity: 1; }
+}
 .concierge {
   position: fixed; right: 22px; bottom: 22px; z-index: 90;
+  /* ⚠️ `section { padding: 84px 0 }` TAMBIEN caia aqui: el panel del chat es
+     un <section>, y heredaba el relleno de las secciones del sitio. Se comia
+     168 px de alto —84 arriba y 84 abajo— que quedaban en blanco dentro de la
+     ventana y se los quitaba a la conversacion. Nadie lo habia visto porque no
+     se ve como un error: se ve como un panel con mucho aire. Medido en el
+     navegador el 16 de noviembre de 2026. */
+  padding: 0;
   /* Panel grande: el concierge arma itinerarios de varios dias y antes se leia
      por una rendija de 380x560. Sigue anclado abajo a la derecha en escritorio
      y pasa a pantalla completa en telefono (mas abajo). */
@@ -1755,13 +1881,29 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   display: flex; flex-direction: column; overflow: hidden;
   background: var(--carbon); border: 1px solid var(--borde); border-radius: 14px;
   box-shadow: 0 24px 60px rgba(0,0,0,.6);
+  /* Nace en la esquina de abajo a la derecha, de donde lo acaban de tocar:
+     asi se entiende que salio del boton y no que cayo del cielo. */
+  transform-origin: 100% 100%;
+  animation: concierge-abre .32s cubic-bezier(.2,1.1,.3,1) both;
+}
+@keyframes concierge-abre {
+  from { opacity: 0; transform: translateY(16px) scale(.96); }
+  to   { opacity: 1; transform: none; }
 }
 .concierge header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px; border-bottom: 1px solid var(--borde); background: var(--negro);
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 15px; border-bottom: 1px solid var(--borde); background: var(--negro);
 }
-.concierge header strong { display: block; font-size: 14px; }
-.concierge header small { color: var(--humo); font-size: 11.5px; }
+/* `flex: 1` en el del medio, en vez del `space-between` de antes: el
+   encabezado paso de dos hijos a tres (cara, quien, cerrar), y con
+   space-between la cara quedaba pegada al borde y el nombre bailando. */
+.concierge-quien { flex: 1; min-width: 0; }
+.concierge header strong { display: block; font-size: 14.5px; letter-spacing: -.01em; }
+.concierge header small {
+  color: var(--humo); font-size: 11.5px;
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.concierge header .agente-punto { width: 10px; height: 10px; }
 .concierge header button { background: none; border: 0; color: var(--humo); font-size: 22px; cursor: pointer; line-height: 1; }
 .concierge .hilo { flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
 .concierge .burbuja {
@@ -1886,7 +2028,10 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .buscador .boton { padding: 0 16px; font-size: 12.5px; }
 
   /* El chat no debe taparle el buscador a nadie. */
-  .concierge-boton { right: 14px; bottom: 14px; padding: 11px 15px; font-size: 12px; }
+  .concierge-boton { right: 14px; bottom: 14px; padding: 8px 16px 8px 9px; gap: 9px; }
+  .concierge-boton-texto strong { font-size: 12.5px; }
+  .concierge-boton-texto small { font-size: 10.5px; }
+  .agente-gancho { right: 14px; bottom: 76px; max-width: calc(100vw - 28px); }
 
   /* La barra no puede desbordar, y desbordaba: .logo y .acciones tenían LOS DOS
      `flex-shrink: 0` y el texto del logo `nowrap`, así que a 390px la suma daba

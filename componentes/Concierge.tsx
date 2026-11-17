@@ -4,16 +4,45 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { t, type Idioma } from '@/lib/idiomas';
 import { formatearMensaje, type Trozo } from '@/lib/formato-chat';
+import { sonar, sePuedeSonar, vigilarElPrimerToque } from './agente-sonido';
 
 /*
- * El chat "Preguntale a alguien de aquí". Habla con /api/ia/conversar, que
- * registra cada mensaje y deja responder al concierge; si una persona del
- * equipo toma la conversación, el widget consulta cada tanto por sus
- * respuestas. El identificador del visitante vive en localStorage: la misma
- * persona vuelve mañana y sigue el mismo hilo.
+ * El chat del sitio. Habla con /api/ia/conversar, que registra cada mensaje y
+ * deja responder al concierge; si una persona del equipo toma la conversación,
+ * el widget consulta cada tanto por sus respuestas. El identificador del
+ * visitante vive en localStorage: la misma persona vuelve mañana y sigue el
+ * mismo hilo.
+ *
+ * ⚠️ QUIÉN CONTESTA SE DICE, NO SE DISIMULA.
+ *
+ * Tony, 16 de noviembre de 2026, pidió que se sintiera una persona: foto,
+ * nombre, que se asome solo, campanita. Todo eso está acá, porque todo eso es
+ * diseño legítimo y es lo que hace que alguien se anime a escribir.
+ *
+ * Lo que NO está es decir que es una persona. El encabezado lleva siempre el
+ * cargo («Asistente virtual») al lado del nombre, y el saludo dejó de decir
+ * «soy del equipo local». El motivo no es moral, es de negocio: quien descubre
+ * que le mintieron en el chat no desconfía del chat, desconfía del sitio donde
+ * está a punto de dejar la tarjeta. La calidez sale de la cara, del nombre y
+ * de la forma de escribir —y esas tres siguen enteras.
  */
 
 type Burbuja = { de: 'yo' | 'ellos'; texto: string; en: string };
+
+export type QuienContesta = {
+  nombre: string;
+  cargo: string;
+  foto_url: string | null;
+};
+
+/* Cuándo se asoma solo, y cuánto se queda.
+   El cupón de salida (`CuponAlSalir`) sale a los 45 s. El gancho sale a los 18
+   y se esconde a los 14 de estar en pantalla: a los 32 s ya no está, así que
+   nunca se pelean por la esquina sin que un archivo tenga que saber del otro. */
+const GANCHO_ESPERA_MS = 18_000;
+const GANCHO_DURA_MS = 14_000;
+
+const YA_SE_ASOMO = 'vlf_chat_gancho_visto';
 
 function identificadorLocal(): string {
   try {
@@ -38,6 +67,22 @@ function pintar(t: Trozo, i: number) {
     );
   }
   return <span key={i}>{t.texto}</span>;
+}
+
+/* La cara. Con foto si hay; si no, un disco de marca con la inicial.
+   ⚠️ El respaldo es a propósito un monograma y NO una cara genérica: una foto
+   de alguien que no existe afirma algo falso sin escribir una palabra, y
+   encima se reconoce a la legua. Un monograma bien hecho se ve profesional y
+   no miente. */
+function Cara({ quien, tamano }: { quien: QuienContesta; tamano: number }) {
+  const inicial = (quien.nombre.trim()[0] ?? '·').toUpperCase();
+  return (
+    <span className="agente-cara" style={{ width: tamano, height: tamano, fontSize: Math.round(tamano * 0.42) }}>
+      {quien.foto_url
+        ? <img src={quien.foto_url} alt="" width={tamano} height={tamano} loading="lazy" decoding="async" />
+        : <span aria-hidden="true">{inicial}</span>}
+    </span>
+  );
 }
 
 /* Lo que dice el concierge. Los enlaces a fichas nuestras no van dentro de la
@@ -67,8 +112,24 @@ function Dicho({ texto, dominio }: { texto: string; dominio: string }) {
   );
 }
 
-export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: string; dominio: string }) {
+export function Concierge({
+  idioma, marca, dominio, quien,
+}: {
+  idioma: Idioma;
+  marca: string;
+  dominio: string;
+  /* Puede no venir: el layout lo pasa, pero si la consulta falló el chat tiene
+     que abrirse igual. Ver `lib/concierge.ts`. */
+  quien?: QuienContesta | null;
+}) {
+  const presenta: QuienContesta = {
+    nombre: quien?.nombre?.trim() || marca,
+    cargo: quien?.cargo?.trim() || t('concierge_cargo', idioma),
+    foto_url: quien?.foto_url ?? null,
+  };
+
   const [abierto, setAbierto] = useState(false);
+  const [gancho, setGancho] = useState(false);
   const [burbujas, setBurbujas] = useState<Burbuja[]>([]);
   const [texto, setTexto] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -96,6 +157,43 @@ export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: s
     return () => window.removeEventListener('abrir-concierge', abrir);
   }, []);
 
+  /* ── El gancho: el agente se asoma solo, una vez ──────────────────────────
+     Una sola vez por navegador, y nunca si ya hay conversación empezada: a
+     quien ya escribió no se le ofrece empezar. */
+  useEffect(() => {
+    const dejarDeVigilar = vigilarElPrimerToque();
+
+    let yaLoVio = false;
+    try { yaLoVio = !!localStorage.getItem(YA_SE_ASOMO); } catch { /* da igual */ }
+    if (yaLoVio) return dejarDeVigilar;
+
+    let esconder: number | undefined;
+    const asomar = window.setTimeout(() => {
+      /* Si mientras tanto abrió el chat o ya tenía hilo, no se asoma. */
+      setGancho((previo) => {
+        if (previo) return previo;
+        return true;
+      });
+      try { localStorage.setItem(YA_SE_ASOMO, '1'); } catch { /* da igual */ }
+      /* La campanita puede NO sonar: los navegadores bloquean el audio hasta
+         que la persona toque algo. Si no se puede, el gancho aparece igual, en
+         silencio. Ver `agente-sonido.ts`. */
+      if (sePuedeSonar()) sonar();
+      esconder = window.setTimeout(() => setGancho(false), GANCHO_DURA_MS);
+    }, GANCHO_ESPERA_MS);
+
+    return () => {
+      window.clearTimeout(asomar);
+      if (esconder) window.clearTimeout(esconder);
+      dejarDeVigilar();
+    };
+  }, []);
+
+  /* Abrir el chat apaga el gancho, siempre. */
+  useEffect(() => {
+    if (abierto) setGancho(false);
+  }, [abierto]);
+
   useEffect(() => {
     try { localStorage.setItem('vlf_chat_hilo', JSON.stringify(burbujas.slice(-60))); } catch { /* nada */ }
     fondo.current?.scrollTo({ top: fondo.current.scrollHeight, behavior: 'smooth' });
@@ -115,6 +213,9 @@ export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: s
       if (nuevos.length) {
         ultimoRecibido.current = nuevos[nuevos.length - 1].enviado_en;
         setBurbujas((previas) => [...previas, ...nuevos.map((m) => ({ de: 'ellos' as const, texto: m.cuerpo, en: m.enviado_en }))]);
+        /* Llegó algo de una persona de verdad mientras la ventana estaba
+           abierta: eso sí merece campanita. */
+        if (sePuedeSonar()) sonar();
       }
     } catch { /* la próxima vez */ }
   }, [conversacionId]);
@@ -124,6 +225,12 @@ export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: s
     const temporizador = setInterval(consultar, 8000);
     return () => clearInterval(temporizador);
   }, [abierto, humano, consultar]);
+
+  function cerrarGancho(evento: React.MouseEvent) {
+    evento.stopPropagation();
+    setGancho(false);
+    try { localStorage.setItem(YA_SE_ASOMO, '1'); } catch { /* da igual */ }
+  }
 
   async function enviar(evento: React.FormEvent) {
     evento.preventDefault();
@@ -160,19 +267,51 @@ export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: s
 
   return (
     <>
-      <button type="button" className={`concierge-boton${abierto ? ' oculto' : ''}`} onClick={() => setAbierto(true)} aria-label={t('concierge_boton', idioma)}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z" />
-        </svg>
-        <span>{t('concierge_boton', idioma)}</span>
+      {/* El gancho. Va FUERA del botón: un botón dentro de otro botón no es
+          HTML válido y el navegador lo desarma donde menos conviene. */}
+      {gancho && !abierto && (
+        <div className="agente-gancho" role="status">
+          <button type="button" className="agente-gancho-cuerpo" onClick={() => setAbierto(true)}>
+            <Cara quien={presenta} tamano={38} />
+            <span className="agente-gancho-texto">
+              <strong>{presenta.nombre}</strong>
+              {t('concierge_gancho', idioma)}
+            </span>
+          </button>
+          <button
+            type="button" className="agente-gancho-cerrar" onClick={cerrarGancho}
+            aria-label={t('concierge_gancho_no', idioma)}
+          >×</button>
+        </div>
+      )}
+
+      <button
+        type="button" className={`concierge-boton${abierto ? ' oculto' : ''}`}
+        onClick={() => setAbierto(true)}
+        aria-label={`${t('concierge_boton', idioma)} — ${presenta.nombre}, ${presenta.cargo}`}
+      >
+        <span className="concierge-boton-cara">
+          <Cara quien={presenta} tamano={34} />
+          <i className="agente-punto" aria-hidden="true" />
+        </span>
+        <span className="concierge-boton-texto">
+          <strong>{t('concierge_boton', idioma)}</strong>
+          <small>{presenta.nombre} · {t('concierge_enlinea', idioma)}</small>
+        </span>
       </button>
 
       {abierto && (
         <section className="concierge" aria-label={t('concierge_titulo', idioma)}>
           <header>
-            <div>
-              <strong>{t('concierge_titulo', idioma)}</strong>
-              <small>{marca}</small>
+            <span className="concierge-boton-cara">
+              <Cara quien={presenta} tamano={42} />
+              <i className="agente-punto" aria-hidden="true" />
+            </span>
+            <div className="concierge-quien">
+              <strong>{presenta.nombre}</strong>
+              {/* ⚠️ El cargo se muestra SIEMPRE. Es la línea que hace que esto
+                  sea cálido sin ser un engaño. No se esconde en un tooltip. */}
+              <small>{presenta.cargo} · {marca}</small>
             </div>
             <button type="button" onClick={() => setAbierto(false)} aria-label="Cerrar">×</button>
           </header>
@@ -186,7 +325,15 @@ export function Concierge({ idioma, marca, dominio }: { idioma: Idioma; marca: s
                   : b.texto}
               </div>
             ))}
-            {enviando && <div className="burbuja ellos pensando">···</div>}
+            {enviando && (
+              <div className="agente-escribiendo">
+                <Cara quien={presenta} tamano={26} />
+                <span className="agente-puntos" aria-hidden="true"><i /><i /><i /></span>
+                <span className="agente-escribiendo-texto">
+                  {presenta.nombre} {t('concierge_escribiendo', idioma)}…
+                </span>
+              </div>
+            )}
             {humano && <div className="aviso">{t('concierge_humano', idioma)}</div>}
           </div>
 
