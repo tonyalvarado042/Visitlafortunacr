@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { t, type Idioma } from '@/lib/idiomas';
+import { estaConversando } from './no-interrumpir';
 
 /*
  * La ventana que se le ofrece a quien está por irse sin reservar.
@@ -57,6 +58,9 @@ export function CuponAlSalir({ cupon, idioma }: { cupon: CuponOfrecible; idioma:
 
     const mostrar = () => {
       if (yaSalio.current) return;
+      /* Igual que con el formulario de reserva: si ya esta en lo nuestro, no
+         se le tapa. Conversar con el chat cuenta. Ver `no-interrumpir.ts`. */
+      if (estaConversando()) return;
       /* Ya metió mano en el formulario: está haciendo justo lo que queremos,
          y taparle la pantalla es sabotearse. */
       if (tocoElFormulario.current) return;

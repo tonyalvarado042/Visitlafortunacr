@@ -7,6 +7,7 @@ import { t, type Idioma } from '@/lib/idiomas';
 import { FormularioSorteo } from './FormularioSorteo';
 import { premioEnPlata } from '@/lib/sorteo-formato';
 import type { Sorteo } from '@/lib/sorteo';
+import { estaConversando } from './no-interrumpir';
 
 /*
  * El aviso de la rifa.
@@ -80,8 +81,16 @@ export function AvisoSorteo({
     const espera = sorteo.dias_para_repreguntar * 24 * 60 * 60 * 1000;
     if (cerradoEn && Date.now() - cerradoEn < espera) return;
 
+    let reintento: number | undefined;
     const abrir = () => {
       if (abiertoAlguna.current) return;
+      /* ⚠️ No se le tapa la pantalla a quien esta conversando con el chat.
+         Y NO se marca como visto: se vuelve a intentar mas tarde, porque si
+         no, el que use el chat no veria nunca la rifa. Ver `no-interrumpir`. */
+      if (estaConversando()) {
+        reintento = window.setTimeout(abrir, 20_000);
+        return;
+      }
       abiertoAlguna.current = true;
       setAbierto(true);
     };
@@ -99,6 +108,7 @@ export function AvisoSorteo({
 
     return () => {
       window.clearTimeout(reloj);
+      if (reintento) window.clearTimeout(reintento);
       document.removeEventListener('mouseout', seVa);
     };
   }, [sorteo, enLaPaginaDelSorteo, forzado]);

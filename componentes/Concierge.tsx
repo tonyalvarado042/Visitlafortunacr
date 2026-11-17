@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { t, type Idioma } from '@/lib/idiomas';
 import { formatearMensaje, type Trozo } from '@/lib/formato-chat';
 import { sonar, sePuedeSonar, vigilarElPrimerToque } from './agente-sonido';
+import { marcarConversacion } from './no-interrumpir';
 
 /*
  * El chat del sitio. Habla con /api/ia/conversar, que registra cada mensaje y
@@ -192,6 +193,14 @@ export function Concierge({
   /* Abrir el chat apaga el gancho, siempre. */
   useEffect(() => {
     if (abierto) setGancho(false);
+  }, [abierto]);
+
+  /* Y mientras el chat este abierto, nadie mas le tapa la pantalla: ni la
+     ventana de la rifa ni el cupon de salida. Quien esta escribiendole al chat
+     ya esta haciendo justo lo que queremos. Ver `no-interrumpir.ts`. */
+  useEffect(() => {
+    marcarConversacion(abierto);
+    return () => marcarConversacion(false);
   }, [abierto]);
 
   useEffect(() => {
