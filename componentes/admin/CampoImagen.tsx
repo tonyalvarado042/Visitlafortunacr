@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { aWebp, ACEPTA, TOPE_BYTES } from '@/lib/foto-navegador';
 
 /*
  * Un campo de imagen DE VERDAD: vista previa, botón de subir y la dirección.
@@ -39,9 +40,33 @@ export function CampoImagen({
     setError(null);
     setSubiendo(true);
     try {
+      /* ⚠️ SE ENCOGE ACA, EN EL NAVEGADOR, ANTES DE MANDARLA.
+         Tony, 10 de noviembre de 2026, subiendo la foto de una razon:
+         «No se pudo subir (502)». Este campo mandaba el archivo CRUDO, y una
+         foto de telefono son 8 MB: o rebota contra el tope de la peticion, o
+         revienta al Worker al convertirla — y un 502 no explica nada.
+         `aWebp` es la misma funcion que ya usa ElegirFotos para las fotos del
+         negocio: 1600 px de ancho, calidad 82, y de 8 MB quedan ~0,7. Lo que
+         viaja ya es chico, asi que el tope deja de importar.
+         Si el navegador no puede (un HEIC viejo), `aWebp` cae sola a la ruta
+         del servidor; y si tampoco, se manda el original y que el servidor
+         conteste lo que corresponda. */
+      let paraMandar: Blob = f;
+      let comoSeLlama = f.name;
+      try {
+        paraMandar = await aWebp(f);
+        comoSeLlama = f.name.replace(/\.[^.]+$/, '') + '.webp';
+      } catch {
+        /* Se manda el original: el servidor decide. */
+      }
+      if (paraMandar.size > TOPE_BYTES) {
+        setError('Esa imagen es enorme incluso achicada. Guardala mas chica y volve a intentar.');
+        return;
+      }
+
       const datos = new FormData();
       datos.set('carpeta', carpeta);
-      datos.set('archivo', f);
+      datos.set('archivo', new File([paraMandar], comoSeLlama, { type: paraMandar.type || f.type }));
       const r = await fetch('/api/admin/imagen', { method: 'POST', body: datos });
       /* El cuerpo puede no ser JSON si algo se cayó antes de llegar a la
          ruta. Sin este try, el fallo real queda tapado por un error de
@@ -74,7 +99,7 @@ export function CampoImagen({
 
         <div className="campo-imagen-acciones">
           <input ref={archivo} type="file" id={`ci-${nombre}`}
-                 accept="image/jpeg,image/png,image/webp,image/avif"
+                 accept={`${ACEPTA},image/avif`}
                  disabled={desactivado || subiendo}
                  /* Sube apenas se elige el archivo: un segundo botón "ahora sí
                     subila" es un paso que nadie entiende para qué está. */

@@ -16,6 +16,12 @@ const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
 const numero = (d: FormData, k: string) => { const v = texto(d, k); return v === '' ? null : Number(v); };
 const marca = (d: FormData, k: string) => texto(d, k) === '1';
 
+/* Un fallo que la pantalla de Aprobaciones muestra tal cual. `redirect` tira,
+   asi que corta la accion ahi mismo: no hay camino que siga en silencio. */
+function avisarAprobaciones(mensaje: string): never {
+  redirect('/admin/ia/aprobaciones?fallo=' + encodeURIComponent(mensaje));
+}
+
 function json(d: FormData, k: string): Record<string, unknown> | null {
   const v = texto(d, k);
   if (!v) return {};
@@ -182,19 +188,31 @@ export async function aprobar(_previo: Estado, datos: FormData): Promise<Estado>
 export async function descartar(datos: FormData) {
   const { usuario } = await contextoPanel('ia');
   const id = texto(datos, 'id');
-  if (!esUuid(id) || !hayClaveDeServicio()) return;
-  await descartarEnvio(id, usuario.id);
+  /* ⚠️ NINGUNA DE ESTAS SALIDAS SE QUEDA MUDA. Este es el boton con que Tony
+     tira un borrador que la IA escribio mal; si no dice nada, no se distingue
+     de un boton roto. Ver las notas de `descartarEnvio`. */
+  if (!esUuid(id)) avisarAprobaciones('No vino el borrador que hay que descartar.');
+  if (!hayClaveDeServicio()) avisarAprobaciones('Falta SUPABASE_SECRET_KEY en el entorno: sin esa llave no se puede descartar.');
+  const r = await descartarEnvio(id, usuario.id);
   revalidatePath('/admin/ia/aprobaciones');
   revalidatePath('/admin');
+  if (!r.ok) avisarAprobaciones(r.error ?? 'No se pudo descartar.');
 }
 
 export async function marcarEnviado(datos: FormData) {
   const { db, destino } = await contextoPanel('ia');
   const id = texto(datos, 'mensaje_id');
-  if (!esUuid(id)) return;
-  await db.from('dst_mensaje').update({ estado_envio: 'enviado', error_envio: null }).eq('id', id).eq('destino_id', destino.id);
+  /* Igual que arriba: «Ya lo mande» se apretaba y, si la fila no era de este
+     destino o la base se quejaba, el mensaje seguia en la lista sin una
+     palabra. El resultado NO se daba por bueno: no se miraba. */
+  if (!esUuid(id)) avisarAprobaciones('No vino el mensaje que hay que marcar.');
+  const { data, error } = await db.from('dst_mensaje')
+    .update({ estado_envio: 'enviado', error_envio: null })
+    .eq('id', id).eq('destino_id', destino.id).select('id');
   revalidatePath('/admin/ia/aprobaciones');
   revalidatePath('/admin');
+  if (error) avisarAprobaciones(`La base no dejo marcarlo: ${error.message}`);
+  if (!data?.length) avisarAprobaciones('Ese mensaje ya no esta pendiente: alguien lo marco antes, o esta pantalla estaba vieja.');
 }
 
 /* ---- Probar el concierge y correr el motor ---- */

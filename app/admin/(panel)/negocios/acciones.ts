@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
 import { refrescarExternasDeNegocio, refrescarExternasPendientes } from '@/lib/externas';
+import { enlaceDeRed, sitioWeb, correo, telefono, type Revisado } from '@/lib/enlaces';
+import type { Guardado } from '@/componentes/admin/FormularioGuardar';
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -14,6 +16,38 @@ const marca = (d: FormData, k: string) => texto(d, k) === '1';
 function refrescar(id?: string) {
   if (id) revalidatePath(`/admin/negocios/${id}`);
   revalidatePath('/admin/negocios');
+}
+
+/**
+ * Las direcciones publicas de un negocio: una por idioma del destino.
+ *
+ * ⚠️ VA CON LA CLAVE DE SERVICIO, Y NO ES UN CAPRICHO.
+ *
+ * `authenticated` —que es con lo que corre el panel— solo tiene SELECT sobre
+ * `dst_ruta`. El INSERT le esta negado, asi que esto fallaba **en silencio**:
+ * el negocio se creaba y sus rutas no. Un negocio sin ruta no tiene URL, o sea
+ * que al publicarlo NO SE ABRE. Asi nacio Bike & Bed Hotel Arenal el 10 de
+ * noviembre de 2026, y asi estaban otros tres.
+ *
+ * Lo correcto de fondo es el GRANT que falta
+ * (`48_los_permisos_que_faltaban.sql`). Mientras tanto esto no espera a nadie:
+ * el Worker SI tiene permiso con su clave de servicio.
+ *
+ * Como esa clave se salta las politicas, el destino se comprueba ACA: solo se
+ * escriben rutas del destino que el panel ya valido.
+ *
+ * Es idempotente a proposito —`onConflict` no pisa lo que haya— asi que
+ * llamarla de nuevo sobre un negocio viejo le REPARA las rutas que le falten
+ * sin tocar las que ya tiene traducidas.
+ */
+async function asegurarRutas(destinoId: string, idiomas: string[], negocioId: string, babosa: string) {
+  const { servicio } = await import('@/lib/supabase-servidor');
+  const { error } = await servicio().from('dst_ruta').upsert(
+    idiomas.map((idioma) => ({ destino_id: destinoId, entidad: 'negocio', entidad_id: negocioId, idioma, babosa })),
+    { onConflict: 'destino_id,entidad,idioma,babosa', ignoreDuplicates: true },
+  );
+  if (error) console.error('asegurarRutas:', error.message);
+  return error?.message ?? null;
 }
 
 export async function crearNegocio(datos: FormData) {
@@ -29,25 +63,90 @@ export async function crearNegocio(datos: FormData) {
     destino_id: destino.id, categoria_id: categoriaId, nombre, babosa,
     estado_publicacion: 'borrador', estado_verificacion: 'pendiente', fuente_dato: 'equipo',
   }).select('id').single();
-  if (error || !data) return;
+  /* Mismo fallo callado que tenia `crearTour`: la base rechazaba y la
+     pantalla no cambiaba nada. */
+  if (error || !data) {
+    console.error('crearNegocio:', error?.message);
+    redirect(`/admin/negocios?fallo=${encodeURIComponent(error?.message ? 'La base lo rechazó así: ' + error.message.slice(0, 200) : 'No se pudo crear el negocio.')}`);
+  }
 
-  // Cada idioma del destino apunta a la misma babosa hasta que alguien la traduzca.
-  await db.from('dst_ruta').insert(destino.idiomas.map((idioma) => ({ destino_id: destino.id, entidad: 'negocio', entidad_id: data.id, idioma, babosa })));
+  await asegurarRutas(destino.id, destino.idiomas, data.id, babosa);
   refrescar();
   redirect(`/admin/negocios/${data.id}`);
 }
 
-export async function editarNegocio(datos: FormData) {
+/*
+ * ⚠️ DEVUELVE EL ERROR, NO NAVEGA. Y esa es toda la diferencia.
+ *
+ * Tony, 10 de noviembre de 2026, con la ficha de Bike & Bed llena a mano:
+ * guardó, la base rechazó por el Facebook, y **se perdió todo lo escrito**.
+ * Lo perdió el `redirect(...?fallo=)` que habíamos puesto esa misma mañana:
+ * navegar vuelve a armar la página desde la BASE, y en la base estaba lo
+ * viejo porque el guardado justamente había fallado.
+ *
+ *     éxito  -> redirect, para que los campos nazcan de lo guardado
+ *               (sin él, el formulario muestra lo viejo y el siguiente
+ *               «Guardar» revierte el cambio anterior — ya pasó)
+ *     fallo  -> DEVOLVER, para que los campos conserven lo tecleado
+ *
+ * Y antes de todo eso: SE REVISA PRIMERO Y SE GUARDA DESPUÉS. Un `check` de
+ * Postgres es todo-o-nada — un Facebook sin https:// tira la fila entera, con
+ * la descripción, las credenciales y lo que sea que se hubiera escrito. Por
+ * eso lo que la base va a rechazar se atrapa de este lado, donde todavía se
+ * puede arreglar solo (`lib/enlaces.ts`) o explicar en castellano.
+ */
+export async function editarNegocio(_previo: Guardado, datos: FormData): Promise<Guardado> {
   const { db, destino } = await contextoPanel('negocios');
   const id = texto(datos, 'id');
-  if (!esUuid(id)) return;
+  if (!esUuid(id)) return { errores: ['No vino el negocio.'] };
   const { data: antes } = await db.from('dst_negocio').select('estado_publicacion, publicado_en, estado_verificacion, verificado_en').eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!antes) return;
+  if (!antes) return { errores: ['Ese negocio no es de este destino.'] };
 
   const publicacion = texto(datos, 'estado_publicacion');
   const verificacion = texto(datos, 'estado_verificacion');
   const membresia = texto(datos, 'membresia');
-  const telefono = (k: string) => { const v = texto(datos, k).replace(/[\s\-().]/g, ''); return v ? (v.startsWith('+') ? v : `+${v}`) : null; };
+
+  /* Se juntan TODOS los errores y no se corta en el primero: quien escribió
+     mal el Facebook y el teléfono merece enterarse de los dos de una, no
+     guardar, fallar, arreglar uno, guardar y fallar otra vez. */
+  const errores: string[] = [];
+  const revisar = (r: Revisado) => { if (r.error) { errores.push(r.error); return null; } return r.valor; };
+
+  const facebook = revisar(enlaceDeRed(texto(datos, 'facebook_url'), 'facebook'));
+  const instagram = revisar(enlaceDeRed(texto(datos, 'instagram_url'), 'instagram'));
+  const web = revisar(sitioWeb(texto(datos, 'sitio_web')));
+  const correoFicha = revisar(correo(texto(datos, 'email')));
+  const correoReservas = revisar(correo(texto(datos, 'email_reservas')));
+  const tel = revisar(telefono(texto(datos, 'telefono'), 'teléfono'));
+  const whats = revisar(telefono(texto(datos, 'telefono_whatsapp'), 'WhatsApp'));
+
+  /* Los números con rango en la base. Sin esto, un año mal tecleado rebota la
+     fila entera con un mensaje que habla de `ck_dst_negocio_opera_desde`. */
+  const entre = (campo: string, comoSeLlama: string, min: number, max: number) => {
+    const v = numero(datos, campo);
+    if (v === null) return null;
+    if (!Number.isFinite(v) || v < min || v > max) {
+      errores.push(`${comoSeLlama}: «${texto(datos, campo)}» no sirve, va entre ${min} y ${max}.`);
+      return null;
+    }
+    return v;
+  };
+  const operaDesde = entre('opera_desde', 'El año en que abrió', 1800, new Date().getFullYear());
+  const latitud = entre('latitud', 'La latitud', -90, 90);
+  const longitud = entre('longitud', 'La longitud', -180, 180);
+  const comision = entre('comision_pct', 'La comisión', 0, 100);
+
+  /* La base no publica un negocio sin descripción (`ck_dst_negocio_publicado`),
+     salvo que sea operador —esos no tienen ficha propia, lo que se publica son
+     sus tours—. Se dice acá con nombre y apellido en vez de dejar que reviente
+     con el nombre del check. */
+  const descripcion = texto(datos, 'descripcion') || null;
+  const esOperador = marca(datos, 'es_operador');
+  if (publicacion === 'publicado' && !descripcion && !esOperador) {
+    errores.push('Para publicar hace falta la descripción. Escribila abajo, o dejá la ficha en borrador por ahora.');
+  }
+
+  if (errores.length) return { errores };
 
   const { error } = await db.from('dst_negocio').update({
     nombre: texto(datos, 'nombre') || undefined,
@@ -55,28 +154,26 @@ export async function editarNegocio(datos: FormData) {
     resumen: texto(datos, 'resumen') || null,
     /* Las credenciales que salen en la ficha de sus TOURS, donde su nombre no
        va a propósito. El año y no la antigüedad: así no envejece. */
-    opera_desde: numero(datos, 'opera_desde'),
+    opera_desde: operaDesde,
     credenciales: texto(datos, 'credenciales') || null,
-    descripcion: texto(datos, 'descripcion') || null,
-    email: texto(datos, 'email').toLowerCase() || null,
-    telefono: telefono('telefono'),
-    telefono_whatsapp: telefono('telefono_whatsapp'),
-    sitio_web: texto(datos, 'sitio_web') || null,
-    /* La base tiene un check: si no parece una URL de esa red, revienta al
-       guardar en vez de dejar un enlace roto en la ficha publica. */
-    facebook_url: texto(datos, 'facebook_url') || null,
-    instagram_url: texto(datos, 'instagram_url') || null,
+    descripcion,
+    email: correoFicha,
+    telefono: tel,
+    telefono_whatsapp: whats,
+    sitio_web: web,
+    facebook_url: facebook,
+    instagram_url: instagram,
     direccion: texto(datos, 'direccion') || null,
     como_llegar: texto(datos, 'como_llegar') || null,
-    latitud: numero(datos, 'latitud'),
-    longitud: numero(datos, 'longitud'),
+    latitud,
+    longitud,
     rango_precio: ['economico', 'moderado', 'alto', 'lujo'].includes(texto(datos, 'rango_precio')) ? texto(datos, 'rango_precio') : null,
     precio_desde_usd: numero(datos, 'precio_desde_usd'),
     membresia: ['gratis', 'pro', 'destacado'].includes(membresia) ? membresia : 'gratis',
     membresia_hasta: membresia !== 'gratis' ? (texto(datos, 'membresia_hasta') || new Date(Date.now() + 365 * 86_400_000).toISOString().slice(0, 10)) : null,
-    comision_pct: numero(datos, 'comision_pct'),
+    comision_pct: comision,
     contacto_comercial: texto(datos, 'contacto_comercial') || null,
-    email_reservas: texto(datos, 'email_reservas').toLowerCase() || null,
+    email_reservas: correoReservas,
     notas_internas: texto(datos, 'notas_internas') || null,
     google_place_id: texto(datos, 'google_place_id') || null,
     logo_url: texto(datos, 'logo_url') || null,
@@ -86,41 +183,24 @@ export async function editarNegocio(datos: FormData) {
     verificado_en: verificacion === 'verificado' && antes.estado_verificacion !== 'verificado' ? new Date().toISOString() : antes.verificado_en,
     es_destacado: marca(datos, 'es_destacado'),
     es_casa: marca(datos, 'es_casa'),
-    es_operador: marca(datos, 'es_operador'),
+    es_operador: esOperador,
     esta_cerrado: marca(datos, 'esta_cerrado'),
   }).eq('id', id);
 
-  refrescar(id);
-
-  /*
-   * ⚠️ SE REDIRIGE SIEMPRE, Y NO ES UN ADORNO.
-   *
-   * Tony, 10 de noviembre de 2026: «le di poner en borrador y no me deja,
-   * vuelve a publicado después de guardar». El guardado funcionaba: la base
-   * tenía «borrador» y la cabecera lo decía. Lo que mentía era el formulario.
-   *
-   * `revalidatePath` invalida el caché del SERVIDOR, pero esta acción se llama
-   * desde el cliente y lo que vuelve es el resultado de la acción, no una
-   * página nueva: el navegador se queda con el árbol que ya tenía y los campos
-   * —que son no controlados— conservan sus valores viejos.
-   *
-   * Y eso no es cosmético: el formulario manda LO QUE MUESTRA. Quien lee
-   * «publicado» y vuelve a darle Guardar sin tocar nada REPUBLICA el negocio,
-   * o revierte el cambio que acababa de hacer. Probado en producción: guardar
-   * dos veces seguidas deshacía el primer guardado.
-   *
-   * Un `redirect` fuerza una navegación de verdad, el servidor arma la página
-   * con lo que hay en la base y los campos nacen con el valor guardado. Es lo
-   * único que lo arregla de raíz; el `key` del <form> solo, no alcanzó.
-   *
-   * Y EL ERROR SE DICE EN PANTALLA. Antes era un `console.error` que solo veía
-   * el Worker: la base rechazaba, la pantalla repintaba el valor viejo y
-   * parecía que «no guardaba». Es el mismo fallo callado que tenía el tour.
-   */
+  /* La red para lo que no vimos venir: una política de RLS, una columna nueva
+     con un check. Se devuelve igual que los otros — nada de navegar. */
   if (error) {
     console.error('editarNegocio:', error.message);
-    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+    return { errores: [`La base lo rechazó así: ${error.message}`] };
   }
+
+  /* Repara las rutas que falten. Los negocios creados mientras el INSERT
+     estaba negado quedaron sin ninguna — sin URL publica. Guardar la ficha
+     ahora las pone, sin que nadie tenga que acordarse. */
+  const { data: conBabosa } = await db.from('dst_negocio').select('babosa').eq('id', id).maybeSingle();
+  if (conBabosa?.babosa) await asegurarRutas(destino.id, destino.idiomas, id, conBabosa.babosa);
+
+  refrescar(id);
   redirect(`/admin/negocios/${id}?guardado=1`);
 }
 
@@ -146,7 +226,14 @@ export async function publicarNegocio(datos: FormData) {
   const { data: antes } = await db.from('dst_negocio')
     .select('estado_publicacion, publicado_en')
     .eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!antes || antes.estado_publicacion === 'publicado') return;
+  if (!antes) {
+    redirect('/admin/negocios?fallo=' + encodeURIComponent('Ese negocio ya no existe: esta pantalla estaba vieja.'));
+  }
+  /* Ya estaba publicado. No es un error, pero quedarse mudo hace creer
+     que el boton no sirve. */
+  if (antes.estado_publicacion === 'publicado') {
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('Ese negocio ya estaba publicado.')}`);
+  }
 
   const { error } = await db.from('dst_negocio').update({
     estado_publicacion: 'publicado',
@@ -171,7 +258,7 @@ export async function publicarNegocio(datos: FormData) {
    * con un check, lo que sea. */
   if (error) {
     console.error('publicarNegocio:', error.message);
-    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('La base lo rechazó así: ' + error.message.slice(0, 200))}`);
   }
   refrescar(id);
 }
@@ -202,7 +289,14 @@ export async function pedirCompletarFicha(datos: FormData) {
   const { data: n } = await db.from('dst_negocio')
     .select('id, nombre, email, descripcion, es_operador')
     .eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!n?.email) return;
+  if (!n) {
+    redirect('/admin/negocios?fallo=' + encodeURIComponent('Ese negocio ya no existe: esta pantalla estaba vieja.'));
+  }
+  /* Sin correo no hay a quien pedirle nada, y eso hay que DECIRLO: el
+     boton se apretaba y no pasaba nada. */
+  if (!n.email) {
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('Ese negocio no tiene correo cargado, asi que no hay a quien pedirle la ficha. Ponelo en Contacto y volve a intentar.')}`);
+  }
 
   const [{ count: fotos }, { count: tours }] = await Promise.all([
     db.from('dst_negocio_foto').select('id', { count: 'exact', head: true }).eq('negocio_id', id),
@@ -293,7 +387,12 @@ export async function rechazarNegocio(datos: FormData) {
   const { data: n } = await db.from('dst_negocio')
     .select('id, nombre, email, es_operador')
     .eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!n) return;
+  /* Mismo fallo callado que tenía `borrarNegocio`: si no está, la pantalla
+     quedaba igual y parecía que el botón no servía. */
+  if (!n) {
+    refrescar();
+    redirect('/admin/negocios?fallo=' + encodeURIComponent('Ese negocio ya no existe: alguien lo borró antes, o esta pantalla estaba vieja.'));
+  }
 
   const { error } = await db.from('dst_negocio').update({
     estado_publicacion: 'archivado',
@@ -303,7 +402,7 @@ export async function rechazarNegocio(datos: FormData) {
 
   if (error) {
     console.error('rechazarNegocio:', error.message);
-    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('La base lo rechazó así: ' + error.message.slice(0, 200))}`);
   }
 
   /* El aviso va DESPUES de archivar y envuelto: si el correo falla, el
@@ -344,16 +443,32 @@ export async function rechazarNegocio(datos: FormData) {
  */
 export async function borrarNegocio(datos: FormData) {
   const { db, destino, usuario } = await contextoPanel('negocios');
-  /* Borrar sin vuelta atras es solo de un administrador. */
-  if (usuario.rol !== 'admin') return;
   const id = texto(datos, 'id');
-  if (!esUuid(id)) return;
+
+  /* ⚠️ NINGUNA DE ESTAS SALIDAS SE QUEDA MUDA.
+     Tony, 11 de noviembre de 2026: «le di borrar y sale la misma pantalla».
+     Y era verdad: el negocio ya no existía —lo habíamos borrado— pero la
+     pantalla que él tenía abierta era la vieja, en caché. Le dio al botón, la
+     acción salió por acá sin decir una palabra, y quedó igual. Desde afuera
+     eso no se distingue de un botón roto.
+     Ahora cada camino termina en la lista diciendo qué pasó. */
+  if (usuario.rol !== 'admin') {
+    redirect('/admin/negocios?fallo=' + encodeURIComponent('Borrar definitivamente solo lo puede hacer un administrador. Podés archivarlo con «Rechazar».'));
+  }
+  if (!esUuid(id)) {
+    redirect('/admin/negocios?fallo=' + encodeURIComponent('No vino el negocio que hay que borrar.'));
+  }
 
   /* Se comprueba que la fila sea de ESTE destino antes de tocar nada que no
      lleve `destino_id`, como las rutas. */
   const { data: n } = await db.from('dst_negocio')
     .select('id').eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!n) return;
+  if (!n) {
+    /* Ya no está: o lo borró alguien más, o esta pantalla es vieja. Igual se
+       termina en la lista, que es lo que la persona quería. */
+    refrescar();
+    redirect('/admin/negocios?fallo=' + encodeURIComponent('Ese negocio ya no existe: alguien lo borró antes, o esta pantalla estaba vieja.'));
+  }
 
   await db.from('dst_ruta').delete()
     .eq('destino_id', destino.id).eq('entidad', 'negocio').eq('entidad_id', id);
@@ -363,7 +478,7 @@ export async function borrarNegocio(datos: FormData) {
     .eq('id', id).eq('destino_id', destino.id);
   if (error) {
     console.error('borrarNegocio:', error.message);
-    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('La base lo rechazó así: ' + error.message.slice(0, 200))}`);
   }
 
   refrescar();
@@ -454,7 +569,11 @@ export async function subirFoto(datos: FormData) {
   const credito = texto(datos, 'credito') || null;
   const licencia = texto(datos, 'licencia') || null;
   const fuente = texto(datos, 'fuente_url') || null;
-  if (fuente && (!credito || !licencia)) return;
+  /* El check de la base exige autor y licencia junto a la fuente. Antes
+     esto se iba callado y las fotos simplemente no aparecian. */
+  if (fuente && (!credito || !licencia)) {
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('Si la foto viene de otro sitio, el autor y la licencia son obligatorios.')}`);
+  }
 
   const alternativo = texto(datos, 'texto_alternativo') || negocio.nombre;
 
@@ -809,7 +928,9 @@ export async function agregarRazon(datos: FormData) {
      esconder tres es una trampa para quien las escribe. */
   const { count } = await db.from('dst_negocio_razon')
     .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
-  if ((count ?? 0) >= 3) return;
+  if ((count ?? 0) >= 3) {
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('Ya hay tres razones, que es lo que muestra la ficha. Borra una para poner otra.')}`);
+  }
 
   const { error } = await db.from('dst_negocio_razon').insert({
     negocio_id: id,
@@ -884,7 +1005,9 @@ export async function agregarCombina(datos: FormData) {
 
   const { count } = await db.from('dst_negocio_combina')
     .select('id', { count: 'exact', head: true }).eq('negocio_id', id);
-  if ((count ?? 0) >= 6) return;
+  if ((count ?? 0) >= 6) {
+    redirect(`/admin/negocios/${id}?fallo=${encodeURIComponent('Ya hay seis combinaciones, que es el maximo que sale en la ficha.')}`);
+  }
 
   const { error } = await db.from('dst_negocio_combina').insert({
     negocio_id: id,

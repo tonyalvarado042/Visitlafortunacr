@@ -4,6 +4,7 @@ import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
+import { FormularioGuardar } from '@/componentes/admin/FormularioGuardar';
 import { ElegirFotos } from '@/componentes/admin/ElegirFotos';
 import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFotoTour, pedirCompletarTour, pedirRevisionDeTour, guardarOpcionDeTour, borrarOpcionDeTour, guardarTraduccionesDeTour } from '../acciones';
 import { CAMPOS_TRADUCIBLES_DESDE_EL_PANEL } from '@/lib/traducciones-de-tour';
@@ -203,7 +204,8 @@ export default async function PaginaTour({ params, searchParams }: {
       {/* Mismo arreglo que en la ficha del negocio: sin esto, el
           desplegable de estado sigue mostrando el valor viejo después
           de guardar y el siguiente «Guardar» lo republica. */}
-      <form key={String(t.actualizado_en)} action={editarTour} autoComplete="off">
+      <FormularioGuardar key={String(t.actualizado_en)} accion={editarTour}
+                         nota="Los cambios de esta pantalla no se guardan solos.">
         <input type="hidden" name="id" value={id} />
         <div className="lado">
           <div>
@@ -328,7 +330,6 @@ export default async function PaginaTour({ params, searchParams }: {
                 <div className="campo"><label>Estado</label><select name="estado" defaultValue={t.estado}>{['borrador', 'pendiente', 'publicado', 'archivado'].map((x) => <option key={x} value={x}>{x}</option>)}</select></div>
                 <div className="campo"><label><input type="checkbox" name="es_destacado" value="1" defaultChecked={t.es_destacado} /> Destacado</label></div>
               </div>
-              <div className="pie-formulario"><BotonAccion>Guardar</BotonAccion></div>
             </div>
             <div className="tarjeta">
               <h2>Próximas salidas</h2>
@@ -338,7 +339,7 @@ export default async function PaginaTour({ params, searchParams }: {
             </div>
           </div>
         </div>
-      </form>
+      </FormularioGuardar>
 
       {/* ---- LAS OPCIONES DE PRECIO ----
           ⚠️ FUERA del formulario grande, y no es cosmético: HTML no permite

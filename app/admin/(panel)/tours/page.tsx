@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { dinero } from '@/lib/admin/formato';
-import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
+import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { crearTour } from './acciones';
 
@@ -19,9 +19,9 @@ const COLOR: Record<string, string> = { borrador: '#9CA3AF', pendiente: '#F59E0B
 export default async function PaginaTours({
   searchParams,
 }: {
-  searchParams: Promise<{ operador?: string }>;
+  searchParams: Promise<{ operador?: string; fallo?: string }>;
 }) {
-  const { operador } = await searchParams;
+  const { operador, fallo } = await searchParams;
   const { destino, db } = await contextoPanel('tours');
   const [{ data: tours }, { data: operadores }, { data: categorias }] = await Promise.all([
     (operador
@@ -37,6 +37,11 @@ export default async function PaginaTours({
 
   return (
     <>
+      {fallo && (
+        <Aviso tipo="mal">
+          {fallo}
+        </Aviso>
+      )}
       <Cabecera
         titulo={elOperador ? `Tours de ${elOperador.nombre}` : 'Tours'}
         sub={`${tours?.length ?? 0} tours · ${tours?.filter((t) => t.estado === 'publicado').length ?? 0} publicados`}

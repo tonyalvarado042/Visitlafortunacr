@@ -4,6 +4,8 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
+import { FormularioGuardar } from '@/componentes/admin/FormularioGuardar';
+import { BotonFila } from '@/componentes/admin/BotonFila';
 import { editarNegocio, publicarNegocio, pedirCompletarFicha, publicarYPedirFicha, rechazarNegocio, borrarNegocio, moverFoto, traducirCampo, traerOpiniones, subirFoto, marcarPortada, borrarFoto, destacarExtracto, agregarRazon, borrarRazon, moverRazon, agregarCombina, borrarCombina } from '../acciones';
 import { CampoImagen } from '@/componentes/admin/CampoImagen';
 import { ElegirFotos } from '@/componentes/admin/ElegirFotos';
@@ -147,7 +149,7 @@ export default async function PaginaNegocio({ params, searchParams }: {
 
       {fallo && (
         <Aviso tipo="mal">
-          <strong>No se pudo publicar.</strong> La base lo rechazó así: <code>{fallo}</code>
+          {fallo}
         </Aviso>
       )}
 
@@ -186,7 +188,8 @@ export default async function PaginaNegocio({ params, searchParams }: {
           llave, React tira el formulario viejo y monta uno nuevo con los
           valores de la base. Va en el <form> y no en cada campo porque el
           problema es de todos: el estado solo fue el que se notó. */}
-      <form key={String(n.actualizado_en)} action={editarNegocio} autoComplete="off">
+      <FormularioGuardar key={String(n.actualizado_en)} accion={editarNegocio}
+                         nota="Los cambios de esta pantalla no se guardan solos.">
         <input type="hidden" name="id" value={id} />
         <div className="lado">
           <div>
@@ -394,12 +397,12 @@ export default async function PaginaNegocio({ params, searchParams }: {
                         {r.texto && <span>{r.texto}</span>}
                       </span>
                       <span className="razon-admin-botones">
-                        <button type="submit" name="razon_mover" value={`${r.id}|-1`} formAction={moverRazon}
-                                className="boton chico secundario" disabled={i === 0} aria-label="Subir">↑</button>
-                        <button type="submit" name="razon_mover" value={`${r.id}|1`} formAction={moverRazon}
-                                className="boton chico secundario" disabled={i === razones.length - 1} aria-label="Bajar">↓</button>
-                        <button type="submit" name="razon_id" value={r.id} formAction={borrarRazon}
-                                className="boton chico peligro" aria-label="Borrar">×</button>
+                        <BotonFila accion={moverRazon} campos={{ id, razon_mover: `${r.id}|-1` }}
+                                   titulo="Subir" desactivado={i === 0}>↑</BotonFila>
+                        <BotonFila accion={moverRazon} campos={{ id, razon_mover: `${r.id}|1` }}
+                                   titulo="Bajar" desactivado={i === razones.length - 1}>↓</BotonFila>
+                        <BotonFila accion={borrarRazon} campos={{ id, razon_id: r.id }}
+                                   clase="boton chico peligro" titulo="Borrar">×</BotonFila>
                       </span>
                     </li>
                   ))}
@@ -441,8 +444,8 @@ export default async function PaginaNegocio({ params, searchParams }: {
                           <strong>{otro?.nombre ?? '—'}</strong>
                           {c.motivo && <span>{c.motivo}</span>}
                         </span>
-                        <button type="submit" name="combina_fila" value={c.id} formAction={borrarCombina}
-                                className="boton chico peligro" aria-label="Quitar">×</button>
+                        <BotonFila accion={borrarCombina} campos={{ id, combina_fila: c.id }}
+                                   clase="boton chico peligro" titulo="Quitar">×</BotonFila>
                       </li>
                     );
                   })}
@@ -491,14 +494,14 @@ export default async function PaginaNegocio({ params, searchParams }: {
                             <strong>{c.autor_nombre}</strong>
                             <span>{c.texto.slice(0, 110)}{c.texto.length > 110 ? '…' : ''}</span>
                           </span>
-                          {/* formAction y no un <form>: esta tarjeta vive dentro
-                              del formulario grande. El id del negocio lo aporta
-                              el hidden de arriba; el de la cita, este botón. */}
-                          <button type="submit" name="extracto_id" value={c.id}
-                                  formAction={destacarExtracto}
-                                  className={c.destacado ? 'boton chico' : 'boton chico secundario'}>
+                          {/* BotonFila y no `formAction`: el id de la cita iba en el
+                              `value` del botón, y eso dejó de llegar cuando el
+                              formulario pasó a `useActionState`. Ver BotonFila.tsx. */}
+                          <BotonFila accion={destacarExtracto} campos={{ id, extracto_id: c.id }}
+                                     clase={c.destacado ? 'boton chico' : 'boton chico secundario'}
+                                     titulo={c.destacado ? 'Quitar de las destacadas' : 'Destacar esta cita'}>
                             {c.destacado ? 'Destacada' : 'Destacar'}
-                          </button>
+                          </BotonFila>
                         </li>
                       ))}
                     </ul>
@@ -523,17 +526,10 @@ export default async function PaginaNegocio({ params, searchParams }: {
           </div>
         </div>
 
-        {/* LA BARRA DE GUARDAR, PEGADA ABAJO.
-            Antes este boton vivia dentro del bloque "Publicacion" de la
-            columna derecha: o sea en la MITAD de una pagina de 500 lineas.
-            Uno editaba las opiniones alla abajo y tenia que subir a buscarlo
-            en la otra columna. Con `sticky` queda siempre a la vista mientras
-            haya formulario en pantalla. */}
-        <div className="barra-guardar">
-          <span>Los cambios de esta pantalla no se guardan solos.</span>
-          <BotonAccion>Guardar todo</BotonAccion>
-        </div>
-      </form>
+      {/* La barra de guardar y sus errores los pone FormularioGuardar: es
+          quien sabe si la accion fallo. Ver el comentario de ese archivo —
+          ahi esta por que el camino del error NO navega. */}
+      </FormularioGuardar>
 
       {/* ⚠️ RECHAZAR Y BORRAR VIVEN FUERA DEL FORMULARIO GRANDE, y no es
           cosmético: HTML NO PERMITE FORMULARIOS ANIDADOS. Estaban dentro

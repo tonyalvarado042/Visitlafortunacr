@@ -1,14 +1,15 @@
 import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { fecha, relativo } from '@/lib/admin/formato';
-import { Cabecera, Vacio } from '@/componentes/admin/ui';
+import { Aviso, Cabecera, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { descartar, marcarEnviado } from '../acciones';
 import { Aprobar } from './Aprobar';
 
 export const dynamic = 'force-dynamic';
 
-export default async function PaginaAprobaciones() {
+export default async function PaginaAprobaciones({ searchParams }: { searchParams: Promise<{ fallo?: string }> }) {
+  const f = await searchParams;
   const { destino, db } = await contextoPanel('ia');
   const [{ data: envios }, { data: pendientes }] = await Promise.all([
     db.from('dst_automatizacion_envio').select('id, intento, borrador, resultado, programado_para, solicitud_id, automatizacion:dst_automatizacion(nombre), viajero:dst_viajero(nombre, email, whatsapp, idioma)').eq('destino_id', destino.id).eq('estado', 'pendiente_aprobacion').order('programado_para'),
@@ -18,6 +19,9 @@ export default async function PaginaAprobaciones() {
 
   return (
     <>
+      {/* El texto se pinta TAL CUAL. La pantalla no le inventa un motivo: cada
+          accion manda el suyo, que es lo unico que sabe que paso de verdad. */}
+      {f.fallo && <Aviso tipo="mal">{f.fallo}</Aviso>}
       <Cabecera titulo="Aprobaciones" migas={[{ ruta: '/admin/ia', nombre: 'Inteligencia' }]} sub="Mensajes que la IA redactó y esperan a una persona, y mensajes que no se pudieron enviar porque el canal no está configurado." />
 
       <div className="tarjeta">

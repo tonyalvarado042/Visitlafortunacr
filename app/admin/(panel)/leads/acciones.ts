@@ -8,6 +8,7 @@ import { hayClaveDeServicio } from '@/lib/supabase-servidor';
 import { puntuarLead, redactarSeguimiento } from '@/lib/ia/seguimiento';
 import { generarItinerarioParaSolicitud } from '@/lib/ia/planificador';
 import { enviarAViajero } from '@/lib/ia/mensajeria';
+import { correosDeUnClic } from '@/lib/correo/respuestas';
 
 export type Estado = { ok?: string | null; error?: string | null; borrador?: string | null; asunto?: string | null; url?: string | null };
 
@@ -160,6 +161,63 @@ export async function enviarMensaje(_previo: Estado, datos: FormData): Promise<E
   if (s?.etapa === 'nuevo') await db.rpc('mover_etapa', { p_solicitud_id: id, p_etapa: 'contactado', p_motivo: null });
   refrescar(id);
   return { ok: envio.enviado ? `Enviado por ${envio.canal}.` : `Guardado como pendiente de envío manual (${envio.error ?? 'canal sin configurar'}).` };
+}
+
+/*
+ * Mandarle un correo ya armado, de un solo clic.
+ *
+ * ⚠️ EL TEXTO SE VUELVE A ARMAR ACA, NO SE RECIBE DEL NAVEGADOR.
+ *
+ * Seria mas facil mandar el cuerpo en el formulario —ya esta en la pantalla—
+ * pero entonces el boton serviria para mandar CUALQUIER texto a CUALQUIER
+ * viajero con solo torcer el formulario. Y, peor para el dia a dia: lo que se
+ * viera en pantalla y lo que saliera podrian separarse sin que nadie lo note.
+ * `correosDeUnClic` es la misma funcion que pinto lo que Tony leyo, asi que
+ * lo que sale es lo que vio. Esa es la regla del cerebro:
+ * «el correo se ve en pantalla ANTES de armarlo».
+ *
+ * NINGUNA SALIDA ES MUDA. Cada camino devuelve su motivo.
+ */
+export async function mandarCorreoRapido(_previo: Estado, datos: FormData): Promise<Estado> {
+  const { db, usuario, destino } = await contextoPanel('leads');
+  const id = texto(datos, 'id');
+  const clave = texto(datos, 'clave');
+  if (!esUuid(id)) return { error: 'Solicitud invalida.' };
+  if (!clave) return { error: 'No vino cual correo hay que mandar.' };
+  if (!hayClaveDeServicio()) return { error: 'Falta SUPABASE_SECRET_KEY en el entorno.' };
+
+  const armado = await correosDeUnClic(id);
+  if (!armado) return { error: 'Esa solicitud ya no existe: esta pantalla estaba vieja.' };
+  if (armado.problema) return { error: armado.problema };
+  const correo = armado.correos.find((c) => c.clave === clave);
+  if (!correo) return { error: `No hay una plantilla de correo «${clave}» activa para este destino.` };
+  if (correo.porQueNo) return { error: correo.porQueNo };
+  if (!correo.cuerpo.trim()) return { error: 'La plantilla quedo vacia al rellenarla. Revisala en IA → Plantillas.' };
+
+  const { data: s } = await db
+    .from('dst_solicitud')
+    .select('id, etapa, viajero:dst_viajero(id, nombre, email, whatsapp, idioma, no_molestar, baja)')
+    .eq('id', id).maybeSingle();
+  const v = (Array.isArray(s?.viajero) ? s?.viajero[0] : s?.viajero) as
+    { id: string; nombre: string | null; email: string | null; whatsapp: string | null; idioma: string | null; no_molestar: boolean; baja: boolean } | null | undefined;
+  if (!v) return { error: 'La solicitud no tiene viajero.' };
+
+  /* `email` explicito: este boton manda CORREO. Sin eso, un viajero con
+     WhatsApp recibiria el texto por ahi, que no es lo que dice el boton. */
+  const envio = await enviarAViajero(destino.id, v, {
+    texto: correo.cuerpo, asunto: correo.asunto, autor: 'equipo',
+    usuario_id: usuario.id, automatico: false, plantilla: clave,
+    metadatos: { de_un_clic: true, plantilla: clave },
+  }, 'email');
+  if (!envio.mensaje_id) return { error: envio.error ?? 'No se pudo enviar.' };
+
+  if (s?.etapa === 'nuevo') await db.rpc('mover_etapa', { p_solicitud_id: id, p_etapa: 'contactado', p_motivo: null });
+  refrescar(id);
+  return {
+    ok: envio.enviado
+      ? `Enviado a ${v.email}.`
+      : `No salio y quedo en «Por enviar a mano»: ${envio.error ?? 'el canal no esta configurado'}`,
+  };
 }
 
 export async function generarPlan(_previo: Estado, datos: FormData): Promise<Estado> {

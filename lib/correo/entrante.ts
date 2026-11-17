@@ -2,6 +2,11 @@ import 'server-only';
 import { servicio } from '@/lib/supabase-servidor';
 import { conversacionPara, type ViajeroContacto } from '@/lib/ia/mensajeria';
 import { sugerirRespuesta, responderConversacion } from '@/lib/ia/agente';
+import { direccionSana, dominiosPosibles, soloDireccion, soloLoNuevo } from '@/lib/correo/direcciones';
+
+/* Estaban acá antes de tener su propio archivo. Se re-exportan para que
+   quien las busque donde estaban las encuentre. */
+export { direccionSana, dominiosPosibles, soloDireccion, soloLoNuevo };
 
 /*
  * Un correo que ENTRA: la respuesta de un viajero.
@@ -43,69 +48,33 @@ export type ResultadoEntrante = {
   envio_id?: string;
 };
 
-/** La dirección pelada: «Hannah <a@b.com>» → «a@b.com». */
-export function soloDireccion(crudo: string): string {
-  const entre = crudo.match(/<([^>]+)>/);
-  return (entre ? entre[1] : crudo).trim().toLowerCase();
-}
-
-/*
- * Lo que el viajero escribió, sin la conversación anterior pegada abajo.
- *
- * Cuando alguien da «Responder», el cliente de correo cita TODO el hilo. Sin
- * esto, cada respuesta guardaría el historial completo otra vez, el panel se
- * vuelve ilegible y la IA lee el correo viejo como si fuera nuevo —y contesta
- * lo que ya contestó—.
- *
- * Se corta en la primera marca de cita. No es perfecto: ningún recorte de
- * citas lo es, cada cliente inventa la suya. Por eso el cuerpo COMPLETO se
- * guarda igual en los metadatos del mensaje: si algún día un recorte se come
- * algo que importaba, está ahí para recuperarlo.
- */
-const MARCAS_DE_CITA = [
-  /^\s*On .+ wrote:\s*$/im,
-  /^\s*El .+ escribió:\s*$/im,
-  /^\s*-----\s*Original Message\s*-----\s*$/im,
-  /^\s*_{10,}\s*$/m,
-  /^\s*De:\s.+$/im,
-  /^\s*From:\s.+$/im,
-];
-
-export function soloLoNuevo(cuerpo: string): string {
-  let corte = cuerpo.length;
-  for (const marca of MARCAS_DE_CITA) {
-    const encontrado = cuerpo.match(marca);
-    if (encontrado?.index !== undefined && encontrado.index < corte) corte = encontrado.index;
-  }
-  const limpio = cuerpo.slice(0, corte)
-    /* Las líneas que empiezan con «>» son cita en cualquier cliente. */
-    .split('\n').filter((l) => !/^\s*>/.test(l)).join('\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-  /* Si el recorte dejó vacío, vale más el cuerpo entero que nada. */
-  return limpio || cuerpo.trim();
-}
-
-/**
- * Recibe un correo y lo mete en la conversación del viajero.
- *
- * No lanza nunca: un correo que no se puede procesar no puede tumbar al
- * Worker ni hacer que el proveedor lo reintente en bucle. Devuelve el motivo.
- */
 export async function recibirCorreo(entrante: CorreoEntrante): Promise<ResultadoEntrante> {
   const db = servicio();
   const de = soloDireccion(entrante.de);
-  const para = soloDireccion(entrante.para);
+  const para = soloDireccion(entrante.para).toLowerCase();
 
   if (!de.includes('@')) return { ok: false, motivo: 'Sin remitente.' };
 
   /* El destino se elige por la dirección a la que escribieron. Así el día que
      exista visitmonteverdecr.com, su correo entra solo donde corresponde. */
-  const dominio = para.split('@')[1] ?? '';
+  if (!direccionSana(para)) {
+    return { ok: false, motivo: `La dirección de destino no es usable: ${para}` };
+  }
+
+  /* El porque de aceptar subdominios y de no confiar en la direccion esta en
+     `dominiosPosibles` y `direccionSana`, arriba. */
+  const dominios = dominiosPosibles(para);
+
+  const filtro = [
+    dominios.length ? `dominio.in.(${dominios.join(',')})` : null,
+    `email_noreply.eq.${para}`,
+    `email_contacto.eq.${para}`,
+  ].filter(Boolean).join(',');
+
   const { data: destino } = await db
     .from('dst_destino')
     .select('id, idioma_principal')
-    .or(`dominio.eq.${dominio},email_noreply.eq.${para},email_contacto.eq.${para}`)
+    .or(filtro)
     .limit(1)
     .maybeSingle();
   if (!destino) return { ok: false, motivo: `Ningún destino contesta a ${para}.` };
@@ -175,23 +144,55 @@ export async function recibirCorreo(entrante: CorreoEntrante): Promise<Resultado
 
   /* Qué hace la IA: lo decide `condiciones.modo` de `responder_correo`, no
      este código. Ver `47_correo_entrante.sql`. */
+  const r = await responderSegunElModo({
+    destinoId: destino.id,
+    viajeroId: viajero.id,
+    conversacionId,
+    solicitudId: conv?.solicitud_id ?? null,
+  });
+  return { ok: true, conversacion_id: conversacionId, mensaje_id: mensaje.id as string, ...r };
+}
+
+/*
+ * Qué se hace con una conversación de correo que espera respuesta.
+ *
+ * ⚠️ ESTA FUNCIÓN LA LLAMAN DOS, Y POR ESO VIVE SOLA.
+ *
+ *   1. `recibirCorreo`, en el momento en que entra el correo.
+ *   2. El barrido de cada 5 minutos (`/api/cron/correos`).
+ *
+ * El barrido existe por el `catch` de acá abajo: si la IA falla justo cuando
+ * entra el correo —la API con hipo, un tiempo agotado—, el correo queda
+ * guardado y la conversación abierta, pero **el borrador no lo pedía nadie
+ * nunca más**. Quedaba esperando a que una persona se diera cuenta. El
+ * barrido lo reintenta, y por eso la lógica no puede estar copiada en dos
+ * lados: a la segunda semana una de las dos copias haría algo distinto.
+ */
+export async function responderSegunElModo(opciones: {
+  destinoId: string;
+  viajeroId: string;
+  conversacionId: string;
+  solicitudId: string | null;
+}): Promise<{ motivo: string; modo: string; envio_id?: string }> {
+  const db = servicio();
+  const { destinoId, viajeroId, conversacionId, solicitudId } = opciones;
+
   const { data: automatizacion } = await db
     .from('dst_automatizacion')
     .select('id, condiciones, esta_activa, requiere_aprobacion')
-    .eq('destino_id', destino.id).eq('clave', 'responder_correo')
+    .eq('destino_id', destinoId).eq('clave', 'responder_correo')
     .maybeSingle();
 
   const modo = String((automatizacion?.condiciones as { modo?: string } | null)?.modo ?? 'solo_avisar');
-  const base = { ok: true, conversacion_id: conversacionId, mensaje_id: mensaje.id as string, modo };
 
   if (!automatizacion?.esta_activa || modo === 'solo_avisar') {
-    return { ...base, motivo: 'Guardado en la conversación; la IA no redacta.' };
+    return { modo, motivo: 'Guardado en la conversación; la IA no redacta.' };
   }
 
   try {
     if (modo === 'sola') {
       const r = await responderConversacion(conversacionId, { origen: 'email' });
-      return { ...base, motivo: r.texto ? 'La IA respondió.' : `La IA no respondió: ${r.motivo}` };
+      return { modo, motivo: r.texto ? 'La IA respondió.' : `La IA no respondió: ${r.motivo}` };
     }
 
     /* modo 'aprobar': redacta y espera el OK. El envío entra como
@@ -201,9 +202,9 @@ export async function recibirCorreo(entrante: CorreoEntrante): Promise<Resultado
       .from('dst_automatizacion_envio')
       .insert({
         automatizacion_id: automatizacion.id,
-        destino_id: destino.id,
-        viajero_id: viajero.id,
-        solicitud_id: conv?.solicitud_id ?? null,
+        destino_id: destinoId,
+        viajero_id: viajeroId,
+        solicitud_id: solicitudId,
         conversacion_id: conversacionId,
         intento: 1,
         estado: 'pendiente_aprobacion',
@@ -213,13 +214,14 @@ export async function recibirCorreo(entrante: CorreoEntrante): Promise<Resultado
       })
       .select('id')
       .single();
-    if (eEnvio) return { ...base, motivo: `Redactado pero no se pudo encolar: ${eEnvio.message}` };
-    return { ...base, motivo: 'Redactado y esperando aprobación.', envio_id: envio.id as string };
+    if (eEnvio) return { modo, motivo: `Redactado pero no se pudo encolar: ${eEnvio.message}` };
+    return { modo, motivo: 'Redactado y esperando aprobación.', envio_id: envio.id as string };
   } catch (fallo) {
     /* La IA falló, pero el correo YA está guardado y la conversación abierta.
-       Eso es lo que no se puede perder; el borrador se puede pedir a mano. */
+       Eso es lo que no se puede perder. Y el borrador ya no queda huérfano:
+       el barrido de cada 5 minutos lo vuelve a intentar. */
     const porque = fallo instanceof Error ? fallo.message : String(fallo);
-    console.error('recibirCorreo: la IA no pudo redactar:', porque);
-    return { ...base, motivo: `Guardado; la IA no pudo redactar: ${porque}` };
+    console.error('responderSegunElModo: la IA no pudo redactar:', porque);
+    return { modo, motivo: `Guardado; la IA no pudo redactar: ${porque}` };
   }
 }

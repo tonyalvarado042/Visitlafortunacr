@@ -28,6 +28,7 @@ export const CRONES: Record<string, string> = {
   '0 13 * * *': '/api/cron/automatizaciones',
   '0 5 * * *': '/api/cron/externas',
   '15 12 * * *': '/api/cron/tipo-cambio',
+  '*/5 * * * *': '/api/cron/correos',
 };
 
 type Manejador = {

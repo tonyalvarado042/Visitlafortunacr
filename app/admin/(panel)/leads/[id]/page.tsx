@@ -7,6 +7,8 @@ import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { agregarNota, asignarResponsable, completarTarea, crearReserva, crearTarea, editarSolicitud, moverEtapa } from '../acciones';
 import { PanelIA } from './PanelIA';
+import { CorreosDeUnClic } from './CorreosDeUnClic';
+import { correosDeUnClic } from '@/lib/correo/respuestas';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +17,25 @@ const uno = <T,>(x: T | T[] | null | undefined): T | null => (Array.isArray(x) ?
 export default async function PaginaLead({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { destino, db, usuario } = await contextoPanel('leads');
+
+  /* Los correos de un clic se arman ACA, al pintar la pagina: sin IA y sin
+     esperas, porque son plantillas rellenadas. Lo que Tony lee es, letra
+     por letra, lo que `mandarCorreoRapido` vuelve a armar para mandar.
+     *
+     * ⚠️ AISLADO, PERO NO EN SILENCIO. Esto es codigo nuevo y toca cinco
+     * tablas. Si revienta —una columna que no esta, un permiso que falta— NO
+     * puede llevarse por delante la ficha entera del lead, que es la pantalla
+     * con la que se trabaja todos los dias. Pero tragarse el error seria peor:
+     * la tarjeta desapareceria sin que nadie sepa por que. Asi que se atrapa
+     * Y SE MUESTRA. */
+  let rapidos: Awaited<ReturnType<typeof correosDeUnClic>> = null;
+  let falloRapidos: string | null = null;
+  try {
+    rapidos = await correosDeUnClic(id);
+  } catch (fallo) {
+    falloRapidos = fallo instanceof Error ? fallo.message : String(fallo);
+    console.error('correosDeUnClic:', falloRapidos);
+  }
 
   /*
    * El embed del itinerario NOMBRA su relación, y sin eso esta página daba 404
@@ -98,6 +119,29 @@ export default async function PaginaLead({ params }: { params: Promise<{ id: str
               </div>
             )}
           </div>
+
+          {falloRapidos && (
+            <div className="tarjeta">
+              <h2>Contestarle ya</h2>
+              <div className="aviso mal">
+                No se pudieron armar los correos de un clic: {falloRapidos}
+              </div>
+              <p className="gris" style={{ fontSize: 12.5, margin: '8px 0 0' }}>
+                El resto de la ficha funciona. Podes escribirle a mano mas abajo.
+              </p>
+            </div>
+          )}
+
+          {rapidos && (
+            <CorreosDeUnClic
+              id={id}
+              para={rapidos.para}
+              nombre={rapidos.nombre}
+              problema={rapidos.problema}
+              avisos={rapidos.avisos}
+              correos={rapidos.correos}
+            />
+          )}
 
           <PanelIA id={id} tieneWhatsapp={!!v?.whatsapp} tieneEmail={!!v?.email} esItinerario={!!plan} />
 

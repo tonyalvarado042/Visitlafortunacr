@@ -151,13 +151,51 @@ for (const f of lista) {
   }
 }
 
+/* ───────────────────────────────────────────────────────────────────────────
+ * SEGUNDA REGLA: un botón que manda su dato en `name`+`value` dentro de un
+ * formulario que usa <FormularioGuardar>.
+ *
+ * POR QUE EXISTE: el 10 de noviembre de 2026 el formulario de la ficha pasó a
+ * `useActionState` para poder mostrar los errores sin perder lo escrito. Con
+ * ese manejo, **React arma el envío SIN el par nombre/valor del botón que lo
+ * disparó**. Los botones de fila —subir, bajar, borrar una razón, destacar una
+ * cita— mandaban su id justo ahí, así que llegaba vacío, la acción cortaba por
+ * su guarda de entrada y NO PASABA NADA: POST 200, cero cambios, cero avisos.
+ *
+ * Tony lo encontró antes que yo, otra vez, y con razón preguntó por qué cada
+ * arreglo destapaba tres cosas nuevas. Esta regla es la respuesta: que el
+ * build lo agarre en vez de él.
+ *
+ * El arreglo es <BotonFila>, que llama a la acción directo con los campos
+ * armados a mano. Ver componentes/admin/BotonFila.tsx.
+ * ──────────────────────────────────────────────────────────────────────────*/
+/* `lista` ya trae rutas absolutas. */
+const conGuardar = lista.filter((f) => readFileSync(f, 'utf8').includes('FormularioGuardar'));
+for (const f of conGuardar) {
+  const ruta = relative(RAIZ, f).split(sep).join('/');
+  const txt = limpiar(readFileSync(f, 'utf8'));
+  for (const m of txt.matchAll(/<button\b[^>]*?>/gs)) {
+    const t = m[0];
+    if (!/formAction=/.test(t)) continue;
+    if (!/\bname=/.test(t) || !/\bvalue=/.test(t)) continue;
+    const nro = txt.slice(0, m.index).split('\n').length;
+    const accion = (t.match(/formAction=\{(\w+)\}/) || [, '?'])[1];
+    fallos.push(
+      `${ruta}:${nro}  <button name=... value=... formAction={${accion}}> dentro de ` +
+      `<FormularioGuardar>: el valor del botón NO llega y la acción no hace nada. Usá <BotonFila>.`
+    );
+  }
+}
+
 if (fallos.length) {
-  console.error('\n❌ FORMULARIOS ANIDADOS — esos botones NO van a hacer nada:\n');
+  console.error('\n❌ BOTONES QUE NO VAN A HACER NADA:\n');
   for (const f of fallos) console.error('   ' + f);
   console.error(
-    '\n   HTML no permite <form> dentro de <form>. El navegador se come los de\n' +
-    '   adentro y los botones terminan mandando el formulario de afuera.\n' +
-    '   Sacá el bloque FUERA del formulario grande.\n'
+    '\n   Dos causas, las dos silenciosas:\n' +
+    '   · <form> dentro de <form>: el navegador se come el de adentro y el\n' +
+    '     botón termina mandando el de afuera. Sacá el bloque FUERA.\n' +
+    '   · name+value+formAction dentro de <FormularioGuardar>: el valor del\n' +
+    '     botón no llega. Cambialo por <BotonFila>.\n'
   );
   process.exit(1);
 }

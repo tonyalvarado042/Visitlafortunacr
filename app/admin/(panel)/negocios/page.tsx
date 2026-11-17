@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
-import { Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
+import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { crearNegocio, traerOpinionesDeTodos } from './acciones';
 import { hayClaveDePlaces } from '@/lib/externas';
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 const PUB: Record<string, string> = { borrador: '#9CA3AF', pendiente: '#F59E0B', publicado: '#66BB2E', archivado: '#6B7280' };
 const VER: Record<string, string> = { pendiente: '#9CA3AF', parcial: '#F59E0B', verificado: '#66BB2E', reclamado: '#3B82F6' };
 
-export default async function PaginaNegocios({ searchParams }: { searchParams: Promise<{ q?: string; estado?: string; seccion?: string }> }) {
+export default async function PaginaNegocios({ searchParams }: { searchParams: Promise<{ q?: string; estado?: string; seccion?: string; fallo?: string }> }) {
   const f = await searchParams;
   const { destino, db } = await contextoPanel('negocios');
   const conPlaces = await hayClaveDePlaces();
@@ -35,6 +35,11 @@ export default async function PaginaNegocios({ searchParams }: { searchParams: P
 
   return (
     <>
+      {f.fallo && (
+        <Aviso tipo="mal">
+          {f.fallo}
+        </Aviso>
+      )}
       <Cabecera titulo="Negocios" sub={`${data?.length ?? 0} en ${destino.nombre}`}>
         {conPlaces ? (
           <form action={traerOpinionesDeTodos}>

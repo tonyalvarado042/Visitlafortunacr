@@ -77,6 +77,11 @@ export default defineConfig({
       triggers.scheduled({ schedule: "0 13 * * *" }),
       triggers.scheduled({ schedule: "0 5 * * *" }),
       triggers.scheduled({ schedule: "15 12 * * *" }),
+      /* Cada 5 minutos: lee los correos que entraron y deja el borrador
+         esperando aprobacion. Tony, 13 de noviembre de 2026: «que este
+         correo quede totalmente leyendose con el agente cada 5 o 10
+         minutos». La hora va IGUAL en cloudflare/entrada.ts. */
+      triggers.scheduled({ schedule: "*/5 * * * *" }),
       /* EL CORTE, y por eso es RUTA y no "custom domain".
          Un custom domain exige borrar antes los registros de DNS que apuntan a
          Vercel, y entre borrarlos y que el Worker tome el dominio el sitio se

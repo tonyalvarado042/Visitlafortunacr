@@ -299,8 +299,23 @@ export async function aprobarEnvio(envioId: string, usuarioId: string, textoFina
   return { ok: true };
 }
 
-export async function descartarEnvio(envioId: string, usuarioId: string): Promise<void> {
-  await servicio().from('dst_automatizacion_envio').update({
+/*
+ * ⚠️ DEVUELVE SI DE VERDAD DESCARTO ALGO, NO `void`.
+ *
+ * El `.eq('estado', 'pendiente_aprobacion')` es a proposito: evita descartar
+ * algo que ya salio. Pero cuando ese filtro no engancha —porque alguien lo
+ * aprobo antes, o porque la pantalla estaba vieja— la consulta no cambia nada
+ * y antes NADIE lo decia: el boton se apretaba y el borrador seguia ahi.
+ *
+ * Es el mismo fallo que Tony encontro el 11 de noviembre de 2026 apretando
+ * «Borrar» en un negocio que ya no existia: «le di borrar y sale la misma
+ * pantalla». Desde afuera un no-op callado es idéntico a un boton roto.
+ */
+export async function descartarEnvio(envioId: string, usuarioId: string): Promise<{ ok: boolean; error?: string }> {
+  const { data, error } = await servicio().from('dst_automatizacion_envio').update({
     estado: 'cancelado', ejecutado_en: new Date().toISOString(), aprobado_por: usuarioId, resultado: 'Descartado desde el panel.',
-  }).eq('id', envioId).eq('estado', 'pendiente_aprobacion');
+  }).eq('id', envioId).eq('estado', 'pendiente_aprobacion').select('id');
+  if (error) return { ok: false, error: `La base no dejo descartarlo: ${error.message}` };
+  if (!data?.length) return { ok: false, error: 'Ese borrador ya no estaba pendiente: alguien lo aprobo o lo descarto antes, o esta pantalla estaba vieja.' };
+  return { ok: true };
 }

@@ -6,6 +6,7 @@ import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
 import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
 import { CAMPOS_TRADUCIBLES_DESDE_EL_PANEL } from '@/lib/traducciones-de-tour';
+import type { Guardado } from '@/componentes/admin/FormularioGuardar';
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
 const texto = (d: FormData, k: string) => String(d.get(k) ?? '').trim();
@@ -18,6 +19,14 @@ export async function crearTour(datos: FormData) {
   let babosa = babosaDe(nombre) || 'tour';
   const { data: repetido } = await db.from('dst_tour').select('id').eq('destino_id', destino.id).eq('babosa', babosa).maybeSingle();
   if (repetido) babosa = `${babosa}-${Math.random().toString(36).slice(2, 6)}`;
+  /* ⚠️ ESTO NO FUNCIONA HOY, Y NO ES CULPA DEL CODIGO.
+     El codigo del tour sale de la secuencia `sq_codigo_tour`, y NADIE tiene
+     USAGE sobre ella: ni anon, ni authenticated, **ni service_role**. O sea
+     que crear un tour desde el panel revienta con «permission denied for
+     sequence sq_codigo_tour» y no hay forma de esquivarlo por codigo —
+     probado el 10 de noviembre de 2026 con la clave de servicio, mismo error.
+     Lo arregla el GRANT de `48_los_permisos_que_faltaban.sql`, y nada mas.
+     Al menos ahora el panel LO DICE en pantalla en vez de no hacer nada. */
   const { data, error } = await db.from('dst_tour').insert({
     destino_id: destino.id, nombre, babosa,
     negocio_id: esUuid(texto(datos, 'negocio_id')) ? texto(datos, 'negocio_id') : null,
@@ -26,18 +35,74 @@ export async function crearTour(datos: FormData) {
     comision_pct: numero(datos, 'comision_pct') ?? destino.comision_por_defecto ?? null,
     estado: 'borrador',
   }).select('id').single();
-  if (error || !data) { console.error('crearTour:', error?.message); return; }
+  /* ⚠️ UN FALLO ACA NO PUEDE QUEDAR EN LA CONSOLA.
+     Asi estaba y asi fallo: el 10 de noviembre de 2026 intente crear un tour
+     desde el panel, el insert reboto, y la pantalla se quedo EXACTAMENTE
+     IGUAL — mismo formulario, sin un solo indicio. Uno piensa que no hizo
+     clic, vuelve a darle, y nada. El motivo viajaba a un registro del Worker
+     que nadie abre. */
+  if (error || !data) {
+    console.error('crearTour:', error?.message);
+    redirect(`/admin/tours?fallo=${encodeURIComponent(error?.message ? 'La base lo rechazó así: ' + error.message.slice(0, 200) : 'No se pudo crear el tour.')}`);
+  }
   revalidatePath('/admin/tours');
   redirect(`/admin/tours/${data.id}`);
 }
 
-export async function editarTour(datos: FormData) {
+/*
+ * ⚠️ DEVUELVE EL ERROR, NO NAVEGA — igual que `editarNegocio`, y por lo mismo.
+ *
+ * Tony, 10 de noviembre de 2026: la base rechazó un campo y el
+ * `redirect(...?fallo=)` lo mandó de vuelta a una pantalla armada DESDE LA
+ * BASE, o sea con lo viejo — perdiendo todo lo que había escrito.
+ *
+ *     éxito  -> redirect, para que los campos nazcan de lo guardado
+ *     fallo  -> DEVOLVER, y `FormularioGuardar` repone lo tecleado
+ *
+ * Y se revisa ANTES de mandar: este UPDATE manda todos los campos de un saque,
+ * así que si UNO rebota, rebota el cambio ENTERO —el estado incluido—. Es el
+ * bug del jet ski que «volvía a borrador» sin decir nada.
+ */
+export async function editarTour(_previo: Guardado, datos: FormData): Promise<Guardado> {
   const { db, destino } = await contextoPanel('tours');
   const id = texto(datos, 'id');
-  if (!esUuid(id)) return;
+  if (!esUuid(id)) return { errores: ['No vino el tour.'] };
   const { data: antes } = await db.from('dst_tour').select('estado, publicado_en').eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!antes) return;
+  if (!antes) return { errores: ['Ese tour no es de este destino.'] };
   const estado = texto(datos, 'estado');
+
+  /* Todos los errores juntos: arreglar uno, guardar, y descubrir el siguiente
+     es la forma más lenta de cargar un tarifario. */
+  const errores: string[] = [];
+
+  const rack = numero(datos, 'precio_adulto_usd') ?? 0;
+  const neto = numero(datos, 'precio_neto_usd');
+  const comision = numero(datos, 'comision_pct');
+  const dificultad = texto(datos, 'dificultad') || null;
+  const descripcion = texto(datos, 'descripcion') || null;
+
+  if (!Number.isFinite(rack) || rack < 0) {
+    errores.push(`El precio de adulto no sirve: «${texto(datos, 'precio_adulto_usd')}».`);
+  }
+  /* `ck_dst_tour_neto`. Es el que más muerde: se baja el precio rack, se
+     olvida el neto, y el tour «no guarda» sin decir por qué. */
+  if (neto !== null && Number.isFinite(rack) && neto > rack) {
+    errores.push(`La tarifa neta ($${neto}) no puede ser mayor que la rack ($${rack}). Bajá la neta o subí la rack.`);
+  }
+  if (comision !== null && (!Number.isFinite(comision) || comision < 0 || comision > 100)) {
+    errores.push(`La comisión «${texto(datos, 'comision_pct')}» no sirve: va entre 0 y 100.`);
+  }
+  if (dificultad && !['facil', 'moderada', 'exigente'].includes(dificultad)) {
+    errores.push(`La dificultad «${dificultad}» no existe: fácil, moderada o exigente.`);
+  }
+  /* `ck_dst_tour_publicado`: sin descripción no se publica, y acá no hay
+     excepción de operador como en los negocios. */
+  if (estado === 'publicado' && !descripcion) {
+    errores.push('Para publicar hace falta la descripción. Escribila, o dejá el tour en borrador por ahora.');
+  }
+
+  if (errores.length) return { errores };
+
   const { error } = await db.from('dst_tour').update({
     nombre: texto(datos, 'nombre') || undefined,
     negocio_id: esUuid(texto(datos, 'negocio_id')) ? texto(datos, 'negocio_id') : null,
@@ -50,21 +115,21 @@ export async function editarTour(datos: FormData) {
       ? (esUuid(texto(datos, 'contrato_id')) ? texto(datos, 'contrato_id') : null)
       : undefined,
     resumen: texto(datos, 'resumen') || null,
-    descripcion: texto(datos, 'descripcion') || null,
+    descripcion,
     incluye: texto(datos, 'incluye') || null,
     no_incluye: texto(datos, 'no_incluye') || null,
     que_llevar: texto(datos, 'que_llevar') || null,
     duracion_horas: numero(datos, 'duracion_horas'),
     hora_inicio: texto(datos, 'hora_inicio') || null,
-    dificultad: texto(datos, 'dificultad') || null,
+    dificultad,
     edad_minima: numero(datos, 'edad_minima'),
     cupo_maximo: numero(datos, 'cupo_maximo'),
     recoge_en_hotel: texto(datos, 'recoge_en_hotel') === '1',
     idiomas_guia: texto(datos, 'idiomas_guia').split(',').map((i) => i.trim().toLowerCase()).filter(Boolean),
-    precio_adulto_usd: numero(datos, 'precio_adulto_usd') ?? 0,
+    precio_adulto_usd: rack,
     precio_nino_usd: numero(datos, 'precio_nino_usd'),
-    precio_neto_usd: numero(datos, 'precio_neto_usd'),
-    comision_pct: numero(datos, 'comision_pct'),
+    precio_neto_usd: neto,
+    comision_pct: comision,
     cancelacion_libre_horas: numero(datos, 'cancelacion_libre_horas'),
     imagen_url: texto(datos, 'imagen_url') || null,
     precio_nota: texto(datos, 'precio_nota') || null,
@@ -79,36 +144,15 @@ export async function editarTour(datos: FormData) {
     publicado_en: estado === 'publicado' && !antes.publicado_en ? new Date().toISOString() : antes.publicado_en,
   }).eq('id', id);
 
-  /* ⚠️ UN FALLO ACÁ NO PUEDE QUEDAR EN LA CONSOLA.
-   *
-   * Así estaba y así falló. Tony, el 9 de noviembre de 2026: *«yo le daba
-   * publicar al jet ski y me vuelve a borrador la pantalla»*.
-   *
-   * Lo reproduje contra la base: este UPDATE manda TODOS los campos de un
-   * saque, así que si UNO rebota, rebota el cambio ENTERO —el estado
-   * incluido— y la pantalla se vuelve a pintar con el estado viejo. Dos
-   * caminos comprobados, los dos terminan en «borrador» sin decir nada:
-   *
-   *   - `ck_dst_tour_publicado` — publicar con la descripción vacía;
-   *   - `ck_dst_tour_neto` — una tarifa neta por encima de la rack, que es
-   *     justo lo que pasa al bajar el precio rack y olvidar el neto.
-   *
-   * Es EXACTAMENTE el bug que ya se había arreglado en `publicarNegocio`
-   * —ahí el motivo viaja en la dirección y la pantalla lo pinta— y que nadie
-   * trasladó a los tours. Pasarse quince minutos buscando si el problema es
-   * el botón, la sesión o la ficha es carísimo, y es culpa de esta línea. */
+  /* La red para lo que no vimos venir: una política de RLS, una columna nueva
+     con un check. Se devuelve igual — nada de navegar. */
   if (error) {
     console.error('editarTour:', error.message);
-    redirect(`/admin/tours/${id}?fallo=${encodeURIComponent(error.message.slice(0, 200))}`);
+    return { errores: [`La base lo rechazó así: ${error.message}`] };
   }
+
   revalidatePath(`/admin/tours/${id}`);
   revalidatePath('/admin/tours');
-  /* ⚠️ TAMBIÉN se redirige cuando SALE BIEN, y por el mismo motivo que en
-     `editarNegocio`: `revalidatePath` limpia el caché del servidor, pero el
-     navegador se queda con el árbol que ya tenía y los campos —no
-     controlados— conservan sus valores viejos. El formulario manda lo que
-     MUESTRA, así que un segundo «Guardar» sin tocar nada deshace el primero.
-     Probado en producción el 10 de noviembre de 2026. */
   redirect(`/admin/tours/${id}?guardado=1`);
 }
 

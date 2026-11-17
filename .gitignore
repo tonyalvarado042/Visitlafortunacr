@@ -21,3 +21,6 @@ fotos/
 /dist/
 .vinext/
 .cloudflare/
+
+# Credenciales de la sesion de prueba del panel (uso local, nunca produccion).
+.pruebas.local.json
