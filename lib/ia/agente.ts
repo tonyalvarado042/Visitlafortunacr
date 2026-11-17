@@ -7,6 +7,11 @@ import { agenteDe, ahoraEn, ejecutar, parametrosBase, textoDe, HERRAMIENTA_WEB, 
 import { buscarConocimiento, bloqueConocimiento, conocimientoBase } from './conocimiento';
 import { NOMBRE_IDIOMA } from './modelos';
 import { enviarEnConversacion } from './mensajeria';
+/* La forma de una direccion publica se decide en UN solo lugar. Antes estaba
+   copiada aqui dos veces —una para negocios y otra para tours— y una copia
+   se desincroniza sin avisar: el enlace sigue saliendo, solo que a un 404. */
+import { rutaDe } from '@/lib/directorio';
+import type { Idioma } from '@/lib/idiomas';
 
 /*
  * El concierge: el agente que conversa con el viajero por el chat web, por
@@ -112,15 +117,17 @@ function promptConcierge(
     'QUÉ HACÉS, EN ORDEN',
     '1. Respondés dudas con el conocimiento y el catálogo. Si no estás segura, buscá con las herramientas ANTES de responder; no adivines.',
     '2. Recomendás negocios y tours del catálogo (buscar_lugares, buscar_tours) y das el enlace cuando lo tengas. Máximo tres opciones por mensaje.',
+    '   Y cuando el viajero cuente QUÉ quiere hacer —el volcán, las termales, una catarata, aventura, ir con niños— buscá tours antes de contestar y ofrecé los que de verdad calcen, con su precio y su enlace. Los tours son lo reservable: una respuesta que explica bonito y no lleva a ninguno es una conversación que no sirvió de nada. No esperés a que te los pidan por nombre.',
     '   El enlace se escribe SIEMPRE como [Nombre del negocio](enlace que devolvió la herramienta), nunca pegando la dirección a la vista: el chat la convierte en un botón con el nombre y una dirección larga en medio de la frase se lee fatal. No te inventes enlaces ni les cambies la forma; usá el que te dio la herramienta, tal cual.',
     '3. Guardás lo que el viajero cuenta de su viaje apenas aparezca (guardar_datos_viajero): nombre, contacto, fechas, personas, con quién viaja, presupuesto, intereses.',
     '4. Cuando quiere reservar o que le armen algo, pedís lo que falta (fechas, personas, y un WhatsApp o correo si no lo tenemos) y creás la solicitud (crear_solicitud). Explicás que una persona del equipo confirma disponibilidad y precio, normalmente en menos de 24 horas.',
+    '   Y lo OFRECÉS vos, sin que lo pidan: en cuanto un tour concreto le interese, decile que se lo podés apartar ahí mismo y pedile fechas, cuántas personas y un correo o WhatsApp. Reservar desde el chat es lo que el chat viene a hacer; mandarlo a buscar un formulario es perderlo. Si te da el tour, pasá su tour_id en crear_solicitud, que es lo que le deja al equipo la ficha a mano para contestarle.',
     '5. Pasás la conversación a una persona (escalar_a_humano) ante quejas, temas de salud o seguridad, dinero o asuntos legales, si el viajero lo pide, o si no encontrás la respuesta.',
     '',
     'REGLAS QUE NO SE NEGOCIAN',
     '- SOLO nombrás negocios que te devolvió buscar_lugares o buscar_tours. Hoteles, restaurantes, termales, operadores de tour, parques y atracciones con entrada: si la herramienta no te lo devolvió, no existe para vos, aunque lo hayas leído en una ficha del conocimiento o en una página que abriste. No lo nombres ni de pasada, ni como "también está", ni para descartarlo. Si el viajero lo nombra él, no lo desmentís: le decís que de ese no tenemos ficha y le ofrecés lo que sí hay.',
     '   Esto vale para NEGOCIOS, no para geografía: el pueblo, el volcán, el lago, los ríos, Monteverde, Río Celeste o San José son lugares y se nombran con toda libertad. Lo que no se nombra es el negocio concreto al que le cobrarían la entrada.',
-    '- Cada negocio del catálogo que nombres va con su enlace, la primera vez que aparece en el mensaje, escrito [Nombre](enlace que devolvió la herramienta). Sin excepción: el enlace a nuestra ficha es lo que el chat viene a hacer. Un negocio nombrado sin enlace es un viajero que se va a buscarlo a otro lado.',
+    '- Cada negocio Y CADA TOUR del catálogo que nombres va con su enlace, la primera vez que aparece en el mensaje, escrito [Nombre](enlace que devolvió la herramienta). Sin excepción: el enlace a nuestra ficha es lo que el chat viene a hacer. Un tour nombrado sin enlace es un viajero que se va a buscarlo a otro lado.',
     '- No inventes precios, horarios ni disponibilidad. Si no está en el conocimiento ni en el catálogo, decí que el equipo lo confirma.',
     '- Las fichas del conocimiento traen "Fuente:" con la página de donde salió el dato. Podés citarla ("según el sitio oficial de la catarata") y pasarle el enlace al viajero que quiera comprobarlo.',
     '- El conocimiento sirve para datos —precios, horarios, cómo llegar, qué esperar—, NO como lista de negocios que recomendar. Si una ficha menciona un negocio, buscalo con buscar_lugares antes de nombrarlo: si no aparece ahí, el dato lo podés usar pero el nombre no se dice.',
@@ -381,19 +388,19 @@ export async function responderConversacion(
                pelada: así copiarlo tal cual es lo más fácil que puede hacer, y
                lo más fácil es lo que el modelo hace. Con "→ https://..." salían
                las direcciones a la vista en medio de la frase. */
-            `ficha=[${n.nombre}](https://${destino.dominio}/${estado.idioma}/${c.babosa}/${n.babosa})`,
+            `ficha=[${n.nombre}](https://${destino.dominio}${rutaDe({ tipo: 'negocio', babosa: n.babosa, categoria_babosa: c.babosa } as unknown as Parameters<typeof rutaDe>[0], estado.idioma as Idioma)})`,
           ].filter(Boolean).join(' ');
         }).join('\n');
       },
     }),
     betaZodTool({
       name: 'buscar_tours',
-      description: 'Buscá los tours reservables del destino con precio, duración, dificultad y operador.',
+      description: 'Buscá los tours RESERVABLES y publicados del destino: precio, duración, dificultad, operador y el enlace a su ficha. Es la herramienta que lleva a reservar: cada tour que nombres va con el enlace que devuelve, y si el viajero se decide, creá la solicitud con crear_solicitud y ese tour_id.',
       inputSchema: z.object({ texto: z.string().nullable().describe('Palabra a buscar en el nombre; null para listar todos') }),
       run: async ({ texto }) => {
         let consulta = db
           .from('dst_tour')
-          .select('id, nombre, resumen, duracion_horas, hora_inicio, dificultad, edad_minima, precio_adulto_usd, precio_nino_usd, recoge_en_hotel, idiomas_guia, operador:dst_negocio(nombre)')
+          .select('id, nombre, babosa, resumen, duracion_horas, hora_inicio, dificultad, edad_minima, precio_adulto_usd, precio_nino_usd, recoge_en_hotel, idiomas_guia, operador:dst_negocio(nombre)')
           .eq('destino_id', conv.destino_id)
           .eq('estado', 'publicado')
           .order('es_destacado', { ascending: false })
@@ -416,6 +423,19 @@ export async function responderConversacion(
             t.edad_minima != null ? `edad mínima ${t.edad_minima}` : null,
             t.recoge_en_hotel ? 'recoge en hotel' : null,
             t.resumen ? `· ${t.resumen}` : null,
+            /* ⚠️ EL ENLACE DEL TOUR. No estaba, y el prompt de arriba le exige
+               al modelo poner enlace en todo lo que nombre del catalogo:
+               `buscar_lugares` se lo daba y `buscar_tours` no. O sea que con
+               los tours el modelo tenia dos salidas, las dos malas — nombrarlo
+               pelado (contra su propia regla) o inventarse una direccion. Y el
+               tour es justo lo que se reserva.
+               Se entrega YA ESCRITO en markdown, igual que en `buscar_lugares`:
+               copiarlo tal cual es lo mas facil que puede hacer el modelo, y lo
+               mas facil es lo que hace.
+               La forma la decide `rutaDe` (lib/directorio.ts), la misma que
+               usa el sitio para pintar sus propios enlaces: asi no hay dos
+               reglas de como se arma una direccion. */
+            t.babosa ? `ficha=[${t.nombre}](https://${destino.dominio}${rutaDe({ tipo: 'tour', babosa: t.babosa as string, categoria_babosa: null } as unknown as Parameters<typeof rutaDe>[0], estado.idioma as Idioma)})` : null,
           ].filter(Boolean).join(' ');
         }).join('\n');
       },
