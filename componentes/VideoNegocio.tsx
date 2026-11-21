@@ -81,13 +81,28 @@ export function VideoNegocio({
   );
 }
 
-/** El botón de arriba, para el que entró a ver el video. */
+/**
+ * El botón de arriba, para el que entró a ver el video.
+ *
+ * ⚠️ EL TRIÁNGULO VA ADENTRO DE UN CÍRCULO, y eso es lo que lo hace legible.
+ * Tony, 21 de noviembre de 2026: *«no se ve como botón de video»*. Tenía
+ * razón: un triangulito suelto al lado de un texto es un adorno; el
+ * triángulo dentro de un disco es el símbolo de reproducir que todo el mundo
+ * ya conoce de YouTube para abajo. No hace falta explicarlo.
+ *
+ * Y el disco es lo ÚNICO naranja. Antes el botón entero era naranja sólido,
+ * igual que «Armar mi viaje» y «Ver los datos de contacto» — las dos
+ * acciones que dan plata. Tres botones del mismo color es ninguno
+ * destacado: el video es un extra, no la acción principal de la ficha.
+ */
 export function BotonVerVideo({ idioma }: { idioma: Idioma }) {
   return (
     <a href="#video" className="boton-ver-video">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M8 5.5v13l11-6.5z" />
-      </svg>
+      <span className="bvv-play" aria-hidden="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5.5v13l11-6.5z" />
+        </svg>
+      </span>
       {t('ver_video', idioma)}
     </a>
   );

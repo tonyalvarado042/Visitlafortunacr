@@ -2672,13 +2672,51 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 }
 .video-marco iframe, .video-marco video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 
+/* El boton que baja al video.
+
+   ⚠️ `justify-self: start` NO es decorativo: SIN ESO MIDE 541px.
+   El dia que `.ficha-hero-texto` paso a ser `grid` —para que el titulo
+   terminara donde empieza la tarjeta del precio— este boton paso a ser un
+   ITEM de esa retícula. Y un item se estira a su columna: el `inline-flex`
+   ni siquiera sobrevive, la retícula lo convierte en `flex` (medido:
+   `getComputedStyle().display` devolvia `flex`). Quedo una pastilla naranja
+   de 541px para dos palabras. Lo vio Tony el 21 de noviembre de 2026.
+   `width: fit-content` es el cinturon: si alguien cambia el contenedor a
+   flex o a bloque, tampoco se estira.
+
+   Los colores NO salen de los tokens del tema a proposito. Este boton vive
+   sobre una FOTO cuando el negocio es destacado, y sobre el fondo de la
+   pagina cuando no — y ese fondo es claro u oscuro segun el tema. Una
+   pastilla oscura con texto blanco es lo unico que se lee en los tres casos
+   sin escribir tres variantes que alguien va a olvidar actualizar. */
 .boton-ver-video {
-  display: inline-flex; align-items: center; gap: 9px; margin-top: 20px;
-  background: var(--naranja); color: var(--sobre-naranja);
-  font-size: 13.5px; font-weight: 800; padding: 11px 20px; border-radius: 100px;
-  transition: transform .14s, box-shadow .18s;
+  display: inline-flex; align-items: center; gap: 10px;
+  justify-self: start; width: fit-content; margin-top: 20px;
+  padding: 7px 18px 7px 7px; border-radius: 100px;
+  /* .72 y no .42: medido. Sobre la cabecera da igual —ahi el velo ya pone
+     un 80% de negro encima de la foto y el contraste del texto blanco sale
+     16:1 con cualquier foto—. Pero cuando el negocio NO es destacado no hay
+     foto ni velo, y la pastilla cae sobre el fondo de la pagina, que en tema
+     claro es casi blanco: con .42 el blanco quedaba en 3.0:1, por debajo del
+     4.5 que hace falta. Con .72 son 9.3:1 en ese peor caso. */
+  background: rgba(0, 0, 0, .72);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .22);
+  color: #fff; font-size: 13.5px; font-weight: 700; letter-spacing: -.01em;
+  transition: background .18s, border-color .18s, transform .14s;
 }
-.boton-ver-video:hover { transform: translateY(-1px); box-shadow: 0 7px 20px rgba(255,106,0,.34); }
+.boton-ver-video .bvv-play {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--naranja); color: var(--sobre-naranja);
+}
+/* Un triangulo centrado por caja se VE corrido a la izquierda: el vertice
+   pesa menos que la base. Un pixel a la derecha y queda centrado al ojo. */
+.boton-ver-video .bvv-play svg { margin-left: 1.5px; }
+.boton-ver-video:hover {
+  background: rgba(0, 0, 0, .84); border-color: rgba(255, 255, 255, .42);
+  transform: translateY(-1px);
+}
 
 /* ---- La oferta premium ---- */
 .premium {
