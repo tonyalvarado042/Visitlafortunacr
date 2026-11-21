@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { EditorRico } from '@/componentes/EditorRico';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { Aviso, Cabecera, Etiqueta, Vacio } from '@/componentes/admin/ui';
+import { porQueNoSeVende } from '@/lib/se-vende';
 import { BotonAccion } from '@/componentes/admin/BotonAccion';
 import { FormularioGuardar } from '@/componentes/admin/FormularioGuardar';
 import { ElegirFotos } from '@/componentes/admin/ElegirFotos';
@@ -98,15 +99,37 @@ export default async function PaginaTour({ params, searchParams }: {
      que rechaza un contrato de otro negocio, asi que ofrecer los demas seria
      ofrecer un error: la lista se arma con los que de verdad se pueden pegar. */
   const [{ data: operadores }, { data: categorias }, { data: salidas }, { data: contratos }] = await Promise.all([
-    db.from('dst_negocio').select('id, nombre').eq('destino_id', destino.id).neq('estado_publicacion', 'archivado').order('nombre'),
+    db.from('dst_negocio').select('id, nombre, estado_publicacion, esta_cerrado, vende_por_aqui').eq('destino_id', destino.id).neq('estado_publicacion', 'archivado').order('nombre'),
     db.from('dst_destino_categoria').select('orden, categoria:dst_categoria(id, nombre, seccion)').eq('destino_id', destino.id).order('orden'),
     db.from('dst_tour_salida').select('id, sale_el, hora, cupo_total, cupo_tomado, precio_usd, esta_abierta').eq('tour_id', id).gte('sale_el', new Date().toISOString().slice(0, 10)).order('sale_el').limit(30),
     t.negocio_id
-      ? db.from('dst_contrato').select('id, nombre, esta_activo, vigencia_hasta, comision_tipo, comision_valor')
+      ? db.from('dst_contrato').select('id, nombre, esta_activo, vigencia_desde, vigencia_hasta, comision_tipo, comision_valor')
           .eq('destino_id', destino.id).eq('negocio_id', t.negocio_id).order('creado_en', { ascending: false })
-      : Promise.resolve({ data: [] as { id: string; nombre: string; esta_activo: boolean; vigencia_hasta: string | null; comision_tipo: string; comision_valor: number | null }[] }),
+      : Promise.resolve({ data: [] as { id: string; nombre: string; esta_activo: boolean; vigencia_desde: string | null; vigencia_hasta: string | null; comision_tipo: string; comision_valor: number | null }[] }),
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
+  /* ⚠️ ¿ESTA TOUR SE PUEDE RESERVAR? Se dice ARRIBA DE TODO.
+     El 20 de noviembre de 2026 Tony abrió Hanging Bridges —publicada, con
+     foto y con precio— y no había botón de reservar. Faltaba amarrarle el
+     contrato, y para enterarse había que bajar hasta el desplegable. La
+     respuesta tiene que estar donde se entra, no donde se arregla.
+     Misma función que la lista: `lib/se-vende.ts`. Una sola regla. */
+  const elOperador = (operadores ?? []).find((o) => o.id === t.negocio_id) ?? null;
+  const elContrato = (contratos ?? []).find((c) => c.id === t.contrato_id) ?? null;
+  const veredicto = porQueNoSeVende({
+    reservas_activas: destino.reservas_activas,
+    estado: t.estado,
+    negocio_id: t.negocio_id ?? null,
+    negocio_estado: elOperador?.estado_publicacion ?? null,
+    negocio_cerrado: elOperador?.esta_cerrado ?? null,
+    vende_por_aqui: elOperador?.vende_por_aqui ?? null,
+    contrato_id: t.contrato_id ?? null,
+    contrato_activo: elContrato?.esta_activo ?? null,
+    vigencia_desde: elContrato?.vigencia_desde ?? null,
+    vigencia_hasta: elContrato?.vigencia_hasta ?? null,
+    precio_adulto_usd: t.precio_adulto_usd,
+  });
+
   const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
 
   return (
@@ -161,6 +184,24 @@ export default async function PaginaTour({ params, searchParams }: {
           </a>
         )}
       </Cabecera>
+      {/* Lo primero que se ve al abrir la tour. Si no se puede reservar, acá
+          dice por qué y qué hacer — en vez de dejar que se descubra mirando
+          la página pública, que es como se descubrió esta vez. */}
+      {veredicto.se_vende ? (
+        <Aviso tipo="ok">
+          <strong>Esta tour se puede reservar desde el sitio.</strong>
+        </Aviso>
+      ) : (
+        <Aviso tipo={t.estado === 'publicado' ? 'mal' : 'info'}>
+          <strong>
+            {t.estado === 'publicado'
+              ? 'Esta tour está PUBLICADA pero no se puede reservar'
+              : 'Esta tour todavía no se puede reservar'}
+            {': '}{veredicto.rotulo}.
+          </strong>{' '}
+          {veredicto.arreglo}
+        </Aviso>
+      )}
 
       {/* ⚠️ EL MOTIVO DEL REBOTE, A LA VISTA.
           Tony, 9 de noviembre de 2026: «yo le daba publicar al jet ski y me

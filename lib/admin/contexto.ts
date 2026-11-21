@@ -25,6 +25,10 @@ export type DestinoPanel = {
      dice al lado de la casilla de «el precio ya incluye el IVA», para que
      quien la marca sepa de que porcentaje esta hablando. */
   iva_pct: number;
+  /* El interruptor general del modulo de reservas. Lo necesita `se-vende.ts`
+     para poder decir «no se puede reservar porque el modulo esta apagado» en
+     vez de mandar a Tony a buscar un contrato que no es el problema. */
+  reservas_activas: boolean;
 };
 
 export const COOKIE_DESTINO = 'vlf_admin_destino';
@@ -43,7 +47,7 @@ export async function contextoPanel(seccion?: Seccion) {
   const db = await sesion();
   const { data } = await db
     .from('dst_destino')
-    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, marca_sigla, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo, iva_pct')
+    .select('id, nombre, babosa, dominio, zona_horaria, marca_nombre, marca_sigla, idioma_principal, idiomas, whatsapp, email_contacto, esta_activo, moneda_iso, comision_por_defecto, lateral_titulo, iva_pct, reservas_activas')
     .order('nombre');
 
   let destinos = (data ?? []) as DestinoPanel[];

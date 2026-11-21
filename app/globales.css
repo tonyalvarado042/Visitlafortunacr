@@ -1210,7 +1210,15 @@ section { padding: 84px 0; }
 /* ---- Ficha ---- */
 /* El aside nunca pasa de 372px, pero puede ceder hasta 300 antes de que el
    texto quede estrangulado en un escritorio angosto. */
-.ficha-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 372px); gap: 40px; align-items: start; padding-bottom: 84px; }
+/* ⚠️ LA COLUMNA DERECHA SE DEFINE UNA SOLA VEZ, ACA.
+   La cabecera a sangre (`.ficha-hero-texto`) usa EXACTAMENTE estas mismas
+   medidas mas abajo, para que el titulo termine donde empieza la tarjeta del
+   precio y no por debajo de ella. Si alguna vez se cambia el ancho de la
+   columna, se cambia aqui y las dos se mueven juntas: con el numero escrito
+   dos veces, una se queda vieja y el titulo vuelve a quedar tapado sin que
+   nadie lo note. */
+:root { --lado-min: 300px; --lado-max: 372px; --ficha-gap: 40px; }
+.ficha-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(var(--lado-min), var(--lado-max)); gap: var(--ficha-gap); align-items: start; padding-bottom: 84px; }
 /* Reservar baja con la página. Sin esto desaparece en cuanto empezás a leer
    las reseñas — y reservar es la razón por la que esta ficha existe.
 
@@ -1305,6 +1313,28 @@ section { padding: 84px 0; }
      z-index. */
   .ficha-con-hero .ficha-lado { margin-top: -132px; position: relative; z-index: 5; }
   .ficha-con-hero .ficha-principal { position: relative; z-index: 1; }
+
+  /* ⚠️ EL TITULO NO PUEDE CORRER POR DEBAJO DE LA TARJETA DEL PRECIO.
+     Lo encontro Tony el 20 de noviembre de 2026 en la ficha de Hanging
+     Bridges Mistico Park: el nombre es largo y la caja del precio —que sube
+     -132px sobre la foto -- le quedaba encima. Medido en vivo a 1512px: el
+     h1 llegaba a x=1329 y la tarjeta empezaba en x=957.
+
+     No se arregla con un `padding-right` a ojo: la cabecera YA es un `.caja`,
+     o sea que tiene exactamente el mismo ancho y el mismo padding que el
+     cuerpo en todos los tamanos. Lo unico que le faltaba era la rejilla. Se
+     le pone LA MISMA —de las variables de arriba— y los hijos van todos a la
+     primera columna: asi el titulo termina donde empieza la tarjeta, por
+     construccion y no por un numero adivinado.
+
+     Va dentro de este @media a proposito: debajo de 1001px la columna derecha
+     cae al final de la pagina y no hay nada que esquivar. */
+  .ficha-hero-texto {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(var(--lado-min), var(--lado-max));
+    gap: var(--ficha-gap);
+  }
+  .ficha-hero-texto > * { grid-column: 1; }
 }
 .bloque { background: var(--carbon); border: 1px solid var(--borde); border-radius: 5px; padding: 24px; }
 .bloque + .bloque { margin-top: 16px; }
@@ -1484,7 +1514,9 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .caja { padding: 0 32px; }
   .barra { padding: 9px 32px; gap: 18px; }
   .menu { gap: 18px; font-size: 12px; }
-  .ficha-cuerpo { gap: 32px; }
+  /* Se cambia la VARIABLE, no la regla: asi la cabecera a sangre se entera
+     del gap nuevo igual que el cuerpo. */
+  :root { --ficha-gap: 32px; }
 }
 
 /* Tablet vertical. */
