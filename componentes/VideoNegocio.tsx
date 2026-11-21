@@ -82,28 +82,65 @@ export function VideoNegocio({
 }
 
 /**
- * El botón de arriba, para el que entró a ver el video.
+ * La MINIATURA del video, en la columna de la derecha y arriba del contacto.
  *
- * ⚠️ EL TRIÁNGULO VA ADENTRO DE UN CÍRCULO, y eso es lo que lo hace legible.
- * Tony, 21 de noviembre de 2026: *«no se ve como botón de video»*. Tenía
- * razón: un triangulito suelto al lado de un texto es un adorno; el
- * triángulo dentro de un disco es el símbolo de reproducir que todo el mundo
- * ya conoce de YouTube para abajo. No hace falta explicarlo.
+ * Antes era un botón de texto en la cabecera. Tony, 21 de noviembre de 2026:
+ * *«quitá el botón, no me gusta la forma; agregá un thumbnail con play
+ * arriba de datos de contacto y que al tocar lleve al video»*. Tiene razón y
+ * la razón es vieja: **un botón promete, una miniatura muestra.** El que ve
+ * un fotograma del lugar ya sabe qué le van a enseñar; el que lee «Ver el
+ * video» tiene que decidir a ciegas.
  *
- * Y el disco es lo ÚNICO naranja. Antes el botón entero era naranja sólido,
- * igual que «Armar mi viaje» y «Ver los datos de contacto» — las dos
- * acciones que dan plata. Tres botones del mismo color es ninguno
- * destacado: el video es un extra, no la acción principal de la ficha.
+ * ⚠️ DE DÓNDE SALE LA IMAGEN, en este orden y sin inventar ninguna:
+ *   1. `video_portada_url`, si el negocio subió una.
+ *   2. El fotograma de YouTube (`i.ytimg.com`), que es EL video, no una foto
+ *      parecida. Es el caso real de hoy: Jalapas tiene YouTube y no tiene
+ *      portada propia.
+ *   3. La foto de portada del negocio. Ya no es el video, pero es el lugar.
+ *   4. Nada: queda el disco sobre fondo oscuro. Antes de poner una foto de
+ *      otra cosa, mejor ninguna.
+ *
+ * Vimeo cae en 3 a propósito: su miniatura pide una llamada a su API y no
+ * vale una petición por ficha para una portada.
  */
-export function BotonVerVideo({ idioma }: { idioma: Idioma }) {
+export function MiniaturaVideo({
+  url, portada, respaldo, idioma,
+}: {
+  url: string;
+  /** La portada que subió el negocio, si hay. */
+  portada: string | null;
+  /** La foto de portada del negocio, de último recurso. */
+  respaldo: string | null;
+  idioma: Idioma;
+}) {
+  const limpia = url.trim();
+  /* Solo http y https, igual que el reproductor: si la dirección no sirve
+     para el video, tampoco se pinta una miniatura que lleva a un hueco. */
+  if (!/^https?:\/\//i.test(limpia)) return null;
+
+  const yt = deYoutube(limpia);
+  /* `hqdefault` y no `maxresdefault`: maxres NO existe para todos los videos
+     —YouTube solo la genera si la fuente era bastante grande— y cuando no
+     existe devuelve una imagen gris de 120x90. Una miniatura rota en la
+     ficha de alguien que pagó el plan premium. hqdefault existe siempre.
+     Viene en 4:3 con franjas negras; el recorte a 16:9 del CSS se las come. */
+  const imagen = portada ?? (yt ? `https://i.ytimg.com/vi/${yt}/hqdefault.jpg` : null) ?? respaldo;
+
   return (
-    <a href="#video" className="boton-ver-video">
-      <span className="bvv-play" aria-hidden="true">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+    <a href="#video" className="mini-video">
+      {imagen
+        /* eslint-disable-next-line @next/next/no-img-element */
+        ? <img src={imagen} alt="" loading="lazy" />
+        : <span className="mini-video-sinfoto" aria-hidden="true" />}
+      <span className="mini-video-play" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5.5v13l11-6.5z" />
         </svg>
       </span>
-      {t('ver_video', idioma)}
+      {/* El texto es lo que le da nombre al enlace. La foto va con alt vacío
+          porque es decoración: quien no la ve necesita saber que esto lleva
+          al video, no cómo se ve el comedor. */}
+      <span className="mini-video-pie">{t('ver_video', idioma)}</span>
     </a>
   );
 }

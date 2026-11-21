@@ -16,7 +16,7 @@ import { CuponAlSalir } from '@/componentes/CuponAlSalir';
 import { FotosArriba, GaleriaAbajo, VisoresFotos } from '@/componentes/GaleriaNegocio';
 import { TiraAtributos } from '@/componentes/TiraAtributos';
 import { PruebaSocial } from '@/componentes/PruebaSocial';
-import { VideoNegocio, BotonVerVideo } from '@/componentes/VideoNegocio';
+import { VideoNegocio, MiniaturaVideo } from '@/componentes/VideoNegocio';
 import { ContactoTapado } from './ContactoTapado';
 import { taparContacto } from '@/lib/contacto-tapado';
 import { alternativas, rutasDeNegocio } from '@/lib/seo';
@@ -199,9 +199,6 @@ export default async function Ficha({ params }: { params: Parametros }) {
           {negocio.direccion && (
             <p style={{ color: 'var(--humo)', marginTop: 14 }}>{negocio.direccion}</p>
           )}
-          {/* Arriba del todo para el que entro justamente a ver el video; el
-              video en si vive mas abajo, despues de las fotos. */}
-          {negocio.video_url && <BotonVerVideo idioma={idioma} />}
         </div>
       </section>
 
@@ -235,8 +232,9 @@ export default async function Ficha({ params }: { params: Parametros }) {
                 lugar quedaba debajo del pliegue. Primero se lee de que se
                 trata, despues se mira.
 
-                Al que entro justamente a ver el video no se le pierde: arriba
-                sigue el boton `BotonVerVideo`, que baja hasta aca. */}
+                Al que entro justamente a ver el video no se le pierde: en la
+                columna de la derecha esta `MiniaturaVideo`, un fotograma con
+                el play que baja hasta aca. */}
             {negocio.video_url && (
               <VideoNegocio
                 url={negocio.video_url}
@@ -475,6 +473,31 @@ export default async function Ficha({ params }: { params: Parametros }) {
                                   descuentoHasta={destino.descuento_lanzamiento_hasta}
                                   leyenda={destino.leyenda_precio} idioma={idioma} />
               </div>
+            )}
+
+            {/* La miniatura del video, ARRIBA DEL CONTACTO. Lo pidió Tony el
+                21 de noviembre de 2026, y de paso se fue el botón que estaba
+                en la cabecera: *«no me gusta la forma»*.
+
+                Acá gana por dos razones. Una, se ve: en escritorio la
+                columna arranca a la altura del título, así que el fotograma
+                queda sobre el pliegue sin competirle al h1. Dos, cae justo
+                donde la persona está decidiendo si llamar — y el video es lo
+                que termina de convencer, que es para lo que el negocio lo
+                pagó.
+
+                ⚠️ VIAJA CON EL CONTACTO. Donde nosotros vendemos,
+                `.ficha-vende` manda el contacto debajo del horario con
+                `order: 2`; la miniatura lleva el mismo `order` para no
+                quedarse sola arriba. «Arriba del contacto» tiene que seguir
+                siendo cierto en los dos casos, no solo en uno. */}
+            {negocio.video_url && (
+              <MiniaturaVideo
+                url={negocio.video_url}
+                portada={negocio.video_portada_url}
+                respaldo={fotoHero}
+                idioma={idioma}
+              />
             )}
 
             <div className="bloque bloque-contacto">

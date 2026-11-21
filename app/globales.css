@@ -2672,50 +2672,91 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
 }
 .video-marco iframe, .video-marco video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 
-/* El boton que baja al video.
+/* La miniatura del video, en la columna de la derecha y arriba del contacto.
 
-   ⚠️ `justify-self: start` NO es decorativo: SIN ESO MIDE 541px.
-   El dia que `.ficha-hero-texto` paso a ser `grid` —para que el titulo
-   terminara donde empieza la tarjeta del precio— este boton paso a ser un
-   ITEM de esa retícula. Y un item se estira a su columna: el `inline-flex`
-   ni siquiera sobrevive, la retícula lo convierte en `flex` (medido:
-   `getComputedStyle().display` devolvia `flex`). Quedo una pastilla naranja
-   de 541px para dos palabras. Lo vio Tony el 21 de noviembre de 2026.
-   `width: fit-content` es el cinturon: si alguien cambia el contenedor a
-   flex o a bloque, tampoco se estira.
+   Reemplaza al botón de texto que estaba en la cabecera. Tony, 21 nov 2026:
+   «no me gusta la forma; un thumbnail con play». Y de paso se va el bug que
+   tenía ese botón: como item de la retícula `.ficha-hero-texto` se estiraba
+   a 541px, porque una retícula convierte `inline-flex` en `flex`. Acá no
+   puede pasar: la miniatura OCUPA la columna a propósito, y el 16/9 lo fija
+   `aspect-ratio`, no el contenido.
 
-   Los colores NO salen de los tokens del tema a proposito. Este boton vive
-   sobre una FOTO cuando el negocio es destacado, y sobre el fondo de la
-   pagina cuando no — y ese fondo es claro u oscuro segun el tema. Una
-   pastilla oscura con texto blanco es lo unico que se lee en los tres casos
-   sin escribir tres variantes que alguien va a olvidar actualizar. */
-.boton-ver-video {
-  display: inline-flex; align-items: center; gap: 10px;
-  justify-self: start; width: fit-content; margin-top: 20px;
-  padding: 7px 18px 7px 7px; border-radius: 100px;
-  /* .72 y no .42: medido. Sobre la cabecera da igual —ahi el velo ya pone
-     un 80% de negro encima de la foto y el contraste del texto blanco sale
-     16:1 con cualquier foto—. Pero cuando el negocio NO es destacado no hay
-     foto ni velo, y la pastilla cae sobre el fondo de la pagina, que en tema
-     claro es casi blanco: con .42 el blanco quedaba en 3.0:1, por debajo del
-     4.5 que hace falta. Con .72 son 9.3:1 en ese peor caso. */
-  background: rgba(0, 0, 0, .72);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, .22);
-  color: #fff; font-size: 13.5px; font-weight: 700; letter-spacing: -.01em;
-  transition: background .18s, border-color .18s, transform .14s;
+   Los colores no salen de los tokens del tema: el disco y el pie viven
+   siempre sobre una foto, que puede ser clara u oscura. Negro translúcido y
+   blanco es lo único que se lee sobre las dos. */
+.mini-video {
+  position: relative; display: block; overflow: hidden;
+  aspect-ratio: 16 / 9; border-radius: 10px;
+  background: var(--sup-0); border: 1px solid var(--borde);
+  transition: border-color .18s, transform .14s, box-shadow .18s;
 }
-.boton-ver-video .bvv-play {
-  display: grid; place-items: center; flex-shrink: 0;
-  width: 26px; height: 26px; border-radius: 50%;
+/* `cover` y no `contain`: la miniatura de YouTube (`hqdefault`) viene en 4:3
+   con franjas negras arriba y abajo. Recortarla a 16/9 se las come exacto y
+   deja el fotograma limpio. Con `contain` saldrían las franjas. */
+.mini-video img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.mini-video-sinfoto {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--sup-1), var(--sup-0));
+}
+/* El disco: centrado, y es LO ÚNICO naranja de la tarjeta. El naranja de la
+   ficha es de «Armar mi viaje» y «Ver los datos de contacto», que son las
+   que dan plata; acá se usa en 54px de disco y en nada más. */
+.mini-video-play {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  display: grid; place-items: center;
+  width: 54px; height: 54px; border-radius: 50%;
   background: var(--naranja); color: var(--sobre-naranja);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
+  transition: transform .16s, box-shadow .16s;
 }
-/* Un triangulo centrado por caja se VE corrido a la izquierda: el vertice
-   pesa menos que la base. Un pixel a la derecha y queda centrado al ojo. */
-.boton-ver-video .bvv-play svg { margin-left: 1.5px; }
-.boton-ver-video:hover {
-  background: rgba(0, 0, 0, .84); border-color: rgba(255, 255, 255, .42);
-  transform: translateY(-1px);
+/* Un triángulo centrado por caja se VE corrido a la izquierda: el vértice
+   pesa menos que la base. Dos píxeles a la derecha y queda centrado al ojo. */
+.mini-video-play svg { margin-left: 2px; }
+/* El velo del pie es parte del CONTRASTE, no decoración.
+
+   ⚠️ TRES PARADAS Y NO DOS, y eso es lo que lo hace legible. Con un degradado
+   liso de .82 a 0, donde cae el texto —a un tercio de la altura del velo— la
+   opacidad real es .82 x 0.36 = **0.29**. Blanco sobre un fotograma claro con
+   29% de negro encima da **2,1:1**: ilegible, y el mismo error que ya cometí
+   con la pastilla naranja que este bloque reemplaza. Con la parada del 45% el
+   texto cae sobre ~.81 y sube a **13:1**. Medido en el navegador, no a ojo.
+
+   La sombra del texto es el cinturón: cubre el fotograma blanco puro que
+   ninguna cuenta prevé. */
+.mini-video-pie {
+  position: absolute; inset: auto 0 0 0;
+  padding: 30px 14px 12px; display: block;
+  background: linear-gradient(to top,
+    rgba(0, 0, 0, .90) 0%, rgba(0, 0, 0, .78) 45%, rgba(0, 0, 0, 0) 100%);
+  color: #fff; font-size: 13px; font-weight: 700; letter-spacing: -.01em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, .8);
+}
+.mini-video:hover, .mini-video:focus-visible {
+  border-color: rgba(255, 106, 0, .55);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .35);
+}
+.mini-video:hover .mini-video-play { transform: translate(-50%, -50%) scale(1.08); }
+
+/* ⚠️ VIAJA CON EL CONTACTO. Donde vendemos nosotros, `.ficha-vende` manda el
+   contacto debajo del horario; sin esto la miniatura se quedaba arriba sola
+   y «arriba del contacto» dejaba de ser cierto justo en las fichas que más
+   importan. Mismo `order` que el contacto: entre iguales manda el orden del
+   HTML, y en el HTML la miniatura va primero. */
+.ficha-vende .mini-video { order: 2; }
+
+/* ⚠️ EN TELÉFONO NO VA, y no es por espacio: es porque apuntaría hacia atrás.
+   Medido en 375px: la columna de la derecha deja de ser columna y se apila
+   DESPUÉS del cuerpo, así que el video queda en y=2006 y la miniatura en
+   y=6671 — tocarla subiría **4.665px**, casi cinco pantallas hacia arriba.
+   Un enlace que devuelve al visitante a algo que ya pasó es peor que no
+   tenerlo. Y no se pierde nada: en teléfono el video cae en el hilo de
+   lectura, segunda pantalla, sin que haya que ir a buscarlo. */
+@media (max-width: 1000px) {
+  .mini-video { display: none; }
 }
 
 /* ---- La oferta premium ---- */
@@ -3055,7 +3096,8 @@ footer { border-top: 1px solid var(--borde); padding: 32px 40px 86px; margin-top
   .concierge-boton:hover,
   .exp-solapas button:hover,
   .boton-destapar:hover,
-  .boton-ver-video:hover,
+  .mini-video:hover,
+  .mini-video:hover .mini-video-play,
   .destacado:hover { transform: none; }
   /* Y el borde encendido, que es la otra mitad de "esta encima". */
   .destacado:hover { border-color: rgba(255,106,0,.35); }
