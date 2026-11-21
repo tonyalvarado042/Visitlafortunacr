@@ -152,9 +152,36 @@ export async function editarTour(_previo: Guardado, datos: FormData): Promise<Gu
     return { errores: [`La base lo rechazó así: ${error.message}`] };
   }
 
+  /* ⚠️ AL PUBLICAR SE LE AVISA AL OPERADOR. Tony lo pidió el 21 de noviembre
+     de 2026: antes, publicar no mandaba absolutamente nada —ni un disparador
+     en la base ni una línea acá— y el operador se enteraba de que su tour
+     estaba a la venta cuando le caía la primera reserva, con un precio que
+     nunca vio. Es el peor momento para descubrir que una cifra está mal.
+
+     Tres cosas que NO se hacen acá, y cada una tiene su razón:
+
+     - **Solo en la TRANSICIÓN.** `antes.estado !== 'publicado'` y ahora sí.
+       Sin esto, cada «Guardar todo» de una tour ya publicada le manda otro
+       correo, y al tercero el operador deja de abrirlos.
+     - **No bloquea la publicación.** El tour queda publicado aunque el correo
+       rebote. Publicar es lo que se pidió; avisar es la consecuencia.
+     - **Pero no se calla.** Si no sale, se dice en la misma pantalla y con el
+       motivo —sin correo del operador, cifras que no cuadran, lo que sea—.
+       Un aviso que se pierde en silencio es peor que no tenerlo, porque deja
+       creyendo que el operador ya vio el precio. */
+  let avisoFallido: string | null = null;
+  if (antes.estado !== 'publicado' && estado === 'publicado') {
+    const r = await mandarRevisionDeTour(db, destino, id);
+    if (!r.ok) avisoFallido = r.motivo ?? 'no se pudo mandar';
+  }
+
   revalidatePath(`/admin/tours/${id}`);
   revalidatePath('/admin/tours');
-  redirect(`/admin/tours/${id}?guardado=1`);
+  redirect(avisoFallido
+    ? `/admin/tours/${id}?guardado=1&fallo=${encodeURIComponent(
+        `El tour quedó publicado, pero NO se le pudo avisar al operador: ${avisoFallido}. ` +
+        'Arreglalo y usá el botón «Pedirle que revise info y tarifas».')}`
+    : `/admin/tours/${id}?guardado=1`);
 }
 
 /* ---- Las OPCIONES de precio ------------------------------------------------
@@ -611,19 +638,34 @@ export async function pedirCompletarTour(datos: FormData) {
  * ⚠️ NO MANDA NADA SOLO. Lo dispara alguien del equipo desde la pantalla del
  * tour.
  */
-export async function pedirRevisionDeTour(datos: FormData) {
-  const { db, destino } = await contextoPanel('tours');
-  const id = texto(datos, 'id');
-  if (!esUuid(id)) return;
+/**
+ * Le manda al operador el correo de «revisá info y tarifas» y anota la fecha.
+ *
+ * ⚠️ UNA SOLA FUNCION PARA LOS DOS CAMINOS: el boton que lo pide a mano y el
+ * aviso automatico al publicar. Si fueran dos, el dia que se cambie una regla
+ * —las cifras que tienen que cuadrar, el destino que tiene que calzar— se
+ * cambiaria en una sola y el operador recibiria cosas distintas segun por
+ * donde salio el correo.
+ *
+ * NO lanza y NO redirige: devuelve que paso. Quien la llama decide. Eso
+ * importa sobre todo al publicar: que el correo no salga **no puede** impedir
+ * que el tour quede publicado.
+ */
+type ResultadoAviso = { ok: boolean; motivo?: string };
 
+async function mandarRevisionDeTour(
+  db: Awaited<ReturnType<typeof contextoPanel>>['db'],
+  destino: Awaited<ReturnType<typeof contextoPanel>>['destino'],
+  id: string,
+): Promise<ResultadoAviso> {
   const { data: t } = await db.from('dst_tour')
     .select('id, nombre, negocio_id, estado, duracion_horas, precio_adulto_usd, precio_neto_usd, comision_pct')
     .eq('id', id).eq('destino_id', destino.id).maybeSingle();
-  if (!t?.negocio_id) return;
+  if (!t?.negocio_id) return { ok: false, motivo: 'la tour no tiene operador' };
 
   const { data: n } = await db.from('dst_negocio')
     .select('id, email').eq('id', t.negocio_id).maybeSingle();
-  if (!n?.email) return;
+  if (!n?.email) return { ok: false, motivo: 'el operador no tiene correo cargado' };
 
   /* ⚠️ LAS TRES CIFRAS TIENEN QUE CUADRAR ANTES DE MANDARLAS.
      El correo le muestra rack, neto y comisión juntos. Si el neto no es el
@@ -641,11 +683,9 @@ export async function pedirRevisionDeTour(datos: FormData) {
   if (rack > 0 && neto != null && comision != null) {
     const implicita = ((rack - neto) / rack) * 100;
     if (Math.abs(implicita - comision) > 0.5) {
-      console.error(
-        `pedirRevisionDeTour: no se manda, las cifras de «${t.nombre}» no cuadran — ` +
-        `rack ${rack} menos neto ${neto} da ${implicita.toFixed(1)}% y el tour dice ${comision}%.`,
-      );
-      return;
+      return { ok: false, motivo:
+        `las cifras no cuadran: rack ${rack} menos neto ${neto} da ` +
+        `${implicita.toFixed(1)}% y el tour dice ${comision}%` };
     }
   }
 
@@ -656,8 +696,7 @@ export async function pedirRevisionDeTour(datos: FormData) {
   const { destinoActual } = await import('@/lib/destino');
   const completo = await destinoActual();
   if (completo.id !== destino.id) {
-    console.error('pedirRevisionDeTour: el destino del panel y el del dominio no calzan; no se manda.');
-    return;
+    return { ok: false, motivo: 'el destino del panel y el del dominio no calzan' };
   }
 
   const { correoRevisarTour } = await import('@/lib/correo/cartas');
@@ -680,12 +719,21 @@ export async function pedirRevisionDeTour(datos: FormData) {
   /* La fecha se anota SOLO si el correo salió: si se anotara igual, la
      pantalla diría «ya se le pidió» de algo que nunca llegó y nadie volvería
      a pedirlo. El error queda en la bitácora de `dst_correo`. */
-  if (envio.ok) {
-    await db.from('dst_tour')
-      .update({ revisar_pedido_en: new Date().toISOString() })
-      .eq('id', id).eq('destino_id', destino.id);
-  } else {
-    await anotarFallo('pedirRevisionDeTour', `el correo no salió: ${envio.error}`);
-  }
+  if (!envio.ok) return { ok: false, motivo: `el correo no salió: ${envio.error}` };
+
+  await db.from('dst_tour')
+    .update({ revisar_pedido_en: new Date().toISOString() })
+    .eq('id', id).eq('destino_id', destino.id);
+  return { ok: true };
+}
+
+/** El botón de la ficha. Pide el correo a mano. */
+export async function pedirRevisionDeTour(datos: FormData) {
+  const { db, destino } = await contextoPanel('tours');
+  const id = texto(datos, 'id');
+  if (!esUuid(id)) return;
+
+  const r = await mandarRevisionDeTour(db, destino, id);
+  if (!r.ok) await anotarFallo('pedirRevisionDeTour', r.motivo ?? 'no se pudo mandar');
   refrescarTour(id);
 }
