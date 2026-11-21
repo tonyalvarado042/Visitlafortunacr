@@ -291,6 +291,25 @@ export async function fotosDeMiTour(tourId: string): Promise<MiFotoDeTour[]> {
  */
 export const MINIMO_FOTOS_TOUR = 3;
 
+/**
+ * Las secciones del catálogo en las que tiene sentido listar una tour.
+ *
+ * ⚠️ UNA SOLA REGLA PARA LAS DOS PANTALLAS: la lista de tours y la ficha.
+ * Estaba escrita a mano en la lista y no estaba en la ficha, así que la ficha
+ * ofrecía las ~50 categorías del destino —«Hoteles · donde_dormir»,
+ * «Taxis · transporte»— para categorizar una tour.
+ *
+ * Y la categoría de una tour no es una etiqueta: `lib/directorio.ts` la usa
+ * para meterla en la retícula pública DE ESA CATEGORÍA. Poner «Hoteles»
+ * publicaba la tour entre los hoteles.
+ *
+ * `que_hacer` entra a propósito: ahí viven «Cataratas», «Canopy», «Rafting»,
+ * «Cabalgatas», «Café y chocolate» — categorías que describen una tour mejor
+ * que las genéricas de la sección `tours`. Las otras cuatro
+ * (donde_dormir, comer_beber, explorar, transporte) son de negocios.
+ */
+export const SECCIONES_DE_TOUR = ['tours', 'que_hacer'];
+
 /* ---- Traducciones de una tour ---- */
 
 /**

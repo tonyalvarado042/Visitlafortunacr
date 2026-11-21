@@ -1,3 +1,4 @@
+import { SECCIONES_DE_TOUR } from '@/lib/comercio';
 import Link from 'next/link';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { dinero } from '@/lib/admin/formato';
@@ -34,7 +35,7 @@ export default async function PaginaTours({
   ]);
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const elOperador = operador ? (operadores ?? []).find((o) => o.id === operador) ?? null : null;
-  const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c && (c.seccion === 'tours' || c.seccion === 'que_hacer'));
+  const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c && SECCIONES_DE_TOUR.includes(c.seccion));
 
   /* Las publicadas que no se venden, para el aviso de arriba. Se calcula con
      la misma función que la columna: una sola regla. */

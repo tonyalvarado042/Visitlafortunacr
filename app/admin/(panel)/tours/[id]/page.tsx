@@ -11,9 +11,13 @@ import { editarTour, subirFotoTour, moverFotoTour, marcarPortadaTour, borrarFoto
 import { CAMPOS_TRADUCIBLES_DESDE_EL_PANEL } from '@/lib/traducciones-de-tour';
 import { NOMBRE_PROPIO } from '@/lib/idiomas';
 import { relativo } from '@/lib/admin/formato';
-import { MINIMO_FOTOS_TOUR } from '@/lib/comercio';
+import { MINIMO_FOTOS_TOUR, SECCIONES_DE_TOUR } from '@/lib/comercio';
 
 export const dynamic = 'force-dynamic';
+
+/* El nombre de la sección como se lee, no como se guarda. El desplegable
+   decía «Naturaleza · que_hacer», con el guión bajo y todo. */
+const ROTULO_SECCION: Record<string, string> = { tours: 'tours', que_hacer: 'qué hacer' };
 
 export default async function PaginaTour({ params, searchParams }: {
   params: Promise<{ id: string }>;
@@ -130,7 +134,25 @@ export default async function PaginaTour({ params, searchParams }: {
     precio_adulto_usd: t.precio_adulto_usd,
   });
 
-  const cats = (categorias ?? []).map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null).filter((c): c is { id: string; nombre: string; seccion: string } => !!c);
+  /* ⚠️ SOLO LAS SECCIONES DONDE UNA TOUR PUEDE VIVIR DE VERDAD.
+     Antes se ofrecían las ~50 categorías del destino, las seis secciones
+     enteras: «Hoteles · donde_dormir», «Taxis · transporte», «Resorts».
+     Y la categoría NO es una etiqueta: decide en qué listado público sale la
+     tour (`lib/directorio.ts` la mete en la retícula de esa categoría).
+     Elegir «Hoteles» publicaba la tour entre los hoteles.
+     La LISTA de tours ya filtraba así desde antes; esta pantalla no. Misma
+     regla en las dos, en un solo lugar: `SECCIONES_DE_TOUR`.
+
+     La que ya está elegida NO se saca aunque caiga fuera del filtro. Si
+     desapareciera, el desplegable mostraría «—» con la tour todavía
+     categorizada en la base, y el siguiente «Guardar todo» le borraría la
+     categoría sin que nadie lo pidiera: la tour se caería del directorio en
+     silencio. Hoy no pasa —las 8 están en la sección `tours`—, pero basta
+     con que alguien le mueva la sección a una categoría. */
+  const cats = (categorias ?? [])
+    .map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null)
+    .filter((c): c is { id: string; nombre: string; seccion: string } => !!c)
+    .filter((c) => SECCIONES_DE_TOUR.includes(c.seccion) || c.id === t.categoria_id);
 
   return (
     <>
@@ -255,7 +277,21 @@ export default async function PaginaTour({ params, searchParams }: {
               <div className="campos">
                 <div className="campo ancho"><label>Nombre</label><input name="nombre" defaultValue={t.nombre} required /></div>
                 <div className="campo"><label>Operador</label><select name="negocio_id" defaultValue={t.negocio_id ?? ''}><option value="">—</option>{operadores?.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}</select></div>
-                <div className="campo"><label>Categoría</label><select name="categoria_id" defaultValue={t.categoria_id ?? ''}><option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{c.nombre} · {c.seccion}</option>)}</select></div>
+                <div className="campo"><label>Categoría</label>
+                  <select name="categoria_id" defaultValue={t.categoria_id ?? ''}>
+                    <option value="">—</option>
+                    {cats.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nombre} · {ROTULO_SECCION[c.seccion] ?? c.seccion}
+                      </option>
+                    ))}
+                  </select>
+                  <small>
+                    Decide <strong>en qué listado del sitio sale</strong> esta tour, y es{' '}
+                    <strong>una sola</strong>. ¿No está la que necesitás?{' '}
+                    <Link href="/admin/categorias">Se crea en Categorías</Link>.
+                  </small>
+                </div>
                 <div className="campo ancho"><label>Resumen</label><input name="resumen" defaultValue={t.resumen ?? ''} maxLength={200} /></div>
                 <div className="campo ancho">
                   <EditorRico
