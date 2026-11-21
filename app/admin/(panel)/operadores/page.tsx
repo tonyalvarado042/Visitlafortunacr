@@ -9,6 +9,7 @@ import {
 import { DocumentoContrato } from './DocumentoContrato';
 import { TerminosIA, type Terminos } from './TerminosIA';
 import { NuevoContrato, NuevoProducto } from './Nuevos';
+import { porQueNoSeVende } from '@/lib/se-vende';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ type Contrato = {
 };
 type Negocio = {
   id: string; nombre: string; babosa: string; vende_por_aqui: boolean;
-  estado_publicacion: string; es_operador: boolean;
+  estado_publicacion: string; es_operador: boolean; esta_cerrado: boolean;
   categoria: { babosa: string } | { babosa: string }[] | null;
 };
 type Complemento = {
@@ -81,10 +82,10 @@ export default async function PaginaOperadores() {
   const [{ data: d }, { data: neg }, { data: tur }, { data: con }, { data: comp }] = await Promise.all([
     db.from('dst_destino').select('reservas_activas, pasarela_lista, email_contacto, email_avisos').eq('id', destino.id).single(),
     db.from('dst_negocio')
-      .select('id, nombre, babosa, vende_por_aqui, estado_publicacion, es_operador, categoria:dst_categoria(babosa)')
+      .select('id, nombre, babosa, vende_por_aqui, esta_cerrado, estado_publicacion, es_operador, categoria:dst_categoria(babosa)')
       .eq('destino_id', destino.id).eq('estado_publicacion', 'publicado')
       .order('nombre'),
-    db.from('dst_tour').select('id, negocio_id, estado').eq('destino_id', destino.id),
+    db.from('dst_tour').select('id, nombre, negocio_id, estado, contrato_id, precio_adulto_usd').eq('destino_id', destino.id),
     db.from('dst_contrato')
       .select('*, productos:dst_producto(*, tarifas:dst_tarifa(*))')
       .eq('destino_id', destino.id).order('creado_en'),
@@ -107,12 +108,45 @@ export default async function PaginaOperadores() {
   /* Las tours de cada operador, contadas una sola vez acá. Un operador con
      doce tours es lo normal; lo que importa de un vistazo es cuántas están
      PUBLICADAS, porque una en borrador no la ofrece nadie. */
-  const tours = (tur ?? []) as { id: string; negocio_id: string | null; estado: string }[];
+  const tours = (tur ?? []) as { id: string; nombre: string; negocio_id: string | null;
+    estado: string; contrato_id: string | null; precio_adulto_usd: number | null }[];
   const toursDe = (id: string) => {
     const suyas = tours.filter((t) => t.negocio_id === id);
     return { total: suyas.length, publicadas: suyas.filter((t) => t.estado === 'publicado').length };
   };
   const porNegocio = new Map(negocios.map((n) => [n.id, n]));
+  const contratoPorId = new Map(contratos.map((c) => [c.id, c]));
+  /* ⚠️ LAS TOURS PUBLICADAS QUE NO SE PUEDEN VENDER, POR OPERADOR.
+     Tony, 21 nov 2026: subio el contrato, le cambio el nombre, y seguia sin
+     poder reservarse. Tenia razon en no entender: la pantalla decia
+     «apagado» en gris —que se lee como un estado, no como un problema— y en
+     ningun lado decia que por eso sus tours publicadas no se venden.
+     Se usa la MISMA funcion que la lista de tours y que la ficha:
+     `lib/se-vende.ts`. Tres pantallas, una sola regla. */
+  const noSeVendenDe = (negocioId: string) => {
+    const n = porNegocio.get(negocioId);
+    return tours
+      .filter((t) => t.negocio_id === negocioId && t.estado === 'publicado')
+      .map((t) => {
+        const c = t.contrato_id ? contratoPorId.get(t.contrato_id) : null;
+        const v = porQueNoSeVende({
+          reservas_activas: modulo,
+          estado: t.estado,
+          negocio_id: t.negocio_id,
+          negocio_estado: n?.estado_publicacion ?? null,
+          negocio_cerrado: n?.esta_cerrado ?? null,
+          vende_por_aqui: n?.vende_por_aqui ?? null,
+          contrato_id: t.contrato_id ?? null,
+          contrato_activo: c?.esta_activo ?? null,
+          vigencia_desde: c?.vigencia_desde ?? null,
+          vigencia_hasta: c?.vigencia_hasta ?? null,
+          precio_adulto_usd: t.precio_adulto_usd,
+        });
+        return { id: t.id, nombre: t.nombre, rotulo: v.rotulo, arreglo: v.arreglo, se_vende: v.se_vende };
+      })
+      .filter((x) => !x.se_vende);
+  };
+  const atascadas = negocios.flatMap((n) => noSeVendenDe(n.id).map((t) => ({ ...t, operador: n.nombre })));
   const ajustes = d as { reservas_activas: boolean; email_contacto: string | null; email_avisos: string | null } | null;
   const modulo = ajustes?.reservas_activas ?? false;
   /* El mismo orden que usa el envio de verdad: primero el buzon interno, y si
@@ -127,6 +161,18 @@ export default async function PaginaOperadores() {
         titulo="Operadores"
         sub={`${negocios.filter((n) => n.vende_por_aqui).length} venden por aquí · ${contratos.filter((c) => c.esta_activo).length} contratos activos`}
       />
+      {atascadas.length > 0 && (
+        <Aviso tipo="mal">
+          <strong>{atascadas.length} {atascadas.length === 1 ? 'tour publicada no se puede reservar' : 'tours publicadas no se pueden reservar'}.</strong>{' '}
+          Están a la vista en el sitio y no tienen botón:{' '}
+          {atascadas.map((t, i) => (
+            <span key={t.id}>
+              {i > 0 && ' · '}
+              <Link href={`/admin/tours/${t.id}`}>{t.nombre}</Link> <span className="gris">({t.operador}: {t.rotulo})</span>
+            </span>
+          ))}
+        </Aviso>
+      )}
 
       {!esAdmin && <Aviso tipo="info">Solo un administrador puede tocar los contratos.</Aviso>}
 
@@ -237,11 +283,38 @@ export default async function PaginaOperadores() {
                     ? `${c.comision_tipo === 'porcentaje' ? `${c.comision_valor}%` : `$${c.comision_valor}`}`
                     : <em className="gris">sin comisión</em>}
                 </span>
-                <Etiqueta color={c.esta_activo ? '#66BB2E' : '#9CA3AF'}>
-                  {c.esta_activo ? 'activo' : 'apagado'}
+                {/* ⚠️ Gris era un estado; rojo es un problema. Un contrato
+                    apagado no es neutro: con el apagado no se vende NADA de
+                    este operador, y eso hay que leerlo de un vistazo. */}
+                <Etiqueta color={c.esta_activo ? '#66BB2E' : '#C0392B'}>
+                  {c.esta_activo ? 'activo' : 'APAGADO · no vende'}
                 </Etiqueta>
               </span>
             </summary>
+
+            {/* ⚠️ LO PRIMERO AL ABRIR EL CONTRATO: si está apagado, qué cuesta.
+                Antes había que deducirlo: la casilla «Contrato activo» vive al
+                final de todo, bajo «Interruptores», después del PDF y de las
+                notas internas. Se sube el documento, se le cambia el nombre, se
+                guarda — y el contrato sigue apagado sin que nada lo diga. */}
+            {!c.esta_activo && (
+              <Aviso tipo="mal">
+                <strong>Este contrato está apagado.</strong> Mientras lo esté, ninguna
+                tour que dependa de él se puede reservar en el sitio.{' '}
+                Para encenderlo: marcá <strong>«Contrato activo»</strong>, abajo del todo
+                en <strong>Interruptores</strong>, y dale <strong>Guardar el contrato</strong>.
+                {' '}Marcarlo sin guardar no hace nada.
+              </Aviso>
+            )}
+            {c.esta_activo && n && noSeVendenDe(n.id).length > 0 && (
+              <Aviso tipo="info">
+                El contrato está activo, pero{' '}
+                {noSeVendenDe(n.id).map((t, i) => (
+                  <span key={t.id}>{i > 0 && ', '}<Link href={`/admin/tours/${t.id}`}>{t.nombre}</Link> ({t.rotulo})</span>
+                ))}
+                {'. '}Acordate: el contrato se amarra a CADA tour, en su propia ficha.
+              </Aviso>
+            )}
 
             {/* Ver cómo quedó, sin tener que buscar la ficha a mano. Si no hay
                 nada publicado todavía, se dice en vez de dar un enlace roto. */}
