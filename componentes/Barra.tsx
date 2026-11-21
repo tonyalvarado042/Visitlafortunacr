@@ -4,6 +4,7 @@ import { MenuPerfil } from './MenuPerfil';
 import { NOMBRE_PROPIO, t, type Idioma } from '@/lib/idiomas';
 import { pareceHaberSesion } from '@/lib/sesion-ligera';
 import { destacadoDelMenu, type Destino, type Categoria } from '@/lib/destino';
+import { rutaDeSeccion } from '@/lib/secciones';
 
 /*
  * La barra.
@@ -125,10 +126,6 @@ export async function Barra({
   // a páginas vacías hace que un destino nuevo se vea hueco.
   const conContenido = categorias.filter((c) => c.total > 0);
   const deSeccion = (seccion: string) => conContenido.filter((c) => c.seccion === seccion);
-  const primeraDe = (seccion: string) => {
-    const c = deSeccion(seccion)[0];
-    return c ? `/${idioma}/${c.babosa}` : null;
-  };
 
   const columnas = enColumnas(
     EN_EL_PANEL
@@ -136,10 +133,16 @@ export async function Barra({
       .filter((g) => g.items.length > 0),
   );
 
-  /* Los enlaces sueltos de la barra. "Qué hacer" no está acá: es el panel. */
+  /* Los enlaces sueltos de la barra. "Qué hacer" no está acá: es el panel.
+   *
+   * ⚠️ APUNTAN A LA SECCIÓN, NO A SU PRIMERA CATEGORÍA. Antes era
+   * `primeraDe(seccion)`: la categoría de menor `orden`, elegida por el
+   * orden y por nada más. "Comer" caía en Restaurantes —1 lugar de 12— y
+   * "Dónde dormir" en Hoteles —10 de 25—. Quien tocaba Comer se iba
+   * creyendo que La Fortuna tiene un restaurante. Ver lib/secciones.ts. */
   const enlaces = ([
-    { clave: 'donde_dormir', href: primeraDe('donde_dormir'), texto: t('donde_dormir', idioma) },
-    { clave: 'comer', href: primeraDe('comer_beber'), texto: t('comer', idioma) },
+    { clave: 'donde_dormir', href: rutaDeSeccion('donde_dormir', idioma, categorias), texto: t('donde_dormir', idioma) },
+    { clave: 'comer', href: rutaDeSeccion('comer_beber', idioma, categorias), texto: t('comer', idioma) },
     { clave: 'experiencias', href: `/${idioma}/experiencias`, texto: t('experiencias', idioma) },
     { clave: 'blog', href: `/${idioma}/blog`, texto: t('blog', idioma) },
   ] as { clave: string; href: string | null; texto: string }[])

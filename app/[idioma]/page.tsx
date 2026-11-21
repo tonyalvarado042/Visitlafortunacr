@@ -3,6 +3,7 @@ import { esManual } from '@/lib/itinerario-modo';
 import { notFound } from 'next/navigation';
 import { destinoActual, categoriasDe, negociosDe, destacadosDe, lemaDe, type Negocio, type Categoria } from '@/lib/destino';
 import { fichasDelDirectorio } from '@/lib/directorio';
+import { rutaDeSeccion } from '@/lib/secciones';
 import { t, lugares, esIdioma, type Idioma } from '@/lib/idiomas';
 import { Barra } from '@/componentes/Barra';
 import { Pie } from '@/componentes/Pie';
@@ -92,6 +93,13 @@ export default async function Portada({ params, searchParams }: {
   }
 
   const conContenido = categorias.filter((c) => c.total > 0);
+
+  /* El «Ver todo» de cada franja. Antes era `conContenido.find(...)?.babosa
+     ?? ''` — la primera categoría de la sección, y si no había ninguna, la
+     cadena vacía: un enlace a `/es/` que se ve igual de bien y no lleva a
+     ningún lado. Ahora lleva a la sección entera, o no se pinta. */
+  const aDormir = rutaDeSeccion('donde_dormir', idioma, categorias);
+  const aComer = rutaDeSeccion('comer_beber', idioma, categorias);
 
   /* Para cada categoría del mosaico, un negocio suyo le presta el resumen Y la
      foto: así la portada dice algo concreto y enseña un lugar real, en vez de
@@ -233,9 +241,11 @@ export default async function Portada({ params, searchParams }: {
                 <span className="rotulo">{t('donde_dormir', idioma)}</span>
                 <h2>{t('de_hostal_a_villa', idioma)}</h2>
               </div>
-              <Link className="enlace-mas" href={`/${idioma}/${conContenido.find((c) => c.seccion === 'donde_dormir')?.babosa ?? ''}`}>
-                {t('ver_todo', idioma)} →
-              </Link>
+              {aDormir && (
+                <Link className="enlace-mas" href={aDormir}>
+                  {t('ver_todo', idioma)} →
+                </Link>
+              )}
             </div>
             <div className="rejilla">
               {dormir.map((n) => <div key={n.id} className="revela"><TarjetaNegocio negocio={n} idioma={idioma} /></div>)}
@@ -253,9 +263,11 @@ export default async function Portada({ params, searchParams }: {
                 <span className="rotulo">{t('comer_beber', idioma)}</span>
                 <h2>{t('comer_beber', idioma)}</h2>
               </div>
-              <Link className="enlace-mas" href={`/${idioma}/${conContenido.find((c) => c.seccion === 'comer_beber')?.babosa ?? ''}`}>
-                {t('ver_todo', idioma)} →
-              </Link>
+              {aComer && (
+                <Link className="enlace-mas" href={aComer}>
+                  {t('ver_todo', idioma)} →
+                </Link>
+              )}
             </div>
             <div className="rejilla">
               {comer.map((n) => <div key={n.id} className="revela"><TarjetaNegocio negocio={n} idioma={idioma} /></div>)}

@@ -3,6 +3,7 @@ import { destinoActual, categoriasDe, negociosDe } from '@/lib/destino';
 import { guiasDe } from '@/lib/blog';
 import { experienciasDe } from '@/lib/experiencias';
 import type { Idioma } from '@/lib/idiomas';
+import { BABOSA_DE_SECCION, babosaDeSeccion, MINIMO_CATEGORIAS_PARA_PAGINA } from '@/lib/secciones';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: cola === '' ? 'daily' : 'weekly',
         priority: cola === '' ? 1 : 0.7,
         alternates: { languages: idiomasDe((i) => `/${i}${cola}`) },
+      });
+    }
+  }
+
+  /* Las páginas de sección: «Comer y beber» con sus doce lugares, no solo
+     «Restaurantes» con uno. Solo las que existen de verdad — una sección con
+     una sola categoría con contenido redirige a esa categoría, y una
+     dirección que redirige no va en el mapa del sitio. */
+  const deAlguno = porIdioma[0]?.categorias ?? [];
+  for (const seccion of Object.keys(BABOSA_DE_SECCION)) {
+    const conContenido = deAlguno.filter((c) => c.seccion === seccion && c.total > 0);
+    if (conContenido.length < MINIMO_CATEGORIAS_PARA_PAGINA) continue;
+    for (const idioma of idiomas) {
+      const babosa = babosaDeSeccion(seccion, idioma);
+      if (!babosa) continue;
+      entradas.push({
+        url: `${base}/${idioma}/${babosa}`,
+        changeFrequency: 'weekly',
+        priority: 0.85,
+        alternates: { languages: idiomasDe((i) => {
+          const b = babosaDeSeccion(seccion, i);
+          return b ? `/${i}/${b}` : null;
+        }) },
       });
     }
   }

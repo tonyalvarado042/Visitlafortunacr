@@ -59,6 +59,8 @@ export const T: Record<string, Diccionario> = {
   explorar:          { es: 'Explorar', en: 'Explore', pt: 'Explorar', fr: 'Explorer', de: 'Entdecken' },
   transporte:        { es: 'Transporte', en: 'Transport', pt: 'Transporte', fr: 'Transport', de: 'Transport' },
   ver_todo:          { es: 'Ver todo', en: 'See all', pt: 'Ver tudo', fr: 'Tout voir', de: 'Alle ansehen' },
+  /* La pastilla que quita el filtro en un listado: «Todos 12». */
+  todos:             { es: 'Todos', en: 'All', pt: 'Todos', fr: 'Tous', de: 'Alle' },
   verificado:        { es: 'Verificado', en: 'Verified', pt: 'Verificado', fr: 'Vérifié', de: 'Verifiziert' },
   destacado:         { es: 'Destacado pagado', en: 'Paid listing', pt: 'Destaque pago', fr: 'Annonce sponsorisée', de: 'Bezahlte Anzeige' },
   llamar:            { es: 'Llamar', en: 'Call', pt: 'Ligar', fr: 'Appeler', de: 'Anrufen' },
