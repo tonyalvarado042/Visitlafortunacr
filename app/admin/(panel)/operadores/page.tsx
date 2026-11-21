@@ -114,6 +114,16 @@ export default async function PaginaOperadores() {
     const suyas = tours.filter((t) => t.negocio_id === id);
     return { total: suyas.length, publicadas: suyas.filter((t) => t.estado === 'publicado').length };
   };
+  /* ⚠️ ESTOS DOS VAN ANTES QUE `noSeVendenDe`, Y NO ES CAPRICHO.
+     `atascadas`, unas lineas mas abajo, LLAMA a `noSeVendenDe` enseguida, y
+     esa funcion usa `modulo`. Con las declaraciones mas abajo el navegador
+     tiraba «Cannot access 'modulo' before initialization» y la pantalla de
+     Operadores quedaba en «Algo se rompio» — en produccion, el 21 de
+     noviembre de 2026. TypeScript no lo agarra: la variable existe, lo que
+     no existe todavia es su valor cuando el cierre se ejecuta. */
+  const ajustes = d as { reservas_activas: boolean; email_contacto: string | null; email_avisos: string | null } | null;
+  const modulo = ajustes?.reservas_activas ?? false;
+
   const porNegocio = new Map(negocios.map((n) => [n.id, n]));
   const contratoPorId = new Map(contratos.map((c) => [c.id, c]));
   /* ⚠️ LAS TOURS PUBLICADAS QUE NO SE PUEDEN VENDER, POR OPERADOR.
@@ -147,8 +157,6 @@ export default async function PaginaOperadores() {
       .filter((x) => !x.se_vende);
   };
   const atascadas = negocios.flatMap((n) => noSeVendenDe(n.id).map((t) => ({ ...t, operador: n.nombre })));
-  const ajustes = d as { reservas_activas: boolean; email_contacto: string | null; email_avisos: string | null } | null;
-  const modulo = ajustes?.reservas_activas ?? false;
   /* El mismo orden que usa el envio de verdad: primero el buzon interno, y si
      no hay, el de contacto. Si este aviso mirara otra columna que la que de
      verdad recibe, diria «falta el correo» con el correo puesto, o peor,
