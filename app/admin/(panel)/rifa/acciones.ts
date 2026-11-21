@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { contextoPanel } from '@/lib/admin/contexto';
 
 export type Estado = { ok?: string | null; error?: string | null };
@@ -89,7 +90,7 @@ export async function guardarRifa(datos: FormData) {
     .update({ ...campos, actualizado_en: new Date().toISOString() })
     .eq('destino_id', destino.id);
 
-  if (error) console.error('guardarRifa:', error.message);
+  if (error) await anotarFallo('guardarRifa', error.message);
   revalidatePath('/admin/rifa');
   revalidatePath('/', 'layout');
 }

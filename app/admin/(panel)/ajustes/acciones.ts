@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { modoItinerario } from '@/lib/itinerario-modo';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { TEXTOS_DEL_SITIO, campoDeTexto } from '@/lib/textos-del-sitio';
@@ -181,7 +182,7 @@ export async function editarDestino(datos: FormData) {
   }
 
   const { error } = await db.from('dst_destino').update(campos).eq('id', destino.id);
-  if (error) console.error('editarDestino:', error.message);
+  if (error) await anotarFallo('editarDestino', error.message);
   revalidatePath('/admin', 'layout');
   /* El sitio publico tambien: los colores, el tema y sobre todo los IDIOMAS
      cambian lo que se sirve al visitante. Sin esto, apagar un idioma se
@@ -207,7 +208,7 @@ export async function guardarCanal(datos: FormData) {
   const { error } = esUuid(id)
     ? await db.from('dst_canal').update(fila).eq('id', id).eq('destino_id', destino.id)
     : await db.from('dst_canal').upsert(fila, { onConflict: 'destino_id,tipo,proveedor' });
-  if (error) console.error('guardarCanal:', error.message);
+  if (error) await anotarFallo('guardarCanal', error.message);
   revalidatePath('/admin/ajustes');
 }
 
@@ -298,7 +299,7 @@ export async function prenderCupon(datos: FormData) {
 
   const { error } = await db.from('dst_cupon')
     .update({ esta_activo: prender }).eq('id', id).eq('destino_id', destino.id);
-  if (error) console.error('prenderCupon:', error.message);
+  if (error) await anotarFallo('prenderCupon', error.message);
   revalidatePath('/admin/ajustes');
 }
 
@@ -332,7 +333,7 @@ export async function cuponDeSalida(datos: FormData) {
     const { error } = await db.from('dst_cupon')
       .update({ mostrar_al_salir: true })
       .eq('id', id).eq('destino_id', destino.id);
-    if (error) console.error('cuponDeSalida:', error.message);
+    if (error) await anotarFallo('cuponDeSalida', error.message);
   }
   revalidatePath('/admin/ajustes');
 }
@@ -347,7 +348,7 @@ export async function guardarGanchoCupon(datos: FormData) {
   const { error } = await db.from('dst_cupon')
     .update({ gancho: String(datos.get('gancho') ?? '').trim() || null })
     .eq('id', id).eq('destino_id', destino.id);
-  if (error) console.error('guardarGanchoCupon:', error.message);
+  if (error) await anotarFallo('guardarGanchoCupon', error.message);
   revalidatePath('/admin/ajustes');
 }
 
@@ -374,7 +375,7 @@ export async function guardarTextosDelSitio(datos: FormData) {
   if (cuantas !== null && cuantas >= 0 && cuantas <= 12) {
     const { error } = await db.from('dst_destino')
       .update({ cuantas_recomendadas: Math.round(cuantas) }).eq('id', destino.id);
-    if (error) console.error('guardarTextosDelSitio, la cantidad:', error.message);
+    if (error) await anotarFallo('guardarTextosDelSitio, la cantidad', error.message);
   }
 
   const aBorrar: string[] = [];
@@ -403,7 +404,7 @@ export async function guardarTextosDelSitio(datos: FormData) {
   if (aPoner.length) {
     const { error } = await db.from('dst_traduccion')
       .upsert(aPoner, { onConflict: 'entidad,entidad_id,campo,idioma' });
-    if (error) console.error('guardarTextosDelSitio, al poner:', error.message);
+    if (error) await anotarFallo('guardarTextosDelSitio, al poner', error.message);
   }
 
   /* El borrado va de a uno por par (idioma, clave): PostgREST no sabe armar

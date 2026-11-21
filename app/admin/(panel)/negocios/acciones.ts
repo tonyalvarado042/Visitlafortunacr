@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
@@ -46,7 +47,7 @@ async function asegurarRutas(destinoId: string, idiomas: string[], negocioId: st
     idiomas.map((idioma) => ({ destino_id: destinoId, entidad: 'negocio', entidad_id: negocioId, idioma, babosa })),
     { onConflict: 'destino_id,entidad,idioma,babosa', ignoreDuplicates: true },
   );
-  if (error) console.error('asegurarRutas:', error.message);
+  if (error) await anotarFallo('asegurarRutas', error.message);
   return error?.message ?? null;
 }
 
@@ -358,7 +359,7 @@ export async function pedirCompletarFicha(datos: FormData) {
       .update({ completar_pedido_en: new Date().toISOString() })
       .eq('id', id).eq('destino_id', destino.id);
   } else {
-    console.error('pedirCompletarFicha:', envio.error);
+    await anotarFallo('pedirCompletarFicha', `el correo no salió: ${envio.error}`);
   }
   refrescar(id);
 }
@@ -418,7 +419,12 @@ export async function rechazarNegocio(datos: FormData) {
           destino: completo, idioma: completo.idioma_principal,
           para: n.email, nombreNegocio: n.nombre, motivo,
         });
-        if (!envio.ok) console.error('aviso de rechazo no salio:', envio.error);
+        /* ⚠️ Acá NO se usa `anotarFallo`: redirige, y un `redirect()` dentro
+           de este `try` se lo come el `catch` de abajo. Además el rechazo SÍ
+           se guardó — lo que falló es el aviso por correo, y sacar a la
+           persona de la pantalla por eso sería peor. Queda en la bitácora de
+           `dst_correo`, que es donde se miran los envíos. */
+        if (!envio.ok) console.error('rechazarNegocio: se rechazó, pero el aviso al negocio no salió:', envio.error);
       }
     } catch (fallo) {
       console.error('aviso de rechazo:', fallo instanceof Error ? fallo.message : fallo);
@@ -769,7 +775,7 @@ export async function marcarPortada(datos: FormData) {
   // Primero se apaga la anterior: uq_dst_foto_portada no deja dos a la vez.
   await db.from('dst_negocio_foto').update({ es_portada: false }).eq('negocio_id', id).eq('es_portada', true);
   const { error } = await db.from('dst_negocio_foto').update({ es_portada: true }).eq('id', fotoId).eq('negocio_id', id);
-  if (error) console.error('marcarPortada:', error.message);
+  if (error) await anotarFallo('marcarPortada', error.message);
   refrescar(id);
 }
 
@@ -835,7 +841,7 @@ export async function borrarFoto(datos: FormData) {
   if (corte !== -1) await db.storage.from(BUCKET).remove([foto.url.slice(corte + marca.length)]);
 
   const { error } = await db.from('dst_negocio_foto').delete().eq('id', fotoId).eq('negocio_id', id);
-  if (error) console.error('borrarFoto:', error.message);
+  if (error) await anotarFallo('borrarFoto', error.message);
   refrescar(id);
 }
 
@@ -898,7 +904,7 @@ export async function destacarExtracto(datos: FormData) {
     .from('dst_resena_externa_extracto')
     .update({ destacado: !fila.destacado })
     .eq('id', extractoId);
-  if (error) console.error('destacarExtracto:', error.message);
+  if (error) await anotarFallo('destacarExtracto', error.message);
   refrescar(id);
 }
 
@@ -939,7 +945,7 @@ export async function agregarRazon(datos: FormData) {
     foto_url: texto(datos, 'razon_foto_url') || null,
     orden: count ?? 0,
   });
-  if (error) console.error('agregarRazon:', error.message);
+  if (error) await anotarFallo('agregarRazon', error.message);
   refrescar(id);
 }
 
@@ -953,7 +959,7 @@ export async function borrarRazon(datos: FormData) {
   // `negocio_id` en el where tambien: sin eso, un id de otro negocio borraria.
   const { error } = await db.from('dst_negocio_razon')
     .delete().eq('id', razonId).eq('negocio_id', id);
-  if (error) console.error('borrarRazon:', error.message);
+  if (error) await anotarFallo('borrarRazon', error.message);
   refrescar(id);
 }
 
@@ -1029,6 +1035,6 @@ export async function borrarCombina(datos: FormData) {
 
   const { error } = await db.from('dst_negocio_combina')
     .delete().eq('id', filaId).eq('negocio_id', id);
-  if (error) console.error('borrarCombina:', error.message);
+  if (error) await anotarFallo('borrarCombina', error.message);
   refrescar(id);
 }

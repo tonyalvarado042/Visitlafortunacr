@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { contextoPanel } from '@/lib/admin/contexto';
 
 export type Estado = { ok?: string | null; error?: string | null };
@@ -103,7 +104,7 @@ export async function guardarContrato(datos: FormData) {
   /* El check de la base rechaza encender "plataforma cobra" sin comisión,
      política ni vigencia. Ese error se traga aquí: la página lo vuelve a
      mostrar apagado, que es lo correcto. */
-  if (error) console.error('guardarContrato:', error.message);
+  if (error) await anotarFallo('guardarContrato', error.message);
   refrescar();
 }
 
@@ -147,7 +148,7 @@ export async function guardarProducto(datos: FormData) {
     esta_activo: esSi(datos, 'esta_activo'),
     actualizado_en: new Date().toISOString(),
   }).eq('id', id);
-  if (error) console.error('guardarProducto:', error.message);
+  if (error) await anotarFallo('guardarProducto', error.message);
   refrescar();
 }
 
@@ -190,7 +191,7 @@ export async function guardarTarifa(datos: FormData) {
     : esUuid(producto)
       ? await db.from('dst_tarifa').insert({ ...fila, producto_id: producto })
       : { error: null };
-  if (error) console.error('guardarTarifa:', error.message);
+  if (error) await anotarFallo('guardarTarifa', error.message);
   refrescar();
 }
 
@@ -265,7 +266,7 @@ export async function guardarComplemento(datos: FormData) {
     : esUuid(negocio)
       ? await db.from('dst_complemento').insert({ ...fila, negocio_id: negocio, destino_id: destino.id })
       : { error: null };
-  if (error) console.error('guardarComplemento:', error.message);
+  if (error) await anotarFallo('guardarComplemento', error.message);
   refrescar();
 }
 
@@ -311,6 +312,6 @@ export async function aprobarTermino(datos: FormData) {
   const { error } = await db.from('dst_contrato')
     .update({ [campo]: valor, actualizado_en: new Date().toISOString() })
     .eq('id', id);
-  if (error) console.error('aprobarTermino:', error.message);
+  if (error) await anotarFallo('aprobarTermino', error.message);
   refrescar();
 }

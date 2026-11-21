@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { destinoActual } from '@/lib/destino';
 import { enviarCorreo } from '@/lib/correo/enviar';
@@ -84,7 +85,7 @@ export async function olvidarLlave(datos: FormData) {
   if (!nombre) return;
 
   const { error } = await db.rpc('olvidar_secreto', { p_nombre: nombre });
-  if (error) console.error('olvidar_secreto:', error.message);
+  if (error) await anotarFallo('olvidar_secreto', error.message);
   revalidatePath('/admin/ajustes/llaves');
 }
 

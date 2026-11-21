@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { babosaDe } from '@/lib/admin/babosa';
@@ -304,7 +305,7 @@ export async function borrarOpcionDeTour(datos: FormData) {
      paradas del itinerario al borrarlas. */
   await db.from('dst_traduccion').delete().eq('entidad', 'tour_opcion').eq('entidad_id', opcionId);
   const { error } = await db.from('dst_tour_opcion').delete().eq('id', opcionId).eq('tour_id', id);
-  if (error) console.error('borrarOpcionDeTour:', error.message);
+  if (error) await anotarFallo('borrarOpcionDeTour', error.message);
   refrescarTour(id);
 }
 
@@ -448,7 +449,7 @@ export async function marcarPortadaTour(datos: FormData) {
   /* Primero se apaga la anterior: `uq_dst_tour_foto_portada` no deja dos. */
   await db.from('dst_tour_foto').update({ es_portada: false }).eq('tour_id', id).eq('es_portada', true);
   const { error } = await db.from('dst_tour_foto').update({ es_portada: true }).eq('id', fotoId).eq('tour_id', id);
-  if (error) console.error('marcarPortadaTour:', error.message);
+  if (error) await anotarFallo('marcarPortadaTour', error.message);
   refrescarTour(id);
 }
 
@@ -497,7 +498,7 @@ export async function borrarFotoTour(datos: FormData) {
   if (corte !== -1) await db.storage.from(BUCKET_TOURS).remove([(foto.url as string).slice(corte + marca.length)]);
 
   const { error } = await db.from('dst_tour_foto').delete().eq('id', fotoId).eq('tour_id', id);
-  if (error) console.error('borrarFotoTour:', error.message);
+  if (error) await anotarFallo('borrarFotoTour', error.message);
   refrescarTour(id);
 }
 
@@ -590,7 +591,7 @@ export async function pedirCompletarTour(datos: FormData) {
       .update({ completar_pedido_en: new Date().toISOString() })
       .eq('id', id).eq('destino_id', destino.id);
   } else {
-    console.error('pedirCompletarTour:', envio.error);
+    await anotarFallo('pedirCompletarTour', `el correo no salió: ${envio.error}`);
   }
   refrescarTour(id);
 }
@@ -684,7 +685,7 @@ export async function pedirRevisionDeTour(datos: FormData) {
       .update({ revisar_pedido_en: new Date().toISOString() })
       .eq('id', id).eq('destino_id', destino.id);
   } else {
-    console.error('pedirRevisionDeTour:', envio.error);
+    await anotarFallo('pedirRevisionDeTour', `el correo no salió: ${envio.error}`);
   }
   refrescarTour(id);
 }

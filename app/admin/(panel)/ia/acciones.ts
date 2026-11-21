@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
@@ -60,7 +61,7 @@ export async function editarAgente(datos: FormData) {
     escala_a: esUuid(texto(datos, 'escala_a')) ? texto(datos, 'escala_a') : null,
     esta_activo: marca(datos, 'esta_activo'),
   }).eq('id', id).eq('destino_id', destino.id);
-  if (error) console.error('editarAgente:', error.message);
+  if (error) await anotarFallo('editarAgente', error.message);
   revalidatePath('/admin/ia');
   revalidatePath(`/admin/ia/agentes/${texto(datos, 'clave')}`);
 }
@@ -90,11 +91,11 @@ export async function guardarConocimiento(datos: FormData) {
   };
   if (esUuid(id)) {
     const { error } = await db.from('dst_conocimiento').update(fila).eq('id', id).eq('destino_id', destino.id);
-    if (error) console.error('guardarConocimiento:', error.message);
+    if (error) await anotarFallo('guardarConocimiento', error.message);
     revalidatePath(`/admin/ia/conocimiento/${id}`);
   } else {
     const { error } = await db.from('dst_conocimiento').insert({ ...fila, creado_por: usuario.id });
-    if (error) console.error('guardarConocimiento:', error.message);
+    if (error) await anotarFallo('guardarConocimiento', error.message);
   }
   revalidatePath('/admin/ia/conocimiento');
   revalidatePath('/admin/ia');
@@ -143,7 +144,7 @@ export async function editarAutomatizacion(datos: FormData) {
     orden: numero(datos, 'orden') ?? 0,
     esta_activa: marca(datos, 'esta_activa'),
   }).eq('id', id).eq('destino_id', destino.id);
-  if (error) console.error('editarAutomatizacion:', error.message);
+  if (error) await anotarFallo('editarAutomatizacion', error.message);
   revalidatePath('/admin/ia/automatizaciones');
   revalidatePath(`/admin/ia/automatizaciones/${id}`);
 }
@@ -166,7 +167,7 @@ export async function guardarPlantilla(datos: FormData) {
       { destino_id: destino.id, clave, canal, idioma, asunto: texto(datos, 'asunto') || null, cuerpo, esta_activa: true },
       { onConflict: 'destino_id,clave,canal,idioma' }
     );
-    if (error) console.error('guardarPlantilla:', error.message);
+    if (error) await anotarFallo('guardarPlantilla', error.message);
   }
   revalidatePath('/admin/ia/plantillas');
 }

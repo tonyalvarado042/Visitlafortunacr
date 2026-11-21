@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { after } from 'next/server';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { avisarResenaPublicada } from '@/lib/aviso-resena';
@@ -26,7 +27,7 @@ async function moderar(datos: FormData, cambio: Record<string, unknown>) {
     .from('dst_resena')
     .update({ ...cambio, moderador_id: usuario.id, moderada_en: new Date().toISOString() })
     .eq('id', id);
-  if (error) console.error('moderar resena:', error.message);
+  if (error) await anotarFallo('moderar resena', error.message);
   refrescar();
 }
 
@@ -71,7 +72,7 @@ export async function responderResena(datos: FormData) {
       respondida_en: respuesta ? new Date().toISOString() : null,
     })
     .eq('id', id);
-  if (error) console.error('responder resena:', error.message);
+  if (error) await anotarFallo('responder resena', error.message);
   refrescar();
 }
 
@@ -85,6 +86,6 @@ export async function cambiarModeracion(datos: FormData) {
     .from('dst_destino')
     .update({ resenas_moderadas: texto(datos, 'moderar') === '1' })
     .eq('id', destino.id);
-  if (error) console.error('cambiarModeracion:', error.message);
+  if (error) await anotarFallo('cambiarModeracion', error.message);
   refrescar();
 }

@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { redirect } from 'next/navigation';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { hayClaveDeIA } from '@/lib/ia/cliente';
@@ -52,7 +53,7 @@ export async function editarGuia(datos: FormData) {
     estado: ['borrador', 'pendiente', 'publicado', 'archivado'].includes(estado) ? estado : antes.estado,
     publicado_en: estado === 'publicado' && !antes.publicado_en ? new Date().toISOString() : antes.publicado_en,
   }).eq('id', id);
-  if (error) console.error('editarGuia:', error.message);
+  if (error) await anotarFallo('editarGuia', error.message);
   revalidatePath(`/admin/guias/${id}`);
   revalidatePath('/admin/guias');
 }
@@ -122,7 +123,7 @@ export async function agregarALaColumna(datos: FormData) {
   }
 
   const { error } = await db.from('dst_lateral').insert(fila);
-  if (error) console.error('agregarALaColumna:', error.message);
+  if (error) await anotarFallo('agregarALaColumna', error.message);
   revalidatePath('/admin/guias');
 }
 
@@ -133,7 +134,7 @@ export async function quitarDeLaColumna(datos: FormData) {
   /* El destino_id en el where no sobra aunque la politica ya filtre: es la
      segunda cerradura, y la que sigue puesta si alguien toca la politica. */
   const { error } = await db.from('dst_lateral').delete().eq('id', id).eq('destino_id', destino.id);
-  if (error) console.error('quitarDeLaColumna:', error.message);
+  if (error) await anotarFallo('quitarDeLaColumna', error.message);
   revalidatePath('/admin/guias');
 }
 

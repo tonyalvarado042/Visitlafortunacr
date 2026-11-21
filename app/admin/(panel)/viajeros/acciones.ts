@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { contextoPanel } from '@/lib/admin/contexto';
 
 const esUuid = (v: unknown) => /^[0-9a-f-]{36}$/i.test(String(v ?? ''));
@@ -76,7 +77,7 @@ async function guardarEtiquetas(
   if (aBorrar.length) {
     const { error } = await db.from('dst_viajero_etiqueta')
       .delete().eq('viajero_id', viajeroId).in('etiqueta_id', aBorrar);
-    if (error) console.error('guardarEtiquetas: no se pudieron quitar etiquetas:', error.message);
+    if (error) await anotarFallo('guardarEtiquetas: no se pudieron quitar etiquetas', error.message);
   }
 
   if (quedan.length) {
@@ -84,6 +85,6 @@ async function guardarEtiquetas(
       quedan.map((etiqueta_id) => ({ viajero_id: viajeroId, etiqueta_id, puesta_por: 'equipo' })),
       { onConflict: 'viajero_id,etiqueta_id', ignoreDuplicates: true },
     );
-    if (error) console.error('guardarEtiquetas: no se pudieron poner etiquetas:', error.message);
+    if (error) await anotarFallo('guardarEtiquetas: no se pudieron poner etiquetas', error.message);
   }
 }

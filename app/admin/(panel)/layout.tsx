@@ -3,6 +3,8 @@ import { MENU, NOMBRE_ROL, puedeVer } from '@/lib/admin/permisos';
 import { NavLateral } from '@/componentes/admin/NavLateral';
 import { Lateral } from '@/componentes/admin/Lateral';
 import { cambiarDestino, salir } from './acciones-panel';
+import { Suspense } from 'react';
+import { AvisoDeGuardado } from '@/componentes/admin/AvisoDeGuardado';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +44,12 @@ export default async function LayoutPanel({ children }: { children: React.ReactN
           <form action={salir}><button type="submit">Salir</button></form>
         </div>
       </Lateral>
-      <div className="contenido">{children}</div>
+      <div className="contenido">
+        {/* `useSearchParams` pide un limite de suspenso. Sin esto Next se
+            queja en el build y el panel entero se cae. */}
+        <Suspense fallback={null}><AvisoDeGuardado /></Suspense>
+        {children}
+      </div>
     </div>
   );
 }

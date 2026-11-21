@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { anotarFallo } from '@/lib/admin/aviso';
 import { contextoPanel } from '@/lib/admin/contexto';
 import { sesion } from '@/lib/supabase-sesion';
 
@@ -23,7 +24,7 @@ export async function invitar(datos: FormData) {
   const { error } = await db.from('dst_invitacion').insert({
     email, nombre: texto(datos, 'nombre') || null, rol, destinos_ids: destinosDe(datos), invitado_por: usuario.id,
   });
-  if (error) console.error('invitar:', error.message);
+  if (error) await anotarFallo('invitar', error.message);
   revalidatePath('/admin/equipo');
 }
 
@@ -55,7 +56,7 @@ export async function editarUsuario(datos: FormData) {
     if (id !== usuario.id) cambios.esta_activo = texto(datos, 'esta_activo') === '1';
   }
   const { error } = await db.from('dst_usuario').update(cambios).eq('id', id);
-  if (error) console.error('editarUsuario:', error.message);
+  if (error) await anotarFallo('editarUsuario', error.message);
   revalidatePath('/admin/equipo');
 }
 
