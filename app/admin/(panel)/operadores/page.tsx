@@ -367,8 +367,23 @@ export default async function PaginaOperadores() {
               {/* ---- La plata ---- */}
               <h4 className="contrato-seccion">La plata</h4>
               <div className="campo"><label>Comisión</label>
-                <input name="comision_valor" type="number" step="0.5" min={0}
-                       defaultValue={c.comision_valor ?? ''} disabled={!esAdmin} /></div>
+                <input name="comision_valor" type="number" step="0.01" min={0}
+                       defaultValue={c.comision_valor ?? ''} disabled={!esAdmin} />
+                {/* ⚠️ ESTE CAMPO NO CALCULA NADA, Y HAY QUE DECIRLO.
+                    Tony, 21 nov 2026: «no debés asegurar que es un campo
+                    comisión, porque las comisiones están en el PDF».
+                    Tiene razón. Se revisó dónde se usa `comision_valor`: en
+                    TRES lugares, los tres de puro mostrar. Ninguno toca un
+                    precio ni liquida nada. La plata de verdad sale del rack y
+                    el neto de CADA tour, que es donde se calcula la comisión
+                    que se le manda al operador. */}
+                <small>
+                  <strong>Es un resumen de lo que dice el contrato, nada más.</strong> No cobra ni
+                  liquida: la comisión que cuenta se saca del <strong>rack menos el neto</strong> de
+                  cada tour, y puede ser distinta en cada una. Si acá ponés 40 y el contrato dice 20,
+                  no se le cobra de más a nadie — pero el resumen miente y el día que alguien liquide
+                  mirando esto, se equivoca.
+                </small></div>
               <div className="campo"><label>Tipo</label>
                 <select name="comision_tipo" defaultValue={c.comision_tipo} disabled={!esAdmin}>
                   <option value="porcentaje">% del total</option>

@@ -305,7 +305,26 @@ export default async function PaginaTour({ params, searchParams }: {
                 <div className="campo"><label>Adulto USD</label><input type="number" step="0.01" name="precio_adulto_usd" defaultValue={t.precio_adulto_usd ?? ''} required /></div>
                 <div className="campo"><label>Niño USD</label><input type="number" step="0.01" name="precio_nino_usd" defaultValue={t.precio_nino_usd ?? ''} /></div>
                 <div className="campo"><label>Neto al operador USD</label><input type="number" step="0.01" name="precio_neto_usd" defaultValue={t.precio_neto_usd ?? ''} /></div>
-                <div className="campo"><label>Comisión %</label><input type="number" step="0.5" name="comision_pct" defaultValue={t.comision_pct ?? ''} /></div>
+                {/* ⚠️ LA COMISION SE SACA DE RACK Y NETO. NO SE ADIVINA.
+                    Tony, 21 nov 2026: «el documento menciona la tarifa rack y
+                    la tarifa neta, y de ahi podes sacar la comision. No se por
+                    que la preguntas otra vez».
+                    Tenia razon: `pctImplicita` ya la calculaba mas arriba y
+                    solo se usaba para avisar cuando no cuadraba. Ahora, si
+                    hay rack y neto, el campo nace con ESE numero. Se puede
+                    corregir —hay contratos con comision fija o con topes—
+                    pero ya no hay que sacar la cuenta a mano. */}
+                <div className="campo"><label>Comisión %</label>
+                  <input type="number" step="0.01" name="comision_pct"
+                         defaultValue={t.comision_pct ?? (pctImplicita != null ? Number(pctImplicita.toFixed(2)) : '')} />
+                  <small>
+                    {pctImplicita != null
+                      ? <>Sale de rack menos neto: <strong>{Number(pctImplicita.toFixed(2))}%</strong>. Cambialo solo si el contrato dice otra cosa.</>
+                      : <>Poné el <strong>neto al operador</strong> y se calcula sola.</>}
+                    {' '}Este número <strong>no le cobra nada a nadie</strong>: el viajero paga el precio de adulto.
+                    {' '}Pero <strong>sí se le manda al operador</strong> en el correo de «revisar el tour», así que si está mal, le llega mal.
+                  </small>
+                </div>
                 {/* ⚠️ EL IVA. Marcado —como nacen todos— la ficha se ve igual
                     que siempre: el precio ES el total. Desmarcado, la ficha
                     muestra el precio pelado, el impuesto aparte y el total
