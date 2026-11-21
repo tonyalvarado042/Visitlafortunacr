@@ -577,6 +577,29 @@ pre.codigo { background: #F4F4F2; border: 1px solid #E6E6E2; border-radius: 8px;
    línea dentro de la tabla. En una tabla el espacio es el que es, así que
    estos campos van chicos — no son para escribir párrafos. */
 .categoria-fila { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Las casillas de «también sale en», en la ficha de una tour.
+   Columnas automáticas y no una lista: con veintisiete categorías, una
+   debajo de otra son veintisiete renglones que empujan el resto del
+   formulario fuera de la pantalla. */
+.casillas-categorias {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 4px 14px; margin-top: 4px;
+  /* Medido: con 25 categorias en una sola columna son 925px de alto, o sea
+     que el resto del formulario queda tres pantallas abajo. Con el tope y
+     el marco se lee como lo que es —una lista que se recorre— y el
+     formulario sigue cabiendo. */
+  max-height: 260px; overflow-y: auto;
+  /* Hex fijo, como todo este archivo: una variable de `globales.css` se
+     daria vuelta el dia que el sitio se ponga en tema oscuro. */
+  border: 1px solid #e6e4df; border-radius: 8px; padding: 8px 10px; background: #fff;
+}
+.casillas-categorias label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13.5px; font-weight: 500; cursor: pointer;
+  padding: 3px 0; min-width: 0;
+}
+.casillas-categorias input { flex-shrink: 0; width: auto; margin: 0; cursor: pointer; accent-color: var(--naranja); }
 .categoria-fila input[type="text"],
 .categoria-fila input:not([type]) { width: 150px; }
 .categoria-fila input[type="number"] { width: 64px; }

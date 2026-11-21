@@ -31,8 +31,11 @@ const COLOR_SECCION: Record<string, string> = {
  * velo— es idéntico porque es la misma retícula.
  */
 export function TarjetaNegocio({ negocio, idioma }: { negocio: Negocio | EnElDirectorio; idioma: Idioma }) {
-  /* Sin `tipo` es un negocio: así las llamadas viejas siguen andando. */
-  const ficha: EnElDirectorio = 'tipo' in negocio ? negocio : { ...negocio, tipo: 'negocio' };
+  /* Sin `tipo` es un negocio: así las llamadas viejas siguen andando. Y un
+     negocio está en una sola categoría, así que `categorias` es la suya. */
+  const ficha: EnElDirectorio = 'tipo' in negocio
+    ? negocio
+    : { ...negocio, tipo: 'negocio', categorias: [negocio.categoria_id] };
   const color = COLOR_SECCION[negocio.seccion] ?? '#8B8B87';
   const verificado = negocio.estado_verificacion === 'verificado' || negocio.estado_verificacion === 'reclamado';
 

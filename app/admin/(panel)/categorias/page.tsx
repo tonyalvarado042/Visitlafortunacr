@@ -26,6 +26,8 @@ type Fila = {
   es_visible: boolean;
   negocios: number;
   tours: number;
+  /** Cuantos de los otros idiomas tienen nombre propio cargado. */
+  traducida: number;
 };
 
 export default async function PaginaCategorias() {
@@ -41,8 +43,30 @@ export default async function PaginaCategorias() {
        contar en memoria evita una función más que mantener. */
     db.from('dst_negocio').select('categoria_id')
       .eq('destino_id', destino.id).neq('estado_publicacion', 'archivado'),
-    db.from('dst_tour').select('categoria_id').eq('destino_id', destino.id),
+    /* Por la tabla puente: desde que una tour puede estar en varias
+       categorias, contar `dst_tour.categoria_id` dejaria fuera a las que la
+       tienen de secundaria — y son tours que SI salen en ese listado. */
+    db.from('dst_tour_categoria').select('categoria_id'),
   ]);
+
+  /* ⚠️ CUANTAS ESTAN TRADUCIDAS, A LA VISTA. Tony, 21 nov 2026: «no veo
+     traducciones, error total porque todo esta traducido». Y era cierto:
+     `crearCategoria` nunca escribio una fila en `dst_traduccion`, asi que
+     toda categoria creada desde el panel sale en ingles y portugues con el
+     nombre en espanol. El agujero no era que faltaran: era que **nada lo
+     decia**. Ahora la columna lo dice en cada fila. */
+  const otrosIdiomas = destino.idiomas.filter((i) => i !== destino.idioma_principal);
+  const { data: traducciones } = await db.from('dst_traduccion')
+    .select('entidad_id, idioma')
+    .eq('entidad', 'categoria').eq('campo', 'nombre');
+  const porCategoria = new Map<string, Set<string>>();
+  for (const t of traducciones ?? []) {
+    const idi = String(t.idioma).trim();
+    if (!otrosIdiomas.includes(idi as (typeof otrosIdiomas)[number])) continue;
+    const set = porCategoria.get(t.entidad_id as string) ?? new Set<string>();
+    set.add(idi);
+    porCategoria.set(t.entidad_id as string, set);
+  }
 
   const uno = <T,>(x: T | T[] | null): T | null => (Array.isArray(x) ? x[0] ?? null : x);
   const cuenta = (lista: { categoria_id: string | null }[] | null, id: string) =>
@@ -60,6 +84,7 @@ export default async function PaginaCategorias() {
       es_visible: e.es_visible,
       negocios: cuenta(negocios, c.id),
       tours: cuenta(tours, c.id),
+      traducida: porCategoria.get(c.id)?.size ?? 0,
     };
   });
 
@@ -95,7 +120,7 @@ export default async function PaginaCategorias() {
           <table className="tabla">
             <thead>
               <tr>
-                <th>Categoría</th><th>Dirección</th><th className="num">Negocios</th>
+                <th>Categoría</th><th>Dirección</th><th>Idiomas</th><th className="num">Negocios</th>
                 <th className="num">Tours</th><th className="num">Orden</th><th>Se ve</th><th></th>
               </tr>
             </thead>
@@ -107,6 +132,13 @@ export default async function PaginaCategorias() {
                     {f.nombre_local && <> <Etiqueta suave>catálogo: {f.nombre}</Etiqueta></>}
                   </td>
                   <td><code style={{ fontSize: 12 }}>/{f.babosa}</code></td>
+                  <td>
+                    {otrosIdiomas.length === 0
+                      ? <span className="gris">—</span>
+                      : f.traducida === otrosIdiomas.length
+                        ? <Etiqueta suave>{f.traducida} de {otrosIdiomas.length}</Etiqueta>
+                        : <Etiqueta color="alerta">{f.traducida} de {otrosIdiomas.length}</Etiqueta>}
+                  </td>
                   <td className="num">{f.negocios || <span className="gris">—</span>}</td>
                   {/* Los tours cuentan IGUAL que los negocios: una categoría
                       que solo tiene tours es una categoría con contenido. */}
@@ -125,6 +157,13 @@ export default async function PaginaCategorias() {
                                     defaultChecked={f.es_visible} disabled={!esAdmin} /> Se ve</label>
                       <BotonAccion clase="boton tenue">Guardar</BotonAccion>
                     </form>
+                    {/* Lo que necesita pensarse —nombre del catalogo,
+                        direccion, seccion, los otros idiomas— vive en la
+                        ficha. Acá quedan los tres de pasada. */}
+                    <Link href={`/admin/categorias/${f.categoria_id}`}
+                          className="boton tenue" style={{ marginTop: 6, display: 'inline-block' }}>
+                      Editar y traducir
+                    </Link>
                     {/* Soltar solo si está vacía. Con contenido adentro, el
                         botón ni sale: la acción lo rechaza igual, pero
                         ofrecerlo sería ofrecer algo que no va a pasar. */}
@@ -174,10 +213,11 @@ export default async function PaginaCategorias() {
       </div>
 
       <p className="gris" style={{ fontSize: 12.5, lineHeight: 1.6 }}>
-        La dirección de una categoría se traduce aparte, en <code>dst_ruta</code>. Una
-        categoría nueva sale con la misma dirección en los tres idiomas hasta que se le
-        cargue la traducción — funciona igual, solo que en inglés dirá lo mismo que en
-        español. <Link href="/admin/negocios">Ver los negocios</Link> ·{' '}
+        Una categoría nueva nace <strong>sin traducir</strong>: sale con el nombre y la
+        dirección en español en los {destino.idiomas.length} idiomas. Funciona igual, solo
+        que un visitante en inglés lee el español. La columna «Idiomas» dice cuáles
+        faltan, y se cargan en <strong>Editar y traducir</strong>.{' '}
+        <Link href="/admin/negocios">Ver los negocios</Link> ·{' '}
         <Link href="/admin/tours">ver los tours</Link>.
       </p>
     </>

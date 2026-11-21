@@ -156,10 +156,19 @@ export default async function Listado({ params }: { params: Parametros }) {
      no aportaba nada visible al directorio. Lo encontró Tony buscando sus
      propios tours y no encontrándolos. */
   const todas = await fichasDelDirectorio(destino, idioma, categorias);
-  const deLaSeccion = todas.filter((f) => f.seccion === vista.seccion);
+
+  /* ⚠️ SE PREGUNTA POR `categorias`, NO POR `categoria_id`. Desde que una
+     tour puede estar en varias, `categoria_id` es solo la PRINCIPAL: filtrar
+     por ella dejaría afuera del listado exactamente a las tours que alguien
+     agregó a mano a esta categoría — que son las que más esperaría ver ahí.
+     Lo mismo para la sección: una tour cuya principal es «Tours de aventura»
+     y que además está en «Puentes colgantes» pertenece a las dos secciones. */
+  const seccionDe = new Map(categorias.map((c) => [c.categoria_id, c.seccion]));
+  const deLaSeccion = todas.filter((f) =>
+    f.categorias.some((id) => seccionDe.get(id) === vista.seccion));
 
   const fichas = (vista.categoriaId
-    ? deLaSeccion.filter((f) => f.categoria_id === vista.categoriaId)
+    ? todas.filter((f) => f.categorias.includes(vista.categoriaId!))
     : deLaSeccion
   ).sort((a: EnElDirectorio, b: EnElDirectorio) =>
     Number(b.es_destacado) - Number(a.es_destacado) ||

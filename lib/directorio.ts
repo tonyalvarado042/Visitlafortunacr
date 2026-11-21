@@ -28,6 +28,25 @@ import type { Idioma } from './idiomas';
 export type EnElDirectorio = Negocio & {
   /** Qué es. La tarjeta arma el enlace con esto y nada más. */
   tipo: 'negocio' | 'tour';
+  /**
+   * TODAS las categorías en las que sale, no solo la principal.
+   *
+   * ⚠️ UNA FICHA, UNA ENTRADA — y la pertenencia es un campo, no una copia.
+   * Desde que una tour puede estar en varias categorías, lo fácil habría
+   * sido devolver una entrada por cada par (tour, categoría): el listado de
+   * la categoría habría funcionado sin tocar nada. Y la portada, el
+   * buscador y el «al azar» habrían empezado a mostrar la misma tour dos y
+   * tres veces, cada uno en su propio sitio y ninguno fallando.
+   *
+   * Así, en cambio, nadie tiene que acordarse de deduplicar: no hay
+   * duplicados que quitar. Quien filtra por categoría pregunta por este
+   * arreglo; todo lo demás ve una tour y una sola.
+   *
+   * Para un negocio es siempre su única categoría. `categoria_id`,
+   * `categoria_nombre` y `seccion` siguen siendo los de la PRINCIPAL: son
+   * los que pinta la tarjeta y los que arman la migaja.
+   */
+  categorias: string[];
 };
 
 /** La dirección pública de una ficha del directorio, sea lo que sea. */
@@ -49,6 +68,7 @@ type FilaTour = {
   video_url: string | null;
   es_destacado: boolean | null;
   fotos?: { url: string; es_portada: boolean; orden: number }[];
+  en_categorias?: { categoria_id: string }[];
 };
 
 /**
@@ -70,7 +90,8 @@ export async function fichasDelDirectorio(
     .from('dst_tour')
     .select(`id, categoria_id, babosa, nombre, resumen, descripcion,
              precio_adulto_usd, imagen_url, video_url, es_destacado,
-             fotos:dst_tour_foto(url, es_portada, orden)`)
+             fotos:dst_tour_foto(url, es_portada, orden),
+             en_categorias:dst_tour_categoria(categoria_id)`)
     .eq('destino_id', destino.id)
     .eq('estado', 'publicado');
 
@@ -78,16 +99,28 @@ export async function fichasDelDirectorio(
     /* El motivo al registro. Devolver solo los negocios en silencio es cómo
        se vuelve a perder la mitad del catálogo sin que nadie lo note. */
     console.error('fichasDelDirectorio (tours):', error.message);
-    return negocios.map((n) => ({ ...n, tipo: 'negocio' as const }));
+    return negocios.map((n) => ({ ...n, tipo: 'negocio' as const, categorias: [n.categoria_id] }));
   }
 
   const porCategoria = new Map(categorias.map((c) => [c.categoria_id, c]));
 
   const tours: EnElDirectorio[] = ((data ?? []) as FilaTour[])
-    /* Sin categoría no hay dónde listarlo. No se inventa una. */
+    /* Sin categoría no hay dónde listarlo. No se inventa una.
+       Se mira la PRINCIPAL: es la que le da nombre y sección a la tarjeta.
+       Una tour que solo tuviera secundarias no tendría qué pintar. */
     .filter((t) => t.categoria_id && porCategoria.has(t.categoria_id))
     .map((t) => {
       const cat = porCategoria.get(t.categoria_id!)!;
+      /* La principal entra SIEMPRE, aunque la tabla puente viniera vacía:
+         el disparador de la base la mantiene, pero si alguna vez no la
+         tuviera, la tour desaparecería de su propia categoría. Un `Set`
+         para que estar las dos veces no la duplique.
+         Y solo las que este destino tiene encendidas: una categoría
+         desenganchada no es un listado al que se pueda llegar. */
+      const todas = new Set<string>([t.categoria_id!]);
+      for (const x of t.en_categorias ?? []) {
+        if (porCategoria.has(x.categoria_id)) todas.add(x.categoria_id);
+      }
       const portada = (t.fotos ?? [])
         .slice()
         .sort((a, b) => (Number(b.es_portada) - Number(a.es_portada)) || (a.orden - b.orden))[0];
@@ -95,6 +128,7 @@ export async function fichasDelDirectorio(
       return {
         tipo: 'tour' as const,
         id: t.id,
+        categorias: [...todas],
         categoria_id: cat.categoria_id,
         categoria_babosa: cat.babosa,
         categoria_nombre: cat.nombre,
@@ -130,7 +164,10 @@ export async function fichasDelDirectorio(
       };
     });
 
-  return [...negocios.map((n) => ({ ...n, tipo: 'negocio' as const })), ...tours];
+  return [
+    ...negocios.map((n) => ({ ...n, tipo: 'negocio' as const, categorias: [n.categoria_id] })),
+    ...tours,
+  ];
 }
 
 /**

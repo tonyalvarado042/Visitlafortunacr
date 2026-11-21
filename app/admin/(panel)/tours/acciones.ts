@@ -152,6 +152,57 @@ export async function editarTour(_previo: Guardado, datos: FormData): Promise<Gu
     return { errores: [`La base lo rechazó así: ${error.message}`] };
   }
 
+  /* ⚠️ LAS OTRAS CATEGORÍAS. Tony, 21 nov 2026: «el tour debe poder ponerse
+     en múltiples categorías». La del desplegable es la PRINCIPAL —la que
+     pinta la tarjeta y arma la migaja—; estas son las demás, y en el sitio
+     pesan exactamente igual: la tour sale en el listado de cada una.
+
+     Tres cosas que importan acá:
+
+     - **Solo se toca si el formulario TRAÍA el control.** `categorias_enviadas`
+       es un campo escondido que solo existe en esa pantalla. Sin esa marca,
+       cualquier otro formulario que llame a `editarTour` le borraría todas
+       las categorías a la tour por no haberlas mandado.
+     - **La principal entra siempre**, esté marcada o no. En la base hay un
+       disparador que lo garantiza igual; acá se hace también para que el
+       guardado sea coherente sin depender de él.
+     - **Solo categorías de ESTE destino.** Un id suelto en el formulario no
+       puede meter la tour en el listado de otro destino. */
+  /* ⚠️ ACÁ NO SE USA `anotarFallo`, Y NO ES OLVIDO: `anotarFallo` REDIRIGE,
+     o sea corta la función en seco. Puesto acá se saltaría el aviso al
+     operador y el redirect de abajo — un guardado que sí entró terminaría
+     pareciendo que no. El motivo se junta y se dice al final, por el mismo
+     `?fallo=` que ya usa el aviso del operador. */
+  let categoriasFallidas: string | null = null;
+  if (texto(datos, 'categorias_enviadas') === '1') {
+    const principal = esUuid(texto(datos, 'categoria_id')) ? texto(datos, 'categoria_id') : null;
+    const marcadas = datos.getAll('en_categorias').map(String).filter(esUuid);
+
+    const { data: delDestino } = await db.from('dst_destino_categoria')
+      .select('categoria_id').eq('destino_id', destino.id);
+    const validas = new Set((delDestino ?? []).map((c) => c.categoria_id as string));
+
+    const quiero = new Set([...(principal ? [principal] : []), ...marcadas].filter((c) => validas.has(c)));
+
+    const { data: ahora } = await db.from('dst_tour_categoria')
+      .select('categoria_id').eq('tour_id', id);
+    const tiene = new Set((ahora ?? []).map((c) => c.categoria_id as string));
+
+    const aQuitar = [...tiene].filter((c) => !quiero.has(c));
+    const aPoner = [...quiero].filter((c) => !tiene.has(c));
+
+    if (aQuitar.length) {
+      const { error: eDel } = await db.from('dst_tour_categoria')
+        .delete().eq('tour_id', id).in('categoria_id', aQuitar);
+      if (eDel) categoriasFallidas = `no se pudieron quitar categorías: ${eDel.message}`;
+    }
+    if (aPoner.length) {
+      const { error: eIns } = await db.from('dst_tour_categoria')
+        .insert(aPoner.map((categoria_id) => ({ tour_id: id, categoria_id })));
+      if (eIns) categoriasFallidas = `no se pudieron agregar categorías: ${eIns.message}`;
+    }
+  }
+
   /* ⚠️ AL PUBLICAR SE LE AVISA AL OPERADOR. Tony lo pidió el 21 de noviembre
      de 2026: antes, publicar no mandaba absolutamente nada —ni un disparador
      en la base ni una línea acá— y el operador se enteraba de que su tour
@@ -175,12 +226,24 @@ export async function editarTour(_previo: Guardado, datos: FormData): Promise<Gu
     if (!r.ok) avisoFallido = r.motivo ?? 'no se pudo mandar';
   }
 
+  /* Los dos avisos posibles, en un solo cartel: si fallan los dos, se ven
+     los dos. Uno pisando al otro sería esconder uno de los dos problemas. */
+  const motivos = [
+    avisoFallido
+      ? `El tour quedó publicado, pero NO se le pudo avisar al operador: ${avisoFallido}. ` +
+        'Arreglalo y usá el botón «Pedirle que revise info y tarifas».'
+      : null,
+    categoriasFallidas
+      ? `Lo demás se guardó, pero las categorías no: ${categoriasFallidas}.`
+      : null,
+  ].filter(Boolean);
+
+  /* El sitio público también: la tour entra o sale de listados enteros. */
   revalidatePath(`/admin/tours/${id}`);
   revalidatePath('/admin/tours');
-  redirect(avisoFallido
-    ? `/admin/tours/${id}?guardado=1&fallo=${encodeURIComponent(
-        `El tour quedó publicado, pero NO se le pudo avisar al operador: ${avisoFallido}. ` +
-        'Arreglalo y usá el botón «Pedirle que revise info y tarifas».')}`
+  revalidatePath('/[idioma]', 'layout');
+  redirect(motivos.length
+    ? `/admin/tours/${id}?guardado=1&fallo=${encodeURIComponent(motivos.join(' '))}`
     : `/admin/tours/${id}?guardado=1`);
 }
 

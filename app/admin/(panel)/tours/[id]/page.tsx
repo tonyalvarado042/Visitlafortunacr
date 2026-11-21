@@ -36,6 +36,12 @@ export default async function PaginaTour({ params, searchParams }: {
   /* La babosa del operador. La necesita el subidor de fotos: la ruta en el
      almacén es <destino>/<negocio>/tours/… y la política de storage solo deja
      escribir dentro de la carpeta del destino al que uno tiene acceso. */
+  /* En qué categorías está HOY. La principal está siempre acá adentro: lo
+     sostiene un disparador de la base, no la buena memoria de quien escriba. */
+  const { data: enCategorias } = await db.from('dst_tour_categoria')
+    .select('categoria_id').eq('tour_id', id);
+  const yaEn = new Set((enCategorias ?? []).map((c) => c.categoria_id as string));
+
   const { data: fotos } = await db.from('dst_tour_foto')
     .select('id, url, es_portada, orden, credito, licencia').eq('tour_id', id).order('orden');
   const { data: operador } = t.negocio_id
@@ -149,6 +155,10 @@ export default async function PaginaTour({ params, searchParams }: {
      categoría sin que nadie lo pidiera: la tour se caería del directorio en
      silencio. Hoy no pasa —las 8 están en la sección `tours`—, pero basta
      con que alguien le mueva la sección a una categoría. */
+  /* Cuántas tiene hoy, para avisar cuando son demasiadas. La principal
+     cuenta: es una categoría más en el sitio, no una etiqueta aparte. */
+  const enTotal = new Set([...yaEn, ...(t.categoria_id ? [t.categoria_id as string] : [])]).size;
+
   const cats = (categorias ?? [])
     .map((c) => uno(c.categoria) as { id: string; nombre: string; seccion: string } | null)
     .filter((c): c is { id: string; nombre: string; seccion: string } => !!c)
@@ -277,7 +287,7 @@ export default async function PaginaTour({ params, searchParams }: {
               <div className="campos">
                 <div className="campo ancho"><label>Nombre</label><input name="nombre" defaultValue={t.nombre} required /></div>
                 <div className="campo"><label>Operador</label><select name="negocio_id" defaultValue={t.negocio_id ?? ''}><option value="">—</option>{operadores?.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}</select></div>
-                <div className="campo"><label>Categoría</label>
+                <div className="campo"><label>Categoría principal</label>
                   <select name="categoria_id" defaultValue={t.categoria_id ?? ''}>
                     <option value="">—</option>
                     {cats.map((c) => (
@@ -287,9 +297,48 @@ export default async function PaginaTour({ params, searchParams }: {
                     ))}
                   </select>
                   <small>
-                    Decide <strong>en qué listado del sitio sale</strong> esta tour, y es{' '}
-                    <strong>una sola</strong>. ¿No está la que necesitás?{' '}
-                    <Link href="/admin/categorias">Se crea en Categorías</Link>.
+                    La que sale <strong>en el cintillo de la tarjeta</strong> y en la ruta de
+                    migajas. Es una sola, y abajo se agregan las demás. ¿No está la que
+                    necesitás? <Link href="/admin/categorias">Se crea en Categorías</Link>.
+                  </small>
+                </div>
+
+                {/* ⚠️ TAMBIÉN SALE EN. Tony, 21 nov 2026: «el tour debe poder
+                    ponerse en múltiples categorías, actualmente solo puede una
+                    y no debería ser así».
+
+                    En el sitio pesan todas IGUAL: la tour sale en el listado
+                    de cada categoría marcada, con la misma tarjeta. Lo único
+                    que distingue a la principal es el cintillo y la migaja —
+                    tiene que haber una porque ahí cabe un nombre, no cinco.
+
+                    La principal se marca sola al guardar, esté o no tildada.
+                    Por eso sale deshabilitada: desmarcarla no haría nada y un
+                    control que no hace nada es peor que no tenerlo. */}
+                <div className="campo ancho"><label>También sale en</label>
+                  <input type="hidden" name="categorias_enviadas" value="1" />
+                  <div className="casillas-categorias">
+                    {cats.filter((c) => c.id !== t.categoria_id).map((c) => (
+                      <label key={c.id}>
+                        <input type="checkbox" name="en_categorias" value={c.id}
+                               defaultChecked={yaEn.has(c.id)} />
+                        {c.nombre} <span className="gris">· {ROTULO_SECCION[c.seccion] ?? c.seccion}</span>
+                      </label>
+                    ))}
+                    {cats.filter((c) => c.id !== t.categoria_id).length === 0 && (
+                      <span className="gris">No hay otras categorías de tours en este destino.</span>
+                    )}
+                  </div>
+                  <small>
+                    La tour sale en el listado de <strong>cada una</strong>, igual que en la
+                    principal. {enTotal > 3 ? (
+                      <strong>
+                        Está en {enTotal} categorías: así sale {enTotal} veces en el sitio y
+                        cada listado dice menos. Tres o cuatro es lo que suele valer la pena.
+                      </strong>
+                    ) : (
+                      <>Sin marcar nada, sale solo en la principal.</>
+                    )}
                   </small>
                 </div>
                 <div className="campo ancho"><label>Resumen</label><input name="resumen" defaultValue={t.resumen ?? ''} maxLength={200} /></div>

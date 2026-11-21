@@ -820,13 +820,22 @@ export async function categoriaEnCualquierIdioma(
   destino: Destino,
   babosa: string,
 ): Promise<string | null> {
+  /* ⚠️ NO SE FILTRA POR `es_vigente`, Y ESO ES EL PUNTO. Una direccion
+     jubilada —la que tenia la categoria antes de que le cambiaran el nombre—
+     se guarda con `es_vigente = false` justamente para poder mandar un 301 a
+     la nueva. Si esta consulta la ignorara, jubilar no serviria de nada: la
+     direccion vieja daria 404, que para Google es «esta pagina ya no existe»
+     en vez de «se mudo», y la posicion se pierde.
+
+     Se ordena por `es_vigente` descendente para que, si la misma babosa
+     existiera viva en un idioma y jubilada en otro, gane la viva. */
   const { data } = await supabase
     .from('dst_ruta')
-    .select('entidad_id')
+    .select('entidad_id, es_vigente')
     .eq('destino_id', destino.id)
     .eq('entidad', 'categoria')
     .eq('babosa', babosa)
-    .eq('es_vigente', true)
+    .order('es_vigente', { ascending: false })
     .limit(1)
     .maybeSingle();
   return (data?.entidad_id as string | undefined) ?? null;

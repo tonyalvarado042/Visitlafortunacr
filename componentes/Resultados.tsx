@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { TarjetaNegocio } from './TarjetaNegocio';
 import { t, lugares, type Idioma } from '@/lib/idiomas';
-import type { Negocio, Categoria } from '@/lib/destino';
+import type { Categoria } from '@/lib/destino';
+import type { EnElDirectorio } from '@/lib/directorio';
 
 /* Lo que se ve en la portada cuando hay una búsqueda. No tiene estado: los
    filtros son enlaces y todo vive en la URL, así que la búsqueda se puede
@@ -11,20 +12,31 @@ export function Resultados({
   negocios, categorias, idioma, consulta, categoriaActiva,
 }: {
   /** Ya filtrados por texto, sin filtrar por categoría. */
-  negocios: Negocio[];
+  negocios: EnElDirectorio[];
   categorias: Categoria[];
   idioma: Idioma;
   consulta: string;
   categoriaActiva: string;
 }) {
+  /* ⚠️ POR TODAS SUS CATEGORÍAS, no solo la principal. Desde que una tour
+     puede estar en varias, contar y filtrar por `categoria_babosa` —que es
+     la principal— dejaba a la tour fuera de la pastilla de cualquier otra
+     categoría suya. Se cuenta en CADA una, que es lo que dice la pastilla;
+     la ficha sigue saliendo una sola vez en la rejilla. */
+  const babosaDe = new Map(categorias.map((c) => [c.categoria_id, c.babosa]));
+  const babosasDe = (n: EnElDirectorio) =>
+    n.categorias.map((id) => babosaDe.get(id)).filter((b): b is string => !!b);
+
   // El conteo de cada pastilla es dentro de la búsqueda actual, no del
   // directorio entero: decir "Cataratas 3" cuando solo una coincide engaña.
   const cuenta = new Map<string, number>();
-  for (const n of negocios) cuenta.set(n.categoria_babosa, (cuenta.get(n.categoria_babosa) ?? 0) + 1);
+  for (const n of negocios) {
+    for (const b of babosasDe(n)) cuenta.set(b, (cuenta.get(b) ?? 0) + 1);
+  }
 
   const conResultados = categorias.filter((c) => cuenta.has(c.babosa));
   const visibles = categoriaActiva
-    ? negocios.filter((n) => n.categoria_babosa === categoriaActiva)
+    ? negocios.filter((n) => babosasDe(n).includes(categoriaActiva))
     : negocios;
 
   const enlace = (babosa: string) => {

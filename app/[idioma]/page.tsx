@@ -116,7 +116,9 @@ export default async function Portada({ params, searchParams }: {
 
   const mejorDe = (c: Categoria): Negocio | undefined =>
     negocios
-      .filter((n) => n.categoria_id === c.categoria_id)
+      /* Por TODAS sus categorías: una tour agregada a esta categoría puede
+         ser la mejor foto que tiene, aunque su principal sea otra. */
+      .filter((n) => n.categorias.includes(c.categoria_id))
       .sort((a, b) => puntos(b) - puntos(a))[0];
 
   const mosaico = conContenido

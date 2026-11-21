@@ -1,0 +1,31 @@
+-- ╔══════════════════════════════════════════════════════════════════════╗
+-- ║  El panel SÍ puede escribir traducciones.                           ║
+-- ╚══════════════════════════════════════════════════════════════════════╝
+--
+-- 21 de noviembre de 2026. Apareció armando la pantalla de traducir una
+-- categoría: el formulario devolvía
+--
+--     permission denied for table dst_traduccion
+--
+-- No era de la pantalla nueva. `dst_traduccion` tenía su política desde
+-- siempre —«el equipo administra traducciones», `es_del_equipo()`, que es la
+-- correcta: deja al equipo y no a los operadores— y a `authenticated` le
+-- habían dado **solo SELECT**.
+--
+-- ⚠️ RLS CON POLÍTICAS PERO SIN GRANT NO SIRVE DE NADA. La política decide
+-- QUÉ filas se pueden tocar; el grant decide SI se puede tocar la tabla.
+-- Postgres mira el grant primero, así que la política nunca llegaba a
+-- correr. Es exactamente lo que ya pasó en este proyecto con otras siete
+-- tablas, y por eso hay nota: la política se lee y parece que todo está
+-- bien.
+--
+-- LO QUE ESTABA ROTO Y NADIE SABÍA: el bloque «Otros idiomas» de la ficha de
+-- una tour. Escribe en esta misma tabla, o sea que **ninguna traducción de
+-- tour se podía guardar desde el panel**. Esa pantalla sí avisa —redirige
+-- con el mensaje— así que el error salía; lo que no había era quien lo
+-- relacionara con un grant.
+--
+-- `dst_ruta`, la tabla hermana, SÍ tenía los cuatro permisos. Nada más que
+-- esta se quedó atrás.
+
+grant insert, update, delete on destinos.dst_traduccion to authenticated;
